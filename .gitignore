@@ -1,0 +1,36 @@
+# ============================================
+# Claude SaaS Template — .gitignore
+# ============================================
+
+# Subproyectos: cada uno es repo independiente
+proyectos/
+
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Claude Code locales
+CLAUDE.local.md
+.claude/settings.local.json
+.mdd/
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Outputs locales sensibles
+outputs/**/*.local.*
+
+# Editores
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+tmp/
+temp/
