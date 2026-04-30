@@ -31,7 +31,9 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 ### Para usar este template como referencia
 
 - Los **agentes en `.claude/agents/`** están disponibles automáticamente para Claude Code en cualquier subproyecto
-- Las **skills en `.claude/skills/`** también — son project-local del template pero se heredan a cualquier sesión que se abra desde la raíz
+- Las **skills de Claude Code en `.claude/skills/`** también — son project-local del template pero se heredan a cualquier sesión que se abra desde la raíz
+- Las **skills de proceso en `.agent/skills/`** las leen los agentes vía Read tool — son procesos repetibles aplicables a cualquier SaaS (ICP, oferta, avatar, pain discovery, meta-skill)
+- Los **frameworks en `memory/frameworks/`** son la "biblia operativa" compartida que los agentes consultan (ej: Hormozi)
 - Los **repos en `inputs/repos-referencia/`** son material de consulta para los agentes
 
 ## Estructura del template
@@ -39,14 +41,27 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 ```
 .
 ├── .claude/
-│   ├── agents/        Agentes genéricos reusables (8): arquitecto, frontend-builder,
-│   │                  backend-builder, code-reviewer, debugger, security-auditor,
-│   │                  penetration-tester, orquestador (genérico)
-│   └── skills/        41 skills curadas: UI/UX (suite ui-ux-pro-max + emil + taste +
-│                      vercel) + animación (GSAP) + marketing (8 TIER 1) + seguridad
-│                      (OWASP + supabase-pentest)
+│   ├── agents/        Agentes genéricos reusables (12):
+│   │                  · técnicos (8): arquitecto, frontend-builder, backend-builder,
+│   │                    code-reviewer, debugger, security-auditor, penetration-tester,
+│   │                    orquestador (genérico)
+│   │                  · estrategia/SaaS (4): hormozi-strategist, saas-strategist,
+│   │                    pain-discovery, billing-engineer
+│   └── skills/        41 skills de Claude Code (slash commands): UI/UX (suite
+│                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
+│                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
+├── .agent/
+│   └── skills/        5 skills de proceso reusables: creador-de-skills (meta-skill),
+│                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
+│                      Las leen los agentes (hormozi-strategist, saas-strategist,
+│                      pain-discovery) vía Read tool.
+├── memory/
+│   ├── orquestacion.md       Patrón de routing en lenguaje natural
+│   └── frameworks/
+│       └── hormozi.md        Síntesis de $100M Offers + Money Models + GOATed Ads.
+│                             Biblia operativa de hormozi-strategist, saas-strategist,
+│                             pain-discovery y las skills construir-oferta + evaluar-icp.
 ├── inputs/repos-referencia/   10 repos de calidad como referencia para los agentes
-├── memory/                    Memoria genérica (orquestacion.md = patrón de routing)
 ├── templates/                 Plantillas reusables
 ├── outputs/                   Entregables del template (vacío por defecto)
 ├── proyectos/                 ← Aquí viven los proyectos concretos (gitignored)
