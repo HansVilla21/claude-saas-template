@@ -34,3 +34,7 @@ logs/
 *.log
 tmp/
 temp/
+
+# Material de referencia personal con copyright (libros, etc.)
+# No subir al repo — bloat + zona gris legal
+docs/books/
