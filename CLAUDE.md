@@ -51,10 +51,43 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        5 skills de proceso reusables: creador-de-skills (meta-skill),
+│   └── skills/        29 skills de proceso reusables:
+│                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
-│                      Las leen los agentes (hormozi-strategist, saas-strategist,
-│                      pain-discovery) vía Read tool.
+│                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
+│                      n8n-workflow-build-script, n8n-code-node-debug-pattern,
+│                      whatsapp-image-delivery-ycloud, n8n-pipeline-rapido-vs-pesado,
+│                      bot-llm-marker-expand-pattern.
+│                      Tier 2 — Integración full-stack (5, capturadas 2026-05-21):
+│                      ycloud-webhook-to-supabase, supabase-realtime-broadcast-pattern,
+│                      bot-handoff-system-end-to-end, inbox-message-bubble-render,
+│                      sales-framework-spsp-whatsapp.
+│                      Tier 3 — Nicho específico (5, capturadas 2026-05-21):
+│                      supabase-edge-function-secret-auth,
+│                      n8n-properties-search-tool-pattern,
+│                      crm-inbox-conv-list-filters-strip,
+│                      n8n-langchain-agent-postgres-memory,
+│                      bot-anti-loop-detector.
+│                      Tier 4 — Outbound + Contactos + Admin (3, capturadas 2026-05-29):
+│                      outbound-delivery-server-action, crm-contact-detail-tabs,
+│                      crm-admin-panel-master-gated.
+│                      Tier 5 — Meta-decisión + Operations (2, capturadas 2026-05-30):
+│                      mesa-arquitectonica-multiagente (panel multi-agente
+│                      + jueces adversariales para decisiones arquitectónicas
+│                      grandes; incluye template.js parametrizable) +
+│                      n8n-workflow-versioning (política formal de versionado
+│                      de workflows N8N: snapshots, tags, rollback procedure).
+│                      Tier 6 — N8N 1.121 gotchas (4, capturadas 2026-06-01,
+│                      del fix loop de bot-c-v1): n8n-task-runner-no-crypto
+│                      (UUID v4 + hash djb2 manuales cuando el sandbox restringe
+│                      crypto global) + n8n-trace-id-postgres-overwrite (Postgres
+│                      nodes pisan campos custom del item; usar $('NodeName')
+│                      directo) + n8n-merge-combineall-trap (combineAll =
+│                      cross-product que muere con input vacío; default a
+│                      'append') + n8n-information-extractor-schema-mode
+│                      (fromJson espera ejemplo, NO schema literal; usar
+│                      'manual' + inputSchema para schemas dinámicos).
+│                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
 │   └── frameworks/
@@ -89,6 +122,28 @@ Esto permite:
 El usuario **NO usa slash commands**. Habla en lenguaje natural sobre lo que quiere lograr. El **orquestador** (`.claude/agents/orquestador.md` del template, o el específico del subproyecto si existe) detecta intención y enruta al recurso correcto.
 
 Detalles en `memory/orquestacion.md`.
+
+### Directriz permanente: capturar todo proceso como skill (regla del founder, 2026-05-21)
+
+**Cada vez que logramos un proceso nuevo en este proyecto** (conectar dos sistemas, resolver una clase de bug, armar un pipeline end-to-end, definir una mecánica de UI), **inmediatamente capturarlo como skill** en `.claude/skills/` (si es slash command usable por Claude Code) o `.agent/skills/` (si es proceso que leen los agentes vía Read).
+
+**Cuándo capturar (regla del 3 + regla del "primera vez no trivial"):**
+- Lo hicimos ≥2 veces y se ve venir la tercera → capturar.
+- Fue la primera vez pero el aprendizaje es no-obvio o cross-project → capturar igual.
+- Resolvimos un bug en cascada y hay learning técnico replicable → capturar.
+
+**Qué capturar:**
+- Pasos repetibles (con variables claras), no narrativas.
+- Gotchas y errores que ya cometimos (para no repetirlos).
+- Output esperado y formato.
+- Ejemplo concreto de input → output.
+
+**Por qué importa (cita literal del founder):**
+> "Va a ser muy importante para más adelante, todo eso replicarlo también en otros proyectos. Quedando bien en este, podemos documentarlo, crear skills para, en otros proyectos, nada más reutilizar esas skills y volver a recrear todo con mucha más facilidad."
+
+**Meta-skill que rige el formato:** `.agent/skills/creador-de-skills/SKILL.md`.
+
+**Cómo se invoca en sesión:** El founder NO escribe `/crear-skill`. Detectar proactivamente cuando un proceso califica y proponerle: *"esto ya califica para skill — la armo ahora?"*. Si dice sí, crear inmediatamente sin pedir más detalles (el contexto ya está en la sesión).
 
 ### Reglas inviolables
 
