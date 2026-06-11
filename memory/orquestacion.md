@@ -51,6 +51,7 @@
 4. **Si una tarea se repite >2 veces, conviértela en skill** (con la skill `creador-de-skills` que cada subproyecto puede tener).
 5. **Decisiones técnicas nuevas se registran** en `memory/decisions.md` del subproyecto con fecha absoluta.
 6. **Aprendizajes de errores se registran** en `memory/learnings.md` del subproyecto.
+7. **Cuidado profesional con cada cambio (directriz founder 2026-06-05).** Sistema ya robusto + cliente real activo. Code review independiente obligatorio post-build. Verificación manual de archivos críticos. Pre-mortem explícito antes de cada acción del founder. Detalle completo en `memory/principios-desarrollo.md` — cargar al inicio de cada sesión.
 
 ## Cuando NO orquestar
 

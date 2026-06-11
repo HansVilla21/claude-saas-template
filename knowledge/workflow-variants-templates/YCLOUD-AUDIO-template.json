@@ -1,0 +1,1622 @@
+{
+  "name": "YCLOUD AUDIO Template (con transcripcion Whisper)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ycloud-{cliente}",
+        "responseMode": "onReceived",
+        "options": {},
+        "responseCode": 200,
+        "responseData": "noData"
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        400
+      ],
+      "id": "ycloud-full-webhook-0001",
+      "name": "Webhook - YCloud Inbound",
+      "webhookId": "ycloud-leo-webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ev-1",
+              "name": "eventType",
+              "value": "={{ $json.body.type }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-2",
+              "name": "messageType",
+              "value": "={{ $json.body.whatsappInboundMessage?.type ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-3",
+              "name": "userMessage",
+              "value": "={{ $json.body.whatsappInboundMessage?.text?.body ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-4",
+              "name": "userPhone",
+              "value": "={{ $json.body.whatsappInboundMessage?.from ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-5",
+              "name": "businessPhone",
+              "value": "={{ $json.body.whatsappInboundMessage?.to ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-6",
+              "name": "ycloudMessageId",
+              "value": "={{ $json.body.whatsappInboundMessage?.id ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-7",
+              "name": "customerName",
+              "value": "={{ $json.body.whatsappInboundMessage?.customerProfile?.name ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-8",
+              "name": "audioLink",
+              "value": "={{ $json.body.whatsappInboundMessage?.audio?.link ?? '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ev-9",
+              "name": "audioMimeType",
+              "value": "={{ $json.body.whatsappInboundMessage?.audio?.mime_type ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        400
+      ],
+      "id": "ycloud-full-extract-0001",
+      "name": "Extract Variables"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.ycloud.com/v2/whatsapp/inboundMessages/{{ $('Extract Variables').first().json.ycloudMessageId }}/markAsRead",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -320,
+        200
+      ],
+      "id": "ycloud-full-markread-0001",
+      "name": "Mark As Read",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER",
+          "name": "YCloud API Key"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "idms-1",
+              "name": "ID",
+              "value": "={{ $('Extract Variables').first().json.userPhone }}",
+              "type": "string"
+            },
+            {
+              "id": "idms-2",
+              "name": "Mensaje",
+              "value": "={{ $json.userMessageFinal }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -40,
+        400
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000002",
+      "name": "ID y Mensaje"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a7e9b1d0-tg00-rein-0001-000000000001",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIO",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0002-000000000002",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0003-000000000003",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0004-000000000004",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0005-000000000005",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0006-000000000006",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIAR",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        140,
+        400
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000003",
+      "name": "REINICIAR?"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('ID y Mensaje').first().json.ID }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        340,
+        200
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000004",
+      "name": "Vacia Redis",
+      "credentials": {
+        "redis": {
+          "id": "PLACEHOLDER",
+          "name": "Level - Redis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('ID y Mensaje').first().json.ID }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        540,
+        200
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000005",
+      "name": "Delete Postgres historial",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "Level - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ycloud.com/v2/whatsapp/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"{{ $('Extract Variables').first().json.businessPhone }}\",\n  \"to\": \"{{ $('Extract Variables').first().json.userPhone }}\",\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": \"Listo, conversacion reiniciada. En que te puedo ayudar?\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        740,
+        200
+      ],
+      "id": "ycloud-full-send-reinicio-0001",
+      "name": "Send Reinicio via YCloud",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER",
+          "name": "YCloud API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a7e9b1d0-tg00-vars-0001-000000000001",
+              "name": "Historial de conversacion",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-vars-0002-000000000002",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $('ID y Mensaje').first().json.Mensaje }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-vars-0003-000000000003",
+              "name": "Telefono",
+              "value": "={{ $('ID y Mensaje').first().json.ID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        340,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000007",
+      "name": "Variables"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list",
+          "cachedResultName": "n8n_chat_histories"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('ID y Mensaje').first().json.ID }}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        520,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000008",
+      "name": "Conversation",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "Level - Postgres"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\n// Devuelve 1 item con { conversation_text, total_messages, session_id }\n\nfunction getArrayFromAny(items) {\n  const first = items[0]?.json;\n\n  const isArr = (v) => Array.isArray(v);\n  const tryParse = (s) => { try { return JSON.parse(s); } catch { return null; } };\n\n  if (isArr(first)) return first;\n\n  const candidatesObj = [first?.messages, first?.conversation, first?.data];\n  for (const c of candidatesObj) if (isArr(c)) return c;\n\n  const candidatesStr = [first?.raw, first?.raw_json, first?.input, first?.payload, first?.body];\n  for (const c of candidatesStr) {\n    if (typeof c === 'string') {\n      const parsed = tryParse(c);\n      if (isArr(parsed)) return parsed;\n    }\n  }\n\n  const asItems = items.map(it => it.json).filter(x => x && x.message);\n  if (asItems.length) return asItems;\n\n  return [];\n}\n\nconst TARGET_SESSION_ID = null;\nconst PREFIX_USUARIO = 'Usuario';\nconst PREFIX_BOT = 'Bot';\n\nconst items = $input.all();\nlet records = getArrayFromAny(items);\n\nrecords = records\n  .filter(r => r?.message?.type && r?.message?.content != null)\n  .filter(r => !TARGET_SESSION_ID || r.session_id === TARGET_SESSION_ID)\n  .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));\n\nconst strip = (txt) => {\n  if (typeof txt !== 'string') return '';\n\n  let out = txt;\n\n  const markerRegex = /#\\s*datos recopilados hasta el momento/i;\n  const markerMatch = out.match(markerRegex);\n  if (markerMatch) {\n    out = out.slice(0, markerMatch.index);\n  }\n\n  const hasUserHeader = /#\\s*mensaje del usuario/i.test(out);\n  if (hasUserHeader) {\n    out = out\n      .split('\\n')\n      .filter(line => !line.trim().startsWith('#'))\n      .join('\\n');\n  }\n\n  return out\n    .replace(/^\\s*(Mensasje|Mensaje)\\s*:\\s*/i, '')\n    .replace(/  \\n/g, '\\n')\n    .replace(/[ \\t]+\\n/g, '\\n')\n    .trim();\n};\n\nconst role = (type) => (type === 'human' ? PREFIX_USUARIO : (type === 'ai' ? PREFIX_BOT : String(type)));\n\nconst lines = [];\nfor (const r of records) {\n  const content = strip(r.message.content);\n  if (!content) continue;\n  lines.push(`${role(r.message.type)}: ${content}`);\n}\n\nreturn [{\n  json: {\n    conversation_text: lines.join('\\n'),\n    total_messages: lines.length,\n    session_id: TARGET_SESSION_ID || (records[0]?.session_id ?? null),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000009",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a7e9b1d0-tg00-unif-0001-000000000001",
+              "name": "Historial de conversacion",
+              "value": "={{ $json.conversation_text }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-unif-0002-000000000002",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $('Variables').first().json['Mensaje actual del usuario'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-unif-0003-000000000003",
+              "name": "Telefono",
+              "value": "={{ $('Variables').first().json.Telefono }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000010",
+      "name": "Unificacion de Variables"
+    },
+    {
+      "parameters": {
+        "text": "=# Historial de conversacion\n{{ $json['Historial de conversacion'] }}\n\n# Mensaje actual del usuario\n{{ $json['Mensaje actual del usuario'] }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"destino\": \"LEO_PRINCIPAL\",\n  \"motivo\": \"descripcion breve\",\n  \"datos_extraidos\": {\n    \"nombre\": null,\n    \"objetivo_financiero\": null,\n    \"capital_mencionado\": null,\n    \"capital_calificado\": false,\n    \"tipo_inversion_interes\": null,\n    \"nivel_conocimiento\": null,\n    \"fase_conversacion\": \"saludo\",\n    \"objeciones_count\": 0,\n    \"ultima_objecion\": null,\n    \"calendly_enviado\": false\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "# CLASIFICADOR — REEMPLAZAR POR EL PROMPT DEL CLIENTE\n\nValores validos para destino:\n- AGENTE_PRINCIPAL\n- AGENTE_OBJECIONES\n- HANDOFF_HUMANO\n\n[Prompt completo del router va aqui]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000011",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 300,
+          "responseFormat": "json_object",
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1140,
+        780
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000012",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "Level - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "LEO_PRINCIPAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a7e9b1d0-tg00-sw-0001-000000000001"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "LEO_PRINCIPAL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a7e9b1d0-tg00-sw-0002-000000000002",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "AGENTE_OBJECIONES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AGENTE_OBJECIONES"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a7e9b1d0-tg00-sw-0003-000000000003",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "HANDOFF_HUMANO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HANDOFF_HUMANO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a7e9b1d0-tg00-sw-0004-000000000004",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BACKUP"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1380,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000013",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Variables').first().json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "# AGENTE PRINCIPAL — REEMPLAZAR POR EL PROMPT DEL CLIENTE\n\n## Identidad\nSos {NOMBRE_BOT}, asesor de {NEGOCIO}.\n\n## Reglas\n- Reemplazar este prompt completo por el del cliente\n- Ver clients/{cliente}/prompts/agente-principal.md\n\n[Prompt del cliente va aqui]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        340
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000014",
+      "name": "AI Agent - Principal"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 800,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000015",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "Level - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Variables').first().json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1700,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000016",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "Level - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Variables').first().json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "# AGENTE OBJECIONES — REEMPLAZAR POR EL PROMPT DEL CLIENTE\n\n[Prompt LAARC del cliente va aqui]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        720
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000018",
+      "name": "AI Agent - Objeciones"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        940
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000019",
+      "name": "OpenAI Chat Model - Objeciones",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "Level - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Variables').first().json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1700,
+        940
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000020",
+      "name": "Postgres Chat Memory - Objeciones",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "Level - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ycloud.com/v2/whatsapp/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"{{ $('Extract Variables').first().json.businessPhone }}\",\n  \"to\": \"{{ $('Extract Variables').first().json.userPhone }}\",\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": \"Gracias por tu mensaje. En un momento te atendemos.\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        1100
+      ],
+      "id": "ycloud-full-send-handoff-0001",
+      "name": "Send Handoff via YCloud",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER",
+          "name": "YCloud API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Respuesta a formatear: {{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "# FORMATEADOR DE MENSAJES\n\nDivide la respuesta en mensajes de max 3 lineas. NO modifica el contenido. NO pierde nada.\n\n[Prompt completo del formateador, ver knowledge/03_TEMPLATES_Y_RECURSOS.md o template-formateador.md]"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        1880,
+        240
+      ],
+      "id": "d9ba402a-db0c-4971-97be-ea5b9645f963",
+      "name": "Basic LLM Chain4",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        440
+      ],
+      "id": "b894a218-bdfe-4265-aa20-9389450a0ad8",
+      "name": "OpenAI Chat Model13",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "Level - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "prompt": "=Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        440
+      ],
+      "id": "b58abb79-10e2-4f5b-bf58-1194d6ebba02",
+      "name": "Auto-fixing Output Parser3"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"output\": \n{\n\"MENSAJE 1\": \n\"Entiendo.\",\n  \"MENSAJE 2\": \n\"Entiendo.\"\n}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        580
+      ],
+      "id": "ca4e3bdd-91f9-446a-9ea9-9e305882eb5a",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1980,
+        580
+      ],
+      "id": "85ca4b58-ddbf-4e29-b072-14c6bfdc6759",
+      "name": "OpenAI Chat Model14",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "Level - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2140,
+        240
+      ],
+      "id": "3e5c03ab-f849-4f71-971e-feabfe19d80c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2400,
+        240
+      ],
+      "id": "267f2196-4877-4fa2-91a0-e16e0d0986d8",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e97607d2-b7b9-48cb-b059-fc5030dcaf56",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2660,
+        240
+      ],
+      "id": "2b9f172f-eb80-4286-bc78-b6938421fca4",
+      "name": "If5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2920,
+        380
+      ],
+      "id": "4ab81d24-4501-4f0b-a2be-6d7934f76ebe",
+      "name": "Wait2",
+      "webhookId": "c1d2e3f4-0001-4000-8000-000000000001"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.ycloud.com/v2/whatsapp/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"from\": \"{{ $('Extract Variables').first().json.businessPhone }}\",\n  \"to\": \"{{ $('Extract Variables').first().json.userPhone }}\",\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": {{ JSON.stringify($json.output) }}\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2920,
+        240
+      ],
+      "id": "ycloud-full-send-chunk-0001",
+      "name": "Send Chunk via YCloud",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER",
+          "name": "YCloud API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-text-1",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "whatsapp.inbound_message.received",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  },
+                  {
+                    "id": "rule-text-2",
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "rule-audio-1",
+                    "leftValue": "={{ $json.eventType }}",
+                    "rightValue": "whatsapp.inbound_message.received",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  },
+                  {
+                    "id": "rule-audio-2",
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "unsupported"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -480,
+        400
+      ],
+      "id": "ycloud-full-switch-type-0001",
+      "name": "Is Text or Audio?"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Extract Variables').first().json.audioLink }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -280,
+        100
+      ],
+      "id": "ycloud-full-download-audio-0001",
+      "name": "Download Audio",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "PLACEHOLDER",
+          "name": "YCloud API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "model",
+              "value": "whisper-1"
+            },
+            {
+              "name": "language",
+              "value": "es"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -60,
+        100
+      ],
+      "id": "ycloud-full-transcribe-0001",
+      "name": "Transcribe Audio (Whisper)",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "norm-a-1",
+              "name": "userMessageFinal",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        100
+      ],
+      "id": "ycloud-full-norm-audio-0001",
+      "name": "Set Normalize - Audio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "norm-t-1",
+              "name": "userMessageFinal",
+              "value": "={{ $('Extract Variables').first().json.userMessage }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        400
+      ],
+      "id": "ycloud-full-norm-text-0001",
+      "name": "Set Normalize - Text"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "ID y Mensaje": {
+      "main": [
+        [
+          {
+            "node": "REINICIAR?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REINICIAR?": {
+      "main": [
+        [
+          {
+            "node": "Vacia Redis",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vacia Redis": {
+      "main": [
+        [
+          {
+            "node": "Delete Postgres historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Postgres historial": {
+      "main": [
+        [
+          {
+            "node": "Send Reinicio via YCloud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Variables": {
+      "main": [
+        [
+          {
+            "node": "Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Unificacion de Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificacion de Variables": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent - Objeciones",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Handoff via YCloud",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Principal": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model - Objeciones": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Objeciones",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory - Objeciones": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Objeciones",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Objeciones": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain4": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Send Chunk via YCloud",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model13": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-fixing Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Auto-fixing Output Parser3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model14": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auto-fixing Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - YCloud Inbound": {
+      "main": [
+        [
+          {
+            "node": "Extract Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Variables": {
+      "main": [
+        [
+          {
+            "node": "Is Text or Audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Chunk via YCloud": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Text or Audio?": {
+      "main": [
+        [
+          {
+            "node": "Mark As Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set Normalize - Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark As Read",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio (Whisper)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio (Whisper)": {
+      "main": [
+        [
+          {
+            "node": "Set Normalize - Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Normalize - Audio": {
+      "main": [
+        [
+          {
+            "node": "ID y Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Normalize - Text": {
+      "main": [
+        [
+          {
+            "node": "ID y Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a7e9b1d0-level-leo-telegram-v1",
+  "meta": {
+    "instanceId": "ycloud-template"
+  },
+  "id": "PLACEHOLDER_WORKFLOW_ID",
+  "tags": [
+    {
+      "name": "template",
+      "id": "template"
+    },
+    {
+      "name": "ycloud",
+      "id": "ycloud"
+    }
+  ]
+}
