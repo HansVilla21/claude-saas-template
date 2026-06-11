@@ -1,0 +1,3058 @@
+{
+  "name": "Chatbot IG",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('ID y Mensaje').item.json.ID }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2240,
+        1104
+      ],
+      "id": "0f73905f-dec6-47e0-98c6-ba1120a21fe1",
+      "name": "Vacía el Array5",
+      "credentials": {
+        "redis": {
+          "id": "WL1SYY1KAARlqGBg",
+          "name": "Redis test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list",
+          "cachedResultName": "n8n_chat_histories"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2464,
+        1104
+      ],
+      "id": "608227f9-4687-433f-b53a-753281ce1d24",
+      "name": "Delete table or rows1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8aV1TE12PGsVSsJk",
+          "name": "Jacó Dream Rentals"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a9478d64-a1d4-448e-b423-c76116e712c6",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIO",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5726aa13-bdc1-4e1a-9bfd-7c33d1b894f6",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "0f698bd6-3edf-4445-961b-00034ba43981",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "c98836e8-15f9-4344-a9d8-ba7697b4bd93",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "70cd771f-5618-41d8-bf5c-cd104e175e0a",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "80a609be-3902-41fb-8bcb-799bf501b57b",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIAR",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2016,
+        1328
+      ],
+      "id": "15d23a01-e09b-41b4-9d5c-7bc883e15251",
+      "name": "REINICIAR"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5dc396d1-45df-44ba-abe1-a4e02105fefc",
+              "leftValue": "={{ $json[\"Estado Chatbot\"] }}",
+              "rightValue": "Apagado",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3248,
+        1296
+      ],
+      "id": "e384fc6e-52bd-47ca-81aa-a123206203ee",
+      "name": "IN OFF?1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appni7o2Ar6CQcwhe",
+          "mode": "list",
+          "cachedResultName": "Jacó Dream Rentals CRM",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0JUKajzwEggcFn",
+          "mode": "list",
+          "cachedResultName": "Clientes Interesados",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe/tbl0JUKajzwEggcFn"
+        },
+        "filterByFormula": "={ID Manychat} = \"{{ $json.ID }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2240,
+        1424
+      ],
+      "id": "c802774f-ca16-4689-b786-7a713fcdc22a",
+      "name": "Buscar Lead",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "nvMzqhSRY93JrUyt",
+          "name": "Jacó Dream Rentals"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "appni7o2Ar6CQcwhe",
+          "mode": "list",
+          "cachedResultName": "Jacó Dream Rentals CRM",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0JUKajzwEggcFn",
+          "mode": "list",
+          "cachedResultName": "Clientes Interesados",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe/tbl0JUKajzwEggcFn"
+        },
+        "id": "={{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3696,
+        1424
+      ],
+      "id": "b675e40c-2b91-4eef-8e2a-32c0c1024d31",
+      "name": "GET Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "nvMzqhSRY93JrUyt",
+          "name": "Jacó Dream Rentals"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appdMLGTpFueaSABj",
+          "mode": "list",
+          "cachedResultName": "Gestión de Vehículos",
+          "cachedResultUrl": "https://airtable.com/appdMLGTpFueaSABj"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblepqs9U8UmiqN6O",
+          "mode": "list",
+          "cachedResultName": "Vehículos",
+          "cachedResultUrl": "https://airtable.com/appdMLGTpFueaSABj/tblepqs9U8UmiqN6O"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Último contacto": "={{ $now }}",
+            "Chatbot Activado": "Encendido"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Año del vehículo",
+              "displayName": "Año del vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Localidad",
+              "displayName": "Localidad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "En mantenimiento",
+                  "value": "En mantenimiento"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Recordatorios",
+              "displayName": "Recordatorios",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Chatbot Activado",
+              "displayName": "Chatbot Activado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Necesita Factura",
+              "displayName": "Necesita Factura",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3472,
+        1296
+      ],
+      "id": "269e2349-35e7-41ca-a4fb-395c63520bc2",
+      "name": "Update Timestamp",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "IJuV9ZKhQ52PB6cU",
+          "name": "Vaas"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cf69fa4e-c7f0-47b0-87f4-ff006f2a1ba3",
+              "leftValue": "={{ $json['ID Manychat'] }}",
+              "rightValue": "={{ $('ID y Mensaje').item.json['ID'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2672,
+        1424
+      ],
+      "id": "2373ca5c-3015-4a51-8875-4b7ecbd0d054",
+      "name": "Existe?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        5040,
+        1520
+      ],
+      "id": "ce16050b-5695-4009-acf8-b4add04a2fd4",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0978707a-e529-48d6-a512-6013d30542f6",
+              "leftValue": "=text",
+              "rightValue": "audio",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3920,
+        1424
+      ],
+      "id": "fbedf563-129c-48c1-a865-a1b39208afc5",
+      "name": "Es audio?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "82b413da-d083-447a-a77c-582093501d53",
+              "leftValue": "={{ $json.propertyName.last() }}",
+              "rightValue": "={{ $('ID y Mensaje').item.json.Mensaje }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4816,
+        1424
+      ],
+      "id": "a489ccbf-ca35-448a-b150-15434648eb27",
+      "name": "Es el último mensaje?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('ID y Mensaje').item.json['ID'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4592,
+        1424
+      ],
+      "id": "e8a9474d-3ef2-40d0-973c-f337a8259477",
+      "name": "Revisar todos los mensajes",
+      "credentials": {
+        "redis": {
+          "id": "WL1SYY1KAARlqGBg",
+          "name": "Redis test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4368,
+        1424
+      ],
+      "id": "d4e80a68-5321-403f-96bd-076f9702cf06",
+      "name": "Esperando nuevo mensaje",
+      "webhookId": "e434f341-796b-4d3f-8706-db21e3de796d"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('ID y Mensaje').item.json.ID }}",
+        "messageData": "={{ $('ID y Mensaje').item.json.Mensaje || \"\" }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        4144,
+        1424
+      ],
+      "id": "1c406255-3677-4c0c-8a5f-1da6a9c7dee0",
+      "name": "Guardar mensajes",
+      "credentials": {
+        "redis": {
+          "id": "WL1SYY1KAARlqGBg",
+          "name": "Redis test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "33215691-a20a-4c63-8b57-82b6d6320291",
+              "name": "Mensajes",
+              "value": "={{ $json.propertyName.join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5040,
+        1328
+      ],
+      "id": "e2ab53e0-78c1-454d-b88b-bda73ac1d6e2",
+      "name": "Juntar mensajes"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\n// Devuelve 1 item con { conversation_text, total_messages, session_id }\n\nfunction getArrayFromAny(items) {\n  // Caso: un solo item con el array en root o en alguna clave\n  const first = items[0]?.json;\n\n  const isArr = (v) => Array.isArray(v);\n  const tryParse = (s) => { try { return JSON.parse(s); } catch { return null; } };\n\n  // 1) Array directo en el root del json\n  if (isArr(first)) return first;\n\n  // 2) Array en claves comunes\n  const candidatesObj = [first?.messages, first?.conversation, first?.data];\n  for (const c of candidatesObj) if (isArr(c)) return c;\n\n  // 3) Array como string JSON en claves comunes\n  const candidatesStr = [first?.raw, first?.raw_json, first?.input, first?.payload, first?.body];\n  for (const c of candidatesStr) {\n    if (typeof c === 'string') {\n      const parsed = tryParse(c);\n      if (isArr(parsed)) return parsed;\n    }\n  }\n\n  // 4) Si nada de lo anterior: asume que cada item ES un registro de mensaje\n  const asItems = items.map(it => it.json).filter(x => x && x.message);\n  if (asItems.length) return asItems;\n\n  // 5) fallback vacío\n  return [];\n}\n\n// ---------- CONFIG OPCIONAL ----------\nconst TARGET_SESSION_ID = null; // e.g., \"7764470220\" para filtrar; déjalo en null para no filtrar\nconst PREFIX_USUARIO = 'Usuario';\nconst PREFIX_BOT = 'Bot';\n// -------------------------------------\n\nconst items = $input.all();\nlet records = getArrayFromAny(items);\n\n// Filtra y ordena\nrecords = records\n  .filter(r => r?.message?.type && r?.message?.content != null)\n  .filter(r => !TARGET_SESSION_ID || r.session_id === TARGET_SESSION_ID)\n  .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));\n\n// --- Limpieza de contenido personalizada ---\nconst strip = (txt) => {\n  if (typeof txt !== 'string') return '';\n\n  let out = txt;\n\n  // 1) Cortar todo lo que venga desde \"# Datos recopilados hasta el momento\"\n  //    (ignorando mayúsculas/minúsculas y espacios)\n  const markerRegex = /#\\s*datos recopilados hasta el momento/i;\n  const markerMatch = out.match(markerRegex);\n  if (markerMatch) {\n    out = out.slice(0, markerMatch.index);\n  }\n\n  // 2) Si trae el encabezado \"# Mensaje del usuario\", quitamos las líneas que empiezan con \"#\"\n  const hasUserHeader = /#\\s*mensaje del usuario/i.test(out);\n  if (hasUserHeader) {\n    out = out\n      .split('\\n')\n      .filter(line => !line.trim().startsWith('#'))\n      .join('\\n');\n  }\n\n  // 3) Limpieza general\n  return out\n    .replace(/^\\s*(Mensasje|Mensaje)\\s*:\\s*/i, '') // por si algún día viene así\n    .replace(/  \\n/g, '\\n')\n    .replace(/[ \\t]+\\n/g, '\\n')\n    .trim();\n};\n\nconst role = (type) => (type === 'human' ? PREFIX_USUARIO : (type === 'ai' ? PREFIX_BOT : String(type)));\n\nconst lines = [];\nfor (const r of records) {\n  const content = strip(r.message.content);\n  if (!content) continue;\n  lines.push(`${role(r.message.type)}: ${content}`);\n}\n\nreturn [{\n  json: {\n    conversation_text: lines.join('\\n'),\n    total_messages: lines.length,\n    session_id: TARGET_SESSION_ID || (records[0]?.session_id ?? null),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5488,
+        1328
+      ],
+      "id": "4e67bbe5-1753-41f1-9d29-a8438a59739b",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4fa108f2-4f60-4b5c-9d2c-77ed49bd61c6",
+              "name": "Historial de conversación",
+              "value": "={{ $json.conversation_text }}",
+              "type": "string"
+            },
+            {
+              "id": "7b9c90c1-9778-42ef-8e59-415820a4d54d",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $items(\"Juntar mensajes\")[0].json[\"Mensajes\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "a1c830bc-1de8-4725-a836-b0bef14cac74",
+              "name": "Telefono",
+              "value": "={{ $items(\"ID y Mensaje\")[0].json[\"ID\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5712,
+        1328
+      ],
+      "id": "b9d9d12c-2acf-4116-a47a-ac224f47ed5f",
+      "name": "Unificación de Variables"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list",
+          "cachedResultName": "n8n_chat_histories"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID}}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5264,
+        1328
+      ],
+      "id": "0bb26686-e88c-4920-8415-3d3e52d5e76a",
+      "name": "Conversation",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "8aV1TE12PGsVSsJk",
+          "name": "Jacó Dream Rentals"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "929d394a-af42-4057-9b39-a23512a333b2",
+              "name": "ID",
+              "value": "={{ $json.ID }}",
+              "type": "string"
+            },
+            {
+              "id": "f8e1256c-edf4-4802-b029-bba582198523",
+              "name": "=Mensaje",
+              "value": "={{ $json.Mensaje }}",
+              "type": "string"
+            },
+            {
+              "id": "f4e0a946-7b00-4926-81d2-ca627ebba00b",
+              "name": "flag",
+              "value": "=",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1792,
+        1328
+      ],
+      "id": "76dcb5a4-e400-4263-9f01-a29488ba76cd",
+      "name": "ID y Mensaje"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRecord",
+        "base": {
+          "__rl": true,
+          "value": "appni7o2Ar6CQcwhe",
+          "mode": "list",
+          "cachedResultName": "Jacó Dream Rentals CRM",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0JUKajzwEggcFn",
+          "mode": "list",
+          "cachedResultName": "Clientes Interesados",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe/tbl0JUKajzwEggcFn"
+        },
+        "id": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3040,
+        1104
+      ],
+      "id": "f27f9337-f1b0-4e18-9291-32d189471ba5",
+      "name": "Delete a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "nvMzqhSRY93JrUyt",
+          "name": "Jacó Dream Rentals"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appni7o2Ar6CQcwhe",
+          "mode": "list",
+          "cachedResultName": "Jacó Dream Rentals CRM",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0JUKajzwEggcFn",
+          "mode": "list",
+          "cachedResultName": "Clientes Interesados",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe/tbl0JUKajzwEggcFn"
+        },
+        "filterByFormula": "={ID Manychat} = '{{ $('ID y Mensaje').item.json.ID }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        2752,
+        1104
+      ],
+      "id": "e11043cc-e40c-4c66-becf-81e758ae0623",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "nvMzqhSRY93JrUyt",
+          "name": "Jacó Dream Rentals"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "=# Historial de conversación\n{{ $json['Historial de conversación'] }}\n\n# Mensaje actual del usuario\n{{ $json[\"Mensaje actual del usuario\"] }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"destino\": \"AGENTE_PRINCIPAL\",\n  \"motivo\": \"descripción breve de por qué se eligió este destino\",\n  \"datos_extraidos\": {\n    \"nombre\": null,\n    \"num_personas\": null,\n    \"fechas_mencionadas\": null,\n    \"villas_mencionadas\": [],\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"pregunta_ubicacion\": false,\n    \"idioma_detectado\": \"es\",\n    \"es_spam\": false,\n    \"tipo_spam\": null,\n    \"requiere_handoff\": false,\n    \"fase_conversacion\": \"inicio\"\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "=# CLASIFICADOR DE MENSAJES — JACÓ DREAM RENTALS\n\n## ROL\nEres un clasificador de conversaciones. Analizás el historial completo y el mensaje actual para determinar qué agente debe responder. No conversás con el usuario, solo clasificás.\n\n## AGENTES DISPONIBLES\n\n### AGENTE_PRINCIPAL\nAgente principal. Maneja el flujo normal de conversación, calificación y cierre.\nActivar cuando: No aplica ninguna condición de HANDOFF_HUMANO.\n\n### HANDOFF_HUMANO\nEscala a Liliana (dueña). Se activa por situaciones que el bot no puede manejar.\nActivar cuando se detecta CUALQUIERA de estas condiciones:\n- **Solicitud directa de humano**: usuario pide hablar con Liliana, con dueña, con persona real\n- **Problema técnico en reserva**: no puede completar reserva, error en el sistema, pago rechazado\n- **Consulta legal/contractual**: pregunta por contratos, políticas de cancelación complejas, disputas\n- **Usuario frustrado**: tono hostil, molestia evidente, múltiples quejas\n- **Casos especiales**: grupos >18 personas, combinación de propiedades, solicitudes custom\n- **Loop sin avance**: 3+ mensajes consecutivos completamente fuera de contexto (spam, ofertas de servicio)\n\n## DETECCIÓN DE SPAM/OFERTAS DE SERVICIO\n\nEstas son señales de spam o bots que ofrecen servicios NO solicitados:\n- Menciones de: SEO, marketing, Instagram growth, followers, engagement, social media services\n- Ofertas de: diseño web, desarrollo, publicidad, consultoría\n- Patterns: \"Hi, I checked your profile\", \"I can help you grow\", \"affordable prices\"\n- Lenguaje comercial/promocional desde el primer mensaje\n\nSi detectás spam/oferta de servicio:\n- `destino`: \"AGENTE_PRINCIPAL\"\n- `es_spam`: true\n- `tipo_spam`: descripción breve\n\nEl agente principal está entrenado para manejar spam cortésmente.\n\n## OUTPUT REQUERIDO\nRespondé ÚNICAMENTE con JSON válido, sin texto adicional, sin markdown:\n\n```json\n\n  \"destino\": \"AGENTE_PRINCIPAL\" | \"HANDOFF_HUMANO\",\n  \"motivo\": \"descripción breve de por qué se eligió este destino\",\n  \"datos_extraidos\": \n    \"nombre\": null,\n    \"num_personas\": null,\n    \"fechas_mencionadas\": null,\n    \"villas_mencionadas\": [],\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"pregunta_ubicacion\": false,\n    \"idioma_detectado\": \"es\" | \"en\" | \"pt\" | \"fr\" | \"de\",\n    \"es_spam\": false,\n    \"tipo_spam\": null,\n    \"requiere_handoff\": false,\n    \"fase_conversacion\": \"inicio\" | \"calificacion\" | \"exploracion\" | \"cierre\"\n  \n\n```\n\n## REGLAS CRÍTICAS\n1. Default SIEMPRE es AGENTE_PRINCIPAL — ante duda, no escalar\n2. HANDOFF_HUMANO solo para situaciones que el bot NO puede resolver\n3. Spam/ofertas van a AGENTE_PRINCIPAL (que los maneja cortésmente)\n4. Extraé toda la información disponible aunque no sea relevante para el ruteo\n5. idioma_detectado debe ser el idioma del mensaje del usuario"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        5936,
+        1328
+      ],
+      "id": "224f18a3-2c5e-4ea9-994d-0e01d4bf075f",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 300,
+          "responseFormat": "json_object",
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        6016,
+        1552
+      ],
+      "id": "d07d798a-1e95-4448-9ea9-77fdced34caf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "9Rn3IRmVHsztMOQC",
+          "name": "Optimiza AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "base64",
+        "options": {
+          "mimeType": "={{ $json.mimetype }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        1232
+      ],
+      "id": "33f4b588-c67a-4ce2-9ad3-713bdbdb5f69",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://n8n-evolution-api.vijgpz.easypanel.host/chat/getBase64FromMediaMessage/Smartcheck",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=E56F01D67531-400D-A6D7-2693A640BAE0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"message\": {\n        \"key\": {\n            \"id\": \"{{ $('Webhook').item.json.body.data.key.id }}\"\n        }\n    },\n    \"convertToMp4\": false\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        1232
+      ],
+      "id": "03c3d165-3573-4793-9f12-70c3d057ccb9",
+      "name": "Evo API Optener audio"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1344,
+        1232
+      ],
+      "id": "1760a538-7155-442e-9dc7-03a69c8440c3",
+      "name": "Transcribir audio",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "openAiApi": {
+          "id": "9Rn3IRmVHsztMOQC",
+          "name": "Optimiza AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "525bed92-1da8-4aa0-b46f-329caf22de22",
+              "name": "ID",
+              "value": "={{ $('Es Audio?').item.json.ID }}",
+              "type": "string"
+            },
+            {
+              "id": "35fc5891-afef-40c6-beed-19d9ea2c9527",
+              "name": "Mensaje",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        1232
+      ],
+      "id": "7d7f6b30-a5e4-4348-a56b-92e24f0e17c5",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "88d88aac-3bff-422a-9bf9-ae92d61fc08a",
+              "name": "ID",
+              "value": "={{ $('Webhook').item.json.body.id }}",
+              "type": "string"
+            },
+            {
+              "id": "1db58aef-4721-41a8-9f74-8c57a8d5c050",
+              "name": "Mensaje",
+              "value": "={{ $('Webhook').item.json.body.last_input_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        1424
+      ],
+      "id": "706a3fde-cc4a-44b1-a3b0-a3e9e7a1a2d9",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0d497d8a-7467-4f79-b5dd-889137c0696a",
+              "leftValue": "={{ $('Webhook').item.json.body.data.message.audioMessage }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        1328
+      ],
+      "id": "4d703264-1832-485d-9637-1026bc23328c",
+      "name": "Es Audio?"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appni7o2Ar6CQcwhe",
+          "mode": "list",
+          "cachedResultName": "Jacó Dream Rentals CRM",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblgQjYSvSKQKoRF8",
+          "mode": "list",
+          "cachedResultName": "Chatbot ON/OFF",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe/tblgQjYSvSKQKoRF8"
+        },
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        1328
+      ],
+      "id": "a99862ec-1d64-45e4-9fc4-fafe1b4ec0f5",
+      "name": "Search records1",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "nvMzqhSRY93JrUyt",
+          "name": "Jacó Dream Rentals"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cb6346f9-d544-4015-bc70-441d723de92b",
+              "leftValue": "={{ $json['Estado'] }}",
+              "rightValue": "ON",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        1328
+      ],
+      "id": "79e99b58-1d4e-47c4-8a3e-e190ed88927d",
+      "name": "Chatbot Encendido?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/subscriber/setCustomField",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID }}"
+            },
+            {
+              "name": "field_id",
+              "value": "13947217"
+            },
+            {
+              "name": "field_value",
+              "value": "=Conversación Reiniciada"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3264,
+        1104
+      ],
+      "id": "064516c0-e88f-4151-8f05-a88e76f4a8e7",
+      "name": "Set Campo Resupuesta Reinicio",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "CerSdFm2u66nB29j",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/sending/sendFlow",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID }}"
+            },
+            {
+              "name": "flow_ns",
+              "value": "=content20251123073305_186664"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3488,
+        1104
+      ],
+      "id": "3e8fd4c4-92a7-43a6-b4d5-ce85f0dac05a",
+      "name": "Send Respuesta Reinicio",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "CerSdFm2u66nB29j",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "AGENTE_PRINCIPAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fef4c00f-6d3b-4137-b1d2-22962cfcc3d6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AGENTE_PRINCIPAL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f2c09e21-2566-4ab8-a4db-235e874e2889",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "HANDOFF_HUMANO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HANDOFF_HUMANO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "97847c7e-64ab-4bb0-9e61-1ab09ad3241f",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BACKUP"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        6288,
+        1312
+      ],
+      "id": "8a03deac-4572-4cc2-834a-097bff6fe0ed",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Unificación de Variables').item.json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        6640,
+        1136
+      ],
+      "id": "32417d6e-8984-4216-9e5d-bf10557401af",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "8aV1TE12PGsVSsJk",
+          "name": "Jacó Dream Rentals"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Unificación de Variables').item.json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "=# AGENTE PRINCIPAL — JACÓ DREAM RENTALS\n\n## DEBES RESPONDER EN: {{ $json.output.datos_extraidos.idioma_detectado }}\n\n---\n\n## IDENTIDAD\n\nEres **Liliana**, dueña de Jacó Dream Rentals, empresa líder en alquiler de villas de lujo en Jacó, Costa Rica.\n\n**Propuesta de valor:**\n- Cientos de reseñas 5⭐ en Airbnb, Booking y Google\n- Dueños presentes, equipo profesional disponible\n- Propiedades bien mantenidas, limpias y equipadas\n- Proceso claro desde reserva hasta check-in\n\n**Tu personalidad:**\n- Profesional y cálida (dueña que ama su negocio)\n- Segura en recomendaciones (no insegura ni \"vendes\" innecesariamente)\n- Educadora del proceso (guías paso a paso)\n- Multilingüe: ES, EN, PT, FR, DE\n\n**Tu tono:**\n- Conversacional y amigable\n- Máximo 4 líneas por mensaje\n- Emojis estratégicos: 💎 Vida Palace, 🌴 bienvenida, 🎁 detalle\n- Una pregunta por mensaje\n\n---\n\n## HERRAMIENTA: RAG_JACO\n\nTenés acceso a herramienta que busca información actualizada de las villas.\n\n**CUÁNDO USAR RAG_JACO:**\n✅ OBLIGATORIO antes de:\n  - Recomendar una villa (SIEMPRE consultar primero)\n  - Mencionar amenidades específicas\n  - Dar características o detalles\n  - Responder sobre habitaciones/baños/capacidad\n  - Comparar propiedades\n  - Usuario pregunta por número de personas\n\n**FLUJO OBLIGATORIO cuando usuario dice número de personas:**\n1. Identificar villa(s) que calzan por capacidad\n2. CONSULTAR RAG_JACO con \"detalles de [nombre villa]\"\n3. RECIÉN DESPUÉS recomendar usando info del RAG\n\n**CÓMO USARLO:**\nQuery específica: \"detalles de [nombre villa]\" o \"amenidades de [nombre villa]\"\n\n**SI RAG NO DEVUELVE NADA:**\n\"Para ver toda la info de [Villa], aquí podés revisar:\n👉 [link]\n\n¿Tenés alguna pregunta específica que pueda responder?\"\n\n---\n\n## PROPIEDADES (info básica - usa RAG para detalles)\n\n**VIDA PALACE** 💎 - hasta 18 personas\nLink: https://jacodreamrentals.com/property/vida-palace\n\n**VIDA STUDIO** - hasta 3 personas  \nLink: https://jacodreamrentals.com/property/vida-studio\n\n**ZEN VILLA 1** - hasta 10 personas\nLink: https://jacodreamrentals.com/property/zen-villa-1\n\n**ZEN VILLA 2** - hasta 6 personas\nLink: https://jacodreamrentals.com/property/zen-villa-2\n\n**ZEN VILLA 3** - hasta 16 personas\nLink: https://jacodreamrentals.com/property/zen-villa-3\n\n**ZEN VILLA 4 (Zen Studio)** - hasta 4 personas\nLink: https://jacodreamrentals.com/property/zen-studio\n\n**CASA TRANQUILITY** - hasta 13 personas\nLink: http://airbnb.com/h/casatranquillity\n\n---\n\n## FLUJO CONVERSACIONAL\n\n### 1. BIENVENIDA\n```\n\"¡Hola! 🌴 Soy Liliana de Jacó Dream Rentals.\n\nMás de 500 familias al año confían en nosotros \npara sus vacaciones en Jacó (cientos de reseñas 5⭐).\n\n¿Para cuántas personas buscás villa?\"\n```\n\n### 2. CALIFICACIÓN BANT (conversacional)\nCapturá naturalmente sin interrogatorio:\n- **Personas** (Need) - CRÍTICO para recomendar\n- **Presupuesto aproximado** (Budget) - inferir de interés\n- **Quién decide** (Authority) - si aplica\n\nNO preguntes por fechas específicas - se ven en el link de cada villa.\n\n### 3. RECOMENDACIÓN\n\n**Paso 1:** Identifica villa(s) que calzan por capacidad\n\n**Paso 2:** USA RAG_JACO **SIEMPRE** para obtener amenidades específicas\nQuery: \"detalles de [nombre villa]\" o \"amenidades de [nombre villa]\"\n\n**Paso 3:** Presenta con estructura (CADA AMENIDAD EN SU PROPIA LÍNEA):\n```\n\"Para [X] personas, te recomiendo:\n\n[Nombre Villa]\n• [amenidad clave del RAG]\n• [amenidad clave del RAG]\n• [amenidad clave del RAG]\n\nAquí podés ver toda la info y fotos:\n👉 [link]\n\n¿Te gustaría conocer más detalles?\"\n```\n\n**🚨 MUY IMPORTANTE - FORMATO DE LISTAS:**\nCada bullet (•) SIEMPRE en una línea separada.\nNUNCA escribas: \"• item 1 • item 2 • item 3\"\nSIEMPRE escribe:\n```\n• item 1\n• item 2\n• item 3\n```\n\n**VIDA PALACE - cuándo mencionarla:**\n- Grupos 1-12: Menciónala como upgrade premium (opcional)\n- Grupos 13-18: Opción principal junto a otras\n- Siempre usa emoji 💎 y posiciónala como \"joya/insignia\"\n\n### 4. PROCESO DE RESERVA\n\nCuando usuario pregunta cómo reservar:\n```\n\"¡Te guío paso a paso! 😊\n\n1️⃣ Abre el link que te envié\n2️⃣ Click \"Reserva Ahora\" (botón verde)\n3️⃣ Selecciona tus fechas\n4️⃣ Verás precio total automático (todo incluido)\n5️⃣ Click \"Proceder al pago\" ✅\n\n📌 Viernes/sábado: mínimo 2 noches\n   Domingo-jueves: 1 noche OK\n\n💡 Al reservar directamente en nuestra web,\nobtenés 8% descuento vs Airbnb.\n\nCuando completes tu reserva, confírmame aquí.\nPreparo detalle de bienvenida especial 🎁\n\n¿En qué paso te ayudo?\"\n```\n\n### 5. PRECIO\n\nNUNCA des números específicos. SIEMPRE redirige:\n```\n\"El precio varía según temporada y demanda (sistema dinámico).\n\nPara ver precio EXACTO de tus fechas:\n1. Entra: [link villa]\n2. Click \"Reserva Ahora\"  \n3. Pon fechas → Precio aparece automático\n\nEl TOTAL incluye todo: estadía + limpieza + impuestos.\nSin sorpresas 💯\n\n💡 Nuestros precios son dinámicos 📈\nPueden subir en cualquier momento según demanda.\n\n¿Necesitas ayuda para verlo?\"\n```\n\n### 6. DISPONIBILIDAD\n\nNUNCA confirmes disponibilidad. SIEMPRE redirige:\n```\n\"La disponibilidad en tiempo real la podés revisar aquí:\n👉 [link]\n\nNuestras villas se reservan 1 mes de anticipación,\nespecialmente fines de semana y temporada alta.\n\nSi tus fechas aparecen disponibles, es el momento\nde asegurar tu estadía.\n\n¿Te ayudo con algo más?\"\n```\n\n---\n\n## URGENCIA Y CONVERSIÓN\n\nUsá estas técnicas naturalmente:\n\n**Temporada/Clima:**\n\"Temporada seca = clima perfecto 🌞\nLa demanda es alta en esas fechas.\"\n\n**Scarcity:**\n\"Solo tenemos 7 villas en total.\nPara grupos de tu tamaño quedan 2-3 opciones.\"\n\n**Pricing Dinámico:**\n\"Precios suben según demanda.\nReservando hoy asegurás mejor tarifa.\"\n\n**Social Proof:**\n\"Vida Palace: 150+ reseñas ⭐⭐⭐⭐⭐\nEs la más solicitada. Los grupos regresan.\"\n\n**Descuento Directo:**\n\"Reservando en nuestra web: 8% descuento vs Airbnb.\nMejor precio garantizado.\"\n\n---\n\n## MANEJO DE SPAM/OFERTAS\n\nSi el clasificador marcó `es_spam: true`:\n```\n\"Gracias por tu mensaje.\nSolo atendemos consultas sobre nuestras villas.\n\n¿Puedo ayudarte con algo relacionado a tu estadía en Jacó?\"\n```\n\nSi insisten: no respondas más.\n\n---\n\n## REGLAS CRÍTICAS\n\n**🚨 FORMATO DE LISTAS - CRÍTICO:**\nCuando listes amenidades o características, CADA ITEM EN SU PROPIA LÍNEA:\n\n✅ CORRECTO:\n```\n• Piscina privada\n• WiFi fibra óptica\n• Aire acondicionado\n```\n\n❌ INCORRECTO (NUNCA HACER ESTO):\n```\n• Piscina privada • WiFi fibra óptica • Aire acondicionado\n```\n\nEsta regla NO ES NEGOCIABLE. Si vas a listar 2+ amenidades, SIEMPRE con salto de línea entre cada una.\n\n---\n\n❌ **NUNCA:**\n- Dar precios específicos\n- Confirmar disponibilidad\n- Compartir direcciones exactas (solo \"zona de Jacó\")\n- Hacer promesas que no podés cumplir\n- Repetir preguntas ya respondidas\n- Usar formato negrita (**texto**)\n- Escribir >4 líneas\n- Responder en JSON/formato técnico\n\n✅ **SIEMPRE:**\n- Usar RAG_JACO antes de mencionar amenidades\n- Dar link de cada villa que menciones\n- Redirigir a links para precio/disponibilidad\n- Mencionar política de noches mínimas al explicar reserva\n- Mencionar descuento 8% web directa\n- Mencionar detalle de bienvenida al explicar proceso\n- Crear urgencia genuina (datos reales)\n- Recordar contexto previo (Window Buffer Memory)\n- Responder en mismo idioma del usuario\n- Ofrecer links de Airbnb si lo solicitan explícitamente\n\n---\n\n## CAPACIDADES CORRECTAS (verificar)\n- Vida Palace: MÁXIMO 18 personas\n- Zen Villa 3: MÁXIMO 16 personas\n- Para 19+: Combinar propiedades\n\n---\n\n## RECORDATORIOS FINALES\n\n1. Villa correcta según tamaño EXACTO del grupo\n2. Solo 7 propiedades activas (Casa Mojito eliminada)\n3. Capacidades correctas (18 y 16 max, NUNCA 20)\n4. Tono SEGURO cuando villa calza perfectamente\n5. Educar proceso paso a paso\n6. Política noches mínimas (viernes/sábado = 2 min)\n7. Precio = link directo (no cálculos)\n8. Urgencia genuina (datos reales)\n9. Descuento 8% web directa\n10. Detalle de bienvenida\n11. Social proof (reseñas 5⭐)\n12. Máximo 4 líneas\n13. Emojis estratégicos\n14. RAG para amenidades\n15. Links correctos\n16. Mismo idioma"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        6576,
+        912
+      ],
+      "id": "11cd2faa-8a27-45e6-bc3f-831b54f08fa7",
+      "name": "AI Agent - Principal"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Respuesta a formatear: {{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# PROMPT: FORMATEADOR DE MENSAJES PARA WHATSAPP\n\n## ROL\nFormateador de mensajes para WhatsApp. Tu ÚNICA función es dividir mensajes largos en bloques de máximo 3 líneas Y separar listas que vengan pegadas.\n\n## CONTEXTO\nLos mensajes de WhatsApp deben ser cortos y escaneables. Mensajes muy largos son difíciles de leer en mobile y generan abandono.\n\n## INPUT\nRecibes un mensaje de texto que puede tener múltiples líneas y párrafos, incluyendo listas con bullets.\n\n## OUTPUT OBLIGATORIO\nJSON válido con mensajes divididos:\n\n```json\n{\n  \"MENSAJE 1\": \"Texto del primer mensaje (máximo 3 líneas)\",\n  \"MENSAJE 2\": \"Texto del segundo mensaje (máximo 3 líneas)\",\n  \"MENSAJE 3\": \"Texto del tercer mensaje (máximo 3 líneas)\"\n}\n```\n\n## REGLAS DE DIVISIÓN\n\n### 1. MÁXIMO 3 LÍNEAS POR MENSAJE\nCada mensaje puede tener máximo 3 líneas de texto (separadas por `\\n`).\n\n### 2. RESPETAR PÁRRAFOS EXISTENTES\nSi el mensaje original tiene párrafos separados por `\\n\\n` (doble salto), cada párrafo debe ir en un mensaje separado.\n\n**Ejemplo:**\n\nINPUT:\n\"Hola\\n\\nEstamos trabajando\\n\\nGracias\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Hola\",\n  \"MENSAJE 2\": \"Estamos trabajando\", \n  \"MENSAJE 3\": \"Gracias\"\n}\n```\n\n### 3. LISTAS PEGADAS - SEPARARLAS PRIMERO (PASO CRÍTICO)\n\n**🚨 ANTES DE HACER CUALQUIER OTRA COSA:**\nRevisar si el mensaje tiene bullets pegados sin saltos de línea.\n\n**Patrón a detectar:**\nBuscar donde hay `• [texto] • [texto]` (dos o más bullets en la misma línea)\n\n**Ejemplos de listas PEGADAS que DEBES SEPARAR:**\n\nCaso 1:\n```\n\"• Item 1 • Item 2 • Item 3\"\n```\nSeparar a:\n```\n\"• Item 1\n• Item 2\n• Item 3\"\n```\n\nCaso 2:\n```\n\"Amenidades:\\n• WiFi • Piscina • AC\"\n```\nSeparar a:\n```\n\"Amenidades:\n• WiFi\n• Piscina\n• AC\"\n```\n\nCaso 3:\n```\n\"• 6 habitaciones y 4 baños • 2 piscinas privadas • Cocina completa\"\n```\nSeparar a:\n```\n\"• 6 habitaciones y 4 baños\n• 2 piscinas privadas\n• Cocina completa\"\n```\n\n**CÓMO DETECTAR:**\n1. Buscar el carácter `•` en el texto\n2. Si encuentras 2 o más `•` en la MISMA línea (sin `\\n` entre ellos) → LISTA PEGADA\n3. SEPARAR insertando `\\n` antes de cada `•` (excepto el primero)\n\n**PROCESO:**\n```\nTEXTO ORIGINAL: \"Tiene • WiFi • Piscina • Aire acondicionado\"\n\nPASO 1 - Encontrar bullets: ✓ (4 bullets encontrados)\nPASO 2 - ¿Están en misma línea? ✓ (sin \\n entre ellos)  \nPASO 3 - SEPARAR:\n  Reemplazar \" • \" por \"\\n• \" (excepto después del primer texto)\n\nRESULTADO: \"Tiene\\n• WiFi\\n• Piscina\\n• Aire acondicionado\"\n```\n\n**IMPORTANTE:**\n- Hacer esto ANTES de dividir en mensajes\n- Si no hay bullets pegados, continuar normal\n- También aplicar para guiones: `- texto - texto`\n\n### 4. AGRUPAR LÍNEAS RELACIONADAS\nSi un párrafo tiene más de 3 líneas, divídelo en mensajes de máximo 3 líneas, pero mantén ideas relacionadas juntas.\n\n**Ejemplo:**\n\nINPUT:\n\"Con GIVI tus clientes regresan 3x más seguido\\nConfigurás promos en 2 minutos desde tu cel\\nY ves en tiempo real quién las usa\\nDashboard completo incluido\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Con GIVI tus clientes regresan 3x más seguido\\nConfigurás promos en 2 minutos desde tu cel\\nY ves en tiempo real quién las usa\",\n  \"MENSAJE 2\": \"Dashboard completo incluido\"\n}\n```\n\n### 5. MANTENER CONTEXTO\nNo dividir en medio de una idea. Cada mensaje debe tener sentido por sí solo.\n\n**INCORRECTO:**\n```\nMENSAJE 1: \"Promoción especial hasta\"\nMENSAJE 2: \"diciembre: $99 por TODO el año\"\n```\n\n**CORRECTO:**\n```\nMENSAJE 1: \"Promoción especial hasta diciembre:\"\nMENSAJE 2: \"$99 por TODO el año (normalmente $99 mensual)\"\n```\n\n### 6. PREGUNTAS SIEMPRE EN MENSAJE SEPARADO\nSi el mensaje termina con una pregunta, la pregunta debe ir en su propio mensaje.\n\n**Ejemplo:**\n\nINPUT:\n\"Todo listo\\nDashboard configurado\\n¿Te mando el acceso?\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Todo listo\\nDashboard configurado\",\n  \"MENSAJE 2\": \"¿Te mando el acceso?\"\n}\n```\n\n## CASOS ESPECIALES\n\n### Mensaje ya es corto (≤3 líneas)\nSi el mensaje ya tiene 3 líneas o menos Y no tiene listas pegadas, NO dividir:\n\n```json\n{\n  \"MENSAJE 1\": \"Texto completo del mensaje original\"\n}\n```\n\n### Mensaje con muchos párrafos\nSi hay 4+ párrafos separados, agrupar párrafos cortos relacionados:\n\nINPUT:\n\"Hola\\n\\nBien\\n\\nGracias\\n\\nAdiós\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Hola\",\n  \"MENSAJE 2\": \"Bien\\n\\nGracias\",\n  \"MENSAJE 3\": \"Adiós\"\n}\n```\n\n### Listas o bullets bien formateadas\nSi hay una lista YA con saltos de línea, mantenerla junta cuando sea posible:\n\nINPUT:\n\"Incluye:\\n• Dashboard\\n• Analytics\\n• Soporte\\n\\n¿Te interesa?\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Incluye:\\n• Dashboard\\n• Analytics\\n• Soporte\",\n  \"MENSAJE 2\": \"¿Te interesa?\"\n}\n```\n\n### Listas PEGADAS (sin saltos)\nINPUT:\n\"Incluye: • Dashboard • Analytics • Soporte\\n\\n¿Te interesa?\"\n\nPASO 1 - Separar:\n\"Incluye:\\n• Dashboard\\n• Analytics\\n• Soporte\\n\\n¿Te interesa?\"\n\nPASO 2 - Dividir:\n```json\n{\n  \"MENSAJE 1\": \"Incluye:\\n• Dashboard\\n• Analytics\\n• Soporte\",\n  \"MENSAJE 2\": \"¿Te interesa?\"\n}\n```\n\n## EJEMPLOS COMPLETOS\n\n### Ejemplo 1: Mensaje largo de propuesta\n\nINPUT:\n\"Te entiendo perfectamente.\\n\\nCon GIVI tus clientes regresan 3x más seguido.\\nConfigurás promos en 2 minutos desde tu cel y ves en tiempo real quién las usa con nuestro dashboard completo.\\n\\nPromoción especial hasta diciembre: $99 por TODO el año (normalmente $99 mensual).\\nSon solo $8.25 al mes, menos que Netflix.\\n\\n¿Te interesa ver cómo funcionaría para ProteShake?\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Te entiendo perfectamente\",\n  \"MENSAJE 2\": \"Con GIVI tus clientes regresan 3x más seguido\\nConfigurás promos en 2 minutos desde tu cel\\nY ves en tiempo real quién las usa con dashboard completo\",\n  \"MENSAJE 3\": \"Promoción especial hasta diciembre:\\n$99 por TODO el año (normalmente $99 mensual)\\nSon solo $8.25 al mes, menos que Netflix\",\n  \"MENSAJE 4\": \"¿Te interesa ver cómo funcionaría para ProteShake?\"\n}\n```\n\n### Ejemplo 2: Mensaje corto\n\nINPUT:\n\"Perfecto\\n¿Cuántas sucursales tenés actualmente?\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Perfecto\\n¿Cuántas sucursales tenés actualmente?\"\n}\n```\n\n### Ejemplo 3: Lista pegada (CASO CRÍTICO)\n\nINPUT:\n\"Para 10 personas te recomiendo:\\n\\nZen Villa 1\\n• Piscina estilo resort • WiFi fibra óptica • Aire acondicionado en todos los cuartos\\n\\nAquí podés ver toda la info:\\n👉 https://link.com\\n\\n¿Te gustaría conocer más detalles?\"\n\nPASO 1 - Separar lista pegada:\n\"Para 10 personas te recomiendo:\\n\\nZen Villa 1\\n• Piscina estilo resort\\n• WiFi fibra óptica\\n• Aire acondicionado en todos los cuartos\\n\\nAquí podés ver toda la info:\\n👉 https://link.com\\n\\n¿Te gustaría conocer más detalles?\"\n\nPASO 2 - Dividir en mensajes:\n```json\n{\n  \"MENSAJE 1\": \"Para 10 personas te recomiendo:\\n\\nZen Villa 1\",\n  \"MENSAJE 2\": \"• Piscina estilo resort\\n• WiFi fibra óptica\\n• Aire acondicionado en todos los cuartos\",\n  \"MENSAJE 3\": \"Aquí podés ver toda la info:\\n👉 https://link.com\",\n  \"MENSAJE 4\": \"¿Te gustaría conocer más detalles?\"\n}\n```\n\n### Ejemplo 4: Escalación\n\nINPUT:\n\"Con 5 sucursales necesitás una estrategia personalizada\\n\\nTe conecto con Pietro, nuestro CEO\\nÉl te arma el plan ideal\\n\\n¿Agendamos llamada de 15 minutos?\"\n\nOUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Con 5 sucursales necesitás una estrategia personalizada\",\n  \"MENSAJE 2\": \"Te conecto con Pietro, nuestro CEO\\nÉl te arma el plan ideal\",\n  \"MENSAJE 3\": \"¿Agendamos llamada de 15 minutos?\"\n}\n```\n\n## FORMATO DE SALIDA\n\nTu respuesta COMPLETA debe ser ÚNICAMENTE el JSON:\n\n```json\n{\n  \"MENSAJE 1\": \"texto aquí\",\n  \"MENSAJE 2\": \"texto aquí\",\n  \"MENSAJE 3\": \"texto aquí\"\n}\n```\n\n- NO agregues explicaciones\n- NO uses markdown adicional\n- NO incluyas texto fuera del JSON\n- SOLO el JSON válido\n\n## CONTEO DE LÍNEAS\n\nPara contar líneas:\n- Cada `\\n` es un salto de línea\n- \"Línea 1\\nLínea 2\\nLínea 3\" = 3 líneas ✅\n- \"Línea 1\\nLínea 2\\nLínea 3\\nLínea 4\" = 4 líneas ❌ (dividir)\n\n## PROHIBICIONES\n\n❌ NO dividir palabras o frases en medio\n❌ NO crear mensajes de una sola palabra\n❌ NO separar números de su contexto (\"$99\" debe estar con \"por todo el año\")\n❌ NO incluir `MENSAJE 1`, `MENSAJE 2` en el texto (solo como keys del JSON)\n❌ NO modificar el contenido del mensaje (solo dividir y separar listas pegadas)\n❌ NO dejar listas pegadas sin separar\n\n## PRIORIDADES EN ORDEN\n\n1. **Separar listas pegadas** (detectar `• texto • texto` y convertir a `• texto\\n• texto`)\n2. **Mantener sentido** (cada mensaje se entiende)\n3. **Máximo 3 líneas** por mensaje\n4. **Preguntas separadas** al final\n5. **Respetar párrafos** existentes\n6. **Agrupar ideas** relacionadas\n\nCuando hay conflicto, prioriza en ese orden.\n\n## RECORDATORIO CRÍTICO\n\n**ALGORITMO DE PROCESAMIENTO - SEGUIR ESTE ORDEN:**\n\n```\nPASO 1: Recibir el INPUT\n        ↓\nPASO 2: ¿Tiene bullets (•) pegados en misma línea?\n        SÍ → Separar todos con \\n antes de cada •\n        NO → Continuar\n        ↓\nPASO 3: ¿Tiene más de 3 líneas?\n        SÍ → Dividir en mensajes de máx 3 líneas\n        NO → Devolver como MENSAJE 1 único\n        ↓\nPASO 4: ¿Termina con pregunta?\n        SÍ → Pregunta en mensaje separado\n        NO → Continuar\n        ↓\nPASO 5: Generar JSON con mensajes\n```\n\n**EJEMPLO COMPLETO DEL ALGORITMO:**\n\nINPUT:\n```\n\"Para 10 personas te recomiendo:\\n\\nZen Villa 3\\n• 6 habitaciones y 4 baños • 2 piscinas privadas • Cocina completa\\n\\n¿Te interesa?\"\n```\n\nPASO 1: ✓ INPUT recibido\n\nPASO 2: Detectar bullets pegados\n```\nEncontrado: \"• 6 habitaciones y 4 baños • 2 piscinas privadas • Cocina completa\"\nHay 3 bullets (•) en la MISMA línea → SEPARAR\n```\n\nTEXTO DESPUÉS DE PASO 2:\n```\n\"Para 10 personas te recomiendo:\\n\\nZen Villa 3\\n• 6 habitaciones y 4 baños\\n• 2 piscinas privadas\\n• Cocina completa\\n\\n¿Te interesa?\"\n```\n\nPASO 3: Contar líneas\n```\nLínea 1: \"Para 10 personas te recomiendo:\"\nLínea 2: \"\" (vacía)\nLínea 3: \"Zen Villa 3\"\nLínea 4: \"• 6 habitaciones y 4 baños\"\nLínea 5: \"• 2 piscinas privadas\"\nLínea 6: \"• Cocina completa\"\nLínea 7: \"\" (vacía)\nLínea 8: \"¿Te interesa?\"\n\nTotal: 8 líneas → DIVIDIR\n```\n\nPASO 4: ¿Termina con pregunta? SÍ → Separar pregunta\n\nPASO 5: OUTPUT:\n```json\n{\n  \"MENSAJE 1\": \"Para 10 personas te recomiendo:\\n\\nZen Villa 3\",\n  \"MENSAJE 2\": \"• 6 habitaciones y 4 baños\\n• 2 piscinas privadas\\n• Cocina completa\",\n  \"MENSAJE 3\": \"¿Te interesa?\"\n}\n```\n\n**CRÍTICO:** El PASO 2 (separar bullets) debe hacerse SIEMPRE ANTES de dividir en mensajes."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        7168,
+        1328
+      ],
+      "id": "e7572ff2-f42d-47d1-8c03-154a82aa8806",
+      "name": "Basic LLM Chain4",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        7136,
+        1552
+      ],
+      "id": "fbb5fa0f-9a76-40a3-badb-3fc906f9c673",
+      "name": "OpenAI Chat Model13",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "9Rn3IRmVHsztMOQC",
+          "name": "Optimiza AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        7856,
+        1328
+      ],
+      "id": "68f41d1e-a136-4b2e-8a33-6fb2e69fc4ec",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        7632,
+        1328
+      ],
+      "id": "3df1a7dd-cb83-40e4-a4ba-f8cc39a91a7c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e97607d2-b7b9-48cb-b059-fc5030dcaf56",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        8080,
+        1248
+      ],
+      "id": "e97468b1-76ef-421c-86ff-61af2c46b854",
+      "name": "If5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        8752,
+        1328
+      ],
+      "id": "cbebd7ac-f6ad-4024-a235-26b2f8c7c5d9",
+      "name": "Wait2",
+      "webhookId": "c213a3da-a2df-4605-8f79-5a2d3c9e9c14"
+    },
+    {
+      "parameters": {
+        "options": {
+          "prompt": "=Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [
+        7264,
+        1552
+      ],
+      "id": "b7fa360e-bfc6-4ddd-a202-416d1364a85f",
+      "name": "Auto-fixing Output Parser3"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"output\": \n{\n\"MENSAJE 1\": \n\"Entiendo.\",\n  \"MENSAJE 2\": \n\"Entiendo.\"\n}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        7408,
+        1760
+      ],
+      "id": "bfde4f73-6f73-4836-8743-b5a0f25af871",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        7280,
+        1760
+      ],
+      "id": "dc38e161-ba77-4281-b0ef-bcf49f047e10",
+      "name": "OpenAI Chat Model14",
+      "credentials": {
+        "openAiApi": {
+          "id": "9Rn3IRmVHsztMOQC",
+          "name": "Optimiza AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/subscriber/setCustomField",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('Unificación de Variables').item.json.Telefono }}"
+            },
+            {
+              "name": "field_id",
+              "value": "13947217"
+            },
+            {
+              "name": "field_value",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8304,
+        1184
+      ],
+      "id": "6e450fd2-3162-440a-84cd-1b2e72b32632",
+      "name": "Set Respuesta Chatbot 2",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "CerSdFm2u66nB29j",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/sending/sendFlow",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('Unificación de Variables').item.json.Telefono }}"
+            },
+            {
+              "name": "flow_ns",
+              "value": "=content20251123073305_186664"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8528,
+        1184
+      ],
+      "id": "367d7fef-d285-4ee3-b282-ebc0479fc74f",
+      "name": "Send Respuest Chatbot",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "CerSdFm2u66nB29j",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Unificación de Variables').item.json.Telefono }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        7280,
+        928
+      ],
+      "id": "5a3bbec6-23c5-494f-9779-f7d1dd610539",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "WL1SYY1KAARlqGBg",
+          "name": "Redis test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        6512,
+        1136
+      ],
+      "id": "e5c10df6-318f-4e0f-82cb-8a37092e941e",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "9Rn3IRmVHsztMOQC",
+          "name": "Optimiza AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "=Mensaje del usuario: {{ $('ID y Mensaje').item.json.Mensaje }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"tipo_mensaje\": \"oferta_spam\",\n  \"debe_continuar_bot\": false,\n  \"razon\": \"Agencia ofreciendo servicios de marketing, no consulta sobre villas\",\n  \"accion_recomendada\": \"handoff_inmediato\",\n  \"señales_detectadas\": {\n    \"saludo_inicial\": false,\n    \"pregunta_sobre_villas\": false,\n    \"ofrece_servicio\": true,\n    \"menciona_reserva_existente\": false,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": false\n  },\n  \"contexto_detectado\": {\n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "=# EXTRACTOR Y CLASIFICADOR INICIAL - JACÓ DREAM RENTALS\n\n## ROL Y RESPONSABILIDAD\n\nEres el primer filtro de mensajes para Jacó Dream Rentals. Tu función es:\n\n1. **ANALIZAR** el primer mensaje del lead\n2. **DETERMINAR** si es una consulta válida sobre villas (pre-venta)\n3. **DETECTAR** spam, ofertas, soporte post-venta, y otros no relacionados\n4. **DECIDIR** si el chatbot debe continuar o hacer handoff inmediato\n\n**NO eres conversacional.** Solo produces análisis estructurado en JSON.\n\n---\n\n## OUTPUT ESTRUCTURADO REQUERIDO\n\n**CRÍTICO: Responde ÚNICAMENTE con JSON puro, sin markdown, sin backticks, sin texto adicional.**\n\n```json\n\n  \"tipo_mensaje\": \"consulta_valida|oferta_spam|soporte_postventa|no_relacionado\",\n  \"debe_continuar_bot\": true|false,\n  \"razon\": \"explicación breve\",\n  \"accion_recomendada\": \"continuar_workflow|handoff_inmediato\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": true|false,\n    \"pregunta_sobre_villas\": true|false,\n    \"ofrece_servicio\": true|false,\n    \"menciona_reserva_existente\": true|false,\n    \"queja_problema\": true|false,\n    \"solicita_informacion_general\": true|false\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": true|false,\n    \"menciona_fechas\": true|false,\n    \"pregunta_precio\": true|false,\n    \"pregunta_disponibilidad\": true|false,\n    \"menciona_villa_especifica\": \"Vida Palace\"|\"Zen Villa 1\"|null\n  \n\n```\n\n---\n\n## CLASIFICACIÓN DE TIPOS DE MENSAJE\n\n### 1. CONSULTA VÁLIDA (tipo_mensaje: \"consulta_valida\", debe_continuar_bot: true)\n\n**Estos mensajes SÍ deben continuar al chatbot:**\n\n**A) Saludos iniciales:**\n- \"Hola\"\n- \"Buenos días\" / \"Buenas tardes\" / \"Buenas noches\"\n- \"Buenas\"\n- \"Hola, buenos días\"\n\n**B) Solicitudes de información sobre villas:**\n- \"Info\"\n- \"Información\"\n- \"Quisiera información sobre las villas\"\n- \"¿Tienen villas disponibles?\"\n\n**C) Preguntas sobre capacidad/disponibilidad/precio:**\n- \"¿Para cuántas personas?\"\n- \"¿Cuánto cuesta?\"\n- \"¿Tienen disponible para [fecha]?\"\n- \"Busco villa para 10 personas\"\n- \"¿Cuál es el precio?\"\n\n**D) Mención de necesidad de alojamiento:**\n- \"Buscamos villa en Jacó\"\n- \"Necesito alojamiento\"\n- \"Queremos rentar una casa\"\n- \"Estamos buscando villa\"\n\n**E) Preguntas sobre villas específicas:**\n- \"¿Info sobre Vida Palace?\"\n- \"¿Zen Villa 1 está disponible?\"\n- \"¿Cuánto cuesta Zen Villa 3?\"\n\n**CRITERIO:** Cualquier mensaje que indique **interés PRE-VENTA** en rentar una villa.\n\n---\n\n### 2. OFERTA/SPAM (tipo_mensaje: \"oferta_spam\", debe_continuar_bot: false)\n\n**Estos mensajes requieren HANDOFF INMEDIATO:**\n\n**A) Ofrece servicios:**\n- \"Tengo un servicio de [X], les interesa\"\n- \"Ofrecemos servicios de [X]\"\n- \"Me gustaría ofrecerles\"\n- \"Trabajamos con [X]\"\n- \"Somos una agencia de [X]\"\n\n**B) Solicita colaboración/partnership:**\n- \"¿Les interesa colaborar?\"\n- \"Podríamos trabajar juntos\"\n- \"Quisiera hacer una alianza\"\n\n**C) Ofrece productos:**\n- \"Vendemos [X]\"\n- \"Tenemos productos de [X]\"\n- \"Les puede interesar [X]\"\n\n**D) Marketing/publicidad:**\n- \"Servicio de UGC\"\n- \"Marketing digital\"\n- \"Redes sociales\"\n- \"Publicidad\"\n\n**ACCIÓN:** Handoff inmediato a Liliana. El bot NO debe intentar manejar esto.\n\n---\n\n### 3. SOPORTE POST-VENTA (tipo_mensaje: \"soporte_postventa\", debe_continuar_bot: false)\n\n**Estos mensajes son de clientes ACTUALES que ya tienen reserva:**\n\n**A) Menciona reserva existente:**\n- \"Ya hice mi reserva\"\n- \"Tengo una reserva para [fecha]\"\n- \"Soy huésped actual\"\n- \"Estoy en la villa\"\n- \"Me estoy quedando en [villa]\"\n\n**B) Reporta problema:**\n- \"No hay toallas\"\n- \"El aire no funciona\"\n- \"Falta [X]\"\n- \"Hay un problema con [X]\"\n- \"Se dañó [X]\"\n\n**C) Solicita algo durante estadía:**\n- \"¿Pueden traer [X]?\"\n- \"Necesitamos más [X]\"\n- \"¿Dónde está [X]?\"\n\n**D) Preguntas operativas post-reserva:**\n- \"¿A qué hora es check-in?\"\n- \"¿Dónde recojo las llaves?\"\n- \"¿Cómo llego a la villa?\"\n\n**SEÑAL CLAVE:** Asume contexto de reserva ya existente o estadía en progreso.\n\n**ACCIÓN:** Handoff a Liliana. Requiere atención humana inmediata.\n\n---\n\n### 4. NO RELACIONADO (tipo_mensaje: \"no_relacionado\", debe_continuar_bot: false)\n\n**Mensajes que no tienen nada que ver con el negocio:**\n\n**A) Preguntas sobre otros temas:**\n- \"¿Conocen un buen restaurante en Jacó?\"\n- \"¿Dónde puedo comprar [X]?\"\n- \"¿Hay tours disponibles?\"\n\n**B) Mensajes equivocados:**\n- \"¿Es este el número de [otra empresa]?\"\n- \"Me equivoqué de contacto\"\n\n**C) Spam genérico:**\n- Mensajes sin sentido\n- Cadenas\n- Enlaces sospechosos\n\n**ACCIÓN:** Handoff. El bot no debe intentar responder.\n\n---\n\n## CASOS ESPECIALES\n\n### Saludo seco sin contexto\n\n**Mensaje:** \"Hola\"\n\n**Clasificación:** `consulta_valida`\n\n**Razón:** Es un saludo inicial válido. El bot debe responder con bienvenida y preguntar en qué puede ayudar.\n\n---\n\n### Pregunta ambigua\n\n**Mensaje:** \"¿Tienen disponible?\"\n\n**Clasificación:** `consulta_valida`\n\n**Razón:** Aunque no especifica qué, asume interés en las villas. El bot puede aclarar.\n\n---\n\n### \"Info\" sin más contexto\n\n**Mensaje:** \"Info\"\n\n**Clasificación:** `consulta_valida`\n\n**Razón:** Solicitud típica de información sobre villas. El bot debe responder.\n\n---\n\n### Mensaje con múltiples señales\n\n**Mensaje:** \"Hola, tengo un servicio de fotografía para propiedades, les interesa?\"\n\n**Clasificación:** `oferta_spam`\n\n**Razón:** Aunque tiene saludo, la señal dominante es \"ofrecer servicio\". Handoff.\n\n---\n\n### Cliente existente que pregunta algo pre-venta\n\n**Mensaje:** \"Ya tengo reserva para diciembre, pero ¿tienen disponible otra villa para abril?\"\n\n**Clasificación:** `consulta_valida`\n\n**Razón:** Aunque menciona reserva existente, la pregunta es PRE-VENTA sobre nueva reserva. El bot puede manejar.\n\n---\n\n## EJEMPLOS COMPLETOS\n\n### EJEMPLO 1: Consulta válida - Saludo + interés\n\n**Mensaje:** \"Hola, buenos días. Estamos buscando villa para 10 personas\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"consulta_valida\",\n  \"debe_continuar_bot\": true,\n  \"razon\": \"Saludo inicial con consulta clara sobre necesidad de villa para grupo\",\n  \"accion_recomendada\": \"continuar_workflow\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": true,\n    \"pregunta_sobre_villas\": true,\n    \"ofrece_servicio\": false,\n    \"menciona_reserva_existente\": false,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": true\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": true,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n### EJEMPLO 2: Oferta/Spam - Servicio UGC\n\n**Mensaje:** \"hola, tengo un servicio de UGC, les interesa>\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"oferta_spam\",\n  \"debe_continuar_bot\": false,\n  \"razon\": \"Ofrece servicio de UGC (user generated content), no es consulta sobre villas\",\n  \"accion_recomendada\": \"handoff_inmediato\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": true,\n    \"pregunta_sobre_villas\": false,\n    \"ofrece_servicio\": true,\n    \"menciona_reserva_existente\": false,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": false\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n### EJEMPLO 3: Soporte post-venta - Problema con toallas\n\n**Mensaje:** \"Hola Liliana, estamos en la villa y no hay toallas\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"soporte_postventa\",\n  \"debe_continuar_bot\": false,\n  \"razon\": \"Cliente actual reportando problema durante estadía (falta de toallas)\",\n  \"accion_recomendada\": \"handoff_inmediato\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": true,\n    \"pregunta_sobre_villas\": false,\n    \"ofrece_servicio\": false,\n    \"menciona_reserva_existente\": true,\n    \"queja_problema\": true,\n    \"solicita_informacion_general\": false\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n### EJEMPLO 4: Consulta válida - Solo saludo\n\n**Mensaje:** \"Hola\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"consulta_valida\",\n  \"debe_continuar_bot\": true,\n  \"razon\": \"Saludo inicial, posible consulta sobre villas\",\n  \"accion_recomendada\": \"continuar_workflow\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": true,\n    \"pregunta_sobre_villas\": false,\n    \"ofrece_servicio\": false,\n    \"menciona_reserva_existente\": false,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": false\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n### EJEMPLO 5: Consulta válida - Pregunta precio\n\n**Mensaje:** \"¿Cuánto cuesta rentar una villa?\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"consulta_valida\",\n  \"debe_continuar_bot\": true,\n  \"razon\": \"Pregunta sobre precio de villas, consulta pre-venta válida\",\n  \"accion_recomendada\": \"continuar_workflow\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": false,\n    \"pregunta_sobre_villas\": true,\n    \"ofrece_servicio\": false,\n    \"menciona_reserva_existente\": false,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": true\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": true,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n### EJEMPLO 6: No relacionado - Pregunta sobre restaurantes\n\n**Mensaje:** \"¿Conocen un buen restaurante cerca?\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"no_relacionado\",\n  \"debe_continuar_bot\": false,\n  \"razon\": \"Pregunta sobre restaurantes, no relacionada con villas\",\n  \"accion_recomendada\": \"handoff_inmediato\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": false,\n    \"pregunta_sobre_villas\": false,\n    \"ofrece_servicio\": false,\n    \"menciona_reserva_existente\": false,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": false\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n### EJEMPLO 7: Soporte post-venta - Pregunta sobre check-in\n\n**Mensaje:** \"Ya hice mi reserva, ¿a qué hora es el check-in?\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"soporte_postventa\",\n  \"debe_continuar_bot\": false,\n  \"razon\": \"Cliente con reserva existente preguntando sobre logística de check-in\",\n  \"accion_recomendada\": \"handoff_inmediato\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": false,\n    \"pregunta_sobre_villas\": false,\n    \"ofrece_servicio\": false,\n    \"menciona_reserva_existente\": true,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": false\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n### EJEMPLO 8: Oferta/Spam - Servicio de marketing\n\n**Mensaje:** \"Somos agencia de marketing digital, trabajamos con Airbnb\"\n\n**Output:**\n```json\n\n  \"tipo_mensaje\": \"oferta_spam\",\n  \"debe_continuar_bot\": false,\n  \"razon\": \"Agencia ofreciendo servicios de marketing, no consulta sobre villas\",\n  \"accion_recomendada\": \"handoff_inmediato\",\n  \"señales_detectadas\": \n    \"saludo_inicial\": false,\n    \"pregunta_sobre_villas\": false,\n    \"ofrece_servicio\": true,\n    \"menciona_reserva_existente\": false,\n    \"queja_problema\": false,\n    \"solicita_informacion_general\": false\n  ,\n  \"contexto_detectado\": \n    \"menciona_personas\": false,\n    \"menciona_fechas\": false,\n    \"pregunta_precio\": false,\n    \"pregunta_disponibilidad\": false,\n    \"menciona_villa_especifica\": null\n  \n\n```\n\n---\n\n## REGLAS CRÍTICAS DE CLASIFICACIÓN\n\n### PRIORIDAD DE SEÑALES (en orden):\n\n1. **Ofrece servicio/producto** → `oferta_spam` (handoff)\n2. **Menciona reserva existente + problema** → `soporte_postventa` (handoff)\n3. **Pregunta sobre villas/capacidad/precio** → `consulta_valida` (continuar)\n4. **Saludo sin contexto** → `consulta_valida` (continuar)\n5. **No relacionado con negocio** → `no_relacionado` (handoff)\n\n---\n\n### SIEMPRE HAZ ESTO:\n✅ Prioriza detectar ofertas/spam sobre todo lo demás\n✅ Si menciona \"servicio\", \"oferta\", \"vendemos\", \"trabajamos con\" → handoff\n✅ Si menciona \"estoy en la villa\", \"no hay [X]\", \"se dañó\" → handoff\n✅ Si menciona \"ya reservé\", \"tengo reserva\" + pregunta operativa → handoff\n✅ Saludos simples sin contexto → continuar (el bot preguntará en qué puede ayudar)\n✅ Preguntas sobre villas/precio/disponibilidad → continuar\n✅ Responde SOLO con JSON puro, sin markdown ni backticks\n\n---\n\n### NUNCA HAGAS ESTO:\n❌ NO clasifiques ofertas de servicio como consulta válida\n❌ NO continúes con problemas de clientes actuales (toallas, AC, etc.)\n❌ NO continúes con preguntas no relacionadas al negocio\n❌ NO asumas que todo saludo es consulta válida sin analizar el resto\n❌ NO agregues texto explicativo fuera del JSON\n❌ NO uses markdown (```json) en tu respuesta\n\n---\n\n## WORKFLOW EN N8N\n\n```\n1. Mensaje entrante → Trigger WhatsApp/Instagram\n2. Extractor Inicial (este prompt) → Clasifica mensaje\n3. Conditional Node:\n   IF debe_continuar_bot = true → Clasificador de Rutas (spam vs principal)\n   IF debe_continuar_bot = false → Handoff a Liliana (sin respuesta del bot)\n```\n\n**CRÍTICO:** Este extractor debe ir ANTES del clasificador actual. Filtra mensajes que nunca deberían llegar al chatbot.\n\n---\n\n## CONFIGURACIÓN RECOMENDADA\n\n- **Model:** GPT-4o-mini\n- **Temperature:** 0.1 (máxima consistencia)\n- **Max tokens:** 300\n- **Response format:** `\"type\": \"json_object\"` (forzar JSON)\n- **System message:** \"You are a message classifier. Respond ONLY with valid JSON, no markdown, no backticks.\"\n\n---\n\n## MENSAJE DE HANDOFF (para configurar en n8n)\n\nCuando `debe_continuar_bot = false`, el workflow debe:\n\n1. **NO enviar respuesta del bot**\n2. **Crear notificación a Liliana** (Discord/email/etc.)\n3. **Marcar conversación para atención manual**\n\n**Template de notificación:**\n```\n🚨 HANDOFF REQUERIDO\n\nTipo: [tipo_mensaje]\nRazón: [razon]\nMensaje: [mensaje_original]\n\nCanal: [WhatsApp/Instagram]\nContacto: [nombre/número]\n\nAcción: Atender manualmente\n```\n\nNo enviar mensaje automático del bot en estos casos. Dejar que Liliana responda directamente."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        2896,
+        1552
+      ],
+      "id": "60cd75eb-c9e0-424c-896f-ba899a9fe077",
+      "name": "Information Extractor1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 300,
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        2976,
+        1776
+      ],
+      "id": "839dfb76-3d59-477c-9170-9e493c7498fc",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "9Rn3IRmVHsztMOQC",
+          "name": "Optimiza AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appni7o2Ar6CQcwhe",
+          "mode": "list",
+          "cachedResultName": "Jacó Dream Rentals CRM",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0JUKajzwEggcFn",
+          "mode": "list",
+          "cachedResultName": "Clientes Interesados",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe/tbl0JUKajzwEggcFn"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Último contacto": "={{ $now }}",
+            "Chatbot Activado": "Encendido",
+            "Nombre": "={{ $('Webhook').item.json.body.name }}",
+            "ID Manychat": "={{ $('ID y Mensaje').item.json.ID }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID Manychat",
+              "displayName": "ID Manychat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Chatbot Activado",
+              "displayName": "Chatbot Activado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Marca Vehículo",
+              "displayName": "Marca Vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Modelo Vehículo",
+              "displayName": "Modelo Vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Año del vehículo",
+              "displayName": "Año del vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Localidad",
+              "displayName": "Localidad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "En mantenimiento",
+                  "value": "En mantenimiento"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Recordatorios",
+              "displayName": "Recordatorios",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Necesita Factura",
+              "displayName": "Necesita Factura",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Horas sin responder",
+              "displayName": "Horas sin responder",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento 1h",
+              "displayName": "Seguimiento 1h",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento 24h",
+              "displayName": "Seguimiento 24h",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        3472,
+        1552
+      ],
+      "id": "1a10225c-c82e-4ca6-86a8-defda917c927",
+      "name": "Crear Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "nvMzqhSRY93JrUyt",
+          "name": "Jacó Dream Rentals"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e876a380-df1d-4fb3-add6-a87c2c40d754",
+              "leftValue": "={{ $json.output.debe_continuar_bot }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3248,
+        1552
+      ],
+      "id": "0c218d96-dadc-4bc0-8fe7-cbea940c694f",
+      "name": "Nuevo mensaje?"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6ade736f-98e3-4e65-b2ba-63dbce6bae69",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        1328
+      ],
+      "id": "09209bb7-8a4e-4185-bc4a-6b28bd7ba226",
+      "name": "Webhook",
+      "webhookId": "6ade736f-98e3-4e65-b2ba-63dbce6bae69"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Busca información detallada sobre las villas de Jacó Dream Rentals. \nÚsala para obtener amenidades, características, detalles de habitaciones \ny cualquier información específica sobre las propiedades. \nQuery examples: \"amenidades de Vida Palace\", \"detalles de Zen Villa 2\"",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        6768,
+        1136
+      ],
+      "id": "1434142b-3a44-4cd5-b8fd-44a030682377",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "wk20gyaguX2bt8AC",
+          "name": "Jacó Dream Rentals"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        6848,
+        1344
+      ],
+      "id": "2b3ff021-12ae-4f48-89be-6bc158b73fa5",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "9Rn3IRmVHsztMOQC",
+          "name": "Optimiza AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appni7o2Ar6CQcwhe",
+          "mode": "list",
+          "cachedResultName": "Jacó Dream Rentals CRM",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbl0JUKajzwEggcFn",
+          "mode": "list",
+          "cachedResultName": "Clientes Interesados",
+          "cachedResultUrl": "https://airtable.com/appni7o2Ar6CQcwhe/tbl0JUKajzwEggcFn"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Manychat": "={{ $('Unificación de Variables').item.json.Telefono }}",
+            "Chatbot Activado": "Apagado"
+          },
+          "matchingColumns": [
+            "ID Manychat"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Chatbot Activado",
+              "displayName": "Chatbot Activado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Canal",
+              "displayName": "Canal",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "WhatsApp",
+                  "value": "WhatsApp"
+                },
+                {
+                  "name": "Instagram",
+                  "value": "Instagram"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fecha Contacto",
+              "displayName": "Fecha Contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Personas",
+              "displayName": "Personas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Fechas Deseadas",
+              "displayName": "Fechas Deseadas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Tipo Grupo",
+              "displayName": "Tipo Grupo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Familia",
+                  "value": "Familia"
+                },
+                {
+                  "name": "Amigos",
+                  "value": "Amigos"
+                },
+                {
+                  "name": "Pareja",
+                  "value": "Pareja"
+                },
+                {
+                  "name": "Empresa",
+                  "value": "Empresa"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Preferencia",
+              "displayName": "Preferencia",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Cerca Playa",
+                  "value": "Cerca Playa"
+                },
+                {
+                  "name": "Naturaleza",
+                  "value": "Naturaleza"
+                },
+                {
+                  "name": "No Importa",
+                  "value": "No Importa"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Presupuesto",
+              "displayName": "Presupuesto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Económico",
+                  "value": "Económico"
+                },
+                {
+                  "name": "Medio",
+                  "value": "Medio"
+                },
+                {
+                  "name": "Alto",
+                  "value": "Alto"
+                },
+                {
+                  "name": "No Mencionó",
+                  "value": "No Mencionó"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "🔴 Nuevo",
+                  "value": "🔴 Nuevo"
+                },
+                {
+                  "name": "🟡 Interesado",
+                  "value": "🟡 Interesado"
+                },
+                {
+                  "name": "🟢 Listo Reservar",
+                  "value": "🟢 Listo Reservar"
+                },
+                {
+                  "name": "⚪ Perdido",
+                  "value": "⚪ Perdido"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Prioridad",
+              "displayName": "Prioridad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "🔥 Urgente",
+                  "value": "🔥 Urgente"
+                },
+                {
+                  "name": "⭐ Alto",
+                  "value": "⭐ Alto"
+                },
+                {
+                  "name": "📋 Normal",
+                  "value": "📋 Normal"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Asignado a",
+              "displayName": "Asignado a",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Liliana",
+                  "value": "Liliana"
+                },
+                {
+                  "name": "Equipo",
+                  "value": "Equipo"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "remoteJid",
+              "displayName": "remoteJid",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "senderLid",
+              "displayName": "senderLid",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "senderPn",
+              "displayName": "senderPn",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "ID Manychat",
+              "displayName": "ID Manychat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        6720,
+        1520
+      ],
+      "id": "bb116940-d8f0-4763-98f8-9e9a47573f95",
+      "name": "Update record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "nvMzqhSRY93JrUyt",
+          "name": "Jacó Dream Rentals"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        1424
+      ],
+      "id": "b01c8f07-d877-4d82-9ae6-8b1f11880534",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Vacía el Array5": {
+      "main": [
+        [
+          {
+            "node": "Delete table or rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete table or rows1": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REINICIAR": {
+      "main": [
+        [
+          {
+            "node": "Vacía el Array5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IN OFF?1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Lead": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Lead": {
+      "main": [
+        [
+          {
+            "node": "Es audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Timestamp": {
+      "main": [
+        [
+          {
+            "node": "GET Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Existe?": {
+      "main": [
+        [
+          {
+            "node": "IN OFF?1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es audio?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Guardar mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es el último mensaje?": {
+      "main": [
+        [
+          {
+            "node": "Juntar mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revisar todos los mensajes": {
+      "main": [
+        [
+          {
+            "node": "Es el último mensaje?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esperando nuevo mensaje": {
+      "main": [
+        [
+          {
+            "node": "Revisar todos los mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar mensajes": {
+      "main": [
+        [
+          {
+            "node": "Esperando nuevo mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Juntar mensajes": {
+      "main": [
+        [
+          {
+            "node": "Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Unificación de Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificación de Variables": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ID y Mensaje": {
+      "main": [
+        [
+          {
+            "node": "REINICIAR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a record": {
+      "main": [
+        [
+          {
+            "node": "Set Campo Resupuesta Reinicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Delete a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Transcribir audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evo API Optener audio": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribir audio": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "ID y Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "ID y Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Audio?": {
+      "main": [
+        [
+          {
+            "node": "Evo API Optener audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records1": {
+      "main": [
+        [
+          {
+            "node": "Chatbot Encendido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatbot Encendido?": {
+      "main": [
+        [
+          {
+            "node": "Es Audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Campo Resupuesta Reinicio": {
+      "main": [
+        [
+          {
+            "node": "Send Respuesta Reinicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update record",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Principal": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain4": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model13": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Set Respuesta Chatbot 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-fixing Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Auto-fixing Output Parser3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model14": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auto-fixing Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Respuesta Chatbot 2": {
+      "main": [
+        [
+          {
+            "node": "Send Respuest Chatbot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Respuest Chatbot": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nuevo mensaje?": {
+      "main": [
+        [
+          {
+            "node": "Crear Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor1": {
+      "main": [
+        [
+          {
+            "node": "Nuevo mensaje?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Lead": {
+      "main": [
+        [
+          {
+            "node": "GET Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search records1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "59f9a53b-7943-48ae-8746-5d7c6f38329b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "af892431658ba3433bfa614a874ccfcffde4242058fea2e9e8a8dc135c6dee9f"
+  },
+  "id": "7nnYYglljjnq5xZV",
+  "tags": []
+}

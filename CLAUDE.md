@@ -173,3 +173,114 @@ Persistente entre sesiones (en `~/.claude/projects/.../memory/`):
 - Nunca instalar global sin permiso
 - Protocolo para instalar repos pasados por el usuario
 - Auditoría de saturación de skills
+
+## Generacion de Prompts y Agentes de Chatbot (Momentum AI)
+
+Este proyecto usa la metodologia Momentum AI para crear prompts y entrenar los agentes de IA
+que responden en los flujos de chatbot. La calidad depende de seguir estas reglas SIEMPRE.
+
+### Antes de generar u optimizar CUALQUIER prompt (obligatorio)
+
+1. Leer `memory/metodologia-core.md` — reglas no-negociables (fuente de verdad)
+2. Leer `memory/feedback-prompting.md` — correcciones ganadas en produccion
+3. Consultar los prompts reales en `knowledge/workflows-reference/` como ancla de calidad
+   (no inventar patrones — seguir lo que ya funciona)
+
+### Skills y agente disponibles
+
+| Recurso | Cuando se usa |
+|---|---|
+| skill `momentum-architect` | decidir cuantos agentes, modelo LLM, estructura del flujo |
+| skill `momentum-prompt-gen` | generar prompts (agente principal, router, especialistas, objeciones, formateador, etc.) |
+| skill `momentum-prompt-optimizer` | mejorar un prompt existente con cambios quirurgicos |
+| agente `prompt-reviewer` | validar un prompt contra el checklist pre-deploy |
+
+El flujo de calidad completo es: **architect (estructura) -> prompt-gen (genera) ->
+prompt-reviewer (valida) -> prompt-optimizer (arregla quirurgicamente lo que falle).**
+
+### Reglas de prompting NO negociables (resumen — el detalle esta en metodologia-core.md)
+
+- **Arquitectura modular** — 1-3 agentes especializados, nunca un mega-prompt
+- **Limites de chars:** agente principal 3,000-5,000 · especializado 1,000-2,000 · classifier 1,500-3,000
+- **Cambios quirurgicos** — si funciona al 70%, arreglar el 30%. NUNCA reescribir desde cero
+- **No inventar** — "Deja verifico eso" en vez de inventar datos
+- **Valor primero, datos despues** — nunca pedir email/tel antes de dar valor
+- **Puntuacion humana** — sin punto final, sin dos puntos, sin ; sin ¿ sin em-dash (—). Default SIEMPRE
+- **Variar mensajes repetidos** — nunca el mismo texto literal dos veces
+- **No prometer lo que el bot no puede enviar** — solo links y texto
+- **SIEMPRE reportar el conteo de caracteres** de cada prompt generado
+- **Formateador:** copiar verbatim el canonico (`.claude/skills/momentum-prompt-gen/assets/template-formateador.md`), no improvisar
+
+### Regla de oro
+
+Si el mensaje del bot suena a articulo de periodico, es bot. Si suena a un mensaje de WhatsApp
+a un amigo, es humano. Ese es el filtro de calidad final.
+
+### Decisiones de prompting (memoria heredada)
+
+`memory/prompting-decisions.md` contiene decisiones arquitectónicas del proyecto Momentum AI
+Chatbot Arquitect (Jacó, Dr. Carlos, El Canal, Level, etc.). Es contexto histórico — NO se
+mezcla con `memory/decisions.md` (que es del CRM SaaS).
+
+---
+
+## Construcción de Workflows n8n (Momentum AI) — kit hermano del de prompts
+
+Para construir **cualquier flujo de n8n** o **chatbot multi-agente** de Momentum, seguí el
+entrenamiento. La **regla madre**: **el template base se DUPLICA, NUNCA se construye desde cero.**
+
+### Antes de construir CUALQUIER workflow n8n (obligatorio)
+
+1. Leer `knowledge/00_CURRICULUM_CONSTRUCCION_N8N.md` — el camino de aprendizaje completo (11 módulos)
+2. Leer `memory/metodologia-core.md` — reglas no-negociables (compartido con prompting-kit)
+3. Leer `memory/feedback-n8n-build.md` — **los 14 errores reales y su fix** (checklist OBLIGATORIO
+   antes de declarar un workflow terminado — revisar SIEMPRE)
+4. **DUPLICAR** el template más parecido de `knowledge/workflows-reference/` (template-base /
+   dr-carlos / el-canal) — **NO improvisar nodos**, NO crear "Router" desde memoria
+
+### Skills de construcción disponibles
+
+| Skill | Cuándo se usa |
+|---|---|
+| `momentum-architect` | decidir cuántos agentes, router, post-processing, stack |
+| `momentum-n8n-builder` ⭐ | configurar el workflow nodo por nodo sobre el template duplicado |
+| `momentum-workflow-variants` | generar variantes TEST (chat interno n8n) / Telegram / YCloud |
+| `n8n-langchain-prompts-rules` | evitar que las llaves `{}` rompan el Information Extractor |
+| `n8n-postgres-prepared-statements` | queries Postgres robustas (JSON deconstruction, 5+ params) |
+| `chatbot-db-schema-supabase` | schema multi-canal + multi-nicho (versión canónica del kit en `.claude/skills/`) |
+| `chatbot-manychat-supabase-multicanal` | patrón multi-canal WA + IG + errores comunes |
+
+### Reglas de construcción NO negociables (resumen — detalle en feedback-n8n-build.md)
+
+- **Duplicar el template, no construir de cero** — solo cambian prompts, agentes, tools,
+  post-procesamiento, credenciales. Mantener nodos comunes intactos.
+- **Router = Information Extractor bien configurado** — SIN llaves `{}` en el prompt, schema
+  repetido dentro del prompt en prosa, 3-4 destinos + backup al principal, Switch leyendo el
+  campo real (`destino` u otro nombre corto). **NUNCA inventar un nodo tipo "Router"**.
+- **Llaves `{}` en nodos LangChain rompen silencioso** — describir formatos en prosa, schema en
+  el campo `inputSchema` (que sí acepta JSON literal)
+- **Postgres 5+ params/nullables → JSON deconstruction** (`$1::jsonb` + `d->>'campo'`)
+- **Nodos de persistencia EN PARALELO, no en serie** (si no, sobrescriben `$json.output`)
+- **"Leer estado" en multi-canal → UPSERT, no SELECT** (auto-curativo)
+- **Usar `.first()` no `.item`** después de Code/Agent/IE/Loop
+- **Webhook externo → `responseMode: onReceived`** (evita timeout y duplicados)
+- **Nombres de nodos representativos + sticky notes** por zona del flujo
+- **VALIDAR antes de entregar** — verificar el output real de cada nodo (sobre todo el router)
+  contra un Information Extractor que ya funcione en el proyecto, NO contra memoria
+
+### Herramientas externas recomendadas (instalar aparte)
+
+- **n8n-mcp** (czlonkowski/n8n-mcp) — crear/validar workflows en vivo. **La validación es lo que
+  mata el router improvisado.**
+- **Skills globales de n8n** (czlonkowski/n8n-skills) — sintaxis exacta de nodos y expresiones.
+  Algunas YA están disponibles globalmente: `n8n-expression-syntax`, `n8n-node-configuration`,
+  `n8n-code-javascript`, `n8n-validation-expert`, `n8n-mcp-tools-expert`, `n8n-workflow-patterns`.
+
+### Causa raíz que este kit ataca (cita textual del README)
+
+> *"El error #1 al construir estos bots es armar el workflow desde cero e improvisar los nodos
+> (sobre todo improvisar el 'router' en vez de un Information Extractor bien configurado).
+> La regla madre de Momentum: el template base se DUPLICA, nunca se construye de cero."*
+
+Esto es **operativo**. Si Claude construye un workflow sin haber duplicado un template y sin
+leer `feedback-n8n-build.md` primero, está violando una regla explícita del proyecto.
