@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        29 skills de proceso reusables:
+│   └── skills/        32 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -87,6 +87,11 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      'append') + n8n-information-extractor-schema-mode
 │                      (fromJson espera ejemplo, NO schema literal; usar
 │                      'manual' + inputSchema para schemas dinámicos).
+│                      Tier 7 — SaaS/Scraping patterns (3, capturadas 2026-06-11):
+│                      async-job-pattern (UI→job→worker→polling+refund créditos),
+│                      apify-integration-pattern (fetch directo, normalización -1/null,
+│                      ScraperError tipado), debugging-silent-errors (console.error
+│                      estructurado, reproducir antes de instrumentar, error codes).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
@@ -95,7 +100,10 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                             Biblia operativa de hormozi-strategist, saas-strategist,
 │                             pain-discovery y las skills construir-oferta + evaluar-icp.
 ├── inputs/repos-referencia/   10 repos de calidad como referencia para los agentes
-├── templates/                 Plantillas reusables
+├── templates/
+│   └── supabase-email-templates/  4 HTML de Auth parametrizados (confirm, magic-link,
+│                                  reset-password, change-email). Reemplazar placeholders
+│                                  {{PRODUCT_NAME}}, {{PRODUCT_TAGLINE}}, etc.
 ├── outputs/                   Entregables del template (vacío por defecto)
 ├── proyectos/                 ← Aquí viven los proyectos concretos (gitignored)
 │   └── hookly/                  primer proyecto (repo independiente)

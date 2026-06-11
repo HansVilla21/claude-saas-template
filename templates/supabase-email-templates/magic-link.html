@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tu link mágico para entrar a {{PRODUCT_NAME}}</title>
+</head>
+<body style="margin:0;padding:0;background:#f6f3ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#1c1917;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f6f3ec;padding:48px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#fffdf7;border:1px solid #e7e0cc;border-radius:6px;">
+          <tr>
+            <td style="padding:40px 40px 24px 40px;border-bottom:1px solid #ece5d2;">
+              <p style="margin:0;font-size:20px;font-weight:500;letter-spacing:-0.01em;color:#1c1917;">
+                {{PRODUCT_NAME}} <span style="font-style:italic;font-family:Georgia,'Times New Roman',serif;color:#78716c;font-weight:400;">{{PRODUCT_TAGLINE}}</span>
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:40px;">
+              <h1 style="margin:0 0 20px 0;font-size:32px;line-height:1.1;font-weight:500;letter-spacing:-0.025em;color:#1c1917;">
+                Entrá a <span style="font-style:italic;font-family:Georgia,'Times New Roman',serif;color:#78716c;font-weight:400;">{{PRODUCT_NAME}}</span>.
+              </h1>
+              <p style="margin:0 0 28px 0;font-size:15px;line-height:1.6;color:#57534e;">
+                Hacé click para entrar. El link expira en una hora y solo funciona una vez.
+              </p>
+
+              <table role="presentation" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="border-radius:6px;background:#1c1917;">
+                    <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:14px 28px;color:#fffdf7;text-decoration:none;font-size:14px;font-weight:500;letter-spacing:-0.01em;">
+                      Entrar a {{PRODUCT_NAME}} &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:32px 0 0 0;font-size:13px;line-height:1.6;color:#a8a29e;">
+                Si el botón no funciona, copiá y pegá esta URL en tu navegador:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#78716c;text-decoration:underline;word-break:break-all;">{{ .ConfirmationURL }}</a>
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:24px 40px;border-top:1px solid #ece5d2;">
+              <p style="margin:0;font-size:12px;line-height:1.6;color:#a8a29e;">
+                Si no pediste entrar, ignorá este correo — no se hace nada con tu cuenta.
+              </p>
+              <p style="margin:12px 0 0 0;font-size:12px;line-height:1.6;color:#a8a29e;">
+                {{PRODUCT_NAME}} · {{PRODUCT_SLOGAN}}
+              </p>
+            </td>
+          </tr>
+        </table>
+
+        <p style="margin:24px 0 0 0;font-size:11px;color:#a8a29e;">
+          {{BRAND_CREDIT}}
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

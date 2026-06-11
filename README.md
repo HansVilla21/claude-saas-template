@@ -62,10 +62,22 @@ Eso es todo. Claude clona el madre, te hace 3 preguntas, prepara la estructura d
 - `pain-discovery` — mining de dolores reales en comunidades online
 - `billing-engineer` — Stripe / Onvo / sistema de créditos / afiliados
 
-### 9 skills genéricas de proceso (`.agent/skills/`)
+### 12 skills genéricas de proceso (`.agent/skills/`)
+
+**Estrategia (5):**
+
 - `creador-de-skills` (meta-skill)
 - `evaluar-icp`, `definir-avatar`, `descubrir-dolor`, `construir-oferta`
+
+**Marketing (4):**
+
 - `customer-research`, `email-sequence`, `launch-strategy`, `social-content`
+
+**Técnicas (3):**
+
+- `async-job-pattern` — trigger desde UI → job en DB → worker → polling → resultado. Incluye idempotencia y refund de créditos en fallo.
+- `apify-integration-pattern` — fetch directo (sin SDK por bug de proxy-agent en Vercel), normalización segura de valores nulos/-1, ScraperError tipado, estimación de costos.
+- `debugging-silent-errors` — patrón de `console.error` estructurado en catch blocks, cómo reproducir antes de instrumentar, mapeo de códigos de error de Postgres/Supabase.
 
 ### 50+ skills de Claude Code (`.claude/skills/`)
 
@@ -80,9 +92,11 @@ Eso es todo. Claude clona el madre, te hace 3 preguntas, prepara la estructura d
 | Infraestructura | meta-pixel-capi, vercel-domain-migration, onvo-setup, onvo-checkout-flow, onvo-troubleshooting |
 
 ### Frameworks
+
 - `memory/frameworks/hormozi.md` — síntesis operativa de $100M Offers + Money Models + GOATed Ads
 
 ### 10 repos de referencia (`inputs/repos-referencia/`)
+
 Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, Taste, OWASP, security-hooks, supabase-pentest, awesome-claude-code-subagents, marketingskills, ui-ux-pro-max-skill.
 
 ---
