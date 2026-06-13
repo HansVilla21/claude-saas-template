@@ -229,6 +229,28 @@ En el chat-panel, un switch "Bot / Agente" permite al humano tomar la conversaci
 - **NO** confiar solo en Telegram para notificar. El handoff debe ser **multi-canal dentro del CRM**. Telegram es bonus, no fuente única.
 - **NO** olvidar el SLA en la task. Sin `due_at`, queda en el limbo. 30min es el sweet spot inmobiliaria — ajustar a tu vertical.
 
+## GOTCHA: reactivar el bot debe limpiar `bot_paused_until`, no solo `handler` (capturado 2026-06-12)
+
+Si el handoff **pausa el bot** (patrón común: el nodo que apaga el bot hace `bot_paused_until = now() + 24h` para que no interrumpa al humano), entonces el gate del workflow que decide si el bot responde tiene 2+ condiciones AND, típicamente:
+
+```
+handler = 'bot'  AND  (bot_paused_until IS NULL OR bot_paused_until < now())  AND  agency.bot_enabled = true
+```
+
+**El bug:** la acción de "Devolver al bot" / "reactivar" en el CRM solo hacía `update({ handler: 'bot' })`. El `handler` quedaba en `bot` pero la pausa de 24h seguía viva → **el bot quedaba mudo** hasta que vencía, aunque el toggle dijera "bot". Síntoma: devolvés al bot, el lead escribe, el bot no responde. La ejecución corta en el nodo gate (`Chatbot Activado?`) y `Get Conversation State` muestra `bot_paused_until` en el futuro.
+
+**La regla:** reactivar el bot = limpiar `handler` **Y** `bot_paused_until` en la MISMA operación.
+
+```ts
+// Devolver al bot
+const update = next === 'bot'
+  ? { handler: 'bot', bot_paused_until: null }
+  : { handler: 'human' };   // tomar la conversación NO toca la pausa
+await supabase.from('conversations').update(update).eq('id', convId);
+```
+
+Fix manual inmediato para una conversación trabada: `UPDATE conversations SET bot_paused_until = NULL WHERE id = '...'`. Diagnóstico: si un bot con `handler='bot'` no responde, mirá `bot_paused_until` ANTES que el prompt o el workflow.
+
 ## Skills relacionadas
 
 - `n8n-pipeline-rapido-vs-pesado` — este patrón es estructural, pipeline PESADO (architect → builder → reviewer)
