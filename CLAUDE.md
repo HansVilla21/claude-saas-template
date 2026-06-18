@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        37 skills de proceso reusables:
+│   └── skills/        38 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -92,7 +92,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      apify-integration-pattern (fetch directo, normalización -1/null,
 │                      ScraperError tipado), debugging-silent-errors (console.error
 │                      estructurado, reproducir antes de instrumentar, error codes).
-│                      Tier 8 — Auth/UX/Deploy SaaS (5, capturadas 2026-06-18, de Mi Menudo):
+│                      Tier 8 — Auth/UX/Deploy SaaS (6, capturadas 2026-06-18, de Mi Menudo):
 │                      auth-supabase-google-nativo (email/clave + Google nativo GIS que
 │                      muestra tu dominio + fix 'Database error saving new user'),
 │                      prototipo-ui-a-datos-reales (conectar un prototipo mock a Supabase
@@ -101,7 +101,10 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      confianza→completar→usar→pagar + tarjeta de activación),
 │                      deploy-seguro-vercel-preview-prod (preview→prod sin romper),
 │                      ingesta-email-cloudflare-worker (forwarding → Worker → Edge
-│                      Function, idempotente, por usuario, nunca botar).
+│                      Function, idempotente, por usuario, nunca botar) +
+│                      reskin-marca-coherente (migrar un template heredado a una marca
+│                      propia coherente: auditar la capa de tokens + cazar overrides de
+│                      --accent en runtime + barrer colores hardcodeados; landing == app).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
