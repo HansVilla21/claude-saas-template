@@ -7,6 +7,7 @@
 - Dos síntomas distintos ("no cambia la etapa" + "no envía mensajes") resultan ser **la misma** policy rota.
 - Acabás de mover una "fuente de verdad" de una tabla a otra (ej. la asignación de `leads.assigned_user_id` → `conversations.assigned_user_id`) y algo empezó a fallar para ciertos roles.
 - Ves un error Postgres `42501: new row violates row-level security policy for table "X"` — a veces apuntando a una tabla que NO es la que estabas escribiendo.
+- **Un update que cambia un campo a un valor que ese rol NO puede VER falla, pero a `null` o al propio usuario funciona.** Ej.: un agente reasigna su conversación a OTRO agente → `42501`; a "sin asignar" (`null`) → OK. Señal de la interacción **SELECT-policy ↔ UPDATE** (causa 3).
 
 ## Por qué existe esta skill
 
@@ -15,6 +16,8 @@ El incidente Givi (2026-07-08): un equipo entero de `agent`s no podía enviar me
 1. **`WITH CHECK` divergido del `USING` en la misma policy.** En una policy de `UPDATE`, `USING` decide **qué filas podés tocar** (visibilidad) y `WITH CHECK` valida **el estado final de la fila**. Son cláusulas separadas y es facilísimo actualizar una y olvidar la otra. Cuando una migración movió la asignación de `leads.assigned_user_id` (viejo) a `conversations.assigned_user_id` (nuevo), el `USING` se actualizó para mirar la conversación pero el `WITH CHECK` siguió exigiendo `leads.assigned_user_id = auth.uid()` — columna que ahora es **siempre NULL** → `WITH CHECK` **insatisfacible** para agentes → `42501`.
 
 2. **Un trigger `SECURITY INVOKER` que escribe OTRA tabla propaga el fallo de RLS.** Insertar en `messages` disparaba `denorm_conversation_on_message` (trigger normal = corre con los permisos del usuario), que hacía `UPDATE leads SET last_message_at=...`. Ese UPDATE chocaba contra la MISMA policy rota → `42501` **abortaba el INSERT de messages entero**. Por eso "no puedo enviar mensajes" era en realidad "el trigger no puede tocar leads". El `CONTEXT:` del error 42501 lo delata (nombra la tabla real + la función del trigger).
+
+3. **La SELECT policy bloquea el UPDATE aunque el WITH CHECK pase (incidente Givi reasignación, 2026-07-09).** En un UPDATE, Postgres exige que la fila NUEVA quede **visible bajo la SELECT policy** del usuario; si no, tira `42501` sobre esa tabla — aunque el `WITH CHECK` del UPDATE pase. Caso: la SELECT policy del agente solo lo deja ver conversaciones propias o del pool (`assigned_user_id = auth.uid() OR null`). Al reasignar su conversación a OTRO agente, la fila nueva (`assigned = otro`) deja de serle visible → `42501`. Reasignar a `null` (sí visible) o a sí mismo (sí visible) funciona → **ese contraste es la firma del problema**. Acá **relajar el WITH CHECK NO alcanza** (el bloqueo viene de la SELECT policy), y **aflojar la SELECT policy rompería el modelo de visibilidad** ("el agente solo ve lo suyo"). La salida correcta es **no hacer la escritura client-side**: moverla a un **server action con chequeo de permiso + admin client (service_role, bypasea RLS)** — la operación es legítima, solo que la RLS por-fila la hace imposible desde el cliente. Patrón: `claimUnassignedConversation` / `reassignConversation` / `reassignContact` en el inbox.
 
 Las dos trampas que lo hacen invisible:
 - **La escritura es client-side y el error se traga.** El patrón "optimista + `if (error) revert; return;`" (sin toast) hace que el chip vuelva a su valor y el mensaje desaparezca **sin decir nada**. Para el usuario "no funciona y no sé por qué".
@@ -42,6 +45,7 @@ rollback;
 Interpretación:
 - `ERROR: 42501 ... violates row-level security policy for table "X"` → **WITH CHECK / INSERT** bloqueado. Leé el `CONTEXT:` — si nombra otra tabla + una función `*_trigger`/`denorm_*`, el culpable es un **trigger que escribe esa otra tabla** (ver paso 4).
 - `UPDATE 0` (0 filas, sin error) → el `USING` no matchea ninguna fila (bloqueo silencioso de UPDATE/DELETE). En la app esto se ve idéntico a "no guardó".
+- **Si el mismo UPDATE a `null`/al propio usuario PASA pero a OTRO valor da 42501** → es la **SELECT policy** (causa 3): la fila nueva no queda visible para el rol. Probá las tres variantes (a self, a null, a otro) para confirmar. Aquí NO sirve tocar el WITH CHECK; ver paso 5b.
 
 ### 3. Leer las cláusulas de la policy y comparar USING vs WITH CHECK
 
@@ -75,6 +79,13 @@ create policy <tabla>_update on public.<tabla> for update
 ```
 - Si el `USING` ya permite al rol vía la tabla hija (conversación asignada), el `WITH CHECK` igualado **también** deja pasar el UPDATE del trigger `SECURITY INVOKER` → arregla los DOS síntomas de una.
 - Sólo tocá `SECURITY DEFINER` en el trigger si querés blindaje extra o si hay caminos donde el usuario legítimamente NO "posee" la fila hija pero el sistema igual debe denormalizar.
+
+### 5b. Si el bloqueo es la SELECT policy (causa 3): server action, NO más RLS
+
+Cuando la operación es **legítima** pero deja la fila fuera de la visibilidad del rol (ej. reasignar a otro), no pelees con la RLS por-fila:
+- **NO** aflojes la SELECT policy para que el rol vea más — rompe el modelo de visibilidad ("el agente solo ve lo suyo").
+- **NO** relajes el WITH CHECK — no es lo que bloquea.
+- **SÍ** mové esa escritura a un **server action** (o RPC `SECURITY DEFINER`) que: (1) chequea el permiso en código (¿el agent posee la fila / es del pool? ¿el destino es miembro?), (2) escribe con **admin client / service_role** (bypasea RLS). Es el patrón de `claimUnassignedConversation` / `reassignConversation`. El write client-side sigue existiendo para lo que SÍ permite la RLS; solo el caso "fuera de visibilidad" pasa por el server action.
 
 ### 6. Verificar adversarialmente: positivo Y negativo
 
