@@ -2,8 +2,22 @@
 # Claude SaaS Template — .gitignore
 # ============================================
 
-# Subproyectos: cada uno es repo independiente
+# Subproyectos: cada uno es repo independiente (repos con su propio git/remoto)
 proyectos/
+crm/
+crm-v2/
+
+# Dependencias (nunca se versionan en el madre)
+node_modules/
+
+# Backups y temporales de trabajo (no son parte del template)
+*.backup*
+.tmp-*
+.playwright-mcp/
+
+# Python cache de los scripts de skills
+__pycache__/
+*.pyc
 
 # Secretos
 .env
@@ -13,6 +27,10 @@ proyectos/
 # Claude Code locales
 CLAUDE.local.md
 .claude/settings.local.json
+# launch.json = config de máquina (puertos/paths del dev server), no del template.
+# OJO: .claude/ SÍ se versiona (agents + skills son parte del template) → ignorar
+# el archivo puntual, nunca la carpeta.
+.claude/launch.json
 .mdd/
 
 # Sistema
