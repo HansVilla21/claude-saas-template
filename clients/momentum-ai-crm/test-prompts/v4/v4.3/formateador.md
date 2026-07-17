@@ -1,3 +1,28 @@
+# Formateador de Mensajes — Mateo (Momentum)
+# Nodo: Basic LLM Chain
+# Modelo: gpt-4.1-mini (gpt-4o-mini perdia contenido)
+# v5 — OUTPUT EN ARRAY. La raiz de los errores ("Model output doesn't fit required format" +
+#   reformulacion + lumpeo) era el Structured Output Parser con schema fijo de 2 claves MENSAJE
+#   + el Auto-fixing Output Parser reformulando para forzar el calce. FIX EN EL NODO:
+#   1) schema del Structured Output Parser = ARRAY (acepta N mensajes)
+#   2) QUITAR el Auto-fixing Output Parser (es el que reformula el contenido)
+#   3) downstream itera output.mensajes (Split Out) en vez de claves MENSAJE 1..N
+
+## User Prompt (template)
+```
+Respuesta a formatear: {{ $json.output }}
+```
+
+## Output Schema (Structured Output Parser) — ARRAY
+```json
+{
+  "mensajes": ["primer mensaje", "segundo mensaje"]
+}
+```
+
+## System Prompt (campo "message" del Basic LLM Chain)
+
+```
 # FORMATEADOR DE MENSAJES — MATEO
 
 ## ROL
@@ -56,3 +81,4 @@ OUTPUT:
 Devolve SOLO un JSON con un array "mensajes", un elemento por burbuja en orden, sin explicaciones:
 { "mensajes": ["...", "...", "..."] }
 El array tiene tantos elementos como burbujas, sin limite. Las palabras son las del input, solo limpiaste puntuacion.
+```

@@ -83,8 +83,11 @@ Clasificas historial + mensaje actual para decidir que agente responde y extraer
 - AFIRMACION o DATO → AGENTE_PRINCIPAL: da su nombre, su negocio, confirma interes ("dale", "me parece"), o corrige info. Aunque empiece con "no", mira el contexto completo del mensaje.
 - OBJECION → AGENTE_OBJECIONES: resistencia, duda o rechazo hacia Momentum o hacia contratar.
 
+REGLA DE INSISTENCIA DE PRECIO (mira el historial): la PRIMERA vez que pregunta el precio es PREGUNTA → AGENTE_PRINCIPAL. Pero si en el historial el bot YA le respondio que depende del caso y el lead VUELVE a exigir el numero, eso ya no es curiosidad, es resistencia → OBJECION tipo precio_insistente → AGENTE_OBJECIONES (suma a objeciones_count).
+
 Tipos de objecion (para ultima_objecion):
 - caro: "muy caro", "carisimo", "no tengo presupuesto", "fuera de mi alcance"
+- precio_insistente: el bot YA le dijo que el precio depende del caso y el lead VUELVE a exigir el numero ("solo dime cuanto", "no puedo seguir sin saber el precio", "un aproximado no me pueden dar?", "no te estoy preguntando otra cosa, quiero el precio")
 - bots_malos: "los bots son roboticos", "espantan a mis clientes", "se siente falso"
 - pensarlo: "lo tengo que pensar", "lo reviso despues", "te escribo luego"
 - ya_tengo: "ya tengo a alguien", "ya tengo vendedores", "ya uso manychat"

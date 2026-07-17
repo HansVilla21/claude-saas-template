@@ -30,10 +30,10 @@ a humano** (Hans/Pietro coordinan la llamada). 3 componentes (router + principal
 | Componentes a construir | Router/Clasificador + Agente Principal + Agente de Objeciones |
 | Mecanismo de agendamiento | **Handoff a Pietro/Hans** (no Calendly). El bot asegura interés + captura datos |
 | Ángulo "el bot es el producto" | **Setter humano puro** — nunca revela que es bot |
-| Manejo de precio | **Escalera de presión (v2)** — 1ra vez redirige + pide 1 dato, 2da vez da piso suave (desde unos $150/mes + instalación única), 3ra/frustrado → handoff. Nunca confirma monto exacto ni setup |
+| Manejo de precio | **Ancla solo si presionan** — por defecto no da precio, lo reserva para la llamada |
 | Dureza de calificación | **Media** — descalifica elegante a no-fit obvios, deja pasar el resto |
 | Nombre / género | **Mateo** (masculino) |
-| Formateador | **Propio (v3)** — parte en burbujas cortas (saludo aparte, pregunta aparte, idea aparte) + limpia puntuación. Filosofía OPUESTA a Level: split agresivo tipo persona texteando, no anti-fragmentación |
+| Formateador | Reusado del template (Level v3), no se toca |
 
 ---
 
@@ -41,10 +41,10 @@ a humano** (Hans/Pietro coordinan la llamada). 3 componentes (router + principal
 
 | Componente | Propósito | Modelo | Tools | Memory | Chars Target |
 |---|---|---|---|---|---|
-| Clasificador/Router | Enruta destino + extrae datos del lead (incl. presión de precio y frustración) | gpt-4.1-mini (temp 0.1, 400 tok) | — | — | ~5.600 |
-| Agente Principal — Mateo | Prospección + memoria/avance + calificación por escenarios + valor + escalera de precio + cierre | gpt-4.1-mini (temp 0.4, 400 tok) | — | Postgres 15 msgs | ~9.200 |
-| Agente de Objeciones (LAARC) | Las 4 objeciones núcleo + caso "quiero el precio" | gpt-4.1-mini (temp 0.4, 400 tok) | — | Postgres 15 msgs | ~2.950 |
-| Formateador | Parte en burbujas cortas (saludo/pregunta/idea aparte) + limpia puntuación | gpt-4o-mini | — | — | ~5.800 |
+| Clasificador/Router | Enruta destino + extrae datos del lead del historial | gpt-4.1-mini (temp 0.1, 400 tok) | — | — | 2.000–3.000 |
+| Agente Principal — Mateo | Prospección + agitación de dolor + venta de valor + asegurar llamada | gpt-4.1-mini (temp 0.4, 400 tok) | — | Postgres 15 msgs | 4.000–4.800 |
+| Agente de Objeciones (LAARC) | Las 4 objeciones núcleo de Momentum | gpt-4.1-mini (temp 0.4, 400 tok) | — | Postgres 15 msgs | 1.500–1.800 |
+| Formateador | Divide respuesta en bloques de 3 líneas | gpt-4o-mini | — | — | *(reusado)* |
 
 **Por qué 3 componentes y no 2:** la objeción "es caro" se responde con la calculadora de
 ahorro (salario + cargas + aguinaldo + vacaciones + incapacidades vs. bot 24/7), que es un
@@ -137,9 +137,8 @@ Segunda objeción consecutiva → HANDOFF.
 ## Reglas de negocio críticas
 
 1. **Valor primero, datos después** — nunca pedir datos antes de demostrar valor
-2. **Precio = escalera (v2)** — 1ra vez redirige + pide 1 dato, 2da vez da piso suave ("desde
-   unos $150/mes + instalación única"), 3ra/frustrado → handoff. El piso es un DESDE, nunca
-   confirma el monto exacto ni el setup
+2. **No da precio** — ancla solo si el lead presiona fuerte ("cuesta bastante menos que un
+   vendedor, los números los vemos en la llamada según tu caso")
 3. **Nunca compromisos vinculantes** — no confirma precios exactos, plazos, ni nada que no sabe
 4. **No revela que es un bot** — setter humano puro
 5. **No agenda con calendario** — asegura el interés + captura info, Hans/Pietro coordinan
@@ -184,22 +183,14 @@ Agent output / router →
 
 ## Entregables de esta sesión
 
-Conteos v2 (tras fixes de las pruebas reales; snapshot v1 en `prompts/versions/v1-pre-fixes/`):
-- [x] `prompts/router-classifier.md` — ~5.600 chars
-- [x] `prompts/agente-principal-mateo.md` — ~8.100 chars
-- [x] `prompts/agente-objeciones.md` — ~2.950 chars
-- [x] `prompts/formateador.md` — ~5.800 chars (v3: parte en burbujas cortas, saludo/pregunta separados)
+- [x] `prompts/router-classifier.md` — 4.547 chars
+- [x] `prompts/agente-principal-mateo.md` — 6.381 chars
+- [x] `prompts/agente-objeciones.md` — 2.334 chars
+- [ ] Formateador: se reusa `clients/level-kenneth/prompts/formateador.md` (se copia al armar el workflow, no se genera nuevo)
 
-### Cambios v2 (de los 3 transcripts de prueba — 62 hallazgos consolidados)
-- **Precio:** escalera fija (redirige → piso suave ~$150/mes → handoff) en vez de esquivar infinito
-- **Gate de cierre:** no propone la llamada sin 2 respuestas de discovery + un dolor claro
-- **Formateador:** punto y seguido SIEMPRE → salto de línea (fix del muro de texto con mayúscula pegada)
-- **Router:** campos `presion_precio_count` + `frustrado`, handoff por presión de precio, colisión de nombre Hans/Pietro
-- **Misfire "jaja soy Mateo":** solo se dispara si preguntan explícitamente si es bot
+Cada prompt con conteo de caracteres reportado.
 
 ### Pendiente (próxima sesión)
-- Armar el workflow n8n duplicando el template base + pegar estos 4 prompts (`/momentum-n8n-builder`)
+- Armar el workflow n8n duplicando el template base + pegar estos 3 prompts (`/momentum-n8n-builder`)
 - Definir canal (YCloud vs Evolution) y notificación de handoff a Hans+Pietro
-- **Re-pegar los prompts actualizados en los nodos n8n** — los fixes solo aplican si el nodo tiene el prompt nuevo (drift conocido del equipo)
-- Verificar que el nodo Formateador esté activo y conectado en la cadena del flujo de prueba
 - Probar el flujo completo y ajustar con conversaciones reales
