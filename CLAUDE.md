@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        29 skills de proceso reusables:
+│   └── skills/        33 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -87,6 +87,96 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      'append') + n8n-information-extractor-schema-mode
 │                      (fromJson espera ejemplo, NO schema literal; usar
 │                      'manual' + inputSchema para schemas dinámicos).
+│                      Tier 7 — Flujo de salida del bot (1 nueva + 2
+│                      extensiones, capturadas 2026-06-12 del pulido de
+│                      bot-c-v1): bot-multibubble-output-flow (flujo
+│                      Formateador→Parser→Split Out→Expand para responder
+│                      en burbujas; wrapper output del Basic LLM Chain, el
+│                      límite de burbujas lo pone el parser no el prompt, no
+│                      aplastar \n con /\s+/g) + extensiones a
+│                      bot-handoff-system-end-to-end (reactivar bot limpia
+│                      bot_paused_until, no solo handler) y a
+│                      n8n-workflow-build-script (deploy vía API PUT +
+│                      verificación por hash SHA-256 contra el N8N vivo).
+│                      Tier 8 — Arquitectura de datos (1, capturada 2026-06-14
+│                      de la Misión 6 de crm-v2): fuente-unica-derivar-de-hijos
+│                      (cuando dos vistas muestran "lo mismo" leyendo columnas
+│                      distintas y divergen: elegir UNA fuente de verdad y
+│                      DERIVAR el dato en la otra vista desde las filas hijas —
+│                      repuntar writes + patch realtime + fallback; sin trigger,
+│                      sin backfill, sin doble-columna sincronizada).
+│                      Tier 9 — Seguridad DB (1, capturada 2026-06-15 de la
+│                      Misión 8 de crm-v2): habilitar-rls-tabla-expuesta
+│                      (prender RLS en una tabla viva sin romper el backend:
+│                      auditar TODOS los consumidores y su ROL DB —¿service_role
+│                      bypassa?—, calcar las policies de una tabla hermana, usar
+│                      los helpers SECURITY DEFINER existentes, verificar
+│                      adversarialmente, recién ahí aplicar; enable+policies
+│                      juntos o queda deny-all silencioso).
+│                      Tier 10 — Infra SaaS producción (1, capturada 2026-06-15
+│                      de la Misión 9 de crm-v2): setup-correo-auth-saas
+│                      (poner un SaaS en prod: subdominio Vercel + Resend
+│                      verificado sin pisar el correo existente —usa subdominio
+│                      send.— + Supabase Auth SMTP + Site URL/NEXT_PUBLIC_SITE_URL
+│                      + flujos reset/invite-only/invitación-fija-contraseña +
+│                      plantillas de correo branded; checklist e2e).
+│                      Tier 11 — Patrones de CRM web (3 nuevas + 1 update,
+│                      capturadas 2026-06-22 de M5-M8 de crm-v2):
+│                      umbral-compartido-cron-cliente (un mismo umbral en un
+│                      cron SQL y un filtro cliente TS: helper puro + constante
+│                      nombrada + cross-reference + verificación contra la DB
+│                      viva, para que notificación y filtro nunca diverjan) +
+│                      inicio-dia-timezone-fija ("hoy"/corte de día anclado a
+│                      una TZ fija con aritmética de offset, NO setHours del
+│                      runtime —bug clásico server-UTC vs negocio-local—) +
+│                      intencion-ui-persistir-sessionstorage (persistir una
+│                      intención que la DB no distingue —marcar no-leído— en
+│                      sessionStorage + guard en el auto-read + re-armado en
+│                      mount, para que sobreviva F5/back-nav). Update a
+│                      setup-correo-auth-saas: links de correo con token_hash
+│                      + verifyOtp en /auth/confirm, NO PKCE code (rompe
+│                      cross-device; fix del reset de Pietro).
+│                      Tier 12 — Roles/permisos + UI (2, capturadas 2026-07-08
+│                      del onboarding de Givi en crm-v2):
+│                      rls-write-bloqueada-por-policy-desalineada (un rol
+│                      no-privilegiado no puede GUARDAR y no aparece error, pero
+│                      a owner/admin sí; causa: WITH CHECK divergido del USING
+│                      tras mover una fuente de verdad entre tablas + triggers
+│                      SECURITY INVOKER que propagan el 42501 a otra tabla;
+│                      incluye el método de reproducir bajo el rol real
+│                      —set local role + jwt.claims + rollback— y verificar
+│                      positivo Y negativo) + dialogo-confirmacion-no-nativo
+│                      (nunca window.confirm/alert/prompt; usar/armar un
+│                      <ConfirmDialog> del design system con variantes
+│                      default/warning/destructive; regla del founder).
+│                      Tier 13 — Inbox estilo WhatsApp + método (4 nuevas + 1
+│                      extensión, capturadas 2026-07-16 de la sesión de
+│                      adjuntos/reacciones/citas del CRM):
+│                      bsp-media-expira-archivar-propio (⭐ cross-project: el
+│                      CDN del BSP BORRA la media a los 7 días —medido: 7.0d
+│                      HTTP 206 / 7.1d 404—; se perdieron 54 archivos para
+│                      siempre antes de detectarlo. Archivar a Storage propio
+│                      al recibir, en background, degradando si falla; el
+│                      filtro del rescate NO es direction='inbound' sino DÓNDE
+│                      APUNTA la URL —el echo de coexistencia muere igual) +
+│                      webhook-contar-event-types-antes-de-arreglar ("solo el
+│                      lead hace las cosas" es FALSO: las reacciones llegan por
+│                      3 event_type distintos; el mismo error se cometió 3
+│                      veces en una sesión. `group by event_type` ANTES de
+│                      tocar el webhook; el `default` que hace JSON.stringify
+│                      envenena la memoria del bot) +
+│                      probar-migracion-contra-base-viva-con-rollback (BEGIN +
+│                      migración + assertions de invariantes + controles
+│                      negativos + ROLLBACK; verificar después que prod quedó
+│                      intacta. Da números medidos, no estimados) +
+│                      verificar-visual-midiendo-contraste (medir el ratio WCAG
+│                      real en el browser componiendo el velo sobre el fondo:
+│                      el instinto de "aclarar el velo" daba 3.2:1, oscurecerlo
+│                      6.42:1). Extensión a
+│                      rls-write-bloqueada-por-policy-desalineada: causa 4 —
+│                      la policy de SELECT y la de WRITE de la MISMA tabla
+│                      mirando fuentes de verdad distintas (el rol VE y hace
+│                      clic, no pasa nada, sin error).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural

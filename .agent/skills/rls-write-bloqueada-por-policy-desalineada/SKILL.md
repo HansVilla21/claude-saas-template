@@ -1,4 +1,4 @@
-# Skill: RLS que bloquea escrituras de un rol (WITH CHECK desalineado + triggers que propagan RLS)
+# Skill: RLS que bloquea escrituras de un rol (policies desalineadas + triggers que propagan RLS)
 
 ## Cuándo usar esta skill
 
@@ -7,6 +7,8 @@
 - Dos síntomas distintos ("no cambia la etapa" + "no envía mensajes") resultan ser **la misma** policy rota.
 - Acabás de mover una "fuente de verdad" de una tabla a otra (ej. la asignación de `leads.assigned_user_id` → `conversations.assigned_user_id`) y algo empezó a fallar para ciertos roles.
 - Ves un error Postgres `42501: new row violates row-level security policy for table "X"` — a veces apuntando a una tabla que NO es la que estabas escribiendo.
+- **El rol VE el elemento y la UI le ofrece la acción, pero la escritura no toma.** Sospechar que la policy de SELECT y la de WRITE de esa tabla miran **fuentes de verdad distintas** (causa 4).
+- Alguien pide *"que esta acción también la puedan hacer los agentes"* — **verificar primero si ya la tienen y algo la bloquea**: puede no ser una feature que falta, sino esta skill (así fue con las etiquetas).
 - **Un update que cambia un campo a un valor que ese rol NO puede VER falla, pero a `null` o al propio usuario funciona.** Ej.: un agente reasigna su conversación a OTRO agente → `42501`; a "sin asignar" (`null`) → OK. Señal de la interacción **SELECT-policy ↔ UPDATE** (causa 3).
 
 ## Por qué existe esta skill
@@ -18,6 +20,11 @@ El incidente Givi (2026-07-08): un equipo entero de `agent`s no podía enviar me
 2. **Un trigger `SECURITY INVOKER` que escribe OTRA tabla propaga el fallo de RLS.** Insertar en `messages` disparaba `denorm_conversation_on_message` (trigger normal = corre con los permisos del usuario), que hacía `UPDATE leads SET last_message_at=...`. Ese UPDATE chocaba contra la MISMA policy rota → `42501` **abortaba el INSERT de messages entero**. Por eso "no puedo enviar mensajes" era en realidad "el trigger no puede tocar leads". El `CONTEXT:` del error 42501 lo delata (nombra la tabla real + la función del trigger).
 
 3. **La SELECT policy bloquea el UPDATE aunque el WITH CHECK pase (incidente Givi reasignación, 2026-07-09).** En un UPDATE, Postgres exige que la fila NUEVA quede **visible bajo la SELECT policy** del usuario; si no, tira `42501` sobre esa tabla — aunque el `WITH CHECK` del UPDATE pase. Caso: la SELECT policy del agente solo lo deja ver conversaciones propias o del pool (`assigned_user_id = auth.uid() OR null`). Al reasignar su conversación a OTRO agente, la fila nueva (`assigned = otro`) deja de serle visible → `42501`. Reasignar a `null` (sí visible) o a sí mismo (sí visible) funciona → **ese contraste es la firma del problema**. Acá **relajar el WITH CHECK NO alcanza** (el bloqueo viene de la SELECT policy), y **aflojar la SELECT policy rompería el modelo de visibilidad** ("el agente solo ve lo suyo"). La salida correcta es **no hacer la escritura client-side**: moverla a un **server action con chequeo de permiso + admin client (service_role, bypasea RLS)** — la operación es legítima, solo que la RLS por-fila la hace imposible desde el cliente. Patrón: `claimUnassignedConversation` / `reassignConversation` / `reassignContact` en el inbox.
+
+4. **Dos policies SEPARADAS de la misma tabla mirando fuentes de verdad distintas — la de SELECT y la de WRITE (CRM Momentum, etiquetas, 2026-07-16).** Variante nueva: acá el `USING` y el `WITH CHECK` de la policy de escritura **coincidían entre sí** (no era la causa 1), y la fila nueva **sí** quedaba visible (no era la causa 3). El problema era **entre policies**: `tag_assignments_select` dejaba al agente ver las etiquetas de un lead **cuya CONVERSACIÓN era suya o del pool**, pero `tag_assignments_write` exigía que el **LEAD** estuviera asignado a él (`leads.assigned_user_id = auth.uid()`). Y el CRM asigna **conversaciones**, no leads. Resultado: el agente **VE** las etiquetas, hace clic, y **no pasa nada, sin error**.
+   **Los números lo hacen invisible:** 293 leads, solo **4** con `assigned_user_id`, contra **207 conversaciones** asignadas → un agente atiende 207 conversaciones y puede etiquetar **3 leads**. Con datos de prueba (donde alguien asignó el lead a mano) funciona perfecto.
+   **Firma:** el rol **ve** el elemento y la UI le ofrece la acción, pero la escritura no toma. Si además la de SELECT tiene una rama que la de WRITE no tiene → ese es el bug.
+   **Arreglo:** la escritura usa el **MISMO criterio que la lectura** → *si lo podés ver, lo podés editar*. No abre nada: lo que el rol ve ya está acotado por la RLS de la tabla padre.
 
 Las dos trampas que lo hacen invisible:
 - **La escritura es client-side y el error se traga.** El patrón "optimista + `if (error) revert; return;`" (sin toast) hace que el chip vuelva a su valor y el mensaje desaparezca **sin decir nada**. Para el usuario "no funciona y no sé por qué".
@@ -56,6 +63,28 @@ select polname, polcmd,
 from pg_policy where polrelid = 'public.<tabla>'::regclass order by polcmd;
 ```
 Antipattern a cazar: para el rol afectado, `using_expr` contempla la fuente de verdad NUEVA (ej. un `EXISTS` contra la tabla hija) pero `check_expr` sigue mirando la columna VIEJA. Esa asimetría es el bug.
+
+### 3b. Comparar la policy de SELECT contra la de WRITE (causa 4)
+
+Si `USING` ≡ `WITH CHECK` y aun así rebota, el problema puede estar **entre policies distintas de la misma tabla**:
+
+```sql
+select polname, polcmd,
+       pg_get_expr(polqual, polrelid)      as using_expr,
+       pg_get_expr(polwithcheck, polrelid) as check_expr
+from pg_policy where polrelid = 'public.<tabla>'::regclass order by polcmd;
+```
+
+Leer la rama del rol afectado en la de **SELECT** y en la de **WRITE**, y preguntarse: **¿miran la misma tabla?** Si la de SELECT resuelve por la tabla hija (ej. `conversations`) y la de WRITE por la padre (ej. `leads.assigned_user_id`), ese es el bug.
+
+**Confirmarlo con datos, no leyendo:**
+```sql
+select
+  (select count(*) from leads) as leads,
+  (select count(*) from leads where assigned_user_id is not null) as lo_que_mira_el_write,
+  (select count(*) from conversations where assigned_user_id is not null) as lo_que_usa_la_app;
+-- 293 / 4 / 207  → el write mira una columna que casi nadie llena
+```
 
 ### 4. Si el error apunta a una tabla que no tocaste: buscar el trigger
 
@@ -119,6 +148,34 @@ Bajo el rol real (paso 2), en transacciones que revertís:
 - **Reproducción** (bajo el JWT real de la agente Tania): stage UPDATE → 42501; message INSERT → 42501 con `CONTEXT: ... denorm_conversation_on_message() ... update public.leads`.
 - **Fix:** migración **0029** — el `WITH CHECK` del agent pasa a espejar su `USING` (permite si el lead tiene una conversación asignada a `auth.uid()`). Verificado: positivo (Tania OK en su conv) + negativo (Tania sigue bloqueada en la conv de otra agente).
 - Migración: `crm-v2/supabase/migrations/0029_leads_update_check_conversation_assignment.sql`. PR #63.
+
+## Ejemplo concreto 2 (CRM Momentum — etiquetas, 2026-07-16)
+
+**Reporte:** *"añadir etiquetas creo que solo lo podía hacer administradores; debemos agregarlo a todos, hasta los agentes"*.
+
+**No era una feature que faltaba: era esta skill, en su variante 4.** El agente ya tenía permiso… si el LEAD estaba asignado a él. El CRM asigna conversaciones.
+
+```
+leads ........................... 293
+leads con assigned_user_id ........ 4   ← lo que miraba el WRITE
+conversaciones asignadas ........ 207   ← lo que usa la app
+leads etiquetables por un agente .. 3
+```
+
+**Verificación (el método del paso 2, bajo el rol real):**
+1. **Reproducir el bug primero** — con la policy viva: el agente ve el lead y la conversación, pero el INSERT rebota con **`42501`**.
+2. **Positivo** — con el fix: etiqueta **y desetiqueta** su conversación.
+3. **Negativo** — el lead de OTRO agente **sigue rebotando con `42501`**.
+4. Repetir 2 y 3 **contra la policy ya aplicada**, no solo contra la de la transacción.
+
+**Fix (migración `0046`):** el `USING`/`WITH CHECK` del write suma la rama de la conversación, calcada de la policy de SELECT.
+```sql
+or exists (
+    select 1 from public.conversations c
+    where c.lead_id = l.id
+      and (c.assigned_user_id = auth.uid() or c.assigned_user_id is null)
+)
+```
 
 ## Gotchas / antipattern
 
