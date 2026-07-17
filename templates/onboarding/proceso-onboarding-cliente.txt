@@ -1,0 +1,32 @@
+﻿Momentum AI CRM — Proceso de Onboarding de Cliente
+Bloque 1 — El negocio (identidad)
+Nombre del negocio / marca (como querés que el bot se presente)
+¿A qué se dedican exactamente? (1-2 párrafos)
+¿Qué los diferencia de la competencia? (propuesta de valor)
+Zona / ubicación de operación
+Horarios de atención (¿el bot atiende 24/7 o avisa horarios?)
+Sitio web / redes (si tienen)
+Bloque 2 — El cliente ideal y la conversación
+¿Quién es el cliente típico que les escribe? (perfil)
+¿Cuáles son las 5-10 preguntas más frecuentes que les hacen?
+¿Cuáles son las objeciones más comunes? (precio, ubicación, confianza, etc.)
+¿Qué información NECESITAN saber de cada lead para atenderlo bien? → esto define qué extrae el bot
+¿Hay algo que el bot NUNCA debe decir o hacer? (límites, temas prohibidos)
+Bloque 3 — Objetivo del bot y flujo
+¿Qué querés que logre el bot principalmente? (calificar leads / agendar / vender / responder dudas / todo)
+¿Hasta dónde llega el bot y cuándo querés que un humano tome el control? (ej: cuando el lead está listo para comprar / cuando pide hablar con persona / cuando se traba)
+Comportamiento de cierre: cuando el lead quiere comprar/avanzar, ¿el bot cierra todo en el chat, manda un link de pago/agenda, o avisa a un humano para que cierre?
+¿Cómo querés enterarte cuando pasa algo importante en un chat? (notificación)
+Bloque 4 — Tono y personalidad
+¿Cómo querés que suene el bot? (vendedor / consultivo / amigable / formal / cercano)
+¿Hay palabras, jerga o frases que usan mucho? ¿Alguna que eviten?
+¿El bot tutea o trata de usted?
+Bloque 5 — Equipo
+      19.  ¿Quién más va a usar el CRM además de vos? (nombres + qué hace cada uno)
+Bloque 6 — Material existente (acelera todo)
+      20.  ¿Tenés scripts de venta / respuestas que ya usás? (mandalos)
+      21.  ¿Tenés un FAQ escrito?
+      22.  ¿Podés pasar 5-10 conversaciones reales exitosas? (oro para calibrar el bot)
+      23.  Material de marketing, brochures, catálogos (PDF, lo que sea)
+
+

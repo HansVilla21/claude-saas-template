@@ -184,8 +184,27 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │       └── hormozi.md        Síntesis de $100M Offers + Money Models + GOATed Ads.
 │                             Biblia operativa de hormozi-strategist, saas-strategist,
 │                             pain-discovery y las skills construir-oferta + evaluar-icp.
+├── clients/                   UN cliente = UNA carpeta (comercial + técnico juntos).
+│                              Tiene su propio README.md = REGISTRO MAESTRO con la
+│                              tabla de clientes (sector, servicios, estado, valor,
+│                              mant./mes) + `_plantilla/` para dar de alta uno nuevo.
+│                              Por cliente: lo comercial (00-perfil, llamadas/,
+│                              propuesta-y-contrato/, planning/, onboarding/,
+│                              entregables/, marca-y-assets/) y lo técnico
+│                              (architecture.md, prompts/ con sus `_compiled/`,
+│                              test-prompts/ versionados v1→v4.x). No todas las
+│                              subcarpetas son obligatorias: un lead puede tener solo
+│                              la ficha, y un bot solo los prompts.
+│                              ⚠️ Antes de tocar acá, LEER `clients/README.md` — el
+│                              proceso de alta y la leyenda de estados están ahí.
+│                              (Hasta 2026-07-16 esto vivía partido en dos árboles por
+│                              idioma —`clientes/` comercial y `clients/` técnico—; se
+│                              unificaron. Si ves `clientes/` en algún lado, es viejo.)
 ├── inputs/repos-referencia/   10 repos de calidad como referencia para los agentes
-├── templates/                 Plantillas reusables
+├── templates/                 Plantillas reusables. `onboarding/` = el proceso de
+│                              onboarding genérico que se le manda a CUALQUIER cliente
+│                              (.docx + texto extraído). Reusable ⇒ NO va bajo un
+│                              cliente.
 ├── outputs/                   Entregables del template (vacío por defecto)
 ├── proyectos/                 ← Aquí viven los proyectos concretos (gitignored)
 │   └── hookly/                  primer proyecto (repo independiente)
