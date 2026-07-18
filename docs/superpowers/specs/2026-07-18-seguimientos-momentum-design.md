@@ -48,8 +48,10 @@ salida (YCloud) que ya usa el bot.
 
 - **Ancla de la ventana 24h:** `conversations.last_inbound_at` (último mensaje real del lead).
   **NO cambia** mientras dura el streak de follow-ups. Cierra la ventana en `last_inbound_at + 24h`.
-- **Ancla de la cadencia:** `conversations.last_outbound_at` (último mensaje saliente). **SÍ cambia**
-  cada vez que mandamos un follow-up → el próximo paso se ancla al follow-up anterior.
+- **Ancla de la cadencia:** `greatest(conversations.last_outbound_at, max(followups.sent_at del
+  streak))` (último saliente real, sea la respuesta original del bot o el follow-up anterior).
+  **SÍ avanza** con cada follow-up → el próximo paso se ancla al anterior. Se incluye
+  `followups.sent_at` en el `greatest` para no depender de la latencia del webhook al re-anclar.
 
 Esto implementa literalmente "relativo al último mensaje": cada paso dispara `intervalo[paso]`
 después del último saliente, y el streak completo queda topado a 24h desde el último msg del lead.
@@ -108,12 +110,26 @@ El mensaje **engancha con lo último que hablaron** (no un genérico "¿seguís 
 - Escalado de tono: **1** = recordatorio suave · **2** = aporta un ángulo / valor nuevo ·
   **3** = cierre respetuoso ("te escribo cuando quieras retomar").
 
-### Persistencia
+### Persistencia (revisado 2026-07-18 tras auditar el camino real)
 
-El mensaje generado se guarda en `messages` como saliente del bot:
-`direction='outbound'`, `sender_kind='bot'`, `is_bot_generated=true`, `sent_via='followup'`.
-→ Aparece natural en el inbox del CRM y el próximo follow-up lo ve como contexto.
-Esto **actualiza `last_outbound_at`** (re-ancla la cadencia, sección 3.1).
+El follow-up se manda por YCloud **igual que cualquier respuesta del bot** y el **webhook
+`ycloud-webhook` ya existente lo persiste solo** en `messages` (con `body`, `sender_kind='bot'`,
+`is_bot_generated=true`, keyed por `external_id = wamid`). Camino probado: **1033 de 1040**
+mensajes salientes del bot de Momentum tienen `body` por esta vía.
+
+→ **NO auto-insertamos en `messages`.** Esto elimina por completo el riesgo de fila duplicada
+(el `POST /v2/whatsapp/messages` de YCloud es **asíncrono**: devuelve el `id` propio de YCloud,
+NO el `wamid`; el `wamid` — que es la key del webhook — llega después. Insertar nosotros con el id
+de YCloud crearía una fila que el webhook no reconoce → duplicado. Por eso dejamos que el webhook
+sea el único que escribe en `messages`).
+
+El insert de la fila en `messages` (vía webhook) **actualiza `last_outbound_at` / preview** por el
+trigger `denorm_conversation_on_message` (re-ancla la cadencia, sección 3.1; no infla `unread`, no
+resucita archivadas). Latencia de segundos — irrelevante porque el próximo paso es en horas.
+
+La **fuente de verdad del follow-up** (texto exacto enviado + contador del streak + audit) es la
+tabla **`followups`** (`rendered_body`), que escribimos nosotros **en la misma corrida, inmediato**
+(no depende de la latencia del webhook).
 
 ## 6. Datos
 
@@ -131,17 +147,27 @@ Reusamos las tablas que ya existen (extendiéndolas mínimamente si hace falta e
 
 ## 7. Camino de envío
 
-Los follow-ups se mandan por el **mismo camino que usa el bot** para responder (n8n → YCloud API
-+ insert en `messages`). En la fase de implementación se inspecciona el workflow del bot vivo para
-reusar exactamente ese sub-flujo de envío+guardado (no inventar uno nuevo). Marca distintiva:
-`sent_via='followup'`.
+Los follow-ups se mandan por el **mismo endpoint que usa el bot**: `POST https://api.ycloud.com/v2/whatsapp/messages`
+con `httpHeaderAuth` (credencial n8n **Momentum AI**, id `jfwQ9Rp74VHhXDsH`), body
+`{ from, to, type:'text', text:{ body } }`. Diferencias con el bot (que lee del webhook entrante):
+
+- **`from`** = número del negocio, resuelto de `agency_channels` (Momentum: `50689839490`,
+  `provider='ycloud'`, `is_active=true`). En un cron NO hay webhook entrante de dónde sacarlo.
+- **`to`** = `leads.whatsapp_phone` (formato `50683984732`, sin `+`).
+
+**No** insertamos en `messages` (lo hace el webhook — sección 5). Tras enviar, insertamos la fila de
+audit en `followups`.
 
 ## 8. Idempotencia y concurrencia
 
-- El cron de n8n se configura **single-instance** (no solapa corridas).
-- Antes de mandar el paso N, la corrida verifica que no exista ya una fila `followups` para ese
-  paso en el streak actual (`created_at > last_inbound_at`) → evita doble envío.
-- El insert de `messages` mantiene su `UNIQUE(agency_id, channel, external_id)` habitual.
+- El cron de n8n se configura **single-instance** (`settings.executionOrder`, sin solape).
+- **El guard anti-doble-envío es la tabla `followups`, no `messages`:** apenas se envía el paso N se
+  hace INSERT inmediato en `followups`. La query de elegibilidad del próximo run cuenta las filas
+  `followups` del streak (`status='sent'` y `sent_at > conversations.last_inbound_at`) → si el paso
+  ya se mandó, la conversación no vuelve a calificar. No depende de la latencia del webhook.
+- El paso (0/1/2) se deriva del `count` de `followups` del streak; el ancla de tiempo del próximo
+  paso es `greatest(last_outbound_at, max(followups.sent_at del streak))` → inmune a la latencia del
+  webhook para re-anclar.
 
 ## 9. Fuera de alcance (v1)
 
