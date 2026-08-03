@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Casacr — Software inmobiliario hecho en Costa Rica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&family=Fraunces:opsz,wght,SOFT@9..144,300..700,0..100&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  /* Refined palette — earth tones, premium */
+  --ink: #1A1410;
+  --ink-2: #3B342D;
+  --ink-3: #6E6359;
+  --muted: #9A8E83;
+  --muted-soft: #C2B5A7;
+  --border: #E8E0D2;
+  --border-strong: #D2C7B3;
+
+  --bg: #F7F2E9;
+  --bg-2: #EFE8DA;
+  --surface: #FBF7EF;
+  --surface-warm: #FFFBF3;
+  --paper: #FFFFFF;
+
+  --terracotta: #B8553A;
+  --terracotta-deep: #8A3D26;
+  --terracotta-soft: #F0DBC8;
+
+  --olive: #5C6745;
+  --gold: #B08D4E;
+
+  --font-display: 'Fraunces', 'Instrument Serif', Georgia, serif;
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  position: relative;
+}
+
+/* Subtle paper grain across the page — keeps it from looking flat / digital */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: 0; background: transparent; color: inherit; }
+
+/* —— Selection —— */
+::selection { background: var(--terracotta); color: white; }
+
+/* —— Layout —— */
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 28px; }
+.wrap-sm { max-width: 920px; margin: 0 auto; padding: 0 28px; }
+
+/* —— Typography —— */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.eyebrow::before {
+  content: '';
+  width: 18px; height: 1px;
+  background: currentColor;
+}
+
+h1, h2, h3, h4 { font-weight: 400; letter-spacing: -0.02em; }
+.display {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+.display em {
+  font-style: italic;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+  color: var(--terracotta-deep);
+}
+
+/* —— Nav —— */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 18px 0;
+  transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              backdrop-filter 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              color 0.6s cubic-bezier(0.4, 0, 0.2, 1),
+              padding 0.4s ease;
+  color: white;
+  background: rgba(26, 20, 16, 0.55);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.nav .brand .cr { color: #F0DBC8; transition: color 0.6s ease; }
+.nav .nav-links a { color: rgba(255,255,255,0.85); transition: color 0.6s ease; }
+.nav .nav-links a:hover { color: white; }
+.nav .btn-ghost { color: rgba(255,255,255,0.88); transition: color 0.6s ease; }
+.nav .btn-ghost:hover { color: white; }
+.nav .btn-primary {
+  background: white;
+  color: var(--ink);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+  transition: background 0.6s ease, color 0.6s ease, box-shadow 0.6s ease;
+}
+.nav .btn-primary:hover {
+  background: var(--terracotta-soft);
+}
+
+.nav.scrolled {
+  padding: 14px 0;
+  background: rgba(247, 242, 233, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom-color: rgba(232, 224, 210, 0.7);
+  color: var(--ink);
+}
+.nav.scrolled .brand .cr { color: var(--terracotta-deep); }
+.nav.scrolled .nav-links a { color: var(--ink-2); }
+.nav.scrolled .nav-links a:hover { color: var(--terracotta-deep); }
+.nav.scrolled .btn-ghost { color: var(--ink-2); }
+.nav.scrolled .btn-ghost:hover { color: var(--ink); }
+.nav.scrolled .btn-primary {
+  background: var(--ink);
+  color: var(--surface);
+  box-shadow: none;
+}
+.nav.scrolled .btn-primary:hover { background: var(--terracotta-deep); }
+
+.nav-inner {
+  max-width: 1240px; margin: 0 auto; padding: 0 28px;
+  display: flex; align-items: center;
+}
+.brand {
+  display: flex; align-items: baseline; gap: 0;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 32;
+  font-size: 26px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.brand .cr {
+  font-style: italic;
+  font-variation-settings: "opsz" 32, "SOFT" 100;
+}
+.nav-links {
+  display: flex; gap: 36px;
+  margin-left: 60px;
+  flex: 1;
+}
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.15s;
+  position: relative;
+}
+.nav-cta {
+  display: flex; align-items: center; gap: 14px;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: transform 0.06s, background 0.15s, color 0.15s, border-color 0.15s;
+}
+.btn:active { transform: scale(0.98); }
+.btn-arrow::after {
+  content: '→';
+  font-family: var(--font-sans);
+  transition: transform 0.15s;
+}
+.btn:hover .btn-arrow::after,
+.btn-arrow:hover::after { transform: translateX(3px); }
+.btn-primary {
+  background: var(--ink);
+  color: var(--surface);
+}
+.btn-primary:hover { background: var(--terracotta-deep); }
+.btn-outline {
+  border: 1px solid var(--border-strong);
+  color: var(--ink);
+}
+.btn-outline:hover { border-color: var(--ink); }
+.btn-ghost { color: var(--ink-2); padding: 11px 14px; }
+.btn-ghost:hover { color: var(--ink); }
+.btn-lg { padding: 14px 26px; font-size: 14.5px; }
+
+/* —— Hero —— */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  padding-top: 80px;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=2400&q=90&fit=crop&auto=format');
+  background-size: cover;
+  background-position: center 55%;
+  z-index: 0;
+  will-change: transform;
+}
+.hero-bg::before {
+  /* base scrim */
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(26, 20, 16, 0.50) 0%,
+    rgba(26, 20, 16, 0.18) 28%,
+    rgba(26, 20, 16, 0.20) 55%,
+    rgba(26, 20, 16, 0.70) 92%,
+    rgba(26, 20, 16, 0.96) 100%);
+  z-index: 1;
+}
+.hero-bg::after {
+  /* vignette + side wash for cinematic feel */
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 45%, transparent 35%, rgba(26,20,16,0.55) 100%),
+    linear-gradient(90deg, rgba(26,20,16,0.45) 0%, transparent 35%, transparent 65%, rgba(26,20,16,0.25) 100%);
+  z-index: 1;
+}
+.hero-grain {
+  position: absolute; inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.10;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.8 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.hero-content {
+  position: relative; z-index: 1;
+  max-width: 1240px; margin: 0 auto;
+  padding: 0 28px;
+  height: calc(100vh - 80px);
+  min-height: 660px;
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  padding-bottom: 64px;
+  color: white;
+}
+.hero-eyebrow {
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 28px;
+}
+.hero-eyebrow::before { background: rgba(255,255,255,0.6); }
+.hero h1 {
+  font-size: clamp(56px, 9vw, 124px);
+  max-width: 14ch;
+  margin-bottom: 28px;
+  text-shadow: 0 2px 40px rgba(0, 0, 0, 0.35);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  line-height: 0.98;
+}
+.hero h1 em {
+  color: #F0DBC8;
+}
+.hero-sub {
+  font-size: clamp(17px, 1.4vw, 20px);
+  max-width: 540px;
+  line-height: 1.55;
+  color: rgba(255,255,255,0.92);
+  font-weight: 300;
+  text-wrap: pretty;
+  margin-bottom: 36px;
+  text-shadow: 0 1px 24px rgba(0, 0, 0, 0.4);
+}
+.hero-cta {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  align-items: center;
+}
+.hero .btn-primary {
+  background: white;
+  color: var(--ink);
+}
+.hero .btn-primary:hover {
+  background: var(--terracotta-soft);
+}
+.hero .btn-outline {
+  border-color: rgba(255,255,255,0.4);
+  color: white;
+}
+.hero .btn-outline:hover { background: rgba(255,255,255,0.1); border-color: white; }
+
+/* Scroll cue */
+.scroll-cue {
+  position: absolute;
+  bottom: 28px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  z-index: 2;
+  animation: bob 2.2s ease-in-out infinite;
+}
+@keyframes bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+.scroll-cue svg { opacity: 0.7; }
+
+/* —— Stats strip —— */
+.stats {
+  background: var(--ink);
+  color: white;
+  padding: 36px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  text-align: center;
+}
+.stat {
+  padding: 8px 24px;
+  border-left: 1px solid rgba(255,255,255,0.1);
+}
+.stat:first-child { border-left: 0; }
+.stat-val {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144;
+  font-size: clamp(36px, 4vw, 54px);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: white;
+  margin-bottom: 8px;
+}
+.stat-val em {
+  font-style: italic;
+  color: #F0DBC8;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.stat-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  font-weight: 600;
+}
+
+/* —— Section —— */
+.section { padding: 120px 0; position: relative; }
+.section-tight { padding: 80px 0; }
+
+.section-head {
+  margin-bottom: 64px;
+  max-width: 720px;
+}
+.section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+.section-title {
+  font-size: clamp(36px, 5vw, 64px);
+  margin-top: 18px;
+  margin-bottom: 18px;
+  text-wrap: balance;
+}
+.section-sub {
+  font-size: 17px;
+  color: var(--ink-3);
+  line-height: 1.6;
+  font-weight: 400;
+  text-wrap: pretty;
+  max-width: 580px;
+}
+.section-head.center .section-sub { margin: 0 auto; }
+
+/* —— Manifesto / quote section —— */
+.manifesto {
+  background: var(--bg);
+  padding: 160px 0;
+  position: relative;
+  text-align: center;
+}
+.manifesto::before, .manifesto::after {
+  content: '';
+  display: block;
+  width: 1px; height: 64px;
+  background: var(--terracotta);
+  opacity: 0.45;
+  margin: 0 auto 40px;
+}
+.manifesto::after { margin: 40px auto 0; }
+.manifesto-quote {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5.2vw, 72px);
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  line-height: 1.12;
+  text-align: center;
+  max-width: 1080px;
+  margin: 0 auto;
+  color: var(--ink);
+  font-variation-settings: "opsz" 144, "SOFT" 40;
+}
+.manifesto-quote em {
+  font-style: italic;
+  color: var(--terracotta-deep);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.manifesto-quote .small-em {
+  font-style: normal;
+  color: var(--ink-3);
+}
+
+/* —— Feature: editorial big block —— */
+.features-wrap {
+  background: var(--surface-warm);
+  position: relative;
+  overflow: hidden;
+}
+.features-wrap::before {
+  /* warm radial tint, very subtle */
+  content: '';
+  position: absolute;
+  top: -200px; left: 50%; transform: translateX(-50%);
+  width: 1200px; height: 800px;
+  background: radial-gradient(ellipse, var(--terracotta-soft) 0%, transparent 65%);
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
+}
+.feature-row {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 100px;
+  align-items: center;
+  padding: 130px 0;
+  position: relative;
+  z-index: 1;
+}
+.feature-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+.feature-row.reverse > .feature-text { order: 2; }
+.feature-num {
+  position: absolute;
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+  font-style: italic;
+  font-size: clamp(180px, 22vw, 300px);
+  font-weight: 300;
+  color: var(--terracotta);
+  opacity: 0.08;
+  line-height: 0.78;
+  letter-spacing: -0.05em;
+  top: 60px;
+  left: -16px;
+  z-index: 0;
+  user-select: none;
+  pointer-events: none;
+}
+.feature-row.reverse .feature-num {
+  left: auto;
+  right: -16px;
+}
+.feature-text { position: relative; z-index: 2; }
+.feature-text .label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--terracotta-deep);
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  font-weight: 500;
+  display: inline-flex; align-items: center; gap: 12px;
+}
+.feature-text .label::before {
+  content: '';
+  width: 28px; height: 1px;
+  background: currentColor;
+}
+.feature-text h2 {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 4.6vw, 60px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  margin-bottom: 22px;
+  text-wrap: balance;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+}
+.feature-text h2 em {
+  font-style: italic;
+  color: var(--terracotta-deep);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.feature-text p {
+  font-size: 17px;
+  color: var(--ink-2);
+  line-height: 1.65;
+  margin-bottom: 28px;
+  text-wrap: pretty;
+  max-width: 52ch;
+}
+.feature-list {
+  list-style: none;
+  display: flex; flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid var(--border);
+}
+.feature-list li {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+.feature-list li svg {
+  width: 18px; height: 18px;
+  color: var(--terracotta);
+  margin-top: 2px;
+}
+
+.feature-visual {
+  position: relative;
+  border-radius: 14px;
+  overflow: visible;
+  z-index: 2;
+  transform: perspective(2200px) rotateY(-2.5deg) rotateX(1.2deg);
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.feature-row.reverse .feature-visual {
+  transform: perspective(2200px) rotateY(2.5deg) rotateX(1.2deg);
+}
+.feature-row:hover .feature-visual {
+  transform: perspective(2200px) rotateY(0) rotateX(0);
+}
+.feature-visual .browser { transform-style: preserve-3d; }
+
+/* "Mac" window chrome for screenshots */
+.browser {
+  background: var(--surface-warm);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 50px 100px -20px rgba(26, 20, 16, 0.28),
+    0 30px 60px -30px rgba(26, 20, 16, 0.20),
+    0 0 0 1px rgba(26, 20, 16, 0.06);
+}
+.browser-bar {
+  display: flex; align-items: center;
+  gap: 5px;
+  padding: 11px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.browser-bar .dot {
+  width: 11px; height: 11px; border-radius: 50%;
+}
+.browser-bar .dot.r { background: #FF6058; }
+.browser-bar .dot.y { background: #FEBC2D; }
+.browser-bar .dot.g { background: #28C840; }
+.browser-bar .url {
+  margin-left: auto; margin-right: auto;
+  background: var(--bg-2);
+  padding: 5px 18px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.browser img { display: block; width: 100%; }
+
+/* Editorial interlude — full-bleed photo with quote */
+.interlude {
+  min-height: 56vh;
+  background-image: url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=2400&q=90&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 120px 28px;
+}
+.interlude::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(26,20,16,0.70) 0%, rgba(26,20,16,0.55) 50%, rgba(26,20,16,0.80) 100%);
+}
+.interlude > * { position: relative; z-index: 1; }
+.interlude-quote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  max-width: 920px;
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+  text-wrap: balance;
+  text-shadow: 0 2px 30px rgba(0,0,0,0.4);
+}
+.interlude-cite {
+  display: block;
+  margin-top: 28px;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+  font-weight: 500;
+}
+
+/* —— Showcase / product gallery —— */
+.showcase {
+  background: var(--ink);
+  color: white;
+  padding: 140px 0;
+  overflow: hidden;
+}
+.showcase .eyebrow { color: rgba(255,255,255,0.7); }
+.showcase .eyebrow::before { background: rgba(255,255,255,0.4); }
+.showcase .section-title { color: white; }
+.showcase .section-sub { color: rgba(255,255,255,0.7); }
+
+.showcase-strip {
+  display: flex;
+  gap: 24px;
+  margin-top: 60px;
+  position: relative;
+  animation: scroll 60s linear infinite;
+}
+.showcase-strip img {
+  flex-shrink: 0;
+  width: 580px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+}
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - 24px)); }
+}
+
+/* —— For Costa Rica section —— */
+.for-cr {
+  background: var(--bg-2);
+}
+.for-cr-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 80px;
+  align-items: center;
+  margin-top: 60px;
+}
+.for-cr-img {
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 4/5;
+  box-shadow: 0 30px 80px rgba(26, 20, 16, 0.18);
+}
+.for-cr-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.bullet-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 36px;
+}
+.bullet {
+  padding: 20px;
+  background: var(--paper);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.bullet h4 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.bullet p {
+  font-size: 13.5px;
+  color: var(--ink-3);
+  line-height: 1.55;
+}
+
+/* —— Testimonials —— */
+.testimonials {
+  padding: 140px 0;
+  background: var(--bg);
+}
+.testi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  margin-top: 60px;
+}
+.testi {
+  background: var(--paper);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.testi:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 50px rgba(26,20,16,0.10);
+}
+.testi-img {
+  aspect-ratio: 4/3;
+  background: var(--bg-2);
+  overflow: hidden;
+}
+.testi-img img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.testi:hover .testi-img img { transform: scale(1.04); }
+.testi-body { padding: 26px; flex: 1; display: flex; flex-direction: column; }
+.testi-quote {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  color: var(--ink);
+  margin-bottom: 22px;
+  flex: 1;
+}
+.testi-quote::before {
+  content: '"';
+  display: block;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 60px;
+  line-height: 0.2;
+  height: 22px;
+  color: var(--terracotta);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.testi-author { display: flex; align-items: center; justify-content: space-between; padding-top: 18px; border-top: 1px solid var(--border); }
+.testi-author .name { font-size: 14px; font-weight: 600; }
+.testi-author .role { font-size: 12px; color: var(--ink-3); margin-top: 2px; }
+.testi-author .badge {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  letter-spacing: 0.05em;
+}
+
+/* —— Pricing —— */
+.pricing-section {
+  padding: 140px 0;
+}
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--paper);
+  margin-top: 64px;
+}
+.plan {
+  padding: 44px 36px;
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.plan:last-child { border-right: 0; }
+.plan.featured {
+  background: var(--ink);
+  color: white;
+}
+.plan.featured .plan-name,
+.plan.featured .plan-features li,
+.plan.featured .plan-price small { color: rgba(255,255,255,0.7); }
+.plan.featured .plan-price { color: white; }
+.plan.featured .plan-desc { color: rgba(255,255,255,0.75); }
+.plan.featured .plan-features li::before { color: var(--terracotta-soft); }
+.plan-badge {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: var(--terracotta);
+  color: white;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+.plan-name {
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+.plan-price {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144;
+  font-size: 76px;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 16px;
+}
+.plan-price .currency { font-size: 30px; color: var(--ink-3); font-variation-settings: "opsz" 32; }
+.plan-price small {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: var(--ink-3);
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+.plan-desc {
+  font-size: 14px;
+  color: var(--ink-3);
+  line-height: 1.55;
+  margin-bottom: 30px;
+  min-height: 44px;
+}
+.plan-features {
+  list-style: none;
+  display: flex; flex-direction: column; gap: 12px;
+  font-size: 14px;
+  color: var(--ink-2);
+  flex: 1;
+  margin-bottom: 30px;
+}
+.plan-features li {
+  display: flex; gap: 10px;
+  line-height: 1.45;
+}
+.plan-features li::before {
+  content: '·';
+  font-size: 24px;
+  line-height: 0.9;
+  color: var(--terracotta);
+  flex-shrink: 0;
+}
+.plan-features li strong { color: inherit; }
+.plan .btn {
+  justify-content: center;
+  width: 100%;
+}
+.plan.featured .btn-primary { background: white; color: var(--ink); }
+.plan.featured .btn-primary:hover { background: var(--terracotta-soft); }
+.plan.featured .btn-outline { border-color: rgba(255,255,255,0.3); color: white; }
+.plan.featured .btn-outline:hover { border-color: white; background: rgba(255,255,255,0.1); }
+
+.pricing-note {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--ink-3);
+}
+
+/* —— FAQ —— */
+.faq {
+  max-width: 800px;
+  margin: 60px auto 0;
+}
+.faq details {
+  border-bottom: 1px solid var(--border);
+  padding: 24px 4px;
+}
+.faq details:first-child { border-top: 1px solid var(--border); }
+.faq summary {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 32;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  list-style: none;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 20px;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: '＋';
+  font-family: var(--font-sans);
+  font-size: 22px;
+  color: var(--ink-3);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+.faq details[open] summary::after { content: '−'; }
+.faq details p {
+  margin-top: 18px;
+  color: var(--ink-2);
+  font-size: 16px;
+  line-height: 1.7;
+  text-wrap: pretty;
+  max-width: 80ch;
+}
+
+/* —— Final CTA —— */
+.cta-final {
+  padding: 0;
+}
+.cta-inner {
+  background-image: url('https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?w=2400&q=85&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  padding: 140px 0;
+  color: white;
+}
+.cta-inner::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    rgba(26, 20, 16, 0.85) 0%,
+    rgba(26, 20, 16, 0.55) 50%,
+    rgba(26, 20, 16, 0.92) 100%);
+}
+.cta-inner > * { position: relative; z-index: 1; }
+.cta-content { text-align: center; max-width: 880px; margin: 0 auto; padding: 0 28px; }
+.cta-content h2 {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 0.98;
+  margin-bottom: 28px;
+  text-wrap: balance;
+}
+.cta-content h2 em {
+  font-style: italic;
+  color: var(--terracotta-soft);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+.cta-content p {
+  font-size: 18px;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 40px;
+  line-height: 1.55;
+  max-width: 580px;
+  margin-left: auto; margin-right: auto;
+  font-weight: 300;
+}
+.cta-content .btn-primary { background: white; color: var(--ink); }
+.cta-content .btn-primary:hover { background: var(--terracotta-soft); }
+
+/* —— Footer —— */
+.footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.7);
+  padding: 80px 0 40px;
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+.footer-brand .brand { color: white; margin-bottom: 18px; }
+.footer-brand .brand .cr { color: var(--terracotta-soft); }
+.footer-brand p {
+  font-size: 14px;
+  line-height: 1.65;
+  max-width: 320px;
+}
+.footer-col h4 {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.footer-col ul {
+  list-style: none;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.footer-col a {
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  transition: color 0.15s;
+}
+.footer-col a:hover { color: white; }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 28px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.5);
+}
+.footer-bottom .links { display: flex; gap: 24px; }
+
+/* —— Reveal on scroll —— */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.9s ease, transform 0.9s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-fast { transition-duration: 0.6s; }
+
+/* —— Mobile —— */
+@media (max-width: 920px) {
+  .nav-links { display: none; }
+  .nav-cta .btn-ghost { display: none; }
+  .hero h1 { font-size: 56px; }
+  .stats-grid { grid-template-columns: 1fr 1fr; gap: 32px 0; }
+  .stat { border-left: 0; padding: 16px; }
+  .section { padding: 80px 0; }
+  .manifesto { padding: 80px 0; }
+  .feature-row { grid-template-columns: 1fr; gap: 40px; padding: 60px 0; }
+  .feature-row.reverse > .feature-text { order: 0; }
+  .for-cr-grid { grid-template-columns: 1fr; gap: 40px; }
+  .bullet-grid { grid-template-columns: 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .plan { border-right: 0; border-bottom: 1px solid var(--border); }
+  .plan:last-child { border-bottom: 0; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .cta-inner { padding: 80px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- —— NAV —— -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="brand">Casa<span class="cr">cr</span></a>
+    <div class="nav-links">
+      <a href="#producto">Producto</a>
+      <a href="#cr">Hecho en CR</a>
+      <a href="#testimonios">Clientes</a>
+      <a href="#preguntas">Preguntas</a>
+    </div>
+    <div class="nav-cta">
+      <a href="index.html" class="btn btn-ghost">Iniciar sesión</a>
+      <a href="#demo" class="btn btn-primary btn-arrow"><span>Agendar demo</span></a>
+    </div>
+  </div>
+</nav>
+
+<!-- —— HERO —— -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow eyebrow">Software inmobiliario hecho en Costa Rica</div>
+    <h1 class="display">El CRM que cierra propiedades mientras <em>tomás café.</em></h1>
+    <p class="hero-sub">Concentrá WhatsApp, leads, propiedades, agenda y reportes en un solo lugar. Con un asistente IA que califica clientes 24/7 y te transfiere la conversación solo cuando es momento de cerrar.</p>
+    <div class="hero-cta">
+      <a href="#demo" class="btn btn-primary btn-lg btn-arrow"><span>Agendar demo</span></a>
+      <a href="#producto" class="btn btn-outline btn-lg">Ver el producto</a>
+    </div>
+  </div>
+  <div class="scroll-cue">
+    Bajá para conocerlo
+    <svg width="14" height="22" viewBox="0 0 14 22" fill="none">
+      <rect x="0.5" y="0.5" width="13" height="21" rx="6.5" stroke="currentColor"/>
+      <rect x="6" y="5" width="2" height="6" rx="1" fill="currentColor">
+        <animate attributeName="opacity" values="1;0;1" dur="2s" repeatCount="indefinite"/>
+      </rect>
+    </svg>
+  </div>
+</section>
+
+<!-- —— STATS —— -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-val">3.<em>2</em>s</div>
+        <div class="stat-label">Tiempo de respuesta</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">92<em>%</em></div>
+        <div class="stat-label">Bot resuelve solo</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">+2.4<em>k</em></div>
+        <div class="stat-label">Agentes activos</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">3<em>×</em></div>
+        <div class="stat-label">Más renovación de exclusivas</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- —— MANIFESTO —— -->
+<section class="manifesto">
+  <div class="wrap">
+    <p class="manifesto-quote reveal">
+      <span class="small-em">Tu negocio vive en WhatsApp.</span><br/>
+      Tu organización <em>vive en un Excel.</em><br/>
+      <span class="small-em">Casacr es donde por fin</span> <em>conviven.</em>
+    </p>
+  </div>
+</section>
+
+<!-- —— FEATURE ROWS —— -->
+<section class="features-wrap" id="producto">
+  <div class="wrap">
+
+    <!-- ROW 1: Inbox -->
+    <div class="feature-row reveal">
+      <span class="feature-num" aria-hidden="true">01</span>
+      <div class="feature-text">
+        <div class="label">Inbox WhatsApp</div>
+        <h2>Una sola bandeja para <em>todos tus clientes.</em></h2>
+        <p>Todos tus chats de WhatsApp Business llegan a Casacr en tiempo real. Etiquetá, asigná, respondé con plantillas que se rellenan solas y dejá que el bot maneje lo que no necesita tu atención.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>API oficial de WhatsApp Business</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Plantillas con campos dinámicos <code style="font-family: var(--font-mono); font-size: 12.5px; background: var(--bg-2); padding: 2px 6px; border-radius: 4px;">{{nombre}}</code></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Bot que califica 24/7 y te transfiere cuando es hora</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Envío de fichas de propiedades desde el chat</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="browser">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">app.casacr.com/inbox</span></div>
+          <img src="assets/screens/inbox-real.png" alt="Inbox de WhatsApp dentro de Casacr"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 2: Leads + Score -->
+    <div class="feature-row reverse reveal">
+      <span class="feature-num" aria-hidden="true">02</span>
+      <div class="feature-text">
+        <div class="label">Pipeline y lead scoring</div>
+        <h2>Sabé a quién llamar <em>primero</em>.</h2>
+        <p>Casacr le pone un score de 0 a 100 a cada lead basado en señales reales: engagement, presupuesto, pre-aprobación, días sin contacto. Tu mañana empieza con claridad: quién está caliente, quién se enfría.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Pipeline visual estilo Kanban</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Score automático con factores transparentes</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Tareas automáticas y manuales por lead</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Documentos del expediente organizados</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="browser">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">app.casacr.com/leads</span></div>
+          <img src="assets/screens/leads-pipeline.png" alt="Pipeline de leads visual"/>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- —— INTERLUDE —— -->
+<section class="interlude">
+  <div>
+    <p class="interlude-quote">“Antes manejaba todo en Excel y WhatsApp. Ahora todo vive en un solo lugar — incluso cuando estoy manejando entre dos visitas.”</p>
+    <cite class="interlude-cite">Daniel Castro · Re/Max Escazú</cite>
+  </div>
+</section>
+
+<!-- —— FEATURE ROWS continued —— -->
+<section class="features-wrap" style="padding-bottom: 0;">
+  <div class="wrap">
+
+    <!-- ROW 3: Calendar -->
+    <div class="feature-row reveal">
+      <span class="feature-num" aria-hidden="true">03</span>
+      <div class="feature-text">
+        <div class="label">Agenda inteligente</div>
+        <h2>Sincronizada con tu <em>Google Calendar.</em></h2>
+        <p>Las visitas que creás en Casacr aparecen en tu Google personal. Te avisamos si dos visitas están en zonas lejanas con poco tiempo entre ellas — algo que un bot no puede entender, pero vos sí.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Sincronización bidireccional con Google Calendar</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Detección de conflictos por distancia entre zonas</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Vistas día, semana y mes</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Recordatorios automáticos al cliente por WhatsApp</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="browser">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">app.casacr.com/agenda</span></div>
+          <img src="assets/screens/calendar-week.png" alt="Vista semanal de la agenda"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW 4: Properties -->
+    <div class="feature-row reverse reveal" style="border-bottom: 0;">
+      <span class="feature-num" aria-hidden="true">04</span>
+      <div class="feature-text">
+        <div class="label">Catálogo y reportes</div>
+        <h2>Cerrá <em>más exclusivas.</em></h2>
+        <p>Cada propiedad tiene una página pública compartible — o podés enlazar a Encuentra24 si preferís. Cada mes Casacr genera un reporte automático para cada propietario con vistas, leads y feedback de visitas.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Página pública compartible por WhatsApp</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Calculadora de financiamiento embebida (BN, BCR, Popular...)</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Reporte mensual automático para propietarios</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12l5 5 9-11"/></svg>Proyección de comisiones del mes en curso</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="browser">
+          <div class="browser-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">app.casacr.com/propiedades</span></div>
+          <img src="assets/screens/property-detail.png" alt="Detalle de propiedad"/>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- —— SHOWCASE STRIP —— -->
+<section class="showcase">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom: 0;">
+      <div class="eyebrow reveal">Un vistazo</div>
+      <h2 class="display section-title reveal">Lo que ves cuando <em>entrás cada mañana.</em></h2>
+      <p class="section-sub reveal">Diseño limpio. Tipografía bien pensada. Información donde la necesitás. Sin la sensación de "software empresarial" de los 2000.</p>
+    </div>
+    <div class="showcase-strip">
+      <img src="assets/screens/dashboard.png" alt="Dashboard de Casacr"/>
+      <img src="assets/screens/inbox-real.png" alt="Inbox WhatsApp"/>
+      <img src="assets/screens/leads-pipeline.png" alt="Pipeline de leads"/>
+      <img src="assets/screens/calendar-week.png" alt="Agenda semanal"/>
+      <img src="assets/screens/property-detail.png" alt="Detalle de propiedad"/>
+      <!-- duplicate for seamless loop -->
+      <img src="assets/screens/dashboard.png" alt=""/>
+      <img src="assets/screens/inbox-real.png" alt=""/>
+      <img src="assets/screens/leads-pipeline.png" alt=""/>
+      <img src="assets/screens/calendar-week.png" alt=""/>
+      <img src="assets/screens/property-detail.png" alt=""/>
+    </div>
+  </div>
+</section>
+
+<!-- —— FOR COSTA RICA —— -->
+<section class="section for-cr" id="cr">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="eyebrow reveal">Hecho en Costa Rica</div>
+      <h2 class="display section-title reveal">Pensado para <em>cómo trabajás vos.</em></h2>
+      <p class="section-sub reveal">No es una copia gringa. Casacr entiende el mercado tico — desde la cédula jurídica hasta el impuesto de traspaso, pasando por Encuentra24 y los bancos locales.</p>
+    </div>
+    <div class="for-cr-grid">
+      <div class="for-cr-img reveal">
+        <img src="https://images.unsplash.com/photo-1581349437898-cebbe9831942?w=1200&q=85&fit=crop&auto=format" alt="Vista de Costa Rica"/>
+      </div>
+      <div class="reveal">
+        <h3 class="display" style="font-size: 36px; line-height: 1.1; margin-bottom: 16px; font-weight: 400;">Detalles que importan.</h3>
+        <p style="font-size: 16px; color: var(--ink-2); line-height: 1.65; max-width: 460px;">
+          Pequeñas cosas que solo notás si vos también vendiste tu primera propiedad en Heredia o cerraste un alquiler en Tamarindo a las 9 PM por WhatsApp.
+        </p>
+        <div class="bullet-grid">
+          <div class="bullet">
+            <h4>Calculadora con bancos CR</h4>
+            <p>Tasas reales de BN, BCR, Popular, Promerica, BAC y Davivienda. Incluye impuesto de traspaso y honorarios.</p>
+          </div>
+          <div class="bullet">
+            <h4>Zonas inteligentes</h4>
+            <p>Provincias completas + zonas estratégicas (Escazú, Sabana, Tamarindo). Sumá las tuyas si no están.</p>
+          </div>
+          <div class="bullet">
+            <h4>Soporte tico</h4>
+            <p>WhatsApp con un equipo en San José. Respuesta promedio menos de 5 minutos en horario laboral.</p>
+          </div>
+          <div class="bullet">
+            <h4>Ley 8968</h4>
+            <p>Datos cifrados, almacenamiento en Costa Rica. Cumple con la ley de protección de datos personales.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- —— TESTIMONIALS —— -->
+<section class="testimonials" id="testimonios">
+  <div class="wrap">
+    <div class="section-head center">
+      <div class="eyebrow reveal" style="justify-content: center;">Lo que dicen los agentes</div>
+      <h2 class="display section-title reveal">Agentes ticos <em>como vos.</em></h2>
+    </div>
+    <div class="testi-grid">
+      <div class="testi reveal">
+        <div class="testi-img"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=900&q=80&auto=format&fit=crop" alt="Laura Ramírez"/></div>
+        <div class="testi-body">
+          <p class="testi-quote">Cerré 3 propiedades en mi primer mes. El bot me liberó horas y dejé de perder leads por falta de seguimiento.</p>
+          <div class="testi-author">
+            <div>
+              <div class="name">Laura Ramírez</div>
+              <div class="role">Independiente · Heredia</div>
+            </div>
+            <span class="badge">2 años en Casacr</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi reveal">
+        <div class="testi-img"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&q=80&auto=format&fit=crop" alt="Daniel Castro"/></div>
+        <div class="testi-body">
+          <p class="testi-quote">Los reportes mensuales me cambiaron la relación con propietarios. Ahora me piden ellos para que les dé exclusiva.</p>
+          <div class="testi-author">
+            <div>
+              <div class="name">Daniel Castro</div>
+              <div class="role">Re/Max Escazú</div>
+            </div>
+            <span class="badge">CCCBR #3214</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi reveal">
+        <div class="testi-img"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=900&q=80&auto=format&fit=crop" alt="Vanessa Solano"/></div>
+        <div class="testi-body">
+          <p class="testi-quote">Trabajo sola y manejo 50+ leads al mes. El lead scoring me dice a quién llamar cada mañana — no exagero, fue antes/después.</p>
+          <div class="testi-author">
+            <div>
+              <div class="name">Vanessa Solano</div>
+              <div class="role">Corredora · San José</div>
+            </div>
+            <span class="badge">8 meses en Casacr</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- —— DEMO CTA inline —— -->
+<section class="section-tight" id="demo" style="padding: 100px 0;">
+  <div class="wrap">
+    <div style="max-width: 880px; margin: 0 auto; text-align: center;">
+      <div class="eyebrow reveal" style="justify-content: center;">Lo más fácil es verlo</div>
+      <h2 class="display section-title reveal" style="margin-top: 18px; margin-bottom: 18px;">Una demo de <em>20 minutos.</em></h2>
+      <p class="section-sub reveal" style="margin: 0 auto 32px;">Te mostramos cómo Casacr se adapta a tu forma de trabajar — sin compromisos. Después te enviamos los detalles para que decidas a tu ritmo.</p>
+      <a href="#" class="btn btn-primary btn-lg btn-arrow reveal"><span>Agendar demo</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- —— FAQ —— -->
+<section class="section" id="preguntas" style="padding-bottom: 60px;">
+  <div class="wrap-sm">
+    <div class="section-head center">
+      <div class="eyebrow reveal" style="justify-content: center;">Preguntas frecuentes</div>
+      <h2 class="display section-title reveal">Todo lo que necesitás <em>saber.</em></h2>
+    </div>
+    <div class="faq">
+      <details open>
+        <summary>¿Cómo se conecta WhatsApp?</summary>
+        <p>Usamos la API oficial de WhatsApp Business. Verificamos tu número en menos de 24 horas y a partir de ahí todos los mensajes nuevos llegan a Casacr. Tus clientes siguen escribiéndote al mismo número de siempre — no cambia nada para ellos.</p>
+      </details>
+      <details>
+        <summary>¿El bot agenda visitas automáticamente?</summary>
+        <p>No. El bot identifica cuándo un cliente está listo para agendar pero <strong>siempre te transfiere a vos</strong>. Sabemos que los agentes manejan rutas, tráfico y zonas que el bot no puede entender bien — eso queda en tus manos.</p>
+      </details>
+      <details>
+        <summary>¿Puedo seguir publicando en Encuentra24, Properstar?</summary>
+        <p>Sí. Casacr te permite enlazar la URL externa de cada propiedad. Vos decidís si compartís la página pública de Casacr o el link del portal donde ya tenés más visibilidad. Tu visibilidad existente no se pierde.</p>
+      </details>
+      <details>
+        <summary>¿Mis datos son seguros?</summary>
+        <p>Sí. Toda tu información está cifrada y respaldada en servidores en Costa Rica. Casacr cumple con la Ley 8968 de Protección de Datos. Podés exportar todos tus datos cuando quieras desde Configuración.</p>
+      </details>
+      <details>
+        <summary>¿Qué pasa si cancelo?</summary>
+        <p>Podés cancelar en cualquier momento desde Configuración. Guardamos tus datos por 90 días por si querés reactivar la cuenta. No hay penalizaciones ni contratos anuales.</p>
+      </details>
+      <details>
+        <summary>¿Funciona en celular?</summary>
+        <p>Sí, en cualquier navegador móvil moderno. Las apps nativas para iOS y Android están en desarrollo — disponibles en Q3 2026.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- —— FINAL CTA —— -->
+<section class="cta-final">
+  <div class="cta-inner">
+    <div class="cta-content">
+      <h2 class="reveal">Cerrá más,<br/><em>trabajando menos.</em></h2>
+      <p class="reveal">Agendá una demo de 20 minutos con nuestro equipo. Te mostramos cómo Casacr se adapta a tu forma de trabajar — sin compromisos.</p>
+      <a href="#" class="btn btn-primary btn-lg btn-arrow reveal"><span>Agendar demo</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- —— FOOTER —— -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="#" class="brand">Casa<span class="cr">cr</span></a>
+        <p>El software inmobiliario hecho en Costa Rica. Para agentes que quieren cerrar más, trabajando menos.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Producto</h4>
+        <ul>
+          <li><a href="#producto">Funcionalidades</a></li>
+          <li><a href="#demo">Agendar demo</a></li>
+          <li><a href="#">Casos de éxito</a></li>
+          <li><a href="#">Roadmap</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="#">Blog inmobiliario</a></li>
+          <li><a href="#">Guías</a></li>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">API docs</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="#">Nosotros</a></li>
+          <li><a href="#">Empleos</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Prensa</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Casacr — Hecho con ☕ en San José, Costa Rica</div>
+      <div class="links">
+        <a href="#">Términos</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Ley 8968</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll state — trigger after passing the hero, not on tiny scroll
+const nav = document.getElementById('nav');
+const getHeroHeight = () => {
+  const hero = document.querySelector('.hero');
+  return hero ? hero.offsetHeight : window.innerHeight;
+};
+let heroH = getHeroHeight();
+window.addEventListener('resize', () => { heroH = getHeroHeight(); }, { passive: true });
+window.addEventListener('scroll', () => {
+  // Trigger transition when crossing 75% of the hero — so it feels like
+  // the nav adapts to the section the user is entering, not on micro-scroll.
+  nav.classList.toggle('scrolled', window.scrollY > heroH * 0.75);
+}, { passive: true });
+
+// Reveal on scroll
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// Parallax on hero bg
+const heroBg = document.querySelector('.hero-bg');
+if (heroBg) {
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    if (y < 800) heroBg.style.transform = `translateY(${y * 0.4}px) scale(${1 + y * 0.0002})`;
+  }, { passive: true });
+}
+</script>
+
+</body>
+</html>

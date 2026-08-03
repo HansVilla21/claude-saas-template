@@ -6,6 +6,35 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-06-12 — Iteración profunda del bot (prompts v2→v4.2, modelos gpt-4.1 full, 3 bugs de flujo) + fix "Devolver al bot"
+
+**Contexto:** Sesión larga de pulido del bot Mateo. El founder trajo iteraciones sucesivas de prompts (v2, v3, v4, v4.1, v4.2) y pidió aplicarlas una por una. En el camino destapamos 3 bugs de RAÍZ que no eran de los prompts sino del flujo alrededor. Cerró con el bot "respondiendo bastante bien". **Análisis completo persistido en `memory/leccion-2026-06-12-pipeline-completo-bot-momentum.md` ⭐ (documento de replicabilidad).**
+
+**Decisiones tomadas:**
+
+1. **División de responsabilidades firme:** el founder escribe los prompts en otro proyecto; yo solo los APLICO al workflow, DIAGNOSTICO bugs técnicos y VERIFICO. No redacto ni cambio contenido de prompts.
+2. **Prompts aplicados** vía build scripts idempotentes SET18→SET24 desde `test-prompts/v{N}/`. Estado final: Principal v4.1, Formateador v4.2, Router v4, Objeciones v4. Verificados por hash SHA-256 contra el canon.
+3. **Formateador "bobo" (v4):** la inteligencia de división de burbujas vive en el AGENTE (separa con líneas en blanco); el formateador solo mapea cada bloque a un MENSAJE y limpia puntuación. Reemplaza el Criterio A+B previo.
+4. **Los 6 nodos LLM a `gpt-4.1` FULL** (SET22). Aclaración: `gpt-4o-mini` ≠ "4.0 mini"; 4/6 nodos ya estaban en `4.1-mini`. El salto real es a full.
+5. **Memoria a 30 mensajes** (Principal + Objeciones).
+6. **Parser del Formateador → "Generate From JSON Example"** con `{output:{MENSAJE 1..4}}` (cambio manual del founder). Sube el límite de 3 a 4 burbujas. Trade-off: con fromJson todos los campos quedan required (vigilar relleno en turnos cortos; si molesta → JSON Schema con solo MENSAJE 1 required).
+7. **Verificación post-deploy obligatoria:** traer el N8N vivo y comparar hash de cada prompt + modelos + memoria. "Está actualizado" se demuestra, no se afirma.
+
+**3 bugs de raíz resueltos (ninguno era del prompt):**
+
+1. **`Expand Property Images` aplastaba los `\n`** (`/\s+/g` → espacio). Rompía las listas numeradas. Fix SET24: `[^\S\n]` para preservar saltos. (Nodo heredado del bot inmobiliario v6, módulo properties apagado pero igual procesaba el texto.)
+2. **Parser cortaba a 3 mensajes** (`additionalProperties:false` + solo MENSAJE 1/2/3). Fix: founder lo pasó a fromJson con 4 mensajes.
+3. **`bot_paused_until` dejaba el bot mudo tras handoff.** El handoff pausa el bot 24h; el botón "Devolver al bot" del inbox (`inbox-client.tsx`) solo cambiaba `handler` sin limpiar la pausa → bot mudo aunque handler='bot'. Fix manual inmediato (`UPDATE ... bot_paused_until=NULL`) + **PR #25** en `momentum-ai-crm`: "Devolver al bot" ahora hace `{handler:'bot', bot_paused_until:null}`.
+
+**Qué se descartó:**
+- Predicción mía de "doble wrapper" al poner `{output:{...}}` en el parser: FALSA, confirmado con ejecución real que el Basic LLM Chain agrega el wrapper `output` solo.
+
+**Insight para modularización (objetivo del founder):** hoy conviven 2 sistemas de prompt — el systemMessage hardcodeado en el nodo (el que se usa) y el `bot_config` de la agencia en Supabase (`core_template`, `system_rules_template`, `custom_instructions`, `business_info`, `conversation_flow`) que YA es modular pero NO está cableado al Agente Principal. Camino natural a "replicable/personalizable/rápido": armar el prompt del agente desde `bot_config` para que dar de alta un cliente = llenar una fila, no editar el workflow.
+
+**Pendientes inmediatos:** commitear el trabajo de N8N (SET15→25 sin commitear) · mergear PR #25 tras probar el preview · vigilar relleno del parser en turnos cortos · evaluar cablear el Agente Principal a `bot_config` · testear paths no ejercitados (objeción precio, "lo pienso", pedir humano, descalificación) · Meta Ads.
+
+**Estado workflow:** versionId vivo tras la sesión = el del parser editado por el founder (rama de prompts v4.1/v4.2 + parser 4-msg + modelos gpt-4.1 full + memoria 30). Snapshots PRE-SET18→25 en `crm-v2/n8n/workflows/snapshots/`.
+
 ## 2026-06-10 — Prompts Mateo deployados + fix duplicación de leads por rotación de wa_user_id
 
 **Contexto:** El founder llegó harto de iteraciones que no funcionaban ("estamos dando vueltas sin llegar a ningún lado"). Trajo sus propios prompts en `clients/momentum-ai-crm/test-prompts/` (bot "Mateo", diseñados con `architecture.md` previo). Sesión larguísima: MCP fix + demo agency + deploy Mateo + primera conversación e2e excelente + bug de leads duplicados encontrado y fixeado.

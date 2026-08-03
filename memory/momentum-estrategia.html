@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Momentum · Estrategia Growth Machine 90 Días</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#15140f;
+  --paper:#f3efe6;
+  --ink:#1a1815;
+  --ink-soft:#3a372f;
+  --muted:#6b6557;
+  --line:#d8d2c4;
+  --accent:#c1502e;
+  --accent-2:#2f5d50;
+  --gold:#b08642;
+  --green:#e3efe7;
+  --green-line:#bcd9c8;
+  --red:#fbecea;
+  --red-line:#f0cdc6;
+  --card:#faf7f0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Hanken Grotesk',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.6;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:880px;margin:0 auto;padding:0 28px}
+.mono{font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+.serif{font-family:'Fraunces',serif}
+
+/* COVER */
+.cover{background:var(--paper);padding:84px 28px 96px;border-bottom:1px solid var(--line)}
+.cover-inner{max-width:880px;margin:0 auto}
+.brandrow{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:78px}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-size:22px;font-weight:600}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:var(--accent);display:inline-block}
+.cover-meta{text-align:right;color:var(--muted);line-height:1.7}
+.tag{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:40px;padding:8px 16px;color:var(--ink-soft);margin-bottom:30px}
+.tag .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+h1.cover-title{font-family:'Fraunces',serif;font-weight:500;font-size:58px;line-height:1.02;letter-spacing:-.02em;margin-bottom:28px}
+h1.cover-title em{color:var(--accent);font-style:italic}
+.cover-lede{font-size:18px;color:var(--ink-soft);max-width:680px;margin-bottom:64px}
+.factgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line);padding-top:28px}
+.fact{padding-right:18px;border-right:1px solid var(--line)}
+.fact:last-child{border-right:none}
+.fact .lbl{color:var(--muted);margin-bottom:10px}
+.fact .big{font-family:'Fraunces',serif;font-size:30px;font-weight:500;line-height:1;margin-bottom:6px}
+.fact .sub{font-size:13px;color:var(--muted)}
+
+/* SECTIONS */
+section{padding:64px 0;border-bottom:1px solid var(--line)}
+.secnum{color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;margin-bottom:6px}
+h2{font-family:'Fraunces',serif;font-weight:500;font-size:34px;line-height:1.1;letter-spacing:-.01em;margin-bottom:18px}
+h3{font-family:'Fraunces',serif;font-weight:500;font-size:22px;margin:30px 0 12px}
+.lede{font-size:18px;color:var(--ink-soft);max-width:720px;margin-bottom:8px}
+p{margin-bottom:14px;color:var(--ink-soft)}
+p strong{color:var(--ink);font-weight:600}
+.kicker{color:var(--muted);margin:32px 0 14px}
+
+ul.clean{list-style:none;margin:18px 0}
+ul.clean li{padding:14px 0 14px 42px;border-bottom:1px solid var(--line);position:relative;color:var(--ink-soft)}
+ul.clean li:last-child{border-bottom:none}
+ul.clean li .n{position:absolute;left:0;top:14px;font-family:'JetBrains Mono',monospace;color:var(--accent);font-size:13px}
+ul.clean li b{color:var(--ink);font-weight:600}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:15px}
+th{text-align:left;font-family:'JetBrains Mono',monospace;text-transform:uppercase;font-size:10.5px;letter-spacing:.07em;color:var(--muted);padding:12px 14px;border-bottom:1.5px solid var(--ink);font-weight:500}
+td{padding:13px 14px;border-bottom:1px solid var(--line);color:var(--ink-soft);vertical-align:top}
+td:first-child{color:var(--ink);font-weight:500}
+.tbmeta{font-family:'Fraunces',serif}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:24px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+.card .ct{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.card h4{font-family:'Fraunces',serif;font-weight:500;font-size:19px;margin-bottom:8px;line-height:1.2}
+.card p{font-size:14.5px;margin-bottom:0}
+.card.good{background:var(--green);border-color:var(--green-line)}
+.card.good .ct{color:var(--accent-2)}
+.card.bad{background:var(--red);border-color:var(--red-line)}
+.card.bad .ct{color:var(--accent)}
+
+.pill{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.p-crit{background:#f4d9d2;color:#9a3215}
+.p-alto{background:#f5e6cf;color:#8a5d18}
+.p-medio{background:#e2e7df;color:#4a5347}
+
+/* ICP blocks */
+.icp{border:1px solid var(--line);border-radius:14px;padding:26px;margin:18px 0;background:var(--card)}
+.icp .rank{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.08em;margin-bottom:6px}
+.icp h4{font-family:'Fraunces',serif;font-weight:500;font-size:24px;margin-bottom:14px}
+.icp .row{display:flex;gap:14px;padding:9px 0;border-top:1px solid var(--line);font-size:14.5px}
+.icp .row .k{font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);width:130px;flex-shrink:0;padding-top:3px}
+.icp .row .v{color:var(--ink-soft)}
+
+/* offer */
+.offer{background:var(--bg);color:var(--paper);border-radius:18px;padding:40px;margin:26px 0}
+.offer h3{color:var(--paper);margin-top:0}
+.offer .price{display:flex;align-items:baseline;gap:12px;margin:10px 0 4px}
+.offer .price .amt{font-family:'Fraunces',serif;font-size:46px;font-weight:500;color:#fff}
+.offer .price .per{color:#b8b2a4;font-size:15px}
+.offer .stack{list-style:none;margin:22px 0}
+.offer .stack li{padding:12px 0;border-bottom:1px solid #2e2b24;display:flex;justify-content:space-between;gap:16px;color:#ddd8cc;font-size:15px}
+.offer .stack li:last-child{border-bottom:none}
+.offer .stack li .val{font-family:'JetBrains Mono',monospace;color:var(--gold);font-size:13px;white-space:nowrap}
+.offer .note{font-size:13.5px;color:#9d978a;margin-top:6px}
+.offer .total{display:flex;justify-content:space-between;align-items:baseline;border-top:1.5px solid var(--gold);margin-top:8px;padding-top:18px}
+.offer .total .l{font-family:'Fraunces',serif;font-size:20px;color:#fff}
+.offer .total .r{font-family:'Fraunces',serif;font-size:24px;color:var(--gold)}
+
+/* angle */
+.angle{border-left:3px solid var(--accent);padding:6px 0 6px 22px;margin:26px 0}
+.angle .at{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.07em;margin-bottom:4px}
+.angle h4{font-family:'Fraunces',serif;font-weight:500;font-size:21px;margin-bottom:10px}
+.hooks{list-style:none;margin:12px 0}
+.hooks li{padding:10px 0 10px 30px;position:relative;color:var(--ink);font-size:15.5px;font-style:italic;font-family:'Fraunces',serif}
+.hooks li .hn{position:absolute;left:0;top:11px;font-family:'JetBrains Mono',monospace;font-style:normal;font-size:12px;color:var(--accent)}
+.cta-line{font-size:13.5px;color:var(--muted);margin-top:6px}
+.cta-line b{color:var(--ink-soft);font-weight:600}
+
+/* phases */
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:24px 0}
+.phase{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.phase .pd{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.06em;margin-bottom:4px}
+.phase h4{font-family:'Fraunces',serif;font-weight:500;font-size:20px;margin-bottom:12px}
+.phase ul{list-style:none}
+.phase ul li{font-size:13px;color:var(--ink-soft);padding:6px 0;border-bottom:1px solid var(--line);line-height:1.4}
+.phase ul li:last-child{border-bottom:none}
+
+.callout{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;padding:22px 24px;margin:24px 0}
+.callout .ct{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.callout p{margin-bottom:0;font-size:15px}
+
+.btnsteps{list-style:none;margin:20px 0}
+.btnsteps li{display:flex;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}
+.btnsteps li .d{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);width:120px;flex-shrink:0;padding-top:3px;letter-spacing:.04em}
+.btnsteps li .t{color:var(--ink-soft);font-size:15px}
+
+/* footer */
+.footer{background:var(--bg);color:var(--paper);padding:56px 28px}
+.footer-inner{max-width:880px;margin:0 auto}
+.footer .sig{font-family:'Fraunces',serif;font-size:26px;color:#fff;margin-bottom:6px}
+.footer .role{color:#b8b2a4;font-size:14px;margin-bottom:28px}
+.footer .meta{color:#85806f;font-size:12.5px;line-height:1.9;border-top:1px solid #2e2b24;padding-top:22px}
+.footer .doctag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;color:#6f6a5c;margin-top:18px}
+
+@media(max-width:720px){
+  h1.cover-title{font-size:40px}
+  .factgrid{grid-template-columns:1fr 1fr;gap:20px 0}
+  .fact{border-right:none;border-bottom:1px solid var(--line);padding-bottom:16px}
+  .cards{grid-template-columns:1fr}
+  .phases{grid-template-columns:1fr}
+  h2{font-size:27px}
+  .offer{padding:26px}
+  .icp .row{flex-direction:column;gap:2px}
+  .icp .row .k{width:auto}
+  .btnsteps li{flex-direction:column;gap:2px}
+}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="brandrow">
+      <div class="brand"><span class="dot"></span>GrowX Partners</div>
+      <div class="cover-meta mono">Documento estratégico · V1<br>2026 · Confidencial</div>
+    </div>
+    <div class="tag mono"><span class="dot"></span>Growth Machine · 90 días</div>
+    <h1 class="cover-title">Vender el sistema,<br>no el software.<br><em>Chatbots que cierran.</em></h1>
+    <p class="cover-lede">Un plan de 90 días para llevar Momentum al mercado costarricense: un CRM conversacional con IA que contesta como humano, califica, agenda y da seguimiento — vendido como servicio de alto valor, no como licencia. Empezamos barato y rápido para sacar casos de éxito, después subimos ticket y presupuesto.</p>
+    <div class="factgrid">
+      <div class="fact"><div class="lbl mono">Cliente</div><div class="big serif">Momentum</div><div class="sub">Software · IA conversacional</div></div>
+      <div class="fact"><div class="lbl mono">Período</div><div class="big serif">90 días</div><div class="sub">Jun — Ago 2026</div></div>
+      <div class="fact"><div class="lbl mono">Foco</div><div class="big serif">Lead gen</div><div class="sub">Facebook + Instagram</div></div>
+      <div class="fact"><div class="lbl mono">Growth Partner</div><div class="big serif">Kevin H.</div><div class="sub">GrowX Partners</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- 01 RESUMEN -->
+<section>
+  <div class="secnum">01</div>
+  <h2>Resumen ejecutivo</h2>
+  <p class="lede">Momentum no tiene problema de producto. El sistema ya está probado y resuelve un dolor real. El reto es de posicionamiento, precio y velocidad de validación con poco presupuesto.</p>
+  <p>El producto es un <strong>CRM conversacional con IA</strong>: un WhatsApp con esteroides donde el chatbot habla como humano, no pierde contexto al entrar un agente, califica y etiqueta solo, agenda dentro de la conversación, registra no-shows y dispara seguimientos. Todo en una sola plataforma — frente a la competencia, donde ManyChat, Airtable, Calendly y el bot viven desconectados y el cliente nunca sabe dónde falla la conexión.</p>
+  <p>El presupuesto de arranque es de <strong>$300/mes en pauta</strong>, y sale de la billetera de Pietro. Eso define toda la estrategia: no podemos darnos el lujo de quemar plata probando ticket alto. Atacamos cinco frentes en paralelo:</p>
+  <ul class="clean">
+    <li><span class="n">01</span><b>Vender el servicio, no el CRM.</b> El valor está en la instalación, la entrevista, el prompt entrenado y el acompañamiento — no en el acceso al software. Eso justifica el precio y nos separa de Go High Level y los white labels tipo Quantum.</li>
+    <li><span class="n">02</span><b>Precio de entrada bajo para validar.</b> Setup de $500 + fee mensual de $150. Barato a propósito: el objetivo de los primeros meses es sacar casos de éxito documentados, no margen.</li>
+    <li><span class="n">03</span><b>Marca Momentum, no Hans persona.</b> Corremos ads de una marca con producto productivizado. Kevin sale en cámara para que el perfil baje a "sistema comprobado" y no a "servicio técnico a la medida".</li>
+    <li><span class="n">04</span><b>ICP amplio y sin formulario al inicio.</b> Con ticket de $500 y solo $300 de pauta, un nicho de salud encarece la conversación. Arrancamos amplio para bajar costo por mensaje, sin formulario de filtro, dejando que el chatbot haga lo suyo y nos diga quién pellizca.</li>
+    <li><span class="n">05</span><b>Reinvertir todo hasta estabilizar.</b> Nadie cobra al inicio: el cash collected se reinvierte (pauta y producción) hasta que el negocio genere $5K–$10K consistentes. Las comisiones se trackean desde la primera venta pero se liquidan al cruzar ese umbral. El fee mensual recurrente construye el activo real: MRR que se atribuye a cada anuncio mucho después del cierre.</li>
+  </ul>
+  <div class="callout">
+    <div class="ct">Cómo lo resolvemos</div>
+    <p>Aplicamos Growth Machine en cuatro fases — Onboarding → Build → Optimize → Scale — enfocados 100% en Facebook e Instagram. Producimos 5 videos por mes con 2 ganchos cada uno, probados en formato Cámara Pro y POV, con Kevin como cara. Validamos el funnel con $300, sacamos los primeros casos de éxito, y solo entonces subimos ticket a $1.000 y duplicamos pauta. Revisión semanal cada lunes.</p>
+  </div>
+</section>
+
+<!-- 02 PRODUCTO -->
+<section>
+  <div class="secnum">02</div>
+  <h2>Análisis del producto</h2>
+  <h3>Qué es Momentum</h3>
+  <p>Sistema propio (desarrollo interno de Hans, no un white label) que integra en una sola plataforma lo que hoy el mercado arma con cuatro o cinco herramientas conectadas a medias. Nace de implementar chatbots en clientes reales y chocar con las deficiencias de los formatos tipo ManyChat.</p>
+  <p>Hoy opera sobre <strong>WhatsApp</strong> (Instagram queda para una fase posterior, requiere ser tech partner de Meta). Ya está probado en un fisioterapeuta y existe un MVP general entrenable para cualquier negocio, con arquitectura pensada para módulos por industria (propiedades para inmobiliarias, citas y pacientes para salud).</p>
+
+  <h3>Lo que el sistema sí hace y la competencia no</h3>
+  <div class="cards">
+    <div class="card good">
+      <div class="ct">Diferenciador 01</div>
+      <h4>Habla como humano y no pierde contexto</h4>
+      <p>En ManyChat, si un agente entra a la conversación, el bot pierde el hilo de lo hablado. Acá el agente toma y devuelve la conversación con un botón, sin perder contexto.</p>
+    </div>
+    <div class="card good">
+      <div class="ct">Diferenciador 02</div>
+      <h4>Califica y etiqueta solo</h4>
+      <p>El chatbot marca leads como tibio, caliente, calificado, y los etiqueta por intención (planes, eventos, servicio) según criterios que uno le da. Todo queda registrado con quién hizo cada cambio.</p>
+    </div>
+    <div class="card good">
+      <div class="ct">Diferenciador 03</div>
+      <h4>Agenda dentro de la conversación</h4>
+      <p>No manda un link de Calendly. Ofrece horarios disponibles como un setter real, agenda, registra la cita y marca el no-show. Seguimientos programables si el lead no responde.</p>
+    </div>
+    <div class="card good">
+      <div class="ct">Diferenciador 04</div>
+      <h4>Todo visible en tiempo real</h4>
+      <p>Tiempo de respuesta por conversación y por agente, conteo de mensajes para detectar qué chat tiene carnita, CRM con tabla de contactos. Nada de plataformas conectadas por detrás que uno no sabe si fallan.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="ct">La frase que vende</div>
+    <p>"No te doy un software. Te entrevisto, te construyo un chatbot que habla como vos, le pongo todas las reglas que quieras, califica y filtra tus leads, los agenda con vos, y te lo monto todo en un sistema que podés travesear con tu equipo." Go High Level no hace eso por vos. Ahí está el servicio de alto valor.</p>
+  </div>
+</section>
+
+<!-- 03 ESTADO / OPORTUNIDAD -->
+<section>
+  <div class="secnum">03</div>
+  <h2>Estado actual y metas a 90 días</h2>
+  <p class="lede">Partimos casi de cero en go-to-market: no hay pitch armado, no hay precio fijo cerrado, no hay redes de Momentum, no hay casos de éxito documentados con ads. Eso es lo que construimos.</p>
+  <table>
+    <thead><tr><th>Indicador</th><th>Hoy</th><th>Meta a 90 días</th></tr></thead>
+    <tbody>
+      <tr><td>Pauta mensual</td><td class="tbmeta">$300</td><td class="tbmeta">$600 (al validar ganadores)</td></tr>
+      <tr><td>Precio de oferta (setup)</td><td class="tbmeta">Sin definir</td><td class="tbmeta">$500 → $1.000</td></tr>
+      <tr><td>Fee mensual recurrente</td><td class="tbmeta">Sin definir</td><td class="tbmeta">$150 → $200</td></tr>
+      <tr><td>Costo por adquisición</td><td class="tbmeta">Desconocido</td><td class="tbmeta">≤ $150 por venta</td></tr>
+      <tr><td>Clientes pagando</td><td class="tbmeta">0 (1 prueba)</td><td class="tbmeta">3 – 5 con caso documentado</td></tr>
+      <tr><td>Redes de marca Momentum</td><td class="tbmeta">No existen</td><td class="tbmeta">FB + IG activas</td></tr>
+      <tr><td>Ganadores de ads identificados</td><td class="tbmeta">0</td><td class="tbmeta">≥ 2 estables</td></tr>
+      <tr><td>MRR recurrente</td><td class="tbmeta">$0</td><td class="tbmeta">$450 – $750</td></tr>
+    </tbody>
+  </table>
+  <p>El truco del modelo: el setup fee paga la pauta y la comisión, pero el <strong>fee mensual se acumula</strong> y se atribuye al mismo anuncio que generó el cliente. Cada venta retenida es ROAS que crece mes a mes sin gastar un peso más en pauta.</p>
+</section>
+
+<!-- 04 ICP -->
+<section>
+  <div class="secnum">04</div>
+  <h2>Cliente ideal</h2>
+  <p class="lede">El dolor es universal: quien necesita un chatbot es porque ya corre ads, le entra mucho flujo de mensajes y gasta tiempo (propio o de vendedores) contestando. Con ticket de $500 le podemos vender a casi cualquiera — pero priorizamos por volumen de mensajes y facturación.</p>
+
+  <div class="icp">
+    <div class="rank mono">Prioridad 01 — arranque amplio</div>
+    <h4>Negocios con alto volumen de mensajes que ya pautan</h4>
+    <div class="row"><div class="k">Decisor</div><div class="v">Dueño o gerente, 30–55 años, GAM y resto de Costa Rica.</div></div>
+    <div class="row"><div class="k">Dolor #1</div><div class="v">"Me entran cientos de mensajes al día y se me caen ventas por no contestar a tiempo." Vendedores carísimos contestando preguntas simples.</div></div>
+    <div class="row"><div class="k">Señal de compra</div><div class="v">Ya invierte en ads. Tiene 1+ vendedores dedicados a WhatsApp. Mensajes repetitivos de bajo valor.</div></div>
+    <div class="row"><div class="k">Mensaje</div><div class="v">"¿Sabés cuánta plata perdés por no contestar a tiempo? Un sistema que contesta como vos, califica y agenda — 24/7."</div></div>
+  </div>
+
+  <div class="icp">
+    <div class="rank mono">Prioridad 02 — al subir ticket</div>
+    <h4>Salud: clínicas dentales, fisioterapeutas, médicos</h4>
+    <div class="row"><div class="k">Decisor</div><div class="v">Doctor(a) o dueño de clínica. Factura bien, no le duele pagar.</div></div>
+    <div class="row"><div class="k">Dolor #1</div><div class="v">No da abasto agendando citas; pierde pacientes por respuesta lenta; no-shows sin seguimiento.</div></div>
+    <div class="row"><div class="k">Por qué después</div><div class="v">El costo por conversación en salud es alto. Con solo $300 de pauta se generan pocas conversaciones. Mejor entrar acá cuando ya haya casos de éxito y presupuesto para subir ticket.</div></div>
+    <div class="row"><div class="k">Upsell natural</div><div class="v">Módulo de citas + pacientes, asistente de voz con ElevenLabs (WhatsApp API), audios automáticos.</div></div>
+  </div>
+
+  <div class="icp">
+    <div class="rank mono">Prioridad 03 — expansión</div>
+    <h4>Inmobiliarias y constructoras</h4>
+    <div class="row"><div class="k">Decisor</div><div class="v">Dueño o desarrollador. De mil mensajes saca un proyecto que paga todo.</div></div>
+    <div class="row"><div class="k">Dolor #1</div><div class="v">Volumen brutal de leads basura mezclados con uno bueno; nadie los califica.</div></div>
+    <div class="row"><div class="k">Por qué encaja</div><div class="v">Módulo de propiedades ya planeado: el bot enseña inmuebles con fotos en la conversación. La relación volumen-de-mensajes vs. proyectos cerrados hace el ROI obvio.</div></div>
+  </div>
+
+  <div class="kicker mono">Fuera de alcance al inicio</div>
+  <ul class="clean">
+    <li><span class="n">—</span>Negocios que <b>no corren ads</b> y reciben pocos mensajes: no tienen el dolor, no pagan el fee.</li>
+    <li><span class="n">—</span>Clientes que solo quieren <b>la licencia del software</b> sin instalación ni acompañamiento — ahí no está el valor ni el margen.</li>
+    <li><span class="n">—</span>Tickets corporativos de <b>$3.000+</b>: entre más alto el ticket, más alto el CPA. Con el presupuesto de pauta que tenemos ($300/mes) no alcanza para vender ese ticket — habría que estar dispuesto a gastar $400–600 buscando al cliente correcto. Se retoman cuando subamos el presupuesto y validemos el funnel.</li>
+  </ul>
+</section>
+
+<!-- 05 LA OFERTA -->
+<section>
+  <div class="secnum">05</div>
+  <h2>La oferta — qué incluir</h2>
+  <p class="lede">El precio del ticket lo define el valor percibido, no el costo. El Ferrari y el Corolla pueden costar lo mismo y uno parece caro y el otro barato. Engordamos la oferta con bonuses que con Claude se producen en dos toques, y eso justifica subir el precio sin subir el costo real.</p>
+
+  <div class="offer">
+    <h3>Growth Machine · Setup Momentum</h3>
+    <div class="price"><span class="amt">$500</span><span class="per">pago único de instalación · precio de validación</span></div>
+    <p class="note">Con descuento agresivo en llamada: "si tomás acción hoy, queda en $600 desde $1.000" cuando subamos el ticket base.</p>
+    <ul class="stack">
+      <li><span>Entrevista de diagnóstico + definición de cliente ideal, dolores y reglas</span><span class="val">núcleo</span></li>
+      <li><span>Construcción del chatbot con prompt entrenado para hablar como el negocio</span><span class="val">núcleo</span></li>
+      <li><span>Configuración de calificación, etiquetado y hand-off automáticos</span><span class="val">núcleo</span></li>
+      <li><span>Agenda conversacional + registro de no-shows + seguimientos programados</span><span class="val">núcleo</span></li>
+      <li><span>Acceso al CRM con múltiples agentes y dashboard de métricas</span><span class="val">núcleo</span></li>
+      <li><span>Acompañamiento durante el período de implementación</span><span class="val">núcleo</span></li>
+      <li><span>Bonus: guía para vender por WhatsApp efectivamente</span><span class="val">+ valor</span></li>
+      <li><span>Bonus: plantillas de guiones y mensajes de seguimiento</span><span class="val">+ valor</span></li>
+      <li><span>Bonus: calculadora de ahorro vs. costo de vendedores (cargas, vacaciones)</span><span class="val">+ valor</span></li>
+    </ul>
+    <div class="total"><span class="l">Fee mensual recurrente</span><span class="r">$150/mes</span></div>
+    <p class="note">Mantiene las luces prendidas (tokens ~$100–180/mes según volumen, licencias). A partir del mes 4, modificaciones y mejoras pasan a fee de servicio preferencial (+$50). Escalonable por volumen: si pasa de X mensajes, se cobra adicional.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="ct">Cómo se justifica el precio</div>
+      <h4>Calculadora de ahorro</h4>
+      <p>En la llamada: un empleado son ~$600–1.000/mes de salario + cargas sociales (CCSS ~26%) + aguinaldo + vacaciones + incapacidades + el costo de entrenarlo y reemplazarlo si renuncia. Un bot a $150/mes hace el mismo trabajo 24/7 sin nada de eso. La calculadora a 12 meses cierra la venta sola.</p>
+    </div>
+    <div class="card">
+      <div class="ct">Puntos de dolor a tocar</div>
+      <h4>Tiempo, enfoque, escala</h4>
+      <p>El tiempo perdido contestando mensajes, el enfoque que se pierde, las ventas que se van a la competencia por respuesta lenta. Delegando eso, el dueño le dedica tiempo al negocio y crece.</p>
+    </div>
+    <div class="card">
+      <div class="ct">Upsells (post-venta)</div>
+      <h4>Features premium $10–20/mes</h4>
+      <p>Auto-etiquetar, auto-asignar, tracker de ventas, asistente de voz con ElevenLabs, website con un prompt vía Claude Code. Cada uno suma al recurrente.</p>
+    </div>
+    <div class="card">
+      <div class="ct">Programa de referidos</div>
+      <h4>Descuento por referral</h4>
+      <p>Link único por cliente. Quien refiere recibe descuento en su mensualidad; el referido entra con descuento. Crecimiento orgánico sin pauta adicional.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="ct">Modelo agencia — el otro canal de venta</div>
+    <p>La arquitectura permite que agencias de marketing usen Momentum como su toolkit: la agencia hace ads + setting + agendamiento y le da al cliente final acceso al CRM, sin que el cliente vea nunca la plataforma de Momentum. La agencia lo incluye en su fee. Es un canal B2B2C que multiplica el alcance sin tocar al consumidor final.</p>
+  </div>
+</section>
+
+<!-- 06 PRECIO Y ECONOMÍA -->
+<section>
+  <div class="secnum">06</div>
+  <h2>Estrategia de precio y economía del funnel</h2>
+  <p class="lede">La tensión central: vender caro da mejor margen y mejor cliente, pero exige tener $500–600 dispuestos a perder por venta en pauta. Hoy no los hay. Por eso arrancamos barato — para validar con el menor riesgo posible.</p>
+
+  <h3>Por qué empezamos en $500 y no en $1.000</h3>
+  <p>Vender caro encarece la pauta: para pegar una venta de $3.000 hay que estar dispuesto a gastar $400+ buscando al cliente correcto. Con solo $300/mes de presupuesto, esos $300 se pueden volver $600 si la primera venta no entra. A $500, el costo de adquisición es más barato y es más fácil pegar tres ventas. Esas tres ventas son los casos de éxito que después nos permiten subir precio y pauta.</p>
+
+  <h3>La economía de arranque: reinvertir, no repartir</h3>
+  <p>Objetivo realista del mes 1: <strong>que la venta pague la pauta</strong>. Si metemos $300 y sale una venta de $500, vamos bien. Pero la regla central del arranque es esta: <strong>nadie toca el dinero todavía</strong>. Todo el cash collected se reinvierte en el negocio (más pauta, más producción) hasta que esté estable y genere al menos <strong>$5.000 a $10.000</strong>. Las comisiones se trackean desde la primera venta — se calculan, se registran, se le debe a cada quien — pero no se pagan hasta cruzar ese umbral.</p>
+  <p>Repartición que se trackea desde el día uno (aunque no se pague aún). Los tres márgenes (60%) más la pauta (40%) consumen el 100% de cada venta — pero durante el arranque <strong>todo se reinvierte por igual</strong>, así que en la práctica la venta entera vuelve al negocio:</p>
+  <table>
+    <thead><tr><th>Concepto</th><th>% de la venta</th><th>Sobre venta de $500</th></tr></thead>
+    <tbody>
+      <tr><td>Comisión Kevin (ads + producción)</td><td class="tbmeta">20%</td><td class="tbmeta">$100 — se acumula</td></tr>
+      <tr><td>Margen Hans</td><td class="tbmeta">20%</td><td class="tbmeta">$100 — se acumula</td></tr>
+      <tr><td>Margen Pietro</td><td class="tbmeta">20%</td><td class="tbmeta">$100 — se acumula</td></tr>
+      <tr><td>Pauta (se reinvierte)</td><td class="tbmeta">40%</td><td class="tbmeta">$200</td></tr>
+    </tbody>
+  </table>
+  <p class="note" style="font-size:13.5px;color:var(--muted)">Mientras el negocio no esté estable, el cash collected vuelve a entrar como pauta y combustible de crecimiento. El 20% de Kevin, el 20% de Hans y el 20% de Pietro se contabilizan como deuda pendiente del negocio — se liquidan cuando se cruce el umbral de $5K–$10K. El fee mensual recurrente tampoco entra en comisión de nadie (ninguno influye en que el cliente se quede): queda íntegro para Momentum y refuerza el colchón que sostiene el crecimiento.</p>
+  <div class="callout">
+    <div class="ct">Por qué reinvertir y no repartir</div>
+    <p>Con $300 de pauta, sacar plata en cada venta mata el crecimiento antes de que arranque. Reinvirtiendo el cash collected, el presupuesto de pauta crece solo a partir de las primeras ventas — sin que Pietro tenga que volver a meter de su billetera. Cuando el negocio genere $5K–$10K de forma consistente, ahí sí se liquidan las comisiones acumuladas y se empieza a repartir margen real. El tracking transparente (cada venta, cada comisión registrada) mantiene la confianza entre los tres sin que nadie sienta que está trabajando gratis.</p>
+  </div>
+
+  <div class="callout">
+    <div class="ct">El switch de escala</div>
+    <p>Cuando el funnel diga "se vende fácil, la pauta funciona, la gente lo quiere": subimos el setup a $1.000 (con descuento en llamada a $600), el fee a $200, duplicamos la pauta a $600, y renegociamos el 20% de comisión hacia abajo porque el ticket más alto lo permite. La data del funcionamiento (CPA real, ROAS mínimo rentable) sale de los primeros 3 cierres.</p>
+  </div>
+
+  <h3>Cierre en la llamada</h3>
+  <p>El setting lo hace el bot de Momentum; el closing lo toman Pietro o Hans. Kevin no closea — solo sus propias ofertas. Tácticas de cierre: pago único $800 vs. dos tractos $1.200, descuento por acción inmediata, bonuses condicionados a tomar acción en la llamada. <strong>Sin formulario de filtro al inicio</strong>: dejamos que el chatbot haga lo suyo y califique en la conversación. La pregunta de facturación ("¿cuánto factura su negocio al mes?") la hace el bot o el setter, no un formulario previo — así no metemos fricción antes de tener data del funnel.</p>
+</section>
+
+<!-- 07 MARCA Y CANAL -->
+<section>
+  <div class="secnum">07</div>
+  <h2>Marca, vocero y canal</h2>
+  <p class="lede">Decisión tomada: corremos ads como marca Momentum, no como Hans persona. Y los voceros somos Hans y Kevin — ambos salimos en cámara.</p>
+  <div class="cards">
+    <div class="card">
+      <div class="ct">Por qué marca y no persona</div>
+      <h4>Momentum, no "Hans gurú"</h4>
+      <p>Construir marca personal exige contenido orgánico constante — otra bronca gigante. Una marca de producto productivizado solo necesita ads corriendo. La marca personal de Hans como gurú de IA para servicios de $5K–6K se construye después, en paralelo.</p>
+    </div>
+    <div class="card">
+      <div class="ct">Por qué Hans y Kevin en cámara</div>
+      <h4>Dos perfiles, dos ángulos</h4>
+      <p>Kevin aporta el tono comercial ("sistema comprobado que funciona") y Hans el respaldo técnico de quien construyó la herramienta. Salimos los dos y probamos qué persona y qué arranque conectan más con cada tipo de cliente.</p>
+    </div>
+  </div>
+  <div class="kicker mono">Setup de marca — semana 1</div>
+  <ul class="clean">
+    <li><span class="n">01</span>Crear cuentas de <b>Facebook e Instagram</b> a nombre de Momentum.</li>
+    <li><span class="n">02</span>Pedir a Claude el concepto de <b>~6 artes de contenido orgánico</b> para que el perfil no se vea vacío cuando entre tráfico.</li>
+    <li><span class="n">03</span>Acceso a Kevin en el <b>Business Suite</b> + logo y branding de Momentum para los videos.</li>
+    <li><span class="n">04</span>Landing existente de Momentum como destino (Hans ya armó una versión propia).</li>
+  </ul>
+
+  <h3>Estrategia de seguidores desde cero</h3>
+  <p>Un perfil con 8 seguidores y el grid vacío mata la conversión: el lead que llega del ad lo revisa antes de escribir. No necesitamos números grandes, necesitamos que <strong>se vea vivo y real</strong>. Reglas y tácticas, de menor a mayor esfuerzo:</p>
+  <ul class="clean">
+    <li><span class="n">01</span><b>Sembrar antes de pautar.</b> Antes del lanzamiento, subir los 6 artes + 2 o 3 reels (recortes de los mismos videos del ad). Un perfil con 9–12 piezas se ve establecido aunque sea nuevo. El feed nunca debe estar vacío cuando entre el primer clic.</li>
+    <li><span class="n">02</span><b>Reciclar el contenido del ad al orgánico.</b> Misma materia prima, dos usos: cada video que se graba para pauta se publica también como reel. El reel es hoy el formato que más alcance orgánico da en cuentas nuevas — el algoritmo lo muestra a no-seguidores, que es exactamente lo que necesitamos.</li>
+    <li><span class="n">03</span><b>Red de arranque manual.</b> Hans, Kevin, Pietro y allegados siguen la cuenta, comentan y comparten los primeros posts. 30–50 seguidores reales el día uno rompen el efecto "cuenta fantasma" y dan señal social al algoritmo.</li>
+    <li><span class="n">04</span><b>Seguir y comentar cuentas del nicho.</b> Negocios que ya pautan, grupos de emprendedores, dueños de retail/clínicas/inmobiliarias en CR. Comentarios de valor (no spam) en sus posts traen perfiles relevantes de vuelta a Momentum.</li>
+    <li><span class="n">05</span><b>Retargeting orgánico vía ads.</b> El tráfico de pauta que no escribe igual ve el perfil. Un % se queda siguiendo si el feed comunica valor. La pauta misma alimenta el orgánico — no son canales separados.</li>
+    <li><span class="n">06</span><b>Contenido que se guarda y se comparte.</b> Carruseles tipo "lo que te cuesta de verdad un empleado vs. un bot" o "5 mensajes que tu negocio está perdiendo hoy". Los guardados y compartidos son la señal que más sube el alcance — más que los likes.</li>
+  </ul>
+  <div class="callout">
+    <div class="ct">Meta realista de seguidores · 90 días</div>
+    <p>No perseguimos vanidad. La meta es un perfil que convierta: <strong>de 0 a ~300–500 seguidores reales del nicho</strong> en 90 días, con feed activo (3–4 piezas/semana entre reels reciclados y carruseles). El objetivo no es el número, es que el lead que llega del ad vea una marca creíble antes de escribir. Si el perfil convierte, 300 seguidores correctos valen más que 5.000 random.</p>
+  </div>
+</section>
+
+<!-- 08 PLAN DE CONTENIDO / ANGULOS -->
+<section>
+  <div class="secnum">08</div>
+  <h2>Plan de contenido — los ángulos</h2>
+  <p class="lede">Cinco videos por mes, cada uno con dos ganchos distintos (los primeros 3 segundos cambian), probados en formato Cámara Pro y POV. Resultado: ~10 variantes/mes. Mismo concepto, ejecución distinta — para que Meta no detecte repetición y baje el alcance.</p>
+
+  <div class="kicker mono">Reglas comunes</div>
+  <ul class="clean">
+    <li><span class="n">—</span><b>Duración:</b> 45–60 segundos, vertical 9:16 para celular.</li>
+    <li><span class="n">—</span><b>Gancho:</b> primeros 3 segundos = pregunta directa o tensión inmediata.</li>
+    <li><span class="n">—</span><b>Subtítulos en pantalla:</b> el 80% ve sin sonido.</li>
+    <li><span class="n">—</span><b>Sin precios en el video</b> — el precio se habla en llamada.</li>
+    <li><span class="n">—</span><b>Sin prueba social en TOFU</b> — los casos de éxito entran en mid-funnel cuando existan.</li>
+  </ul>
+
+  <div class="angle">
+    <div class="at mono">Ángulo 01 · El dinero que se fuga ahora mismo</div>
+    <h4>Lo que perdés por no contestar a tiempo</h4>
+    <p>El dolor central de no tener un sistema: cada mensaje sin responder es una venta que se va a la competencia. Es pérdida medible, pasa todos los días, y el negocio ni la ve.</p>
+    <ul class="hooks">
+      <li><span class="hn">1</span>"Cada mensaje que tardás en contestar es plata que se va con la competencia."</li>
+      <li><span class="hn">2</span>"Tu cliente preguntó precio a las 9pm. Le contestaste a las 8am. Ya compró en otro lado."</li>
+    </ul>
+    <p class="cta-line"><b>CTA:</b> Escribinos y te mostramos cuánto estás dejando sobre la mesa.</p>
+  </div>
+
+  <div class="angle">
+    <div class="at mono">Ángulo 02 · El costo real de un empleado</div>
+    <h4>Salario + cargas vs. un bot que no para</h4>
+    <p>El corazón de la oferta. Un empleado contestando WhatsApp cuesta salario + cargas sociales (CCSS, aguinaldo) + vacaciones + incapacidades + horario limitado. Un bot trabaja 24/7, los 365 días, sin pedir nada de eso. La comparación directa es demoledora cuando se pone en números.</p>
+    <ul class="hooks">
+      <li><span class="hn">1</span>"Un empleado: salario, cargas, aguinaldo, vacaciones, incapacidades. Un bot: ninguna de esas."</li>
+      <li><span class="hn">2</span>"¿Cuánto te cuesta de verdad la persona que contesta tu WhatsApp? Sumá las cargas."</li>
+    </ul>
+    <p class="cta-line"><b>CTA:</b> Te hacemos el cálculo de cuánto ahorrás. Escribinos.</p>
+  </div>
+
+  <div class="angle">
+    <div class="at mono">Ángulo 03 · El que nunca se enferma ni se va</div>
+    <h4>Trabaja 24/7, sin vacaciones ni incapacidades</h4>
+    <p>El giro de costo a confiabilidad. El empleado se va a las 6pm, se enferma, pide vacaciones, renuncia y hay que volver a entrenar. El bot contesta a las 11pm un domingo, no se incapacita, no renuncia, y atiende a 100 personas a la vez. Mismo trabajo, fracción del costo, cero dolores de cabeza.</p>
+    <ul class="hooks">
+      <li><span class="hn">1</span>"No pide vacaciones, no se incapacita, no renuncia. Y contesta a las 11pm de un domingo."</li>
+      <li><span class="hn">2</span>"Mientras tu vendedor duerme, este le cierra la venta al cliente que escribió de madrugada."</li>
+    </ul>
+    <p class="cta-line"><b>CTA:</b> Mirá los números para tu negocio. Mandanos un mensaje.</p>
+  </div>
+
+  <div class="angle">
+    <div class="at mono">Ángulo 04 · Romper la creencia</div>
+    <h4>No es el chatbot robótico que te imaginás</h4>
+    <p>Ataca la creencia incorrecta que frena la compra: "los chatbots se sienten falsos y espantan clientes". Diferenciación del bot que habla como humano y no pierde contexto.</p>
+    <ul class="hooks">
+      <li><span class="hn">1</span>"La gente odia los chatbots robóticos. Por eso hicimos uno que no se siente como uno."</li>
+      <li><span class="hn">2</span>"'No quiero un bot que espante a mis clientes.' Tranquilo — este habla como vos."</li>
+    </ul>
+    <p class="cta-line"><b>CTA:</b> Te mando una demo por WhatsApp para que lo veás hablar.</p>
+  </div>
+
+  <div class="angle">
+    <div class="at mono">Ángulo 05 · Demostración directa</div>
+    <h4>El sistema en acción</h4>
+    <p>El más directo, para quien ya casi decide. Demostración en pantalla: el bot calificando, etiquetando, agendando y registrando en tiempo real mientras el dueño hace otra cosa.</p>
+    <ul class="hooks">
+      <li><span class="hn">1</span>"Mirá lo que pasa cuando entra un mensaje: califica, agenda y registra solo."</li>
+      <li><span class="hn">2</span>"Esto contesta, filtra y agenda mientras vos dormís. En vivo."</li>
+    </ul>
+    <p class="cta-line"><b>CTA:</b> Quiero una demo para mi negocio. Escribinos.</p>
+  </div>
+
+  <div class="callout">
+    <div class="ct">Andromeda — regla creativa</div>
+    <p>Dos ads son idénticos para Meta si comparten los mismos 3 segundos iniciales, sin importar copy o CTA. Por eso cada gancho cambia el arranque visual. Iteramos sobre <strong>personas</strong> (Kevin vs. Hans, diferentes arranques) más que sobre tweaks de copy. Métricas guía: CPMR y % de visitantes nuevos.</p>
+  </div>
+</section>
+
+<!-- 09 PLAN 90 DIAS -->
+<section>
+  <div class="secnum">09</div>
+  <h2>Plan de 90 días</h2>
+  <p class="lede">Cuatro fases secuenciales. Cada una con entregables, foco y revisión semanal con Pietro y Hans.</p>
+  <div class="phases">
+    <div class="phase">
+      <div class="pd mono">Días 1–7</div>
+      <h4>Onboarding</h4>
+      <ul>
+        <li>Diagnóstico ya cerrado: el transcript de la llamada es el insumo</li>
+        <li>Cuentas FB + IG de Momentum (ya creadas)</li>
+        <li>6 artes orgánicos + acceso Business Suite</li>
+        <li>5 guiones aprobados</li>
+        <li>Sin formulario al inicio: el bot califica directo</li>
+        <li>Sistema listo para cliente prueba "Momentum"</li>
+        <li>Grabación sáb/dom · lista lun–mar</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="pd mono">Días 8–30</div>
+      <h4>Build</h4>
+      <ul>
+        <li>Lanzamiento primera tanda de ads ($300)</li>
+        <li>Monitoreo diario primeros 7 días</li>
+        <li>Sesión 1:1 lunes 10am</li>
+        <li>Primeros cierres y medición de CPA real</li>
+        <li>Registro de qué ad generó cada lead</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="pd mono">Días 31–60</div>
+      <h4>Optimize</h4>
+      <ul>
+        <li>Apagar ads que no rinden</li>
+        <li>Replicar ganadores con variantes</li>
+        <li>Segunda tanda de videos</li>
+        <li>Documentar primeros casos de éxito</li>
+        <li>Probar subir ticket a $700 en cierres fáciles</li>
+      </ul>
+    </div>
+    <div class="phase">
+      <div class="pd mono">Días 61–90</div>
+      <h4>Scale</h4>
+      <ul>
+        <li>Subir ticket base a $1.000 / fee $200</li>
+        <li>Duplicar pauta a $600 solo en ganadores</li>
+        <li>Campaña de casos de éxito (mid-funnel)</li>
+        <li>Renegociar % de comisión</li>
+        <li>Plan post-90 y expansión a nuevos nichos</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout">
+    <div class="ct">Sobre el presupuesto</div>
+    <p>Mantenemos $300/mes mientras aprendemos. No subimos pauta antes de tener ganadores claros — sería tirar plata. Solo escalamos sobre anuncios que traen ventas a buen costo, y de forma gradual (Meta penaliza subidas bruscas). Velocidad de iteración por encima de todo: si un ad sale caro, se cambia ya, no el otro mes.</p>
+  </div>
+</section>
+
+<!-- 10 METRICAS -->
+<section>
+  <div class="secnum">10</div>
+  <h2>Qué vamos a medir</h2>
+  <p class="lede">Cada lunes 10am, los mismos indicadores. Sin proyecciones falsas — números reales contra el objetivo. KPIs primarios: CPA y ROAS. Vanity metrics (impresiones, reach, likes) se deprioritizan.</p>
+  <ul class="clean">
+    <li><span class="n">01</span>Cuánto se gastó en ads esa semana, por campaña y por anuncio.</li>
+    <li><span class="n">02</span>Cuántas conversaciones llegaron y de qué anuncio vino cada una.</li>
+    <li><span class="n">03</span>Cuántas pasaron el filtro de facturación y llegaron a setting.</li>
+    <li><span class="n">04</span>Cuántas llamadas agendadas vs. show rate vs. no-shows.</li>
+    <li><span class="n">05</span>Cuántas ventas se cerraron y de qué anuncio vinieron.</li>
+    <li><span class="n">06</span><b>CPA</b> — cuánto costó en pauta cerrar cada venta.</li>
+    <li><span class="n">07</span><b>ROAS</b> incluyendo el MRR recurrente atribuido al anuncio.</li>
+    <li><span class="n">08</span>Top ganadores y candidatos a apagar.</li>
+  </ul>
+  <table>
+    <thead><tr><th>Indicador</th><th>Hoy</th><th>Meta día 90</th></tr></thead>
+    <tbody>
+      <tr><td>Ventas cerradas / mes</td><td class="tbmeta">0</td><td class="tbmeta">3 – 5</td></tr>
+      <tr><td>CPA</td><td class="tbmeta">—</td><td class="tbmeta">≤ $150</td></tr>
+      <tr><td>MRR acumulado</td><td class="tbmeta">$0</td><td class="tbmeta">$450 – $750</td></tr>
+      <tr><td>Ganadores estables</td><td class="tbmeta">0</td><td class="tbmeta">≥ 2</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Proyección del funnel con $300/mes</h3>
+  <p>Esta proyección se basa en benchmarks de campañas click-to-WhatsApp en Latinoamérica y de lead-gen B2B de software/servicios, ajustados a la realidad de Costa Rica. <strong>No es promesa, es escenario de trabajo</strong> para saber si los $300 dan o no dan, y dónde apretar.</p>
+  <p class="note" style="font-size:13.5px;color:var(--muted);margin-bottom:18px">Referencias: en LATAM el costo por conversación click-to-WhatsApp suele estar por debajo de $0,50; el ICP-1 nuestro (negocios que ya pautan) es más barato de alcanzar que un nicho de salud o un lead-form B2B US ($60–250 por lead). Los anuncios click-to-WhatsApp abren 72h gratis de mensajería, lo que reduce costo de tokens. Por eso usamos rangos conservador / realista / optimista.</p>
+  <table>
+    <thead><tr><th>Métrica del embudo</th><th>Conservador</th><th>Realista</th><th>Optimista</th></tr></thead>
+    <tbody>
+      <tr><td>Pauta mensual</td><td class="tbmeta">$300</td><td class="tbmeta">$300</td><td class="tbmeta">$300</td></tr>
+      <tr><td>Costo por conversación</td><td class="tbmeta">$1,50</td><td class="tbmeta">$0,90</td><td class="tbmeta">$0,50</td></tr>
+      <tr><td>Conversaciones / mes</td><td class="tbmeta">200</td><td class="tbmeta">333</td><td class="tbmeta">600</td></tr>
+      <tr><td>% calificados (bot filtra)</td><td class="tbmeta">15%</td><td class="tbmeta">20%</td><td class="tbmeta">25%</td></tr>
+      <tr><td>Leads calificados / mes</td><td class="tbmeta">30</td><td class="tbmeta">67</td><td class="tbmeta">150</td></tr>
+      <tr><td>% que agenda llamada</td><td class="tbmeta">25%</td><td class="tbmeta">30%</td><td class="tbmeta">35%</td></tr>
+      <tr><td>Llamadas agendadas</td><td class="tbmeta">8</td><td class="tbmeta">20</td><td class="tbmeta">53</td></tr>
+      <tr><td>Show rate</td><td class="tbmeta">60%</td><td class="tbmeta">70%</td><td class="tbmeta">75%</td></tr>
+      <tr><td>% de cierre sobre show</td><td class="tbmeta">20%</td><td class="tbmeta">25%</td><td class="tbmeta">30%</td></tr>
+      <tr><td>Ventas / mes</td><td class="tbmeta">1</td><td class="tbmeta">3 – 4</td><td class="tbmeta">11</td></tr>
+      <tr><td>CPA (pauta ÷ ventas)</td><td class="tbmeta">$300</td><td class="tbmeta">$75 – $100</td><td class="tbmeta">$27</td></tr>
+      <tr><td>Ingreso mes 1 (setup $500)</td><td class="tbmeta">$500</td><td class="tbmeta">$1.500 – $2.000</td><td class="tbmeta">$5.500</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <div class="ct">Cómo leer la proyección</div>
+    <p>El escenario <strong>conservador</strong> es la línea roja: 1 venta paga la pauta y casi nada más — ahí estamos aprendiendo, no ganando, y es aceptable el mes 1. El <strong>realista</strong> (3–4 ventas, CPA ~$75–100) es donde el modelo empieza a tener sentido y se justifica subir ticket. El <strong>optimista</strong> asume que pegamos un ángulo ganador rápido. El número que define todo es el <strong>CPA</strong>: si una venta de $500 cuesta menos de $250 en pauta, el funnel es rentable y se escala. Cuidado: el cuello de botella más probable no será la pauta, será el <strong>show rate y el cierre</strong> — igual que pasó en Givi, donde los no-shows fueron el problema, no los mensajes.</p>
+  </div>
+  <div class="callout">
+    <div class="ct">Nota sobre proyecciones</div>
+    <p>No ponemos metas semanales artificiales. El crecimiento no es lineal: los primeros 30 días son de aprendizaje, los segundos de optimización, los últimos de salto. Lo importante es saber cada lunes exactamente dónde estamos parados y qué ajustar.</p>
+  </div>
+</section>
+
+<!-- 11 RIESGOS -->
+<section>
+  <div class="secnum">11</div>
+  <h2>Riesgos y mitigaciones</h2>
+  <table>
+    <thead><tr><th>Riesgo</th><th>Prob.</th><th>Impacto</th><th>Mitigación</th></tr></thead>
+    <tbody>
+      <tr><td>La pauta se quema sin generar ventas</td><td class="tbmeta">Media</td><td class="tbmeta">Alto</td><td>Ticket bajo ($500) mantiene el CPA bajo y permite más intentos con los mismos $300. Monitoreo diario los primeros 7 días: si un ad sale caro, se apaga de inmediato — no se espera al otro mes.</td></tr>
+      <tr><td>Ticket de $500 no soporta fee mensual de $150</td><td class="tbmeta">Media</td><td class="tbmeta">Medio</td><td>Opción de bajar fee a $100–150 para clientes con menos capital; escalonar por volumen de mensajes.</td></tr>
+      <tr><td>El bot confunde términos o pierde calidad</td><td class="tbmeta">Media</td><td class="tbmeta">Medio</td><td>El fee mensual cubre ajuste continuo de prompt — es justamente lo que mantiene al cliente pagando.</td></tr>
+      <tr><td>Saturación creativa antes del mes 2</td><td class="tbmeta">Media</td><td class="tbmeta">Medio</td><td>5 videos en pipeline siempre, rotación de ganchos y personas desde el día 1.</td></tr>
+      <tr><td>Costo de tokens más alto de lo previsto</td><td class="tbmeta">Media</td><td class="tbmeta">Medio</td><td>Hans mueve los procesos secundarios (extracción de datos) a un modelo más económico; el fee cubre el costo real.</td></tr>
+      <tr><td>Nicho de salud encarece la conversación</td><td class="tbmeta">Alta</td><td class="tbmeta">Bajo</td><td>Arrancamos amplio; salud entra cuando haya casos y presupuesto para subir ticket.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- 12 PROXIMOS PASOS -->
+<section style="border-bottom:none">
+  <div class="secnum">12</div>
+  <h2>Próximos pasos</h2>
+  <p class="lede">Esto es un trabajo entre socios, no con un cliente. Hans y Pietro dieron luz verde para hacer lo que se necesite. El diagnóstico ya está en el transcript de la llamada — no hay llamada de diagnóstico aparte.</p>
+  <ul class="btnsteps">
+    <li><div class="d mono">Listo</div><div class="t">Grupo de WhatsApp con Kevin, Pietro y Hans creado. Transcript y assets compartidos.</div></li>
+    <li><div class="d mono">Listo</div><div class="t">Cuentas de Facebook e Instagram de Momentum creadas.</div></li>
+    <li><div class="d mono">Lado Momentum</div><div class="t">Hans deja el sistema funcionando para el cliente prueba "Momentum" y configura el setting.</div></li>
+    <li><div class="d mono">Lado Momentum</div><div class="t">Compartir acceso al Business Suite, logo, branding y URL de la landing con Kevin + 6 artes orgánicos.</div></li>
+    <li><div class="d mono">Kevin · sáb–dom</div><div class="t">Grabación de la primera tanda de videos (Hans + Kevin en cámara, 5 ángulos × 2 ganchos).</div></li>
+    <li><div class="d mono">Kevin · lun–mar</div><div class="t">Edición lista, ads cargados al Business Manager de Momentum.</div></li>
+    <li><div class="d mono">Lanzamiento</div><div class="t">Primera tanda al aire con $300 de pauta, sin formulario. Monitoreo diario.</div></li>
+  </ul>
+  <div class="callout">
+    <div class="ct">Acuerdo de trabajo</div>
+    <p>Aunque es un proyecto entre socios por comisión y no por fee, se trabaja con el mismo estándar y orden que un cliente pagado: documentos de por medio, estrategia clara, revisión semanal los lunes 10am. La comisión arranca en 20% de la venta (cash collected del mes), renegociable a la baja cuando el ticket suba. Mientras el negocio no esté estable ($5K–$10K), las comisiones se trackean pero no se pagan — todo se reinvierte. El presupuesto de pauta inicial corre por cuenta de Momentum.</p>
+  </div>
+</section>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-inner">
+    <div class="sig serif">Kevin Herra</div>
+    <div class="role">Growth Partner · GrowX Partners · Programa Growth Machine</div>
+    <div class="meta">
+      Revisión semanal · Lunes 10am · Grupo de WhatsApp "Momentum · Marketing" (activo)<br>
+      Producto: Momentum — CRM conversacional con IA · Hans Villalobos + Pietro Sudsassi<br>
+      Validación en Costa Rica con $300 de pauta · escala al confirmar ganadores
+    </div>
+    <div class="doctag mono">Estrategia V1 · 2026 · Momentum · Documento confidencial</div>
+  </div>
+</div>
+
+</body>
+</html>

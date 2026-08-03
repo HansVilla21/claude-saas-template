@@ -1,0 +1,696 @@
+{
+  "name": "Template TEST",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## FLUJO DE PRUEBAS - CHAT INTERNO N8N\n\nEste workflow es una version simplificada para probar rapidamente la logica del chatbot sin necesidad de Telegram, ManyChat, ni webhooks externos.\n\n**Uso:** Activar el workflow, abrir el chat de n8n (esquina inferior derecha), y escribir mensajes.\n\n**Que incluye:** Router + Agentes + Memoria Postgres.\n**Que NO incluye:** Airtable, Redis batching, formateador, envio a canales externos.",
+        "height": 220,
+        "width": 420,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        140
+      ],
+      "id": "b1a2c3d4-note-0001-8000-000000000001",
+      "name": "Nota - Flujo de Pruebas"
+    },
+    {
+      "parameters": {
+        "content": "## LECTURA Y FORMATEO DEL HISTORIAL\n\n1. Postgres: lee el historial del usuario por sessionId\n2. Code: formatea como \"Usuario: ... / Bot: ...\"\n3. Unificar: deja el historial listo para el Clasificador\n\n**Por que:** El router necesita el historial completo para tomar decisiones contextuales (ej: \"esta es la primera objecion o ya hubo una?\").",
+        "height": 200,
+        "width": 440,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        360,
+        160
+      ],
+      "id": "b1a2c3d4-note-0002-8000-000000000002",
+      "name": "Nota - Historial"
+    },
+    {
+      "parameters": {
+        "content": "## CORAZON DEL SISTEMA - ROUTING\n\nEl Clasificador (Information Extractor) decide que agente responde basandose en historial + mensaje actual.\n\n**Output obligatorio:** `{ destino: \"...\", motivo: \"...\", datos_extraidos: {...} }`\n\nEl Enrutador (Switch) lee `$json.output.destino` y manda al agente correcto.\n\n**CRITICO:** El prompt del Clasificador define TODO el comportamiento del routing. Si rutea mal, el chatbot entero falla.",
+        "height": 220,
+        "width": 440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        820,
+        120
+      ],
+      "id": "b1a2c3d4-note-0003-8000-000000000003",
+      "name": "Nota - Routing"
+    },
+    {
+      "parameters": {
+        "content": "## AGENTES AI\n\n- **Agente Principal**: flujo normal (discovery, educacion, calificacion, cierre)\n- **Agente de Objeciones**: maneja UNA objecion con framework LAARC\n- **BACKUP**: si el router devuelve output vacio, por defecto va al Principal\n\nCada agente tiene su propia memoria Postgres (context window 15).\n\nEn esta version TEST, los agentes son TERMINALES — su output se muestra directo en el chat de n8n.",
+        "height": 220,
+        "width": 440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        200
+      ],
+      "id": "b1a2c3d4-note-0004-8000-000000000004",
+      "name": "Nota - Agentes"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        400
+      ],
+      "id": "b1a2c3d4-0001-4000-8000-000000000001",
+      "name": "Chat de Pruebas (n8n)",
+      "webhookId": "f4e5d6c7-test-chat-trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1b2c3d4-test-0001-8000-000000000001",
+              "name": "Historial de conversación",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-test-0002-8000-000000000002",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "a1b2c3d4-test-0003-8000-000000000003",
+              "name": "Telefono",
+              "value": "={{ $json.sessionId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        400
+      ],
+      "id": "b1a2c3d4-0002-4000-8000-000000000002",
+      "name": "Setear Variables Iniciales"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list",
+          "cachedResultName": "n8n_chat_histories"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('Chat de Pruebas (n8n)').item.json.sessionId }}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        380,
+        400
+      ],
+      "id": "c3f8a1b2-test-4a00-8b00-000000000101",
+      "name": "Leer Historial (Postgres)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Postgres"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\n// Devuelve 1 item con { conversation_text, total_messages, session_id }\n\nfunction getArrayFromAny(items) {\n  // Caso: un solo item con el array en root o en alguna clave\n  const first = items[0]?.json;\n\n  const isArr = (v) => Array.isArray(v);\n  const tryParse = (s) => { try { return JSON.parse(s); } catch { return null; } };\n\n  // 1) Array directo en el root del json\n  if (isArr(first)) return first;\n\n  // 2) Array en claves comunes\n  const candidatesObj = [first?.messages, first?.conversation, first?.data];\n  for (const c of candidatesObj) if (isArr(c)) return c;\n\n  // 3) Array como string JSON en claves comunes\n  const candidatesStr = [first?.raw, first?.raw_json, first?.input, first?.payload, first?.body];\n  for (const c of candidatesStr) {\n    if (typeof c === 'string') {\n      const parsed = tryParse(c);\n      if (isArr(parsed)) return parsed;\n    }\n  }\n\n  // 4) Si nada de lo anterior: asume que cada item ES un registro de mensaje\n  const asItems = items.map(it => it.json).filter(x => x && x.message);\n  if (asItems.length) return asItems;\n\n  // 5) fallback vacío\n  return [];\n}\n\n// ---------- CONFIG OPCIONAL ----------\nconst TARGET_SESSION_ID = null; // e.g., \"7764470220\" para filtrar; déjalo en null para no filtrar\nconst PREFIX_USUARIO = 'Usuario';\nconst PREFIX_BOT = 'Bot';\n// -------------------------------------\n\nconst items = $input.all();\nlet records = getArrayFromAny(items);\n\n// Filtra y ordena\nrecords = records\n  .filter(r => r?.message?.type && r?.message?.content != null)\n  .filter(r => !TARGET_SESSION_ID || r.session_id === TARGET_SESSION_ID)\n  .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));\n\n// --- Limpieza de contenido personalizada ---\nconst strip = (txt) => {\n  if (typeof txt !== 'string') return '';\n\n  let out = txt;\n\n  // 1) Cortar todo lo que venga desde \"# Datos recopilados hasta el momento\"\n  //    (ignorando mayúsculas/minúsculas y espacios)\n  const markerRegex = /#\\s*datos recopilados hasta el momento/i;\n  const markerMatch = out.match(markerRegex);\n  if (markerMatch) {\n    out = out.slice(0, markerMatch.index);\n  }\n\n  // 2) Si trae el encabezado \"# Mensaje del usuario\", quitamos las líneas que empiezan con \"#\"\n  const hasUserHeader = /#\\s*mensaje del usuario/i.test(out);\n  if (hasUserHeader) {\n    out = out\n      .split('\\n')\n      .filter(line => !line.trim().startsWith('#'))\n      .join('\\n');\n  }\n\n  // 3) Limpieza general\n  return out\n    .replace(/^\\s*(Mensasje|Mensaje)\\s*:\\s*/i, '') // por si algún día viene así\n    .replace(/  \\n/g, '\\n')\n    .replace(/[ \\t]+\\n/g, '\\n')\n    .trim();\n};\n\nconst role = (type) => (type === 'human' ? PREFIX_USUARIO : (type === 'ai' ? PREFIX_BOT : String(type)));\n\nconst lines = [];\nfor (const r of records) {\n  const content = strip(r.message.content);\n  if (!content) continue;\n  lines.push(`${role(r.message.type)}: ${content}`);\n}\n\nreturn [{\n  json: {\n    conversation_text: lines.join('\\n'),\n    total_messages: lines.length,\n    session_id: TARGET_SESSION_ID || (records[0]?.session_id ?? null),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        400
+      ],
+      "id": "c3f8a1b2-test-4a00-8b00-000000000102",
+      "name": "Formatear Historial"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c3f8a1b2-test-unif-0001-000000000001",
+              "name": "Historial de conversación",
+              "value": "={{ $json.conversation_text }}",
+              "type": "string"
+            },
+            {
+              "id": "c3f8a1b2-test-unif-0002-000000000002",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $('Setear Variables Iniciales').first().json['Mensaje actual del usuario'] }}",
+              "type": "string"
+            },
+            {
+              "id": "c3f8a1b2-test-unif-0003-000000000003",
+              "name": "Telefono",
+              "value": "={{ $('Setear Variables Iniciales').first().json.Telefono }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        660,
+        400
+      ],
+      "id": "c3f8a1b2-test-4a00-8b00-000000000103",
+      "name": "Unificar Variables"
+    },
+    {
+      "parameters": {
+        "text": "=# Historial de conversacion\n{{ $json['Historial de conversación'] }}\n\n# Mensaje actual del usuario\n{{ $json['Mensaje actual del usuario'] }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"destino\": \"{{AGENTE_PRINCIPAL_NOMBRE}}\",\n  \"motivo\": \"descripcion breve\",\n  \"datos_extraidos\": {\n    \"nombre\": null,\n    \"objeciones_count\": 0,\n    \"ultima_objecion\": null,\n    \"fase_conversacion\": \"saludo\"\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "# CLASIFICADOR DE MENSAJES — {{NOMBRE_EMPRESA}}\n\n## FORMATO DE OUTPUT OBLIGATORIO (LEER PRIMERO)\n\nTu output SIEMPRE debe ser un objeto JSON valido. NUNCA YAML. NUNCA texto. NUNCA markdown. SOLO JSON.\n\nA continuacion la ESTRUCTURA de los campos (listado en YAML solo para visualizacion — devuelve JSON):\n\ndestino: \"{{AGENTE_PRINCIPAL_NOMBRE}}\"\nmotivo: \"descripcion breve\"\ndatos_extraidos:\n  nombre: null\n  (agregar mas campos segun discovery)\n  objeciones_count: 0\n  ultima_objecion: null\n  fase_conversacion: \"saludo\"\n\n### NOMBRES DE CAMPOS — NO NEGOCIABLES\n\nEl campo principal se llama EXACTAMENTE: destino\n\nPROHIBIDO renombrarlo. Variantes PROHIBIDAS:\n❌ agente, agente_asignado, agente_destino, decision, ruta, routing\n\n✅ SOLO: destino\n\n---\n\n## ROL\nSos un clasificador. Analizas historial + mensaje actual para decidir que agente responde.\n\n## AGENTES DISPONIBLES\n- {{AGENTE_PRINCIPAL_NOMBRE}} (default)\n- AGENTE_OBJECIONES\n- HANDOFF_HUMANO\n\n## CRITERIO: PREGUNTA vs OBJECION vs CORRECCION\n\nPREGUNTA → {{AGENTE_PRINCIPAL_NOMBRE}}\nCORRECCION/AFIRMACION → {{AGENTE_PRINCIPAL_NOMBRE}} (aunque empiece con \"no\")\nOBJECION → AGENTE_OBJECIONES (primera vez)\nSEGUNDA OBJECION → HANDOFF_HUMANO\n\n(Completar con ejemplos especificos del cliente al implementar)\n\n## REGLAS DE DECISION\n1. Objecion y objeciones_count == 0 → AGENTE_OBJECIONES\n2. Segunda objecion, pide humano, frustrado → HANDOFF_HUMANO\n3. Todo lo demas → {{AGENTE_PRINCIPAL_NOMBRE}}\n\nJSON puro. Sin markdown. Sin backticks."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        400
+      ],
+      "id": "b1a2c3d4-0003-4000-8000-000000000003",
+      "name": "Clasificador / Orquestador"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 300,
+          "responseFormat": "json_object",
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        900,
+        620
+      ],
+      "id": "b1a2c3d4-0004-4000-8000-000000000004",
+      "name": "LLM del Clasificador",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "{{AGENTE_PRINCIPAL_NOMBRE}}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b1a2c3d4-switch-0001-8000-000000000001"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "{{AGENTE_PRINCIPAL_NOMBRE}}"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b1a2c3d4-switch-0002-8000-000000000002",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "AGENTE_OBJECIONES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AGENTE_OBJECIONES"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b1a2c3d4-switch-0003-8000-000000000003",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "HANDOFF_HUMANO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HANDOFF_HUMANO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b1a2c3d4-switch-0004-8000-000000000004",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BACKUP"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1140,
+        400
+      ],
+      "id": "b1a2c3d4-0005-4000-8000-000000000005",
+      "name": "Enrutador de Agentes"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Setear Variables Iniciales').first().json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "# AGENTE PRINCIPAL — {{NOMBRE_EMPRESA}}\n\n## IDENTIDAD\nSos {{BOT_NOMBRE}}, {{BOT_ROL}} de {{NOMBRE_EMPRESA}}.\n\nFecha actual: 2026-04-17\n\n## OBJETIVO\n{{OBJETIVO_PRINCIPAL}}\n\n## INFORMACION DEL NEGOCIO\n{{INFO_NEGOCIO}}\n\n## FLUJO CONVERSACIONAL\n(Adaptar segun discovery del cliente)\n\n## REGLAS CRITICAS\n1. Max 3-4 lineas por mensaje\n2. UNA pregunta por mensaje\n3. Puntuacion informal (sin :, sin ;, sin ¿)\n4. Cierre en 2 pasos (proponer → esperar confirmacion → enviar link)\n5. Variar mensajes repetidos\n6. No prometer material que no existe\n\n## CIERRE EN 2 PASOS\nPASO 5A: Proponer (sin link)\nPASO 5B: Enviar link (solo tras confirmacion afirmativa)\n\n(Completar con detalles del cliente)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        200
+      ],
+      "id": "b1a2c3d4-0006-4000-8000-000000000006",
+      "name": "Agente Principal"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        440
+      ],
+      "id": "b1a2c3d4-0007-4000-8000-000000000007",
+      "name": "LLM del Agente Principal",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Setear Variables Iniciales').first().json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1200,
+        440
+      ],
+      "id": "b1a2c3d4-0008-4000-8000-000000000008",
+      "name": "Memoria - Principal",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Setear Variables Iniciales').first().json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "# AGENTE OBJECIONES — {{NOMBRE_EMPRESA}}\n\nSeguis siendo {{BOT_NOMBRE}}. Manejas UNA objecion con framework LAARC.\n\n## LAARC\nL - Listen: mostrar que escuchaste\nA - Acknowledge: validar la preocupacion\nA - Assess: preguntar causa raiz\nR - Respond: estrategia segun tipo\nC - Confirm: verificar que quedo resuelto\n\nTodo en UN mensaje fluido, max 4 lineas.\n\n## OBJECIONES COMUNES\n- Precio/caro\n- Timing/no es momento\n- Miedo/desconfianza\n\n## REGLAS\n1. NUNCA coordinar fecha/hora directamente — usar link\n2. NUNCA ofrecer descuento\n3. NUNCA defender agresivamente\n4. SIEMPRE terminar con pregunta de confirmacion\n\n(Completar con objeciones especificas del cliente)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        560
+      ],
+      "id": "b1a2c3d4-0009-4000-8000-000000000009",
+      "name": "Agente de Objeciones (LAARC)"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        800
+      ],
+      "id": "b1a2c3d4-0010-4000-8000-000000000010",
+      "name": "LLM del Agente de Objeciones",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Setear Variables Iniciales').first().json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1200,
+        800
+      ],
+      "id": "b1a2c3d4-0011-4000-8000-000000000011",
+      "name": "Memoria - Objeciones",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1a2c3d4-handoff-0001-8000-000000000001",
+              "name": "output",
+              "value": "Gracias por tu mensaje. Voy a pasarte con un miembro del equipo para que te ayude directamente.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        920
+      ],
+      "id": "b1a2c3d4-0012-4000-8000-000000000012",
+      "name": "Mensaje de Handoff"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Chat de Pruebas (n8n)": {
+      "main": [
+        [
+          {
+            "node": "Setear Variables Iniciales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setear Variables Iniciales": {
+      "main": [
+        [
+          {
+            "node": "Leer Historial (Postgres)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Historial (Postgres)": {
+      "main": [
+        [
+          {
+            "node": "Formatear Historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Historial": {
+      "main": [
+        [
+          {
+            "node": "Unificar Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificar Variables": {
+      "main": [
+        [
+          {
+            "node": "Clasificador / Orquestador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificador / Orquestador": {
+      "main": [
+        [
+          {
+            "node": "Enrutador de Agentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Clasificador": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Clasificador / Orquestador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrutador de Agentes": {
+      "main": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente de Objeciones (LAARC)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensaje de Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Agente Principal": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria - Principal": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Agente de Objeciones": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Objeciones (LAARC)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria - Objeciones": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente de Objeciones (LAARC)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b1a2c3d4-template-test-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "id": "PLACEHOLDER_WORKFLOW_ID",
+  "tags": []
+}
