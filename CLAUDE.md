@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        62 skills de proceso reusables:
+│   └── skills/        69 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -193,6 +193,25 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      deploy-seguro-vercel-preview-prod (preview→prod sin romper),
 │                      ingesta-email-cloudflare-worker (forwarding → Worker → Edge
 │                      Function, idempotente, por usuario, nunca botar).
+│                      Tier 16 — Finanzas + Auth/Onboarding SaaS (7, capturadas
+│                      2026-06-18/20 de Mi Menudo): dinero-multimoneda-app-financiera
+│                      (precisión decimal + moneda nativa por cuenta + saldo en vivo;
+│                      evita "plata fantasma") + tipo-de-cambio-real-bccr-hacienda
+│                      (FX real CR vía BCCR/Hacienda JSON sin API key, endpoint propio
+│                      + caché + fallback; nunca hardcodear el tipo de cambio) +
+│                      supabase-google-login-movil-vs-desktop (login Google+Supabase
+│                      en SPA: GIS/signInWithIdToken en desktop vs OAuth redirect en
+│                      móvil —la sesión no se establecía en el cel y rebotaba al login) +
+│                      gmail-forwarding-auto-confirm (auto-confirmar el reenvío de Gmail
+│                      server-side; el usuario no toca el link de confirmación) +
+│                      onboarding-estado-server-side (estado de onboarding desde señales
+│                      reales del server, NO localStorage por-dispositivo —reaparecía como
+│                      cuenta nueva en otro device) + ui-distintiva-no-ai-default (no caer
+│                      en el "default genérico de IA" al crear/rediseñar landing o UI;
+│                      distintivo y de alta calidad desde la v1) + reskin-marca-coherente
+│                      (migrar un template heredado a una marca propia coherente: auditar
+│                      la capa de tokens + cazar overrides de --accent en runtime + barrer
+│                      colores hardcodeados; landing == app).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
