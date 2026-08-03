@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        33 skills de proceso reusables:
+│   └── skills/        62 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -177,6 +177,22 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      la policy de SELECT y la de WRITE de la MISMA tabla
 │                      mirando fuentes de verdad distintas (el rol VE y hace
 │                      clic, no pasa nada, sin error).
+│                      Tier 14 — SaaS/Scraping patterns (3, capturadas 2026-06-11,
+│                      de Hookly): async-job-pattern (UI→job→worker→polling+refund
+│                      créditos), apify-integration-pattern (fetch directo,
+│                      normalización -1/null, ScraperError tipado),
+│                      debugging-silent-errors (console.error estructurado,
+│                      reproducir antes de instrumentar, error codes).
+│                      Tier 15 — Auth/UX/Deploy SaaS (5, capturadas 2026-06-18, de Mi Menudo):
+│                      auth-supabase-google-nativo (email/clave + Google nativo GIS que
+│                      muestra tu dominio + fix 'Database error saving new user'),
+│                      prototipo-ui-a-datos-reales (conectar un prototipo mock a Supabase
+│                      sin reescribir la UI; perfil real + derivados en vivo),
+│                      embudo-activacion-saas (diseñar el camino del usuario:
+│                      confianza→completar→usar→pagar + tarjeta de activación),
+│                      deploy-seguro-vercel-preview-prod (preview→prod sin romper),
+│                      ingesta-email-cloudflare-worker (forwarding → Worker → Edge
+│                      Function, idempotente, por usuario, nunca botar).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
@@ -201,10 +217,13 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                              idioma —`clientes/` comercial y `clients/` técnico—; se
 │                              unificaron. Si ves `clientes/` en algún lado, es viejo.)
 ├── inputs/repos-referencia/   10 repos de calidad como referencia para los agentes
-├── templates/                 Plantillas reusables. `onboarding/` = el proceso de
-│                              onboarding genérico que se le manda a CUALQUIER cliente
-│                              (.docx + texto extraído). Reusable ⇒ NO va bajo un
-│                              cliente.
+├── templates/                 Plantillas reusables:
+│   ├── onboarding/            el proceso de onboarding genérico que se le manda a
+│   │                          CUALQUIER cliente (.docx + texto extraído). Reusable ⇒
+│   │                          NO va bajo un cliente.
+│   └── supabase-email-templates/  4 HTML de Auth parametrizados (confirm, magic-link,
+│                                  reset-password, change-email). Reemplazar placeholders
+│                                  {{PRODUCT_NAME}}, {{PRODUCT_TAGLINE}}, etc.
 ├── outputs/                   Entregables del template (vacío por defecto)
 ├── proyectos/                 ← Aquí viven los proyectos concretos (gitignored)
 │   └── hookly/                  primer proyecto (repo independiente)
