@@ -49,7 +49,7 @@ ultima_actualizacion: 2026-08-04
 
 - ✅ **Chatbot Eva** — multi-agente en producción (Principal BANT · Inventario vía Google Sheets · Agendamiento/derivación), **en ManyChat, fuera de nuestro stack**
 - ✅ **Espacio en el CRM** — `/a/desarrollos-ecologicos-el-canal`, funnel inmobiliario de 5 etapas, owner = Hans (2026-08-04)
-- ✅ **Prompt de Eva cargado al CRM** (2026-08-04) — v2, 23.150 chars, en `bot_config.agent_prompts.principal` **y** en `custom_instructions` (las dos formas que conviven en la base). Habilita "Probar bot" y el asistente de IA del inbox
+- ✅ **Prompt de Eva cargado al CRM** — **v3** (auditoría 2026-08-04), 7.325 chars, en `bot_config.agent_prompts.principal` **y** en `custom_instructions` (las dos formas que conviven en la base). Habilita "Probar bot" y el asistente de IA del inbox. v2 (23.150 chars) archivada en `prompts/versions/`
 - ⏳ **Número de WhatsApp** — sin conectar (`agency_channels` vacío) → no entra tráfico real
 - ⏳ **Acceso del cliente al CRM** — todavía no invitado
 - ⏳ **Migración del bot a nuestro stack** — hoy solo el prompt principal; faltan clasificador, inventario y derivación
@@ -78,11 +78,12 @@ ultima_actualizacion: 2026-08-04
 **Operativo (ya definido):**
 
 - [x] Espacio en el CRM creado y verificado bajo RLS (2026-08-04)
-- [x] Prompt principal de Eva cargado y verificado con la función real del inbox (2026-08-04)
+- [x] Prompt principal de Eva **v3** cargado y verificado con la función real del inbox (2026-08-04)
+- [ ] Agregar al prompt la regla de **variar los mensajes repetidos** — v3 no la trae y es el tell #2 que delata al bot (ver `memory/feedback-prompting.md` §4)
+- [ ] Decidir el modelo: con 7.325 chars la metodología pide GPT-4o, no mini
 - [x] `settings.bot_enabled=true` — necesario para que responda en "Probar bot". Sin número conectado no puede entrar tráfico real
 - [ ] Probar la conversación en `/a/desarrollos-ecologicos-el-canal/probar-bot` (round-trip a n8n, no verificable desde el repo)
 - [ ] Cargar el resto de los agentes (clasificador, inventario, derivación) si se va a replicar el flujo completo
-- [ ] Corregir `{{ $now.format('yyyy-MM-dd') }}` en el prompt — es sintaxis de n8n, fuera de n8n el modelo la lee literal
 - [ ] Conectar el número de WhatsApp en YCloud → `agency_channels`
 - [ ] Invitar al cliente desde Settings → Equipo y decidir si Hans sigue como owner
 
@@ -95,7 +96,7 @@ ultima_actualizacion: 2026-08-04
 ## 9. Enlaces internos
 
 - Espacio en el CRM: `/a/desarrollos-ecologicos-el-canal` (agency `343317d1-b3d0-4903-a49d-f99437749699`)
-- Prompt principal (fuente): [`prompts/agente-principal.md`](prompts/agente-principal.md) · listo para pegar: [`prompts/_compiled/agente-principal.txt`](prompts/_compiled/agente-principal.txt)
+- Prompt principal v3 (fuente): [`prompts/agente-principal.md`](prompts/agente-principal.md) · listo para pegar: [`prompts/_compiled/agente-principal.txt`](prompts/_compiled/agente-principal.txt) · histórico: [`prompts/versions/`](prompts/versions/)
 - Script de alta: [`crm-v2/scripts/provision-el-canal.js`](../../crm-v2/scripts/provision-el-canal.js)
 - Script que carga el prompt al CRM: [`crm-v2/scripts/load-el-canal-prompts.js`](../../crm-v2/scripts/load-el-canal-prompts.js)
 - Arquitectura del bot actual: [`knowledge/workflows-reference/el-canal/analysis.md`](../../knowledge/workflows-reference/el-canal/analysis.md)
