@@ -212,6 +212,21 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      (migrar un template heredado a una marca propia coherente: auditar
 │                      la capa de tokens + cazar overrides de --accent en runtime + barrer
 │                      colores hardcodeados; landing == app).
+│                      Tier 17 — WhatsApp proactivo a staff (1, capturada 2026-08-05
+│                      de crm-v2): whatsapp-proactivo-a-staff (avisar por WhatsApp a
+│                      un agente/staff cuando pasa un evento en la DB —caso canónico:
+│                      handoff— vía plantilla Meta aprobada: colgarse de la fila
+│                      `notifications` que ya hace el fan-out + trigger pg_net que lee
+│                      secretos de Vault → Edge Function que resuelve teléfono + número
+│                      del negocio + datos del lead y manda la plantilla YCloud, con
+│                      tabla de log/anti-spam y degradación total. Gotchas no-obvios:
+│                      proactivo fuera de la ventana de 24h EXIGE plantilla aprobada;
+│                      la plantilla no puede empezar/terminar en variable; las
+│                      "variables con nombre" de YCloud son posicionales por debajo;
+│                      hardcodear lo que es igual para todos los tenants; botón URL
+│                      dinámico = base fija + sufijo `<slug>/inbox?conv=<id>`; revocar
+│                      EXECUTE del trigger SECURITY DEFINER a anon; guardado del perfil
+│                      por server action —el update client-side falla silencioso—).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
