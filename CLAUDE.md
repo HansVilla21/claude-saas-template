@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        69 skills de proceso reusables:
+│   └── skills/        70 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -227,6 +227,26 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      dinámico = base fija + sufijo `<slug>/inbox?conv=<id>`; revocar
 │                      EXECUTE del trigger SECURITY DEFINER a anon; guardado del perfil
 │                      por server action —el update client-side falla silencioso—).
+│                      Tier 18 — Catálogo multifuncional (1, capturada 2026-08-05
+│                      de crm-v2): catalogo-multifuncional-por-preset (sección donde
+│                      cada negocio carga LO QUE VENDE —propiedades, servicios,
+│                      productos— con UNA base que se adapta a cualquier rubro por
+│                      configuración y que el bot consume. Enfoque híbrido: tabla base
+│                      `catalog_items` (columnas compartidas + `attributes` jsonb) +
+│                      "preset" por vertical sobre el sistema de módulos existente
+│                      (`module_definitions`: config_schema=ficha de atributos,
+│                      extractor_schema, tool_config.mode, prompt_fragment, ui_slots).
+│                      Plomería una vez, rubro nuevo = preset nuevo sin código. Dos
+│                      modos de bot: `search` (rubro grande → tool con fallback
+│                      multi-pass, cap 5) vs `inline` (rubro chico → lista completa
+│                      inyectada en el prompt, `list_all`). UI con form dinámico
+│                      derivado de la ficha (cero forms por rubro) + fotos a Storage
+│                      por agencia + server action con gate de rol. Gotchas: jsonb
+│                      `->>` es TEXTO —filtrar numéricos en memoria—; el camino de
+│                      lectura debe servir al owner REAL no solo master (presets
+│                      scope=global + agency_modules is_member_of); `agency_id` lo pone
+│                      el flow nunca el LLM; confirmar enums/uniques del schema antes;
+│                      solo `available`+`is_published`+no borrado se muestra al lead).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
