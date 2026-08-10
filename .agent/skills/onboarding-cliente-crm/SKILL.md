@@ -48,6 +48,27 @@
 
 ## Gotchas (errores ya cometidos — no repetir)
 
+- **#-1 El playground y el bot de PRODUCCIÓN son workflows DISTINTOS y se desincronizan.**
+  `bot-test-playground` (`dxZTZdwzyIcimZv0`) y `bot-c-v1` (`Jsh4krhC9HRUh7Ly`) leen el MISMO
+  `bot_config`, así que un prompt nuevo aparece en los dos al instante — pero las **tools son
+  nodos del grafo** y no viajan solas. Verificado 2026-08-10 al conectar el número de Jacó: el
+  playground tenía la `Catalog Search Tool` desde el 06/08, producción no la había recibido
+  nunca (sin cambios desde el 29/06). El prompt del cliente ya decía *"OBLIGATORIO usar la
+  Catalog Search Tool"* → **en el playground el bot daba datos reales del catálogo y en
+  producción los describía de memoria**. Probar solo en "Probar bot" NO prueba producción.
+  **Antes de dar por conectado un número, diffear las tools de los dos workflows:**
+  ```bash
+  # por cada workflow: qué nodos están conectados como ai_tool
+  curl -s -H "X-N8N-API-KEY: $N8N_API_KEY" "$HOST/api/v1/workflows/<id>" \
+    | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{const w=JSON.parse(d);
+        for(const [f,c] of Object.entries(w.connections||{}))
+          if(c.ai_tool) c.ai_tool.flat().forEach(t=>console.log(f,"→",t.node))})'
+  ```
+  El port se hace **copiando el nodo** del workflow donde ya funciona (nunca reescribiéndolo):
+  ver `crm-v2/scripts/build-bot-c-v1-set30-catalog-tool.js` — valida que las referencias
+  `$('Nodo')` existan en el destino, deja snapshot, es idempotente y verifica releyendo del
+  n8n vivo que los parámetros queden **idénticos por hash** a los de la fuente.
+
 - **#0 El playground "Probar bot" SÍ requiere `settings.bot_enabled=true`.** (Corrige una nota vieja que decía lo contrario.) Con `bot_enabled=false` el workflow `bot-test-playground` responde `{"ok":false,"error":"not_configured"}` y la UI muestra "no configurado", aunque `bot_config.agent_prompts` esté completo. Verificado 2026-07-14 con Jacó Dream Rentals: mismo bot_config → `not_configured` con el flag en false, respondió bien apenas se puso en true. Es seguro prenderlo aunque el cliente "no quiera bot en prod": el bot de producción resuelve por número en `agency_channels`, así que **sin número conectado el bot de prod NO dispara** — solo se habilita el playground. Además la config debe tener los **3 agentes** (`router,principal,objeciones`) en `agent_prompts`; si el cliente no tiene objeciones, cargar un stub (rara vez se dispara: el switch cae a principal por defecto).
 - **#1 `bot_config.agent_prompts`, NO `prompts`** (ver paso 3). El más caro.
 - **#2 NO duplicar workflows n8n por cliente.** El playground (`bot-test-playground`) y el bot
