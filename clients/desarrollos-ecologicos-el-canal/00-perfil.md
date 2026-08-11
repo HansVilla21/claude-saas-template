@@ -84,8 +84,11 @@ ultima_actualizacion: 2026-08-04
 - [x] `settings.bot_enabled=true` — necesario para que responda en "Probar bot". Sin número conectado no puede entrar tráfico real
 - [ ] Probar la conversación en `/a/desarrollos-ecologicos-el-canal/probar-bot` (round-trip a n8n, no verificable desde el repo)
 - [ ] Cargar el resto de los agentes (clasificador, inventario, derivación) si se va a replicar el flujo completo
+- [x] **Usuario de Jimena creado** (2026-08-04) — `jimemateo@gmail.com`, rol `admin` de la agency. Creado con `admin.createUser` (no `inviteUserByEmail`), así que **todavía no le llegó ningún correo**. Contraseña temporal generada al vuelo, no guardada en ningún lado
+- [ ] Probar el login con esa cuenta y después entregársela a ella
+- [ ] Que ella cambie la contraseña desde "olvidé mi contraseña" (mata la temporal)
+- [ ] Decidir si Jimena pasa a `owner` (hoy el owner es Hans; `agencies.owner_user_id` es uno solo)
 - [ ] Conectar el número de WhatsApp en YCloud → `agency_channels`
-- [ ] Invitar al cliente desde Settings → Equipo y decidir si Hans sigue como owner
 
 ## 8. Notas estratégicas (para mí)
 
