@@ -1,5 +1,8 @@
 # Session Handoff — 2026-06-12 — Bot Momentum pulido (prompts v4.2, gpt-4.1 full, 3 bugs de flujo resueltos)
 
+> ⚠️ **HANDOFF HISTÓRICO — superado por `session-handoff-2026-08-11.md`**
+> Se conserva como registro del estado al 2026-06-12. Para el estado actual, leer el handoff nuevo primero.
+
 **Propósito:** Snapshot del estado al cierre del 2026-06-12. Lectura obligatoria al inicio de cualquier sesión nueva.
 
 **Reemplaza al handoff anterior** (`session-handoff-2026-06-10.md` queda como histórico).
