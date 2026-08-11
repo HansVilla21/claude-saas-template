@@ -72,7 +72,7 @@ YCloud (2 endpoints activos, fan-out del MISMO evento)
 1. 🔴 **Rotar el token de Apify** hardcodeado en el nodo `Apify - Scrape Link` de `bot-c-v1`. **Ya está en el historial de git** (5+ workflows trackeados, 5+ commits). Moverlo a `$env` y barrer los demás workflows. Mismo problema con `BOT_TEST_SECRET` en el `Auth Guard` del playground.
 2. **4 snapshots de workflow fuera de git** (rollback local en `crm-v2/n8n/workflows/snapshots/`), sin commitear justamente por ese token.
 3. **2 warnings de lint** preexistentes: `master-shell.tsx` (unused var), `provenance.ts` (unused eslint-disable).
-4. **Drift editorial en el prompt de Jacó:** el `.md` sigue en v10 con la sección `RAG_JACO`; lo desplegado ya usa la `Catalog Search Tool`. Decisión editorial del founder.
+4. ~~**Drift editorial en el prompt de Jacó**~~ → ✅ **CERRADO el mismo día.** El `.md` pasó a **v11**, *regenerado desde `_compiled/`* (que está verificado char a char contra `bot_config` en la base: 14.971 = 14.971). Se regenera en vez de editarse a mano justamente para que el drift no vuelva. Incluye el bloque `## CATÁLOGO DE PROPIEDADES`, que es el `prompt_fragment` del preset `catalog-inmobiliaria` — **no es del cliente**, y si el preset cambia hay que re-sincronizar el `.md` (anotado en su metadata). Snapshot del anterior en `versions/agente-principal-v10-rag-jaco.md`.
 5. **Roberto tiene número en YCloud** (`+50672053814`) pero **no está en `agency_channels`** — su bot de producción no dispara. Revisar si es intencional.
 
 ## Cómo trabajar con Hans
