@@ -85,7 +85,9 @@ ultima_actualizacion: 2026-08-04
 - [ ] Probar la conversación en `/a/desarrollos-ecologicos-el-canal/probar-bot` (round-trip a n8n, no verificable desde el repo)
 - [ ] Cargar el resto de los agentes (clasificador, inventario, derivación) si se va a replicar el flujo completo
 - [x] **Usuario de Jimena creado** (2026-08-04) — `jimemateo@gmail.com`, rol `admin` de la agency. Creado con `admin.createUser` (no `inviteUserByEmail`), así que **todavía no le llegó ningún correo**. Contraseña temporal generada al vuelo, no guardada en ningún lado
-- [ ] Probar el login con esa cuenta y después entregársela a ella
+- [x] **Login de Jimena verificado end-to-end** (2026-08-04) — con su correo y contraseña reales contra la API de auth, no con `service_role`
+- [x] **Datos de prueba sembrados** (2026-08-04) — 1 contacto `Ana Sofía Rodríguez (PRUEBA)` (+50600000001) con conversación de WhatsApp y 5 mensajes, para que practique las etiquetas. Se borra con `node crm-v2/scripts/seed-demo-el-canal.js --undo`
+- [ ] Borrar el contacto de prueba antes de que entren leads reales
 - [ ] Que ella cambie la contraseña desde "olvidé mi contraseña" (mata la temporal)
 - [ ] Decidir si Jimena pasa a `owner` (hoy el owner es Hans; `agencies.owner_user_id` es uno solo)
 - [ ] Conectar el número de WhatsApp en YCloud → `agency_channels`
