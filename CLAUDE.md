@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        70 skills de proceso reusables:
+│   └── skills/        74 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -247,6 +247,29 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      scope=global + agency_modules is_member_of); `agency_id` lo pone
 │                      el flow nunca el LLM; confirmar enums/uniques del schema antes;
 │                      solo `available`+`is_published`+no borrado se muestra al lead).
+│                      Tier 19 — Método de trabajo (3, capturadas 2026-08-11 de la
+│                      sesión de etiquetas + drill-down del CRM):
+│                      verificar-base-del-pr-antes-de-mergear (⭐ cross-project:
+│                      `mergeable: MERGEABLE` responde "¿se puede mergear?", NO
+│                      "¿a dónde?" — dos PRs figuraban MERGED pero su
+│                      `baseRefName` era otra rama y el código NUNCA llegó a
+│                      producción; casi se repite el mismo día porque GitHub solo
+│                      reapunta un PR apilado si la rama base se BORRA. Incluye
+│                      cómo auditar PRs viejos mergeados fuera de main y cómo
+│                      rescatarlos) + drill-down-numero-a-lista (hacer clickeable
+│                      un número del dashboard: enlazar a la lista que ya existe
+│                      en vez de construir un modal; comparar las DEFINICIONES de
+│                      las dos pantallas antes de enlazar —si "sin atender" y "sin
+│                      asignar" cuentan distinto, ese número NO se enlaza—; una
+│                      fuente única que construye Y lee la URL; y verificar el
+│                      ROUND-TRIP completo exigiendo número === filas, no que se
+│                      armó un string) + worktree-para-no-pisar-el-checkout
+│                      (trabajar cuando el founder está en el mismo repo: un
+│                      `git checkout` suyo movió HEAD a mitad de una feature y
+│                      otro commit quedó HUÉRFANO; incluye el gotcha de que un
+│                      worktree FUERA del repo da ~96 errores fantasma de tsc con
+│                      idéntica versión de paquetes → va DENTRO para heredar el
+│                      node_modules, y el reflog como red de seguridad).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
