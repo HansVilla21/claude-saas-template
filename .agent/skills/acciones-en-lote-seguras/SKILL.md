@@ -115,3 +115,5 @@ Y una selección que sobrevive a un cambio de filtro es una acción a ciegas esp
 - `rls-write-bloqueada-por-policy-desalineada` — por qué la policy te filtra filas que creías tuyas.
 - `dialogo-confirmacion-no-nativo` — el `<ConfirmDialog>` del design system.
 - `probar-migracion-contra-base-viva-con-rollback` — probar la semántica SQL del lote sin tocar prod.
+- `reporte-in-app-con-snapshot-efimero` — reusa esta misma garantía (derivar en vez de guardar) para
+  elegir qué mensajes se adjuntan a un reporte.

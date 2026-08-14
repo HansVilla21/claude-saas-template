@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        76 skills de proceso reusables:
+│   └── skills/        77 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -306,6 +306,34 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      **3d: leé la policy VIVA, no la migración** — se reportó
 │                      un bug inexistente por leer un `.sql` que una migración
 │                      posterior ya había arreglado.
+│                      Tier 21 — Reportar lo que no se puede reconstruir (1,
+│                      capturada 2026-08-13 de la sección de reportes del CRM):
+│                      reporte-in-app-con-snapshot-efimero (⭐ cross-project:
+│                      poner "reportar un bug" DENTRO del producto cuando lo que
+│                      hay que reportar es EFÍMERO — un playground, un preview,
+│                      una vista derivada que tu base no guarda. La pregunta que
+│                      decide todo el diseño es una sola: *"¿el servidor puede ir
+│                      a buscar después lo que el usuario vio?"*. Si no puede, el
+│                      **snapshot viaja con el reporte en el instante del clic**
+│                      —jsonb, no FK: no hay a qué apuntar— y de ahí sale todo lo
+│                      demás. Lo no-obvio: la evidencia la manda el CLIENTE y no
+│                      hay alternativa, así que la línea que importa es cuál campo
+│                      viene del navegador y cuál del contexto autenticado —un
+│                      transcript inventado solo ensucia el reporte de quien lo
+│                      inventó, un `agency_id` del navegador escribe en la cuenta
+│                      de otro—; una burbuja rota se DESCARTA pero lo que ni
+│                      siquiera es un array SÍ falla (front roto, conviene
+│                      enterarse); al recortar por tamaño se tira lo VIEJO porque
+│                      el final es donde está la evidencia; la selección se
+│                      congela DESMONTANDO el modal al cerrar, no con un efecto
+│                      que sincronice —el linter de React rechaza eso y tiene
+│                      razón—; nombre y correo del que reportó se COPIAN o darlo
+│                      de baja vuelve el reporte anónimo; e INSERT y UPDATE van
+│                      como policies SEPARADAS porque no expresan el mismo
+│                      permiso —reportar es de todos, gestionar es del dueño del
+│                      panel—. Incluye el chequeo que ni tsc ni el build ven: si
+│                      el join con la tabla del tenant viene vacío bajo RLS,
+│                      TODA la bandeja dice "Negocio eliminado").
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
