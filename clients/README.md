@@ -41,11 +41,13 @@ El **proceso de onboarding genérico** (el que se le manda a cualquier cliente) 
 |---|---|---|---|---|---|---|---|
 | **Mueblería Pérez Luna** | Muebles premium (CR) | Chatbot · CRM · Sitio web | Onboarding | $2.000 | $200 | 2026-06-03 | [perfil](muebleria-perez-luna/00-perfil.md) |
 | **Desarrollos Ecológicos El Canal** | Inmobiliaria / desarrollo residencial (Grecia, CR) | Chatbot · CRM | ⚠️ por confirmar | — | — | — | [perfil](desarrollos-ecologicos-el-canal/00-perfil.md) |
+| **Givi** | App de fidelización / lealtad para comercios (CR) | CRM (producción) · Chatbot (por construir) | producción | ⚠️ s/d | ⚠️ s/d | — | [perfil](givi/00-perfil.md) |
 
 > **Carpetas con parte TÉCNICA pero todavía sin ficha comercial** (tienen prompts, no `00-perfil.md`). Si entran al registro: copiarles `_plantilla/00-perfil.md` y sumar la fila arriba.
 > `momentum-ai-crm/` (el bot del propio CRM: prompts + test-prompts v1→v4.4.2) · `jaco-dream-rentals/` · `roberto/`
 >
-> Otros clientes de chatbot mencionados por Hans, sin carpeta todavía: Dr. Carlos (SmartCheck), Givy, asesores financieros (demo), una inmobiliaria (versión CRM base).
+> Otros clientes de chatbot mencionados por Hans, sin carpeta todavía: Dr. Carlos (SmartCheck), asesores financieros (demo), una inmobiliaria (versión CRM base).
+> (Givi salió de esta lista el 2026-08-13: ya tiene carpeta y ficha con los datos verificados contra la base viva.)
 > (Varela / Condominio del Canal salió de esta lista el 2026-08-04: ya tiene carpeta como **Desarrollos Ecológicos El Canal**.)
 
 ## Leyenda de estados
