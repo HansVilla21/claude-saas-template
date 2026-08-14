@@ -362,6 +362,46 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      se eligió el umbral duro sobre el lower-bound de Wilson
 │                      o el suavizado bayesiano: en un dashboard de CLIENTE el
 │                      orden tiene que poder explicarse en una línea).
+│                      Tier 23 — Lo que no encoge, desborda (1, capturada
+│                      2026-08-14 del arreglo responsive completo del CRM):
+│                      auditar-responsive-midiendo (⭐ cross-project: el
+│                      desborde horizontal en celular casi nunca es "algo es
+│                      muy ancho" — es algo que **se niega a encogerse**, y en
+│                      CSS eso tiene tres formas, TODAS invisibles para tsc,
+│                      el linter y el build: (1) un track de grid `1fr` es
+│                      `minmax(auto, 1fr)` y ese `auto` es un PISO —el olor
+│                      delator es que la rama de desktop ya usa `minmax(0,1fr)`
+│                      porque alguien ya se peleó con esto, y la de mobile
+│                      quedó en `1fr`—; (2) `flex-1` sin `min-w-0`, y peor con
+│                      un control de formulario adentro porque su ancho
+│                      intrínseco (~180px) pasa a ser piso duro —medido: el
+│                      composer del chat pedía 398px en una caja de 375—; (3)
+│                      texto sin corte, que muerde en los campos que caen a un
+│                      email cuando falta el nombre. Más la cuarta: restar
+│                      alturas a mano (`calc(100dvh - 49px)`) ignora los
+│                      banners condicionales —el de impersonación se enciende
+│                      JUSTO en el caso de todos los días—; se reemplaza por
+│                      un shell que define el alto y pantallas que piden
+│                      `h-full`, avisando que eso mueve el scroll del `body` a
+│                      `main`. Trae el script de auditoría con las dos piezas
+│                      no obvias (ignorar lo que vive dentro de un scroller
+│                      horizontal INTENCIONAL, y reportar solo el ancestro más
+│                      alto), el control negativo que prueba que la medición
+│                      discrimina, los blancos táctiles por NIVELES (44 suelto
+│                      / 36 denso / 24 piso duro de WCAG 2.5.8) con el truco
+│                      del `<label>` que agranda el área sin agrandar lo que se
+│                      ve —y reenvía el clic con el `shiftKey` intacto—, y la
+│                      regla de NO inflar lo que WCAG exime por estar dentro de
+│                      una frase: un reporte en cero puede ser peor producto.
+│                      Incluye el bug que no es de tamaño sino de EXISTENCIA
+│                      —una acción colgada de `group-hover` no existe en una
+│                      pantalla sin hover— y los 4 gotchas que hacen MENTIR al
+│                      reporte: medir sobre el esqueleto de carga, el bucle que
+│                      no espera el cambio de ruta —delator: el mismo número de
+│                      caracteres en rutas distintas—, un panel que no compone
+│                      frames congela las animaciones y una geometría de modal
+│                      parece rota, y el ROL de la sesión decidiendo qué podés
+│                      ver —con `agent` el composer roto ni se renderiza—).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
