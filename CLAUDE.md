@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        77 skills de proceso reusables:
+│   └── skills/        78 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -334,6 +334,34 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      panel—. Incluye el chequeo que ni tsc ni el build ven: si
 │                      el join con la tabla del tenant viene vacío bajo RLS,
 │                      TODA la bandeja dice "Negocio eliminado").
+│                      Tier 22 — El número que dirige la plata (1, capturada
+│                      2026-08-13 rediseñando "Por campaña" del CRM):
+│                      porcentaje-necesita-minimo-muestra (⭐ cross-project:
+│                      una tasa —conversión, cierre, apertura, rating, error—
+│                      que ORDENA una lista necesita un mínimo de muestra. Caso
+│                      real: un anuncio con **1 lead y 1 cierre daba 100%** y
+│                      encabezaba la tabla, en verde, por encima del que trajo
+│                      **89 con 3 cierres (3%)** — en la pantalla donde el
+│                      cliente decide en qué anuncio pone el presupuesto. El
+│                      fondo es de razonamiento, no de diseño: una tasa es una
+│                      ESTIMACIÓN y su incertidumbre depende del denominador
+│                      (con n=1, el intervalo de "100%" va de ~2% a 100%), así
+│                      que ordenar por el valor puntual sin mirar n pone el
+│                      ruido arriba SIEMPRE. Lo no-obvio del arreglo: (1)
+│                      SEGMENTAR y no filtrar —esconder las filas de poca
+│                      muestra hace que el cliente crea que su anuncio nuevo no
+│                      se está midiendo—, con los insuficientes abajo ordenados
+│                      por VOLUMEN; (2) apagar el color y la barra, que es la
+│                      mitad del daño porque el color se lee ANTES que el
+│                      número; (3) escalar la barra solo con los significativos
+│                      o el ruido aplasta a los datos reales; (4) el CSV
+│                      necesita su columna `datosSuficientes` porque en Excel lo
+│                      primero que hacen es reordenar por el %. Incluye el
+│                      control negativo que hace que el test discrimine
+│                      —"ordenar solo por tasa lo pondría primero"— y por qué
+│                      se eligió el umbral duro sobre el lower-bound de Wilson
+│                      o el suavizado bayesiano: en un dashboard de CLIENTE el
+│                      orden tiene que poder explicarse en una línea).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural

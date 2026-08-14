@@ -117,3 +117,9 @@ Cubrir además: link con un id borrado (no vacía la pantalla), valor inválido 
 3. Se compara "Sin atender" vs "Sin asignar" → **NO coinciden** → ese KPI queda inerte, comentado, y la divergencia va al backlog.
 4. `lib/url-filters.ts` con `buildContactsHref` + `parseContactFilters`.
 5. `verify-drilldown.ts` → **24 combinaciones (6 estados × 4 períodos), cero discrepancias**, más el lead de las 04:25 UTC que en Costa Rica es de ayer (`"Hoy"` da 3 y no 4).
+
+## Skills relacionadas
+
+- `porcentaje-necesita-minimo-muestra` — el otro modo en que un número del dashboard engaña: un
+  porcentaje calculado sobre una muestra chica que ordena la lista y dirige la decisión.
+- `fuente-unica-derivar-de-hijos` — cuando dos vistas muestran "lo mismo" leyendo columnas distintas.
