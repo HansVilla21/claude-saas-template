@@ -87,6 +87,78 @@ En una de las pruebas **se olvidó el `rollback` explícito**. No pasó nada por
 
 **Poner siempre el `rollback`.** Y verificar el paso 4 igual: si la herramienta hubiera autocommiteado, la tabla quedaba creada en prod sin migración ni registro.
 
+---
+
+## 🔒 Variante fuerte: el bloque que SIEMPRE aborta (2026-08-13)
+
+*Capturada en el CRM de Momentum probando la migración `0057`. **Reemplaza al paso 1** y elimina el susto de arriba de raíz.*
+
+El `rollback` explícito depende de tres cosas que no controlás: que te acuerdes de escribirlo, que la herramienta mantenga **una sola sesión** entre statements, y que ningún error a mitad de camino te saltee el final del script. Si alguna falla, la escritura **queda en prod**.
+
+La versión que no depende de nada de eso: meter todo en un `DO` que **termina siempre en `raise exception`**. La excepción aborta la transacción — no hay camino en que las escrituras sobrevivan — y el **reporte viaja dentro del mensaje del error**.
+
+```sql
+do $$
+declare
+  n_a int; n_b int;
+begin
+  -- 1. mutaciones de prueba (insert / update / delete / hasta DDL)
+  --    ⚠️ la DDL es transaccional en Postgres: podés aplicar la policy NUEVA
+  --       acá adentro y medir ANTES vs DESPUÉS en el mismo bloque
+  execute 'drop policy if exists mi_policy on public.tabla';
+  execute 'create policy mi_policy on public.tabla for update using ( … )';
+
+  -- 2. mediciones + controles negativos
+  update public.tabla set x = 1 where id = :caso_que_debe_pasar;  get diagnostics n_a = row_count;
+  update public.tabla set x = 1 where id = :caso_que_NO_debe;     get diagnostics n_b = row_count;
+
+  -- 3. el final obligatorio: nunca hay commit
+  raise exception 'REPORTE >>> permitido=% (esperado 1) | bloqueado=% (esperado 0)', n_a, n_b;
+end $$;
+```
+
+La herramienta devuelve el reporte **como texto del error**. Es un "fallo" que en realidad es el resultado.
+
+### Por qué esto es mejor, y no solo distinto
+
+| | `begin … rollback` | bloque que siempre aborta |
+|---|---|---|
+| Si te olvidás del final | **escribe en prod** | imposible: sin `raise` no compila tu intención, y con `raise` siempre aborta |
+| Si la herramienta parte los statements | `begin` es no-op → **autocommit** | es **un solo statement**: o corre entero o no corre |
+| Si algo falla a mitad | el `rollback` puede no ejecutarse | la excepción **es** el rollback |
+| Probar una policy nueva | hay que aplicarla antes | se aplica **adentro** y se mide antes/después |
+
+### Combinalo con el rol real
+
+Para probar RLS, adentro del mismo bloque:
+
+```sql
+  perform set_config('request.jwt.claims',
+                     json_build_object('sub', v_user, 'role','authenticated')::text, true);
+  execute 'set local role authenticated';
+  -- … los updates que querés medir …
+  execute 'reset role';
+```
+
+Un `update` bloqueado por el `USING` **no lanza error**: afecta 0 filas. Por eso se mide con `get diagnostics … row_count`, no con un `begin/exception`. Para el `WITH CHECK`, que sí lanza `42501`, envolvé cada intento en su propio `begin … exception when others then …` para poder seguir midiendo los demás.
+
+### Lo que NO cambia
+
+El **paso 4 sigue siendo obligatorio**: después del bloque, verificar con una query aparte que prod quedó intacta. La garantía es teórica hasta que la mirás.
+
+### Ejemplo real (migración `0057`, CRM Momentum)
+
+```
+ANTES   agente + lead del POOL: 0 filas (esperado 0 = el bug)
+DESPUES agente + POOL:          1 filas (esperado 1)
+DESPUES agente + conv AJENA:    0 filas (esperado 0)   ← no se ensanchó de más
+DESPUES agente + conv SUYA:     1 filas (esperado 1)   ← sin regresión
+DESPUES agente + OTRA AGENCY:   0 filas (esperado 0)   ← multi-tenant intacto
+DESPUES owner + conv ajena:     1 filas (esperado 1)   ← sin regresión
+```
+
+Seis mediciones, la policy vieja y la nueva en el mismo bloque, y prod verificada intacta después. Recién ahí se aplicó.
+
 ## Output esperado
 
 - El SQL de la migración **verificado contra el esquema real** antes de que nadie lo aplique.

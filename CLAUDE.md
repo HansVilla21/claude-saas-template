@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        74 skills de proceso reusables:
+│   └── skills/        76 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -270,6 +270,42 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      worktree FUERA del repo da ~96 errores fantasma de tsc con
 │                      idéntica versión de paquetes → va DENTRO para heredar el
 │                      node_modules, y el reflog como red de seguridad).
+│                      Tier 20 — La escritura que no avisa (2 nuevas + 2
+│                      extensiones, capturadas 2026-08-13 de las acciones en
+│                      lote del CRM): detectar-escritura-filtrada-rls
+│                      (⭐ cross-project: bajo RLS un `update` que NO matchea el
+│                      USING **no devuelve error** — afecta 0 filas y responde
+│                      éxito, así que `if (error)` nunca entra y la UI optimista
+│                      queda mintiendo. La única detección es pedir `.select()` y
+│                      CONTAR filas. Incluye dónde NO sirve: cuando el write
+│                      vuelve la fila invisible para quien la hizo —reasignar a
+│                      otro— el RETURNING viene vacío aunque haya funcionado, y
+│                      eso va por server action. 3 incidentes del proyecto salen
+│                      de este mismo modo de fallo) + acciones-en-lote-seguras
+│                      (selección múltiple + acciones masivas sin los 3 desastres
+│                      típicos: actuar sobre filas que el usuario ya no ve —se
+│                      resuelve DERIVANDO la selección como intersección con lo
+│                      visible, garantía estructural y no un efecto que compite
+│                      con el clic—; decir "50" cuando cambiaron 40 —reportar
+│                      `appliedIds` de la base + los motivos, y tratar "ya
+│                      estaban así" como ÉXITO—; y ser más permisivo que la app
+│                      de a una fila —si escribís con admin client el gate propio
+│                      es la ÚNICA barrera: tenant del contexto nunca del
+│                      navegador, destino validado, tope por lote—).
+│                      **Extensiones:** probar-migracion-contra-base-viva-con-rollback
+│                      suma el **bloque que SIEMPRE aborta** (`DO` que termina en
+│                      `raise exception`, con el reporte dentro del mensaje del
+│                      error): no existe camino en que la escritura persista, y
+│                      como la DDL es transaccional permite aplicar la policy
+│                      NUEVA adentro y medir antes/después en el mismo bloque —
+│                      reemplaza al paso de "confirmar que el rollback funciona".
+│                      Y rls-write-bloqueada-por-policy-desalineada suma la
+│                      **causa 5** (policies de TABLAS DISTINTAS que expresan el
+│                      MISMO permiso y divergen: el agente VE el lead y PUEDE
+│                      etiquetarlo pero NO cambiarle el estado) + el aviso
+│                      **3d: leé la policy VIVA, no la migración** — se reportó
+│                      un bug inexistente por leer un `.sql` que una migración
+│                      posterior ya había arreglado.
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural

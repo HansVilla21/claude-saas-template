@@ -86,6 +86,49 @@ select
 -- 293 / 4 / 207  → el write mira una columna que casi nadie llena
 ```
 
+### 3c. Comparar las policies de TABLAS DISTINTAS que expresan el MISMO permiso (causa 5)
+
+*Capturada el 2026-08-13 en el CRM de Momentum.*
+
+Causa 4 mira dos policies de **la misma** tabla. Esta mira las de **tablas distintas** que responden a la misma pregunta de negocio — *"¿este agente puede operar sobre este lead?"*. Cuando la respuesta vive escrita a mano en tres lugares, tarde o temprano uno se queda atrás:
+
+| Policy | ¿contempla el pool (`conversación sin asignar`)? |
+|---|---|
+| `leads_select` | ✅ |
+| `tag_assignments_write` | ✅ (se arregló en su momento) |
+| **`leads_update`** | ❌ ← **la que quedó atrás** |
+
+Síntoma exacto: el agente **VE** el lead, **PUEDE etiquetarlo**, y **no puede** cambiarle el estado. Y como el `USING` filtra en vez de lanzar, son **0 filas sin error**.
+
+**La pregunta que lo destapa:** *¿qué otras tablas responden a este mismo permiso?* Listalas y compará la rama del rol afectado en todas:
+
+```sql
+select c.relname, p.polname, p.polcmd, pg_get_expr(p.polqual, p.polrelid) as using_expr
+  from pg_policy p join pg_class c on c.oid = p.polrelid
+ where c.relname in ('leads','tag_assignments','conversations')   -- las que expresan el mismo permiso
+ order by c.relname, p.polcmd;
+```
+
+Si una rama dice `c.assigned_user_id = auth.uid()` y otra dice `c.assigned_user_id = auth.uid() or c.assigned_user_id is null`, ahí está.
+
+**Señal de alarma extra:** si el código tiene un helper que declara el permiso (ej. `canEditConversation`) y la base es **más estricta** que ese helper, la UI va a habilitar controles que la base rechaza. El helper es la intención; la policy es la realidad. Que difieran es el bug.
+
+### 🔴 3d. Leé la policy VIVA, no la migración
+
+**Error real cometido el 2026-08-12 y corregido el 2026-08-13.** Se diagnosticó "el etiquetado está roto para el rol agent" leyendo la migración `0019`… cuando una migración **posterior** (`0046`) ya lo había arreglado un mes antes. Se reportó un bug inexistente y se escribió en el backlog como si fuera cierto.
+
+```sql
+-- ESTO es la verdad, no el archivo .sql
+select polname, pg_get_expr(polqual, polrelid), pg_get_expr(polwithcheck, polrelid)
+  from pg_policy where polrelid = 'public.<tabla>'::regclass;
+```
+
+Y si la policy viva **no coincide** con ninguna migración del repo, buscá en `supabase_migrations.schema_migrations`: puede haberse aplicado algo que nunca se versionó como archivo.
+
+```sql
+select version, name from supabase_migrations.schema_migrations order by version desc limit 15;
+```
+
 ### 4. Si el error apunta a una tabla que no tocaste: buscar el trigger
 
 ```sql
@@ -182,7 +225,8 @@ or exists (
 - **NO** asumas que `USING` y `WITH CHECK` son lo mismo. En UPDATE son dos cláusulas: `USING` = qué filas alcanzás; `WITH CHECK` = validación del estado final. Un fix que sólo toca una deja el bug a medias.
 - **NO** leas el `42501` sólo por la tabla del mensaje principal. El `CONTEXT:` puede revelar que el culpable es un **trigger** escribiendo OTRA tabla.
 - **NO** diagnostiques con owner/admin/master: bypasean o pasan la rama privilegiada del OR y esconden el bug. Reproducí con el rol restrictivo real.
-- **NO** dejes que el cliente se trague el error de escritura (optimista + revert en silencio). Mostralo, o vas a debuggear a ciegas.
+- **NO** dejes que el cliente se trague el error de escritura (optimista + revert en silencio). Mostralo, o vas a debuggear a ciegas. → cómo detectarlo de verdad: `detectar-escritura-filtrada-rls`.
+- **NO** diagnostiques leyendo el archivo de migración. La policy viva puede haber cambiado después (ver 3d) — ya se reportó un bug inexistente por esto.
 - **NO** muevas una fuente de verdad entre tablas sin auditar todas las policies (USING **y** WITH CHECK) y los triggers `SECURITY INVOKER` que tocan la tabla.
 - **SIEMPRE** verificá el negativo además del positivo: que el fix no abrió acceso a quien no debe.
 
@@ -191,3 +235,5 @@ or exists (
 - `habilitar-rls-tabla-expuesta` — el otro lado del mismo tema (prender RLS sin romper el backend; roles que bypasean).
 - `fuente-unica-derivar-de-hijos` — el refactor "el dato vive en la tabla hija" que, mal propagado a las policies, causa justo este bug.
 - `verificar-funcionamiento-end-to-end` — verificar contra la base bajo el rol real antes de decir "arreglado".
+- `detectar-escritura-filtrada-rls` — la capa de detección: cómo hacer que un write que la RLS filtra **deje de ser invisible** en la UI.
+- `probar-migracion-contra-base-viva-con-rollback` — §"bloque que SIEMPRE aborta": permite aplicar la policy nueva **adentro** de la prueba y medir antes/después sin tocar prod.
