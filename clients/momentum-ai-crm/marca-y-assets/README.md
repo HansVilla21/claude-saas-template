@@ -8,7 +8,22 @@ mezclados con logos de otros clientes y con 4 a 8 copias duplicadas de cada uno
 Acá está **una sola copia de cada variante**, verificada por checksum: los duplicados
 eran byte por byte idénticos.
 
-## Qué es cada archivo
+## Vectores (SVG) — agregados el 2026-08-14
+
+El kit del diseño no traía vector: eran **todos PNG, incluso los masters**. Estos SVG se
+**vectorizaron del original** y están verificados contra él (ver "Cómo se hicieron").
+
+| Archivo | Qué es | Peso |
+|---|---|---|
+| `momentum-isologo.svg` | ⭐ **El isologo a todo color, vectorial.** El que hay que usar. | 5,8 KB |
+| `momentum-isologo-mono.svg` | La silueta con `fill="currentColor"`: sirve de blanco, de negro o de cualquier color, sin archivos aparte. | 1,0 KB |
+| `momentum-icono.svg` | El mismo isologo **encuadrado en un cuadrado** con 6 % de aire — para favicon o ícono de app. | 5,9 KB |
+
+⚠️ **Estos SVG son una reconstrucción, no el archivo del diseñador.** Son fieles (números
+abajo) y sirven para web, impresión y animación. Pero **los PNG siguen siendo los masters**:
+si mañana aparece el `.ai` o el `.svg` original, ese manda y estos se reemplazan.
+
+## Qué es cada archivo (los PNG originales)
 
 | Archivo | Qué es | Tamaño |
 |---|---|---|
@@ -70,8 +85,47 @@ cuadrado(im, 256, margen=0.06).save("src/app/favicon.ico",
 Después **mirar el resultado a 16 y 32px**, que es donde una marca fina se convierte en
 manchas. Ahí se decide el margen, no en el archivo grande.
 
+## Cómo se hicieron los SVG (y qué tan fieles son)
+
+**No fue un autotrace.** Un trazado automático deja cientos de nodos con curvas
+aproximadas; esto se midió y se reconstruyó.
+
+**La geometría resultó ser exacta.** Cuatro piernas de ancho `t = 409,5` con paso
+`530,17` (en un ancho de 2000); esquinas superiores de radio `= t` — y no un
+semicírculo: hay un **techo plano** del ancho del hueco entre piernas; ranuras y lengua
+con semicírculos de radio `g/2`. Los arcos ajustan a **círculos de verdad**, con menos de
+2px de error sobre 2000. El SVG tiene ~30 nodos, no cientos.
+
+**El color no es un degradado.** El listón se dobla sobre sí mismo y en cada doblez hay
+una costura dura — en el PNG se ven como una caída del alfa a ~250 más un salto de color
+de **hasta 235/255**. Se detectaron las 4, se trazaron, y cada tramo lleva su propio
+degradado lineal ajustado por mínimos cuadrados sobre los píxeles reales.
+
+**Los arcos se emiten como cúbicas calculadas, no como `<A>`:** las banderas de barrido
+de los arcos SVG son la fuente clásica de arcos dibujados al revés.
+
+| Verificación | Resultado |
+|---|---|
+| silueta, contra el canal alfa del PNG | **IoU 99,625 %** |
+| color | error medio **0,37/255 (0,15 %)**; 99,4 % de los píxeles bajo 4/255 |
+| en un navegador real (dibujado en `<canvas>`, 19 puntos) | diferencia **máxima 7/255** — y los 2 puntos que pasan de 3 están pegados a una costura |
+
+Los scripts quedan acá: `_vectorizar.py` (mide, detecta costuras, ajusta degradados y
+compara píxel a píxel) y `_gen_svg.py` (arma el path y verifica la silueta). Se corren con
+Python + Pillow, nada más.
+
+## Dónde se usan los SVG hoy
+
+```
+crm-v2/src/app/icon.svg          favicon vectorial (el <link> que prefiere el navegador)
+crm-v2/public/brand/isologo.svg  la marca de la UI: barra, login y reset
+```
+
+Los PNG del CRM (`icon.png`, `apple-icon.png`, `favicon.ico`) quedan como respaldo para
+navegadores viejos y para iOS, que no acepta SVG en el ícono de inicio.
+
 ## Lo que falta
 
-**No hay SVG.** Todo el kit es PNG, incluso los masters. Para web es aceptable —los
-tamaños que usa el CRM ya están generados— pero para impresión grande o para animar la
-marca hace falta el vector. Si aparece el `.ai` / `.svg` original, va acá.
+**El vector ORIGINAL del diseñador.** Los SVG de acá son una reconstrucción fiel, no el
+archivo fuente. Si aparece el `.ai` o el `.svg` original, reemplaza a estos y este README
+se actualiza.
