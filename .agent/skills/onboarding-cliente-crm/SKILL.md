@@ -45,8 +45,48 @@
 6. **(Opcional) Conectar WhatsApp de producción.** Insertar en `agency_channels`
    (`channel='whatsapp'`, `provider='ycloud'`, `phone_number` E.164 sin `+`). El bot de prod
    resuelve la agency por ese número.
+   **Verificar el número contra la API de YCloud, NO contra lo que diga un handoff**
+   (`GET api.ycloud.com/v2/whatsapp/phoneNumbers`, header `X-API-Key`): da el `wabaId`, el
+   `verifiedName` y el estado `CONNECTED`. En 2026-08-17 un handoff de 6 días antes citaba un
+   número de Roberto que **ya no existía en la cuenta**.
+   - Los **webhooks de YCloud son por CUENTA, no por número** (`GET /v2/webhookEndpoints`): si el
+     tenant anterior ya funciona, el número nuevo queda cubierto solo. No hay nada que configurar.
+   - **Las plantillas se aprueban por WABA**, y cada cliente trae el suyo. Chequear
+     `GET /v2/whatsapp/templates?wabaId=<waba>` **antes** de prometer el aviso de handoff: sin
+     `aviso_handoff` en APPROVED no hay notificación proactiva posible (fuera de la ventana de 24h
+     Meta solo acepta plantilla).
+   - **Cargar el teléfono del staff** (`users.phone`) de quien recibe el handoff. `notify-agent-whatsapp`
+     resuelve el destinatario por ahí; sin él responde `skipped: no_phone`, lo loguea en
+     `wa_notification_log` y **el lead queda esperando a alguien que nunca se enteró**. Si el bot del
+     cliente cierra escalando ("en un momento te coordinamos"), esto no es un extra: es el último
+     paso de su embudo.
+   - Poner `settings.bot_enabled = true` **explícito**. El flow lo da por `true` cuando falta
+     (`COALESCE(...,true)`), así que un `settings` vacío funciona pero deja la UI diciendo una cosa
+     y el bot haciendo otra.
 
 ## Gotchas (errores ya cometidos — no repetir)
+
+- **#-2 El nodo `Router` NO era config-driven, y el destino es un contrato duro.** (Descubierto
+  2026-08-17 conectando a Roberto; arreglado en los dos workflows.) `Agente Principal` y `Agente
+  Objeciones` leen `bot_config.agent_prompts.*`; **el `Router` tenía el clasificador de Momentum
+  escrito a mano**, así que los prompts de router de todos los clientes **nunca se ejecutaron** y un
+  fisioterapeuta ruteaba con reglas de "aceptó la DEMO" / "corre ads". Medido con el mismo mensaje en
+  los dos routers: *"dolor agudo insoportable, no puedo ni moverme"* → con el del tenant
+  **HANDOFF_HUMANO** ("alarma médica"), con el default **AGENTE_PRINCIPAL** ("no es relevante para
+  calificación comercial"). Hoy el prompt del tenant se usa **solo si declara el contrato**: la
+  palabra `destino` + los 3 destinos válidos (`AGENTE_PRINCIPAL`, `AGENTE_OBJECIONES`,
+  `HANDOFF_HUMANO`).
+  **Dos cosas que hay que saber al dar de alta un cliente:**
+  1. **El prompt del router del cliente DEBE emitir `AGENTE_PRINCIPAL`**, no el nombre de su bot. El
+     `Switch — Destino Router` **descarta el turno** si `destino` trae un valor desconocido — el
+     BACKUP solo dispara cuando `destino` **no existe**. Un destino fuera del contrato = **bot mudo**,
+     no bot degradado. (Roberto emitía `ROBERTO`; Jacó declaraba `PRINCIPAL`.)
+  2. **No todo lo que está bajo la llave `router` es un router.** El de Jacó es un *filtro pre-bot*
+     con otro schema (`tipo_mensaje`, `debe_continuar_bot`). Antes de dar por bueno un prompt heredado,
+     leer qué emite — no asumirlo por el nombre de la llave.
+  El script `crm-v2/scripts/build-router-config-driven-v1.js` es idempotente, deja snapshot y verifica
+  por hash contra el n8n vivo (incluido que el default embebido sea idéntico char a char al literal
+  anterior).
 
 - **#-1 El playground y el bot de PRODUCCIÓN son workflows DISTINTOS y se desincronizan.**
   `bot-test-playground` (`dxZTZdwzyIcimZv0`) y `bot-c-v1` (`Jsh4krhC9HRUh7Ly`) leen el MISMO

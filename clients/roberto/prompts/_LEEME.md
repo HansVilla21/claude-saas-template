@@ -7,6 +7,16 @@ Carpeta de los prompts del bot de Roberto. Misma convención que `clients/moment
 - **Negocio / agency:** `Roberto` (industria `fisio`)
 - **Slug:** `roberto` → `/a/roberto`
 - **agency_id:** `db2ccbc7-ca8a-491a-a9e7-febef1585de1`
+- **WhatsApp de producción (2026-08-17):** `+506 7132 8474` — WABA `1108398568178924`,
+  verified name "Roberto Venegas". En `agency_channels` + `settings.bot_enabled=true`. Bot 24/7.
+
+## Contrato del router (no romper)
+
+El `router-classifier` **debe emitir `destino: "AGENTE_PRINCIPAL"`**, no `ROBERTO`. El
+`Switch — Destino Router` del workflow n8n solo conoce `AGENTE_PRINCIPAL`, `AGENTE_OBJECIONES` y
+`HANDOFF_HUMANO`, y **descarta el turno** ante un valor desconocido → el bot queda mudo. Al editar
+este prompt, recargarlo con `crm-v2/scripts/patch-roberto-router-contract.js` (merge quirúrgico +
+verificación por hash; aborta solo si se rompe el contrato).
 
 ## Dónde va cada cosa
 
