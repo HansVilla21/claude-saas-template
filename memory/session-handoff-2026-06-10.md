@@ -1,5 +1,8 @@
 # Session Handoff — 2026-06-10 — Mateo en producción de test + fix duplicación de leads
 
+> ⚠️ **HANDOFF HISTÓRICO — superado por `session-handoff-2026-06-12.md`**
+> Este archivo se conserva como registro del estado al 2026-06-10. Para estado actual, leer el handoff del 2026-06-12 primero (incluye prompts v4.2, modelos gpt-4.1 full, los 3 bugs de flujo resueltos y la lección de replicabilidad).
+
 **Propósito:** Snapshot del estado del proyecto al cierre del 2026-06-10. Lectura obligatoria al inicio de cualquier sesión nueva.
 
 **Reemplaza al handoff anterior** (`session-handoff-2026-06-06.md` queda como histórico).

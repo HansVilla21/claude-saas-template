@@ -1,0 +1,1334 @@
+{
+  "name": "Template TELEGRAM",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## FLUJO DE TELEGRAM - PRUEBAS CON CLIENTE REAL\n\nVersion del chatbot que corre sobre un bot de Telegram. Ideal para que el cliente (o un lead real) lo pruebe desde su celular como si fuera un WhatsApp.\n\n**Setup:**\n1. Crear un bot con @BotFather en Telegram\n2. Agregar el token en la credencial \"{CLIENTE} - Telegram\"\n3. Activar el workflow\n4. Darle el link del bot al cliente: t.me/NombreDelBot",
+        "height": 220,
+        "width": 440,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        140
+      ],
+      "id": "a7e9b1d0-note-0001-8000-000000000001",
+      "name": "Nota - Flujo Telegram"
+    },
+    {
+      "parameters": {
+        "content": "## COMANDO DE REINICIO\n\nSi el usuario escribe \"REINICIO\", \"reinicio\", \"reiniciar\" (y variantes), el bot:\n1. Borra su historial de Redis\n2. Borra su historial de Postgres\n3. Responde confirmando el reinicio\n\n**Por que:** Permite al cliente probar flujos distintos sin que el bot \"recuerde\" conversaciones anteriores.\n\n**IMPORTANTE:** Postgres delete usa operation \"deleteTable\" con deleteCommand \"delete\". El valor \"delete\" solo NO funciona.",
+        "height": 220,
+        "width": 440,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        300,
+        -60
+      ],
+      "id": "a7e9b1d0-note-0002-8000-000000000002",
+      "name": "Nota - Reinicio"
+    },
+    {
+      "parameters": {
+        "content": "## LECTURA DEL HISTORIAL\n\nPostgres lee los mensajes anteriores usando el chat_id de Telegram como sessionId.\n\nEl Code node transforma los registros en un string \"Usuario: X / Bot: Y\" que el Clasificador puede interpretar.\n\n**NOTA:** Despues del Code node el pairedItem de n8n se rompe. TODAS las expresiones a nodos anteriores deben usar `.first()` en vez de `.item`.",
+        "height": 200,
+        "width": 440,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        460,
+        340
+      ],
+      "id": "a7e9b1d0-note-0003-8000-000000000003",
+      "name": "Nota - Historial"
+    },
+    {
+      "parameters": {
+        "content": "## CORAZON DEL SISTEMA - ROUTING\n\nEl Clasificador (Information Extractor) decide que agente responde.\n\n**Reglas clave:**\n- El output tiene campo `destino` (NO `agente`, NO `decision`)\n- NO usar llaves `{ }` en el systemPromptTemplate — rompe n8n\n- Usar YAML para describir la estructura en el prompt, pero el output es JSON",
+        "height": 200,
+        "width": 440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        300
+      ],
+      "id": "a7e9b1d0-note-0004-8000-000000000004",
+      "name": "Nota - Routing"
+    },
+    {
+      "parameters": {
+        "content": "## AGENTES AI + BACKUP\n\n3 rutas del Switch:\n- LEO_PRINCIPAL / AGENTE_PRINCIPAL: flujo normal\n- AGENTE_OBJECIONES: maneja objeciones con LAARC\n- HANDOFF_HUMANO: envia mensaje estatico y espera intervencion\n- BACKUP (notExists): si el router devuelve vacio, va al Principal\n\nCada agente guarda su propia memoria Postgres con sessionKey = chat_id.",
+        "height": 220,
+        "width": 440,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1580,
+        80
+      ],
+      "id": "a7e9b1d0-note-0005-8000-000000000005",
+      "name": "Nota - Agentes"
+    },
+    {
+      "parameters": {
+        "content": "## FORMATEADOR DE MENSAJES\n\nEl Basic LLM Chain toma la respuesta del agente y la divide en multiples mensajes cortos (max 3 lineas cada uno).\n\n**Por que:** En WhatsApp/Telegram se ve mas natural recibir 3 mensajes cortos que 1 mensaje largo.\n\n**Modelo:** gpt-4o-mini (el prompt del formateador es universal, no cambia entre clientes).",
+        "height": 200,
+        "width": 440,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        0
+      ],
+      "id": "a7e9b1d0-note-0006-8000-000000000006",
+      "name": "Nota - Formateador"
+    },
+    {
+      "parameters": {
+        "content": "## ENVIO EN CHUNKS POR TELEGRAM\n\nItera cada chunk del formateador:\n1. Verifica que no sea vacio\n2. Envia via Telegram\n3. Espera unos segundos (simula pausa humana)\n4. Siguiente chunk\n\n**IMPORTANTE:** Todos los nodos \"Telegram Send\" llevan `additionalFields.appendAttribution: false` para que n8n NO agregue \"Sent via n8n.io\" al final (eso delata al bot).",
+        "height": 220,
+        "width": 440,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2380,
+        0
+      ],
+      "id": "a7e9b1d0-note-0007-8000-000000000007",
+      "name": "Nota - Envio Chunks"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        400
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000001",
+      "name": "Recibir Mensaje (Telegram)",
+      "webhookId": "a7e9b1d0-tg00-webhook-telegram",
+      "credentials": {
+        "telegramApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a7e9b1d0-tg00-idms-0001-000000000001",
+              "name": "ID",
+              "value": "={{ $json.message.chat.id.toString() }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-idms-0002-000000000002",
+              "name": "Mensaje",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -40,
+        400
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000002",
+      "name": "Extraer ID y Mensaje"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a7e9b1d0-tg00-rein-0001-000000000001",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIO",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0002-000000000002",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0003-000000000003",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0004-000000000004",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0005-000000000005",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "a7e9b1d0-tg00-rein-0006-000000000006",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIAR",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        140,
+        400
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000003",
+      "name": "Es comando REINICIO?"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Extraer ID y Mensaje').first().json.ID }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        340,
+        200
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000004",
+      "name": "Limpiar Redis (Reinicio)",
+      "credentials": {
+        "redis": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Redis"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('Extraer ID y Mensaje').first().json.ID }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        540,
+        200
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000005",
+      "name": "Borrar Historial (Reinicio)",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Extraer ID y Mensaje').first().json.ID }}",
+        "text": "Conversacion reiniciada. Podemos empezar de nuevo cuando quieras.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        740,
+        200
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000006",
+      "name": "Enviar Confirmacion de Reinicio",
+      "credentials": {
+        "telegramApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a7e9b1d0-tg00-vars-0001-000000000001",
+              "name": "Historial de conversacion",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-vars-0002-000000000002",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $('Extraer ID y Mensaje').first().json.Mensaje }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-vars-0003-000000000003",
+              "name": "Telefono",
+              "value": "={{ $('Extraer ID y Mensaje').first().json.ID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        340,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000007",
+      "name": "Setear Variables Iniciales"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list",
+          "cachedResultName": "n8n_chat_histories"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('Extraer ID y Mensaje').first().json.ID }}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        520,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000008",
+      "name": "Leer Historial (Postgres)",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Postgres"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\n// Devuelve 1 item con { conversation_text, total_messages, session_id }\n\nfunction getArrayFromAny(items) {\n  const first = items[0]?.json;\n\n  const isArr = (v) => Array.isArray(v);\n  const tryParse = (s) => { try { return JSON.parse(s); } catch { return null; } };\n\n  if (isArr(first)) return first;\n\n  const candidatesObj = [first?.messages, first?.conversation, first?.data];\n  for (const c of candidatesObj) if (isArr(c)) return c;\n\n  const candidatesStr = [first?.raw, first?.raw_json, first?.input, first?.payload, first?.body];\n  for (const c of candidatesStr) {\n    if (typeof c === 'string') {\n      const parsed = tryParse(c);\n      if (isArr(parsed)) return parsed;\n    }\n  }\n\n  const asItems = items.map(it => it.json).filter(x => x && x.message);\n  if (asItems.length) return asItems;\n\n  return [];\n}\n\nconst TARGET_SESSION_ID = null;\nconst PREFIX_USUARIO = 'Usuario';\nconst PREFIX_BOT = 'Bot';\n\nconst items = $input.all();\nlet records = getArrayFromAny(items);\n\nrecords = records\n  .filter(r => r?.message?.type && r?.message?.content != null)\n  .filter(r => !TARGET_SESSION_ID || r.session_id === TARGET_SESSION_ID)\n  .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));\n\nconst strip = (txt) => {\n  if (typeof txt !== 'string') return '';\n\n  let out = txt;\n\n  const markerRegex = /#\\s*datos recopilados hasta el momento/i;\n  const markerMatch = out.match(markerRegex);\n  if (markerMatch) {\n    out = out.slice(0, markerMatch.index);\n  }\n\n  const hasUserHeader = /#\\s*mensaje del usuario/i.test(out);\n  if (hasUserHeader) {\n    out = out\n      .split('\\n')\n      .filter(line => !line.trim().startsWith('#'))\n      .join('\\n');\n  }\n\n  return out\n    .replace(/^\\s*(Mensasje|Mensaje)\\s*:\\s*/i, '')\n    .replace(/  \\n/g, '\\n')\n    .replace(/[ \\t]+\\n/g, '\\n')\n    .trim();\n};\n\nconst role = (type) => (type === 'human' ? PREFIX_USUARIO : (type === 'ai' ? PREFIX_BOT : String(type)));\n\nconst lines = [];\nfor (const r of records) {\n  const content = strip(r.message.content);\n  if (!content) continue;\n  lines.push(`${role(r.message.type)}: ${content}`);\n}\n\nreturn [{\n  json: {\n    conversation_text: lines.join('\\n'),\n    total_messages: lines.length,\n    session_id: TARGET_SESSION_ID || (records[0]?.session_id ?? null),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000009",
+      "name": "Formatear Historial"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a7e9b1d0-tg00-unif-0001-000000000001",
+              "name": "Historial de conversacion",
+              "value": "={{ $json.conversation_text }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-unif-0002-000000000002",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $('Setear Variables Iniciales').first().json['Mensaje actual del usuario'] }}",
+              "type": "string"
+            },
+            {
+              "id": "a7e9b1d0-tg00-unif-0003-000000000003",
+              "name": "Telefono",
+              "value": "={{ $('Setear Variables Iniciales').first().json.Telefono }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000010",
+      "name": "Unificar Variables"
+    },
+    {
+      "parameters": {
+        "text": "=# Historial de conversacion\n{{ $json['Historial de conversacion'] }}\n\n# Mensaje actual del usuario\n{{ $json['Mensaje actual del usuario'] }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"destino\": \"{{AGENTE_PRINCIPAL_NOMBRE}}\",\n  \"motivo\": \"descripcion breve\",\n  \"datos_extraidos\": {\n    \"nombre\": null,\n    \"objeciones_count\": 0,\n    \"ultima_objecion\": null,\n    \"fase_conversacion\": \"saludo\"\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "# CLASIFICADOR DE MENSAJES — {{NOMBRE_EMPRESA}}\n\n## FORMATO DE OUTPUT OBLIGATORIO (LEER PRIMERO)\n\nTu output SIEMPRE debe ser un objeto JSON valido. NUNCA YAML. NUNCA texto. NUNCA markdown. SOLO JSON.\n\nA continuacion la ESTRUCTURA de los campos (listado en YAML solo para visualizacion — devuelve JSON):\n\ndestino: \"{{AGENTE_PRINCIPAL_NOMBRE}}\"\nmotivo: \"descripcion breve\"\ndatos_extraidos:\n  nombre: null\n  (agregar mas campos segun discovery)\n  objeciones_count: 0\n  ultima_objecion: null\n  fase_conversacion: \"saludo\"\n\n### NOMBRES DE CAMPOS — NO NEGOCIABLES\n\nEl campo principal se llama EXACTAMENTE: destino\n\nPROHIBIDO renombrarlo. Variantes PROHIBIDAS:\n❌ agente, agente_asignado, agente_destino, decision, ruta, routing\n\n✅ SOLO: destino\n\n---\n\n## ROL\nSos un clasificador. Analizas historial + mensaje actual para decidir que agente responde.\n\n## AGENTES DISPONIBLES\n- {{AGENTE_PRINCIPAL_NOMBRE}} (default)\n- AGENTE_OBJECIONES\n- HANDOFF_HUMANO\n\n## CRITERIO: PREGUNTA vs OBJECION vs CORRECCION\n\nPREGUNTA → {{AGENTE_PRINCIPAL_NOMBRE}}\nCORRECCION/AFIRMACION → {{AGENTE_PRINCIPAL_NOMBRE}} (aunque empiece con \"no\")\nOBJECION → AGENTE_OBJECIONES (primera vez)\nSEGUNDA OBJECION → HANDOFF_HUMANO\n\n(Completar con ejemplos especificos del cliente al implementar)\n\n## REGLAS DE DECISION\n1. Objecion y objeciones_count == 0 → AGENTE_OBJECIONES\n2. Segunda objecion, pide humano, frustrado → HANDOFF_HUMANO\n3. Todo lo demas → {{AGENTE_PRINCIPAL_NOMBRE}}\n\nJSON puro. Sin markdown. Sin backticks."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000011",
+      "name": "Clasificador / Orquestador"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 300,
+          "responseFormat": "json_object",
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1140,
+        780
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000012",
+      "name": "LLM del Clasificador",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "{{AGENTE_PRINCIPAL_NOMBRE}}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a7e9b1d0-tg00-sw-0001-000000000001"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "{{AGENTE_PRINCIPAL_NOMBRE}}"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a7e9b1d0-tg00-sw-0002-000000000002",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "AGENTE_OBJECIONES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AGENTE_OBJECIONES"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a7e9b1d0-tg00-sw-0003-000000000003",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "HANDOFF_HUMANO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HANDOFF_HUMANO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a7e9b1d0-tg00-sw-0004-000000000004",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BACKUP"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1380,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000013",
+      "name": "Enrutador de Agentes"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Setear Variables Iniciales').first().json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "# AGENTE PRINCIPAL — {{NOMBRE_EMPRESA}}\n\n## IDENTIDAD\nSos {{BOT_NOMBRE}}, {{BOT_ROL}} de {{NOMBRE_EMPRESA}}.\n\nFecha actual: 2026-04-17\n\n## OBJETIVO\n{{OBJETIVO_PRINCIPAL}}\n\n## INFORMACION DEL NEGOCIO\n{{INFO_NEGOCIO}}\n\n## FLUJO CONVERSACIONAL\n(Adaptar segun discovery del cliente)\n\n## REGLAS CRITICAS\n1. Max 3-4 lineas por mensaje\n2. UNA pregunta por mensaje\n3. Puntuacion informal (sin :, sin ;, sin ¿)\n4. Cierre en 2 pasos (proponer → esperar confirmacion → enviar link)\n5. Variar mensajes repetidos\n6. No prometer material que no existe\n\n## CIERRE EN 2 PASOS\nPASO 5A: Proponer (sin link)\nPASO 5B: Enviar link (solo tras confirmacion afirmativa)\n\n(Completar con detalles del cliente)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        340
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000014",
+      "name": "Agente Principal"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000015",
+      "name": "LLM del Agente Principal",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Setear Variables Iniciales').first().json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1700,
+        560
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000016",
+      "name": "Memoria - Principal",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Setear Variables Iniciales').first().json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "# AGENTE OBJECIONES — {{NOMBRE_EMPRESA}}\n\nSeguis siendo {{BOT_NOMBRE}}. Manejas UNA objecion con framework LAARC.\n\n## LAARC\nL - Listen: mostrar que escuchaste\nA - Acknowledge: validar la preocupacion\nA - Assess: preguntar causa raiz\nR - Respond: estrategia segun tipo\nC - Confirm: verificar que quedo resuelto\n\nTodo en UN mensaje fluido, max 4 lineas.\n\n## OBJECIONES COMUNES\n- Precio/caro\n- Timing/no es momento\n- Miedo/desconfianza\n\n## REGLAS\n1. NUNCA coordinar fecha/hora directamente — usar link\n2. NUNCA ofrecer descuento\n3. NUNCA defender agresivamente\n4. SIEMPRE terminar con pregunta de confirmacion\n\n(Completar con objeciones especificas del cliente)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1620,
+        720
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000018",
+      "name": "Agente de Objeciones (LAARC)"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1560,
+        940
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000019",
+      "name": "LLM del Agente de Objeciones",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Setear Variables Iniciales').first().json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1700,
+        940
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000020",
+      "name": "Memoria - Objeciones",
+      "credentials": {
+        "postgres": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Postgres"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Extraer ID y Mensaje').first().json.ID }}",
+        "text": "Gracias por tu mensaje. Voy a pasarte con un miembro del equipo para que te ayude directamente.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1620,
+        1100
+      ],
+      "id": "a7e9b1d0-tg00-4000-8000-000000000022",
+      "name": "Enviar Mensaje de Handoff",
+      "credentials": {
+        "telegramApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Telegram"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Respuesta a formatear: {{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# PROMPT: FORMATEADOR DE MENSAJES PARA WHATSAPP\n\n## ROL\nFormateador de mensajes para WhatsApp. Tu ÚNICA función es dividir mensajes largos en bloques de máximo 3 líneas Y separar listas que vengan pegadas.\n\n## CONTEXTO\nLos mensajes de WhatsApp deben ser cortos y escaneables. Mensajes muy largos son difíciles de leer en mobile y generan abandono.\n\n## INPUT\nRecibes un mensaje de texto que puede tener múltiples líneas y párrafos, incluyendo listas con bullets.\n\n## OUTPUT OBLIGATORIO\nJSON válido con mensajes divididos:\n\n```json\n{\n  \"MENSAJE 1\": \"Texto del primer mensaje (máximo 3 líneas)\",\n  \"MENSAJE 2\": \"Texto del segundo mensaje (máximo 3 líneas)\",\n  \"MENSAJE 3\": \"Texto del tercer mensaje (máximo 3 líneas)\"\n}\n```\n\n## REGLAS DE DIVISIÓN\n\n### 1. MÁXIMO 3 LÍNEAS POR MENSAJE\nCada mensaje puede tener máximo 3 líneas de texto (separadas por `\\n`).\n\n### 2. RESPETAR PÁRRAFOS EXISTENTES\nSi el mensaje original tiene párrafos separados por `\\n\\n` (doble salto), cada párrafo debe ir en un mensaje separado.\n\n### 3. AGRUPAR LÍNEAS RELACIONADAS\nSi un párrafo tiene más de 3 líneas, divídelo en mensajes de máximo 3 líneas, pero mantén ideas relacionadas juntas.\n\n### 4. MANTENER CONTEXTO\nNo dividir en medio de una idea. Cada mensaje debe tener sentido por sí solo.\n\n### 5. PREGUNTAS SIEMPRE EN MENSAJE SEPARADO\nSi el mensaje termina con una pregunta, la pregunta debe ir en su propio mensaje.\n\n## CASOS ESPECIALES\n\n### Mensaje ya es corto (≤3 líneas)\nSi el mensaje ya tiene 3 líneas o menos, NO dividir:\n\n```json\n{\n  \"MENSAJE 1\": \"Texto completo del mensaje original\"\n}\n```\n\n## FORMATO DE SALIDA\n\nTu respuesta COMPLETA debe ser ÚNICAMENTE el JSON:\n\n```json\n{\n  \"MENSAJE 1\": \"texto aquí\",\n  \"MENSAJE 2\": \"texto aquí\"\n}\n```\n\n- NO agregues explicaciones\n- NO uses markdown adicional\n- NO incluyas texto fuera del JSON\n- SOLO el JSON válido\n\n## PROHIBICIONES\n\n❌ NO dividir palabras o frases en medio\n❌ NO crear mensajes de una sola palabra\n❌ NO separar números de su contexto\n❌ NO modificar el contenido del mensaje (solo dividir)\n\n## PRIORIDADES EN ORDEN\n\n1. **Mantener sentido** (cada mensaje se entiende)\n2. **Máximo 3 líneas** por mensaje\n3. **Preguntas separadas** al final\n4. **Respetar párrafos** existentes\n5. **Agrupar ideas** relacionadas"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        1880,
+        240
+      ],
+      "id": "d9ba402a-db0c-4971-97be-ea5b9645f963",
+      "name": "Formateador de Mensajes",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        440
+      ],
+      "id": "b894a218-bdfe-4265-aa20-9389450a0ad8",
+      "name": "LLM del Formateador",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "prompt": "=Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [
+        1980,
+        440
+      ],
+      "id": "b58abb79-10e2-4f5b-bf58-1194d6ebba02",
+      "name": "Parser Auto-correctivo"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"output\": \n{\n\"MENSAJE 1\": \n\"Entiendo.\",\n  \"MENSAJE 2\": \n\"Entiendo.\"\n}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2120,
+        580
+      ],
+      "id": "ca4e3bdd-91f9-446a-9ea9-9e305882eb5a",
+      "name": "Parser Estructurado"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1980,
+        580
+      ],
+      "id": "85ca4b58-ddbf-4e29-b072-14c6bfdc6759",
+      "name": "LLM del Parser",
+      "credentials": {
+        "openAiApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - OpenAI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2140,
+        240
+      ],
+      "id": "3e5c03ab-f849-4f71-971e-feabfe19d80c",
+      "name": "Separar Mensajes"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2400,
+        240
+      ],
+      "id": "267f2196-4877-4fa2-91a0-e16e0d0986d8",
+      "name": "Iterar Mensajes"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e97607d2-b7b9-48cb-b059-fc5030dcaf56",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2660,
+        240
+      ],
+      "id": "2b9f172f-eb80-4286-bc78-b6938421fca4",
+      "name": "Mensaje No Vacio?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2920,
+        380
+      ],
+      "id": "4ab81d24-4501-4f0b-a2be-6d7934f76ebe",
+      "name": "Pausa entre Mensajes",
+      "webhookId": "c1d2e3f4-0001-4000-8000-000000000001"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Extraer ID y Mensaje').first().json.ID }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2920,
+        240
+      ],
+      "id": "7a838101-3242-4359-bd94-153c9522ad05",
+      "name": "Enviar Chunk (Telegram)",
+      "credentials": {
+        "telegramApi": {
+          "id": "PLACEHOLDER",
+          "name": "{{CLIENTE}} - Telegram"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Recibir Mensaje (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Extraer ID y Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer ID y Mensaje": {
+      "main": [
+        [
+          {
+            "node": "Es comando REINICIO?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es comando REINICIO?": {
+      "main": [
+        [
+          {
+            "node": "Limpiar Redis (Reinicio)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Setear Variables Iniciales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limpiar Redis (Reinicio)": {
+      "main": [
+        [
+          {
+            "node": "Borrar Historial (Reinicio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Borrar Historial (Reinicio)": {
+      "main": [
+        [
+          {
+            "node": "Enviar Confirmacion de Reinicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setear Variables Iniciales": {
+      "main": [
+        [
+          {
+            "node": "Leer Historial (Postgres)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer Historial (Postgres)": {
+      "main": [
+        [
+          {
+            "node": "Formatear Historial",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formatear Historial": {
+      "main": [
+        [
+          {
+            "node": "Unificar Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificar Variables": {
+      "main": [
+        [
+          {
+            "node": "Clasificador / Orquestador",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificador / Orquestador": {
+      "main": [
+        [
+          {
+            "node": "Enrutador de Agentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Clasificador": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Clasificador / Orquestador",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrutador de Agentes": {
+      "main": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente de Objeciones (LAARC)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Mensaje de Handoff",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Agente Principal": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria - Principal": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Principal",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Principal": {
+      "main": [
+        [
+          {
+            "node": "Formateador de Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Agente de Objeciones": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Objeciones (LAARC)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Memoria - Objeciones": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente de Objeciones (LAARC)",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de Objeciones (LAARC)": {
+      "main": [
+        [
+          {
+            "node": "Formateador de Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formateador de Mensajes": {
+      "main": [
+        [
+          {
+            "node": "Separar Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Separar Mensajes": {
+      "main": [
+        [
+          {
+            "node": "Iterar Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iterar Mensajes": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Mensaje No Vacio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mensaje No Vacio?": {
+      "main": [
+        [
+          {
+            "node": "Enviar Chunk (Telegram)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pausa entre Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Chunk (Telegram)": {
+      "main": [
+        [
+          {
+            "node": "Pausa entre Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pausa entre Mensajes": {
+      "main": [
+        [
+          {
+            "node": "Iterar Mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Formateador": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Formateador de Mensajes",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Auto-correctivo": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Formateador de Mensajes",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser Estructurado": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Parser Auto-correctivo",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM del Parser": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Parser Auto-correctivo",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a7e9b1d0-template-telegram-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "id": "PLACEHOLDER_WORKFLOW_ID",
+  "tags": []
+}

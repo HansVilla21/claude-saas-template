@@ -1,0 +1,3875 @@
+{
+  "name": "Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('ID y Mensaje').item.json.ID }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -5424,
+        -304
+      ],
+      "id": "b1ac6e5a-af5f-479d-b81c-4b1a011cf5c5",
+      "name": "Vacía el Array5",
+      "credentials": {
+        "redis": {
+          "id": "D0tF42Jzc8AIqGVh",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list",
+          "cachedResultName": "n8n_chat_histories"
+        },
+        "deleteCommand": "delete",
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -5200,
+        -304
+      ],
+      "id": "0fb8b0ab-620d-4796-afef-b5cdd5eeae14",
+      "name": "Delete table or rows1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "xrSLVRuL8Ee4sHKm",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a9478d64-a1d4-448e-b423-c76116e712c6",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIO",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5726aa13-bdc1-4e1a-9bfd-7c33d1b894f6",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "0f698bd6-3edf-4445-961b-00034ba43981",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reinicio",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "c98836e8-15f9-4344-a9d8-ba7697b4bd93",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "70cd771f-5618-41d8-bf5c-cd104e175e0a",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "Reiniciar",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "80a609be-3902-41fb-8bcb-799bf501b57b",
+              "leftValue": "={{ $json.Mensaje }}",
+              "rightValue": "REINICIAR",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -5648,
+        -16
+      ],
+      "id": "27fa01f4-6b3b-4f20-baea-86f023ad4f65",
+      "name": "REINICIAR"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5dc396d1-45df-44ba-abe1-a4e02105fefc",
+              "leftValue": "={{ $json[\"Estado Chatbot\"] }}",
+              "rightValue": "Apagado",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4976,
+        64
+      ],
+      "id": "c8104d75-1f55-453b-aac7-27ecfe2d1ec6",
+      "name": "IN OFF?1"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "apprnTahFSmTazTi7",
+          "mode": "list",
+          "cachedResultName": "Sistema Operativo",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqtFdkLmUk2tITR",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7/tblqtFdkLmUk2tITR"
+        },
+        "filterByFormula": "={ID Manychat} = \"{{ $json.ID }}\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -5424,
+        448
+      ],
+      "id": "cb27afe8-aca5-4361-bec0-b80952d83fa2",
+      "name": "Buscar Lead",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "apprnTahFSmTazTi7",
+          "mode": "list",
+          "cachedResultName": "Sistema Operativo",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqtFdkLmUk2tITR",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7/tblqtFdkLmUk2tITR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Webhook').item.json.body.name }}",
+            "Usuario de IG": "={{ $('Webhook').item.json.body.ig_username }}",
+            "Fuente": "Anuncios",
+            "Estado": "Conversación",
+            "Estado Chatbot": "Encendido",
+            "ID Manychat": "={{ $('Webhook').item.json.body.id }}",
+            "Último contacto": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Usuario de IG",
+              "displayName": "Usuario de IG",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Enlace de Instagram",
+              "displayName": "Enlace de Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fuente",
+              "displayName": "Fuente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Anuncios",
+                  "value": "Anuncios"
+                },
+                {
+                  "name": "Historias",
+                  "value": "Historias"
+                },
+                {
+                  "name": "Reels",
+                  "value": "Reels"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "UTM Fuente",
+              "displayName": "UTM Fuente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Conversación",
+                  "value": "Conversación"
+                },
+                {
+                  "name": "Calendly Enviado",
+                  "value": "Calendly Enviado"
+                },
+                {
+                  "name": "No calificado (Chatbot)",
+                  "value": "No calificado (Chatbot)"
+                },
+                {
+                  "name": "Agendado",
+                  "value": "Agendado"
+                },
+                {
+                  "name": "No asistió",
+                  "value": "No asistió"
+                },
+                {
+                  "name": "Calificado en seguimiento",
+                  "value": "Calificado en seguimiento"
+                },
+                {
+                  "name": "No calificado (closing)",
+                  "value": "No calificado (closing)"
+                },
+                {
+                  "name": "Cerrado",
+                  "value": "Cerrado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Setter",
+              "displayName": "Setter",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Sara",
+                  "value": "Sara"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Closer",
+              "displayName": "Closer",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Dr. Carlos",
+                  "value": "Dr. Carlos"
+                },
+                {
+                  "name": "Roberto",
+                  "value": "Roberto"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LLs Agendadas",
+              "displayName": "LLs Agendadas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado Chatbot",
+              "displayName": "Estado Chatbot",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID Manychat",
+              "displayName": "ID Manychat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Seguimiento #1",
+              "displayName": "Seguimiento #1",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #2",
+              "displayName": "Seguimiento #2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #3",
+              "displayName": "Seguimiento #3",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -4752,
+        256
+      ],
+      "id": "3f1bfc38-c0a8-4abf-b1cf-0295b8e7de55",
+      "name": "Crear Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "apprnTahFSmTazTi7",
+          "mode": "list",
+          "cachedResultName": "Sistema Operativo",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqtFdkLmUk2tITR",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7/tblqtFdkLmUk2tITR"
+        },
+        "id": "={{ $json.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -4528,
+        256
+      ],
+      "id": "c747288b-8268-4bef-aeec-0bf00eff25e1",
+      "name": "GET Lead",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appdMLGTpFueaSABj",
+          "mode": "list",
+          "cachedResultName": "Gestión de Vehículos",
+          "cachedResultUrl": "https://airtable.com/appdMLGTpFueaSABj"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblepqs9U8UmiqN6O",
+          "mode": "list",
+          "cachedResultName": "Vehículos",
+          "cachedResultUrl": "https://airtable.com/appdMLGTpFueaSABj/tblepqs9U8UmiqN6O"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "Último contacto": "={{ $now }}",
+            "Chatbot Activado": "Encendido"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": false
+            },
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Año del vehículo",
+              "displayName": "Año del vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Localidad",
+              "displayName": "Localidad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "En mantenimiento",
+                  "value": "En mantenimiento"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Recordatorios",
+              "displayName": "Recordatorios",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Chatbot Activado",
+              "displayName": "Chatbot Activado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Necesita Factura",
+              "displayName": "Necesita Factura",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -4752,
+        64
+      ],
+      "id": "16a77c1d-8d07-4148-a9ca-1c835a90e700",
+      "name": "Update Timestamp",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cf69fa4e-c7f0-47b0-87f4-ff006f2a1ba3",
+              "leftValue": "={{ $json['ID Manychat'] }}",
+              "rightValue": "={{ $('ID y Mensaje').item.json['ID'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -5200,
+        448
+      ],
+      "id": "9b224417-57c6-4d26-8920-05556b568c97",
+      "name": "Existe?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -3184,
+        256
+      ],
+      "id": "1b8b6beb-af2d-4e29-9ffd-1529cca3cef1",
+      "name": "No Operation, do nothing3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0978707a-e529-48d6-a512-6013d30542f6",
+              "leftValue": "=text",
+              "rightValue": "audio",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -4304,
+        256
+      ],
+      "id": "911b375b-2e6b-460f-b8ca-5b097452c8a9",
+      "name": "Es audio?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "82b413da-d083-447a-a77c-582093501d53",
+              "leftValue": "={{ $json.propertyName.last() }}",
+              "rightValue": "={{ $('ID y Mensaje').item.json.Mensaje }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -3408,
+        256
+      ],
+      "id": "bfd5f38c-c62a-4e73-bc30-6f5b544ddf15",
+      "name": "Es el último mensaje?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $('ID y Mensaje').item.json['ID'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -3632,
+        256
+      ],
+      "id": "9a676b94-bc12-4118-a794-dfd2a94db6bd",
+      "name": "Revisar todos los mensajes",
+      "credentials": {
+        "redis": {
+          "id": "D0tF42Jzc8AIqGVh",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 45
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3856,
+        256
+      ],
+      "id": "4723830e-ea24-43be-b083-254d0a06d32c",
+      "name": "Esperando nuevo mensaje",
+      "webhookId": "e434f341-796b-4d3f-8706-db21e3de796d"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('ID y Mensaje').item.json.ID }}",
+        "messageData": "={{ $('ID y Mensaje').item.json.Mensaje || \"\" }}",
+        "tail": true
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -4080,
+        256
+      ],
+      "id": "3ed4c57b-2a52-41d4-ab27-46991a914081",
+      "name": "Guardar mensajes",
+      "credentials": {
+        "redis": {
+          "id": "D0tF42Jzc8AIqGVh",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "33215691-a20a-4c63-8b57-82b6d6320291",
+              "name": "Mensajes",
+              "value": "={{ $json.propertyName.join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3184,
+        48
+      ],
+      "id": "6ecd083e-24f5-483a-b282-6785e785446d",
+      "name": "Juntar mensajes"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Function node\n// Devuelve 1 item con { conversation_text, total_messages, session_id }\n\nfunction getArrayFromAny(items) {\n  // Caso: un solo item con el array en root o en alguna clave\n  const first = items[0]?.json;\n\n  const isArr = (v) => Array.isArray(v);\n  const tryParse = (s) => { try { return JSON.parse(s); } catch { return null; } };\n\n  // 1) Array directo en el root del json\n  if (isArr(first)) return first;\n\n  // 2) Array en claves comunes\n  const candidatesObj = [first?.messages, first?.conversation, first?.data];\n  for (const c of candidatesObj) if (isArr(c)) return c;\n\n  // 3) Array como string JSON en claves comunes\n  const candidatesStr = [first?.raw, first?.raw_json, first?.input, first?.payload, first?.body];\n  for (const c of candidatesStr) {\n    if (typeof c === 'string') {\n      const parsed = tryParse(c);\n      if (isArr(parsed)) return parsed;\n    }\n  }\n\n  // 4) Si nada de lo anterior: asume que cada item ES un registro de mensaje\n  const asItems = items.map(it => it.json).filter(x => x && x.message);\n  if (asItems.length) return asItems;\n\n  // 5) fallback vacío\n  return [];\n}\n\n// ---------- CONFIG OPCIONAL ----------\nconst TARGET_SESSION_ID = null; // e.g., \"7764470220\" para filtrar; déjalo en null para no filtrar\nconst PREFIX_USUARIO = 'Usuario';\nconst PREFIX_BOT = 'Bot';\n// -------------------------------------\n\nconst items = $input.all();\nlet records = getArrayFromAny(items);\n\n// Filtra y ordena\nrecords = records\n  .filter(r => r?.message?.type && r?.message?.content != null)\n  .filter(r => !TARGET_SESSION_ID || r.session_id === TARGET_SESSION_ID)\n  .sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));\n\n// --- Limpieza de contenido personalizada ---\nconst strip = (txt) => {\n  if (typeof txt !== 'string') return '';\n\n  let out = txt;\n\n  // 1) Cortar todo lo que venga desde \"# Datos recopilados hasta el momento\"\n  //    (ignorando mayúsculas/minúsculas y espacios)\n  const markerRegex = /#\\s*datos recopilados hasta el momento/i;\n  const markerMatch = out.match(markerRegex);\n  if (markerMatch) {\n    out = out.slice(0, markerMatch.index);\n  }\n\n  // 2) Si trae el encabezado \"# Mensaje del usuario\", quitamos las líneas que empiezan con \"#\"\n  const hasUserHeader = /#\\s*mensaje del usuario/i.test(out);\n  if (hasUserHeader) {\n    out = out\n      .split('\\n')\n      .filter(line => !line.trim().startsWith('#'))\n      .join('\\n');\n  }\n\n  // 3) Limpieza general\n  return out\n    .replace(/^\\s*(Mensasje|Mensaje)\\s*:\\s*/i, '') // por si algún día viene así\n    .replace(/  \\n/g, '\\n')\n    .replace(/[ \\t]+\\n/g, '\\n')\n    .trim();\n};\n\nconst role = (type) => (type === 'human' ? PREFIX_USUARIO : (type === 'ai' ? PREFIX_BOT : String(type)));\n\nconst lines = [];\nfor (const r of records) {\n  const content = strip(r.message.content);\n  if (!content) continue;\n  lines.push(`${role(r.message.type)}: ${content}`);\n}\n\nreturn [{\n  json: {\n    conversation_text: lines.join('\\n'),\n    total_messages: lines.length,\n    session_id: TARGET_SESSION_ID || (records[0]?.session_id ?? null),\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2736,
+        48
+      ],
+      "id": "c58e8c36-3f2e-425b-8b05-cdca2cbc2bd9",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4fa108f2-4f60-4b5c-9d2c-77ed49bd61c6",
+              "name": "Historial de conversación",
+              "value": "={{ $json.conversation_text }}",
+              "type": "string"
+            },
+            {
+              "id": "7b9c90c1-9778-42ef-8e59-415820a4d54d",
+              "name": "Mensaje actual del usuario",
+              "value": "={{ $items(\"Juntar mensajes\")[0].json[\"Mensajes\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "a1c830bc-1de8-4725-a836-b0bef14cac74",
+              "name": "Telefono",
+              "value": "={{ $items(\"ID y Mensaje\")[0].json[\"ID\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2512,
+        48
+      ],
+      "id": "cc4d4ede-d19a-4cf9-8bba-d0662e396266",
+      "name": "Unificación de Variables"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "n8n_chat_histories",
+          "mode": "list",
+          "cachedResultName": "n8n_chat_histories"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "session_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID}}"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2960,
+        48
+      ],
+      "id": "ebf0ceb9-f8e8-42c3-88c1-d319446afff9",
+      "name": "Conversation",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "xrSLVRuL8Ee4sHKm",
+          "name": "Postgres account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "929d394a-af42-4057-9b39-a23512a333b2",
+              "name": "ID",
+              "value": "={{ $json.ID }}",
+              "type": "string"
+            },
+            {
+              "id": "f8e1256c-edf4-4802-b029-bba582198523",
+              "name": "=Mensaje",
+              "value": "={{ $json.Mensaje }}",
+              "type": "string"
+            },
+            {
+              "id": "f4e0a946-7b00-4926-81d2-ca627ebba00b",
+              "name": "flag",
+              "value": "={{ $json.Mensaje }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -5872,
+        -16
+      ],
+      "id": "8d019b5e-bc9d-48f6-8c1b-01c0bca0928a",
+      "name": "ID y Mensaje"
+    },
+    {
+      "parameters": {
+        "operation": "deleteRecord",
+        "base": {
+          "__rl": true,
+          "value": "apprnTahFSmTazTi7",
+          "mode": "list",
+          "cachedResultName": "Sistema Operativo",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqtFdkLmUk2tITR",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7/tblqtFdkLmUk2tITR"
+        },
+        "id": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -4752,
+        -304
+      ],
+      "id": "5fbb6716-e40a-407f-aa2c-ae897cc9f43d",
+      "name": "Delete a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "apprnTahFSmTazTi7",
+          "mode": "list",
+          "cachedResultName": "Sistema Operativo",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqtFdkLmUk2tITR",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7/tblqtFdkLmUk2tITR"
+        },
+        "filterByFormula": "={ID Manychat} = '{{ $('ID y Mensaje').item.json.ID }}'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -4976,
+        -304
+      ],
+      "id": "c939b065-41b8-4c49-a7b1-aa0b3d492b8b",
+      "name": "Search records",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "=# Historial de conversación\n{{ $json['Historial de conversación'] }}\n\n# Mensaje actual del usuario\n{{ $json[\"Mensaje actual del usuario\"] }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"destino\": \"DR_CARLOS\",\n  \"motivo\": \"descripción breve de por qué se eligió este destino\",\n  \"datos_extraidos\": {\n    \"nombre\": null,\n    \"consulta_para_si_mismo\": null,\n    \"dolor\": null,\n    \"dolor_pts\": 0,\n    \"tiempo_percibido\": null,\n    \"tiempo_pts\": 0,\n    \"tiempo_oculto\": null,\n    \"tiempo_oculto_pts\": 0,\n    \"historial\": null,\n    \"historial_pts\": 0,\n    \"score_total\": 0,\n    \"nivel\": \"bajo\",\n    \"fase_actual\": \"saludo\",\n    \"vsl_enviado\": false,\n    \"vsl_visto\": false,\n    \"objeciones_count\": 0,\n    \"ultima_objecion\": null,\n    \"es_emergencia\": false\n  }\n}",
+        "options": {
+          "systemPromptTemplate": "=# CLASIFICADOR DE MENSAJES — Dr. Carlos Hernández v3.0\n\n## ROL\nSos un clasificador de conversaciones. Analizás el historial completo y el mensaje actual para determinar qué agente debe responder. No conversás con el usuario, solo clasificás y extraés datos.\n\n## AGENTES DISPONIBLES\n\n### DR_CARLOS\nAgente principal. Maneja todo el flujo normal de conversación.\nActivar cuando: no aplica ninguna condición de los otros agentes.\n\n### AGENTE_OBJECIONES\nEspecialista en manejo de objeciones. Solo se activa en la PRIMERA objeción.\nActivar cuando:\n- El usuario expresa resistencia, duda o rechazo sobre: precio, timing, cannabis/CBD, medicación tradicional, o cualquier otra objeción al protocolo\n- Y en el historial NO hay objeciones previas ya manejadas\n\n### HANDOFF_HUMANO\nEscala al equipo humano. Se activa por situaciones que el bot no puede manejar.\nActivar cuando se detecta CUALQUIERA de estas condiciones:\n- **Emergencia psiquiátrica o crisis activa**: menciona suicidio, quitarse la vida, hacerse daño, \"emergencia\", \"urgente\", \"necesito ayuda urgente\", \"crisis de ansiedad\", \"ataques todos los días\", \"no puedo más con esto\", \"estoy en crisis\", \"no aguanto más\"\n- **Consulta médica técnica**: pregunta por dosis específicas, miligramos, interacciones con medicamentos, efectos adversos graves\n- **Tema legal**: pregunta si es legal, si necesita receta, regulaciones, leyes sobre cannabis\n- **Segunda objeción o más**: en el historial ya hubo una objeción manejada y el usuario objeta nuevamente\n- **Usuario insiste en hablar con humano**: pide explícitamente hablar con el Dr. Carlos real o una persona\n- **Usuario molesto o agresivo**: tono hostil, insultos, frustración evidente y sostenida\n- **Loop sin avance**: 3 o más mensajes consecutivos completamente fuera de contexto\n\n## CALIFICACIÓN INTERNA\nCalculá el score acumulado según las respuestas del historial. Actualizarlo en cada turno.\n\n| Variable | 0 pts | 1 pt | 2 pts |\n|---|---|---|---|\n| Dolor | Leve, lo maneja | Le incomoda bastante | Lo sobrepasa |\n| Tiempo percibido | < 3 meses | 3 meses – 2 años | > 2 años |\n| Tiempo oculto | Es nuevo en él/ella | — | Ya existía antes |\n| Historial | Nada aún | Algo leve | Múltiples / sin resultados |\n\n**Clasificación:**\n- 0–3 pts → nivel_bajo\n- 4–5 pts → nivel_medio\n- 6–8 pts → nivel_alto\n\n## OUTPUT REQUERIDO\nRespondé ÚNICAMENTE con JSON válido, sin texto adicional, sin markdown:\n\n\n  \"destino\": \"DR_CARLOS\" | \"AGENTE_OBJECIONES\" | \"HANDOFF_HUMANO\",\n  \"motivo\": \"descripción breve de por qué se eligió este destino\",\n  \"datos_extraidos\": \n    \"nombre\": null,\n    \"consulta_para_si_mismo\": null,\n    \"dolor\": null,\n    \"dolor_pts\": 0,\n    \"tiempo_percibido\": null,\n    \"tiempo_pts\": 0,\n    \"tiempo_oculto\": null,\n    \"tiempo_oculto_pts\": 0,\n    \"historial\": null,\n    \"historial_pts\": 0,\n    \"score_total\": 0,\n    \"nivel\": \"bajo\" | \"medio\" | \"alto\" | null,\n    \"fase_actual\": \"saludo\" | \"contexto\" | \"dolor\" | \"tiempo\" | \"tiempo_oculto\" | \"historial\" | \"resultado\" | \"vsl\" | \"calendly\",\n    \"vsl_enviado\": false,\n    \"vsl_visto\": false,\n    \"objeciones_count\": 0,\n    \"ultima_objecion\": null,\n    \"es_emergencia\": false\n  \n\n\n## REGLAS CRÍTICAS\n1. Ante cualquier señal de emergencia → HANDOFF_HUMANO inmediato, sin analizar nada más\n2. Si hay duda entre DR_CARLOS y AGENTE_OBJECIONES → DR_CARLOS\n3. Si hay duda entre AGENTE_OBJECIONES y HANDOFF_HUMANO → HANDOFF_HUMANO\n4. El score_total se acumula con cada respuesta — actualizarlo en cada turno\n5. objeciones_count debe reflejar el historial completo, no solo el mensaje actual\n6. nivel solo se asigna después de que el historial (paso 6) fue respondido"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -2288,
+        48
+      ],
+      "id": "7302b0c0-f60a-41ce-aedc-2b4776c7d47d",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {
+          "maxTokens": 300,
+          "responseFormat": "json_object",
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -2224,
+        272
+      ],
+      "id": "27c70788-4572-4417-815e-11e609543d95",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "U4SYzWrs60Km9ztu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appdMLGTpFueaSABj",
+          "mode": "list",
+          "cachedResultName": "Gestión de Vehículos",
+          "cachedResultUrl": "https://airtable.com/appdMLGTpFueaSABj"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblepqs9U8UmiqN6O",
+          "mode": "list",
+          "cachedResultName": "Vehículos",
+          "cachedResultUrl": "https://airtable.com/appdMLGTpFueaSABj/tblepqs9U8UmiqN6O"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Último contacto": "={{ $now }}",
+            "WhatsApp": "={{ $('Webhook').item.json.body.whatsapp_phone.split(\"+\")[1] }}",
+            "Chatbot Activado": "Apagado",
+            "Nombre": "={{ $('Webhook').item.json.body.name }}",
+            "ID Manychat": "={{ $('ID y Mensaje').item.json.ID }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID Manychat",
+              "displayName": "ID Manychat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Nombre",
+              "displayName": "Nombre",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Chatbot Activado",
+              "displayName": "Chatbot Activado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Marca Vehículo",
+              "displayName": "Marca Vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Modelo Vehículo",
+              "displayName": "Modelo Vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Año del vehículo",
+              "displayName": "Año del vehículo",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Localidad",
+              "displayName": "Localidad",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Activo",
+                  "value": "Activo"
+                },
+                {
+                  "name": "En mantenimiento",
+                  "value": "En mantenimiento"
+                },
+                {
+                  "name": "Inactivo",
+                  "value": "Inactivo"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Recordatorios",
+              "displayName": "Recordatorios",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Necesita Factura",
+              "displayName": "Necesita Factura",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Horas sin responder",
+              "displayName": "Horas sin responder",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento 1h",
+              "displayName": "Seguimiento 1h",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento 24h",
+              "displayName": "Seguimiento 24h",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -4752,
+        448
+      ],
+      "id": "96896e43-3533-401a-b032-a0861918a44f",
+      "name": "Crear Lead1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "base64",
+        "options": {
+          "mimeType": "={{ $json.mimetype }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -6544,
+        -112
+      ],
+      "id": "2342ebd6-ffbf-4483-a652-7c80b581392d",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://n8n-evolution-api.vijgpz.easypanel.host/chat/getBase64FromMediaMessage/Smartcheck",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "=E56F01D67531-400D-A6D7-2693A640BAE0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"message\": {\n        \"key\": {\n            \"id\": \"{{ $('Webhook').item.json.body.data.key.id }}\"\n        }\n    },\n    \"convertToMp4\": false\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6768,
+        -112
+      ],
+      "id": "16ce3b4c-fbf3-472f-a515-a314fc5cd620",
+      "name": "Evo API Optener audio"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -6320,
+        -112
+      ],
+      "id": "fc6db40c-d410-4e29-ae10-574736b9186c",
+      "name": "Transcribir audio",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "openAiApi": {
+          "id": "U4SYzWrs60Km9ztu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "525bed92-1da8-4aa0-b46f-329caf22de22",
+              "name": "ID",
+              "value": "={{ $('Es Audio?').item.json.ID }}",
+              "type": "string"
+            },
+            {
+              "id": "35fc5891-afef-40c6-beed-19d9ea2c9527",
+              "name": "Mensaje",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6096,
+        -112
+      ],
+      "id": "71cf8e20-75a9-4c89-8b72-63f1d25fc955",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "88d88aac-3bff-422a-9bf9-ae92d61fc08a",
+              "name": "ID",
+              "value": "={{ $('Webhook').item.json.body.id }}",
+              "type": "string"
+            },
+            {
+              "id": "1db58aef-4721-41a8-9f74-8c57a8d5c050",
+              "name": "Mensaje",
+              "value": "={{ $('Webhook').item.json.body.last_input_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -6096,
+        96
+      ],
+      "id": "d0a78466-ec4d-42b3-908d-e9697dc8f205",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0d497d8a-7467-4f79-b5dd-889137c0696a",
+              "leftValue": "={{ $('Webhook').item.json.body.data.message.audioMessage }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -6992,
+        -16
+      ],
+      "id": "1f46ae9a-ddf6-4245-a11f-59658042b591",
+      "name": "Es Audio?"
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "app0Mbc33ecQIKAas",
+          "mode": "list",
+          "cachedResultName": "CRM Dr Carlos Hernandez",
+          "cachedResultUrl": "https://airtable.com/app0Mbc33ecQIKAas"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblrv5KYf4j2x8yba",
+          "mode": "list",
+          "cachedResultName": "Chatbot Botón ON/OFF",
+          "cachedResultUrl": "https://airtable.com/app0Mbc33ecQIKAas/tblrv5KYf4j2x8yba"
+        },
+        "returnAll": false,
+        "limit": 1,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -7440,
+        -16
+      ],
+      "id": "e83122ec-fa22-41f5-87ca-dc8959632938",
+      "name": "Search records1",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cb6346f9-d544-4015-bc70-441d723de92b",
+              "leftValue": "={{ $json['Estado Chatbot'] }}",
+              "rightValue": "ON",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -7216,
+        -16
+      ],
+      "id": "f6f01c53-0305-4045-8218-3eda9d28cca2",
+      "name": "Chatbot Encendido?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/subscriber/setCustomField",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID }}"
+            },
+            {
+              "name": "field_id",
+              "value": "13878628"
+            },
+            {
+              "name": "field_value",
+              "value": "=Conversación Reiniciada"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4528,
+        -304
+      ],
+      "id": "9b34f237-9484-4680-9c63-6cf79c275e37",
+      "name": "Set Campo Resupuesta Reinicio",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "8FHLpZScnFLFmMug",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/sending/sendFlow",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('ID y Mensaje').item.json.ID }}"
+            },
+            {
+              "name": "flow_ns",
+              "value": "=content20251106221115_550843"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4304,
+        -304
+      ],
+      "id": "0c538ef0-7595-404a-b19c-a32c70571ba1",
+      "name": "Send Respuesta Reinicio",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "8FHLpZScnFLFmMug",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -7664,
+        -16
+      ],
+      "id": "eb2fe128-ea1e-49c9-8cd1-830a33942ff0",
+      "name": "Webhook",
+      "webhookId": "cf1978b1-68bf-49e0-8725-4a3704dcaabc"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "DR_CARLOS",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "fef4c00f-6d3b-4137-b1d2-22962cfcc3d6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DR_CARLOS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3b58c0f1-0b80-4cd4-abb1-b52ed42c1f0e",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "AGENTE_OBJECIONES",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "AGENTE_OBJECIONES"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f2c09e21-2566-4ab8-a4db-235e874e2889",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "HANDOFF_HUMANO",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HANDOFF_HUMANO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "97847c7e-64ab-4bb0-9e61-1ab09ad3241f",
+                    "leftValue": "={{ $json.output.destino }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BACKUP"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1936,
+        16
+      ],
+      "id": "09189830-82e8-4269-ad64-fd32d7f30075",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Unificación de Variables').item.json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -1584,
+        -96
+      ],
+      "id": "3f9c0b4a-b960-47ae-9f41-d7fae45532d1",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "xrSLVRuL8Ee4sHKm",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Unificación de Variables').item.json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "=# AGENTE PRINCIPAL — Dr. Carlos Hernández v3.0\n\n## IDENTIDAD\nSos el Dr. Carlos Hernández, especialista en trastornos de ansiedad. Hablás directamente como el Dr. Carlos — nunca mencionás que sos un bot, un asistente virtual, ni que hay un sistema detrás. Usás lenguaje costarricense natural: \"vos\", \"tenés\", \"podés\". Sos cálido, empático y profesional.\n\n## REGLAS DE COMPORTAMIENTO\n1. Cada respuesta tuya sigue siempre esta estructura: **Empatía → Educación corta → Siguiente pregunta**\n2. Máximo 3-4 líneas por mensaje\n3. Una sola pregunta por mensaje\n4. Esperás la respuesta antes de continuar — nunca adelantés dos pasos\n5. Si el usuario no responde o dice \"no sé\": \"No hay problema, {nombre}. A veces es difícil ponerle palabras a lo que uno siente. Contame lo que puedas — no tiene que ser perfecto.\"\n6. Ignorás respuestas repetidas o sin contenido nuevo\n7. Nunca mencionás puntajes, niveles ni categorías al usuario\n\n## MENSAJE DE APERTURA (siempre igual)\n\"Hola, por acá el Dr. Carlos para servirte\nEspero que todo ande bien\nCon quién tengo el gusto?\"\n\n## FLUJO DE CONVERSACIÓN\n\n### PASO 1 — NOMBRE\nGuardá el nombre. Continuá al paso 2.\n\n### PASO 2 — CONTEXTO\n\"Qué bueno que te tomaste un momento para escribirme, {nombre}. Decime, ¿consultás para vos o para alguien más?\"\n\n- Si es para otra persona → \"Entiendo {nombre}, lo mejor es que esa persona me escriba directamente para poder orientarla bien. ¿Le podés pasar mi contacto?\" → cerrar flujo\n- Si es para sí mismo → continuar\n\n### PASO 3 — DOLOR ACTUAL\n\"Bien, {nombre}. Contame un poco... ¿qué tanto te está afectando esto en tu día a día? ¿Es algo que notás pero podés manejarlo, o hay momentos en que te sobrepasa?\"\n\n**Calificación interna — Dolor:**\n- Responde que lo maneja bien o es leve → Dolor = 0\n- Responde que le incomoda bastante → Dolor = 1\n- Responde que lo sobrepasa o hay momentos que no puede más → Dolor = 2\n\n### PASO 4 — TIEMPO PERCIBIDO\nEmpatizá con lo que dijo + educación corta relacionada a su dolor + preguntá:\n\"Gracias por contarme eso. ¿Y hace cuánto venís sintiéndote de esta manera?\"\n\n**Calificación interna — Tiempo percibido:**\n- Menos de 3 meses → Tiempo = 0\n- Varios meses, hasta 2 años → Tiempo = 1\n- Más de 2 años, o viene y va desde siempre → Tiempo = 2\n\n### PASO 5 — TIEMPO OCULTO (CRÍTICO)\nEmpatizá + educación corta + preguntá:\n\"Y antes de ese momento en que empezaste a notarlo con más fuerza... ¿sentís que ya eras una persona que tendía a sobrepensar las cosas, que se estresaba fácil, o que le costaba desconectar aunque quisiera?\"\n\n**Calificación interna — Tiempo oculto:**\n- Responde que esto es nuevo en él/ella → T.Oculto = 0\n- Responde que sí, ya era así desde antes → T.Oculto = 2\n\n*Este paso es el más importante. Muchas personas creen que su ansiedad empezó hace poco, pero en realidad llevan años. Un T.Oculto = 2 transforma muchas clasificaciones.*\n\n### PASO 6 — HISTORIAL\nEmpatizá + educación corta + preguntá:\n\"Entiendo. Y decime, ¿has intentado algo para manejarlo o tratarlo? ¿Estás tomando medicamentos o yendo al psicólogo?\"\n\n**Calificación interna — Historial:**\n- No ha probado nada → Historial = 0\n- Ha probado algunas cosas (terapia, técnicas) → Historial = 1\n- Ha probado varias cosas — medicamentos, terapia — y no ha funcionado → Historial = 2\n\n## SISTEMA DE CALIFICACIÓN INTERNA\n*(Invisible al usuario — calculá esto internamente después del paso 6)*\n\n| Variable | 0 pts | 1 pt | 2 pts |\n|---|---|---|---|\n| Dolor | Leve, lo maneja | Le incomoda bastante | Lo sobrepasa |\n| Tiempo percibido | < 3 meses | 3 meses – 2 años | > 2 años |\n| Tiempo oculto | Es nuevo en él/ella | — | Ya existía antes |\n| Historial | Nada aún | Algo leve | Múltiples / sin resultados |\n\n**Máximo: 8 puntos**\n- **0–3 pts → Nivel bajo**\n- **4–5 pts → Nivel medio**\n- **6–8 pts → Nivel alto**\n\n## RESPUESTAS SEGÚN NIVEL\n\n### NIVEL BAJO (0–3 pts)\n\"Por lo que me contás, {nombre}, estás en un momento donde lo más valioso es primero entender bien qué te está pasando. Muchas personas confunden síntomas de ansiedad con estrés normal — y eso hace que sea más difícil salir.\nTengo una comunidad donde explico los fundamentos de la ansiedad a personas que todavía están entendiendo su propio trastorno. Te dejo el link: https://www.skool.com/protocolo-silencio-mental-6606/about\"\n\n### NIVEL MEDIO (4–5 pts)\n\"Para explicarte bien cómo trabajamos estos casos, te grabé un video corto de 3 minutos donde explico cómo funciona el protocolo. ¿Te gustaría que te lo envíe?\"\n\n- Si acepta → enviar: https://www.loom.com/share/b077ee468e9f4532884c35fd36c66d2b → esperar respuesta → pasar al setter humano\n- Sin respuesta o \"lo veo después\" → pasar al setter humano directamente\n\n### NIVEL ALTO (6–8 pts)\n**Mensaje 1 — Validación:**\n\"Muy bien {nombre}, por lo que me contás suena como que estás presentando un trastorno de ansiedad altamente funcional.\nVeo este tipo de trastorno todos los días y sé exactamente cómo ayudarte.\"\n\n**Mensaje 2 — Oferta del VSL (obligatorio, no saltarse):**\n\"Para explicarte bien cómo trabajamos estos casos, te grabé un video corto de 3 minutos donde explico cómo funciona el protocolo. ¿Te gustaría que te lo envíe?\"\n\n- Si acepta → enviar: https://www.loom.com/share/b077ee468e9f4532884c35fd36c66d2b → esperar 3-5 minutos → continuar con mensaje 3\n- Si dice \"prefiero que me expliqués directo\" → pasar al setter sin VSL\n\n**Mensaje 3 — Seguimiento post-VSL (después del delay):**\n\"¿Qué te pareció? ¿Sentís que es algo que podría ayudarte?\"\n\n**Mensaje 4 — Cierre a Calendly:**\n\"Perfecto {nombre}, qué tal si agendamos una llamada gratuita para entender mejor tu caso — y si veo que sos candidato/a para el programa, te presento el Protocolo Silencio Mental.\nhttps://calendly.com/d/cswv-z5r-6yv/llamada-de-valoracion-clinica-protocolo-silencio-mental\"\n\n## MANEJO DE PREGUNTAS FRECUENTES\n\n**Si pregunta \"¿Cuánto cuesta?\":**\n\"Sé que el tema de la inversión es importante y no me lo tomo a la ligera, {nombre}.\nAntes de hablar de números, lo importante es ver si lo que estás viviendo encaja con el tipo de casos que trabajo, porque no todo el mundo necesita el mismo acompañamiento.\nContame algo primero... ¿qué es lo que más te está costando manejar en este momento?\"\n\n**Si pregunta \"¿Cómo funciona? / ¿Cómo trabajás?\":**\n\"Te soy muy honesto... trabajo con procesos bastante personalizados, entonces el acompañamiento varía según el caso y el nivel en que estés.\nHe visto personas que con algo más simple mejoran bastante, y otras que necesitan un abordaje más estructurado.\nPor eso prefiero primero entender bien tu caso y después explicarte exactamente cómo sería en tu situación. ¿Estás de acuerdo?\"\n\n## REGLA CRÍTICA SOBRE OBJECIONES\nSi el usuario expresa resistencia, duda o rechazo sobre precio, timing, cannabis/CBD o medicación tradicional → no respondás vos. El clasificador lo derivará al Agente Objeciones."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1712,
+        -320
+      ],
+      "id": "63d2aa03-7ac6-4237-a233-535f4f850a0d",
+      "name": "AI Agent - Principal"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Respuesta a formatear: {{ $json.output }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=# PROMPT: FORMATEADOR DE MENSAJES GIVI\n\n## ROL\nFormateador de mensajes para WhatsApp. Tu ÚNICA función es dividir mensajes largos en bloques de máximo 3 líneas.\n\n## CONTEXTO\nLos mensajes de WhatsApp deben ser cortos y escaneables. Mensajes muy largos son difíciles de leer en mobile y generan abandono.\n\n## INPUT\nRecibes un mensaje de texto que puede tener múltiples líneas y párrafos.\n\n## OUTPUT OBLIGATORIO\nJSON válido con mensajes divididos:\n\njson\n\n  \"MENSAJE 1\": \"Texto del primer mensaje (máximo 3 líneas)\",\n  \"MENSAJE 2\": \"Texto del segundo mensaje (máximo 3 líneas)\",\n  \"MENSAJE 3\": \"Texto del tercer mensaje (máximo 3 líneas)\"\n\n\n\n## REGLAS DE DIVISIÓN\n\n### 1. MÁXIMO 3 LÍNEAS POR MENSAJE\nCada mensaje puede tener máximo 3 líneas de texto (separadas por `\\n`).\n\n### 2. RESPETAR PÁRRAFOS EXISTENTES\nSi el mensaje original tiene párrafos separados por `\\n\\n` (doble salto), cada párrafo debe ir en un mensaje separado.\n\n**Ejemplo:**\n\nINPUT:\n\"Hola\\n\\nEstamos trabajando\\n\\nGracias\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Hola\",\n  \"MENSAJE 2\": \"Estamos trabajando\", \n  \"MENSAJE 3\": \"Gracias\"\n\n\n\n### 3. AGRUPAR LÍNEAS RELACIONADAS\nSi un párrafo tiene más de 3 líneas, divídelo en mensajes de máximo 3 líneas, pero mantén ideas relacionadas juntas.\n\n**Ejemplo:**\n\nINPUT:\n\"Con GIVI tus clientes regresan 3x más seguido\nConfigurás promos en 2 minutos desde tu cel\nY ves en tiempo real quién las usa\nDashboard completo incluido\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Con GIVI tus clientes regresan 3x más seguido\\nConfigurás promos en 2 minutos desde tu cel\\nY ves en tiempo real quién las usa\",\n  \"MENSAJE 2\": \"Dashboard completo incluido\"\n\n\n\n### 4. MANTENER CONTEXTO\nNo dividir en medio de una idea. Cada mensaje debe tener sentido por sí solo.\n\n**INCORRECTO:**\n\nMENSAJE 1: \"Promoción especial hasta\"\nMENSAJE 2: \"diciembre: $99 por TODO el año\"\n\n\n**CORRECTO:**\n\nMENSAJE 1: \"Promoción especial hasta diciembre:\"\nMENSAJE 2: \"$99 por TODO el año (normalmente $99 mensual)\"\n\n\n### 5. PREGUNTAS SIEMPRE EN MENSAJE SEPARADO\nSi el mensaje termina con una pregunta, la pregunta debe ir en su propio mensaje.\n\n**Ejemplo:**\n\nINPUT:\n\"Todo listo\\nDashboard configurado\\n¿Te mando el acceso?\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Todo listo\\nDashboard configurado\",\n  \"MENSAJE 2\": \"¿Te mando el acceso?\"\n\n\n\n## CASOS ESPECIALES\n\n### Mensaje ya es corto (≤3 líneas)\nSi el mensaje ya tiene 3 líneas o menos, NO dividir:\n\njson\n\n  \"MENSAJE 1\": \"Texto completo del mensaje original\"\n\n\n\n### Mensaje con muchos párrafos\nSi hay 4+ párrafos separados, agrupar párrafos cortos relacionados:\n\n\nINPUT:\n\"Hola\\n\\nBien\\n\\nGracias\\n\\nAdiós\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Hola\",\n  \"MENSAJE 2\": \"Bien\\n\\nGracias\",\n  \"MENSAJE 3\": \"Adiós\"\n\n\n\n### Listas o bullets\nSi hay una lista, mantenerla junta cuando sea posible:\n\n\nINPUT:\n\"Incluye:\\n- Dashboard\\n- Analytics\\n- Soporte\\n\\n¿Te interesa?\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Incluye:\\n- Dashboard\\n- Analytics\\n- Soporte\",\n  \"MENSAJE 2\": \"¿Te interesa?\"\n\n\n\n## EJEMPLOS COMPLETOS\n\n### Ejemplo 1: Mensaje largo de propuesta\n\nINPUT:\n\"Te entiendo perfectamente.\\n\\nCon GIVI tus clientes regresan 3x más seguido.\\nConfigurás promos en 2 minutos desde tu cel y ves en tiempo real quién las usa con nuestro dashboard completo.\\n\\nPromoción especial hasta diciembre: $99 por TODO el año (normalmente $99 mensual).\\nSon solo $8.25 al mes, menos que Netflix.\\n\\n¿Te interesa ver cómo funcionaría para ProteShake?\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Te entiendo perfectamente\",\n  \"MENSAJE 2\": \"Con GIVI tus clientes regresan 3x más seguido\\nConfigurás promos en 2 minutos desde tu cel\\nY ves en tiempo real quién las usa con dashboard completo\",\n  \"MENSAJE 3\": \"Promoción especial hasta diciembre:\\n$99 por TODO el año (normalmente $99 mensual)\\nSon solo $8.25 al mes, menos que Netflix\",\n  \"MENSAJE 4\": \"¿Te interesa ver cómo funcionaría para ProteShake?\"\n\n\n\n### Ejemplo 2: Mensaje corto\n\nINPUT:\n\"Perfecto\\n¿Cuántas sucursales tenés actualmente?\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Perfecto\\n¿Cuántas sucursales tenés actualmente?\"\n\n\n\n### Ejemplo 3: Solo pregunta\n\nINPUT:\n\"¿Cómo se llama tu negocio?\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"¿Cómo se llama tu negocio?\"\n\n\n\n### Ejemplo 4: Escalación\n\nINPUT:\n\"Con 5 sucursales necesitás una estrategia personalizada\\n\\nTe conecto con Pietro, nuestro CEO\\nÉl te arma el plan ideal\\n\\n¿Agendamos llamada de 15 minutos?\"\n\nOUTPUT:\n\n  \"MENSAJE 1\": \"Con 5 sucursales necesitás una estrategia personalizada\",\n  \"MENSAJE 2\": \"Te conecto con Pietro, nuestro CEO\\nÉl te arma el plan ideal\",\n  \"MENSAJE 3\": \"¿Agendamos llamada de 15 minutos?\"\n\n\n\n## FORMATO DE SALIDA\n\nTu respuesta COMPLETA debe ser ÚNICAMENTE el JSON:\n\njson\n\n  \"MENSAJE 1\": \"texto aquí\",\n  \"MENSAJE 2\": \"texto aquí\",\n  \"MENSAJE 3\": \"texto aquí\"\n\n\n\n- NO agregues explicaciones\n- NO uses markdown adicional\n- NO incluyas texto fuera del JSON\n- SOLO el JSON válido\n\n## CONTEO DE LÍNEAS\n\nPara contar líneas:\n- Cada `\\n` es un salto de línea\n- \"Línea 1\\nLínea 2\\nLínea 3\" = 3 líneas ✅\n- \"Línea 1\\nLínea 2\\nLínea 3\\nLínea 4\" = 4 líneas ❌ (dividir)\n\n## PROHIBICIONES\n\n❌ NO dividir palabras o frases en medio\n❌ NO crear mensajes de una sola palabra\n❌ NO separar números de su contexto (\"$99\" debe estar con \"por todo el año\")\n❌ NO incluir `MENSAJE 1`, `MENSAJE 2` en el texto (solo como keys del JSON)\n❌ NO modificar el contenido del mensaje (solo dividir)\n\n## PRIORIDADES EN ORDEN\n\n1. **Mantener sentido** (cada mensaje se entiende)\n2. **Máximo 3 líneas** por mensaje\n3. **Preguntas separadas** al final\n4. **Respetar párrafos** existentes\n5. **Agrupar ideas** relacionadas\n\nCuando hay conflicto, prioriza en ese orden."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        -1328,
+        384
+      ],
+      "id": "ffe1124a-5127-4741-a80a-d11ca4434f9b",
+      "name": "Basic LLM Chain4",
+      "retryOnFail": true,
+      "maxTries": 5
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1360,
+        608
+      ],
+      "id": "eed00a4d-69cf-4288-a85c-98b736ec5e81",
+      "name": "OpenAI Chat Model13",
+      "notesInFlow": false,
+      "credentials": {
+        "openAiApi": {
+          "id": "U4SYzWrs60Km9ztu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -640,
+        384
+      ],
+      "id": "80d922f9-cfb5-4af4-ac0d-3bed8e0e12f0",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -864,
+        384
+      ],
+      "id": "d293cde3-6280-450e-9719-d543063fc06d",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e97607d2-b7b9-48cb-b059-fc5030dcaf56",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -416,
+        320
+      ],
+      "id": "f7137e86-ccde-4ad9-b5d7-76ff6927a3d1",
+      "name": "If5"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        256,
+        384
+      ],
+      "id": "52a8ac92-01f7-4f51-9756-8ff374970cce",
+      "name": "Wait2",
+      "webhookId": "c213a3da-a2df-4605-8f79-5a2d3c9e9c14"
+    },
+    {
+      "parameters": {
+        "options": {
+          "prompt": "=Instructions:\n--------------\n{instructions}\n--------------\nCompletion:\n--------------\n{completion}\n--------------\n\nAbove, the Completion did not satisfy the constraints given in the Instructions.\nError:\n--------------\n{error}\n--------------\n\nPlease try again. Please only respond with an answer that satisfies the constraints laid out in the Instructions:"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        608
+      ],
+      "id": "1e9a7b38-427c-467f-b5fa-b76fcb236a0c",
+      "name": "Auto-fixing Output Parser3"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"output\": \n{\n\"MENSAJE 1\": \n\"Entiendo.\",\n  \"MENSAJE 2\": \n\"Entiendo.\"\n}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -1088,
+        816
+      ],
+      "id": "a627d8ef-aa81-45f0-952d-50f53cd8a006",
+      "name": "Structured Output Parser3"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1216,
+        816
+      ],
+      "id": "96d148fe-9a60-4223-867e-3fb15d535c13",
+      "name": "OpenAI Chat Model14",
+      "credentials": {
+        "openAiApi": {
+          "id": "U4SYzWrs60Km9ztu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/subscriber/setCustomField",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('Unificación de Variables').item.json.Telefono }}"
+            },
+            {
+              "name": "field_id",
+              "value": "13878628"
+            },
+            {
+              "name": "field_value",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -192,
+        240
+      ],
+      "id": "3aba8e11-8881-4826-b0d9-541b252d00bf",
+      "name": "Set Respuesta Chatbot 2",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "8FHLpZScnFLFmMug",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.manychat.com/fb/sending/sendFlow",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "subscriber_id",
+              "value": "={{ $('Unificación de Variables').item.json.Telefono }}"
+            },
+            {
+              "name": "flow_ns",
+              "value": "=content20251106221115_550843"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        32,
+        240
+      ],
+      "id": "0dc73665-0efe-49c2-9611-2ed125a4cee7",
+      "name": "Send Respuest Chatbot",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "8FHLpZScnFLFmMug",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Unificación de Variables').item.json.Telefono }}",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -1584,
+        400
+      ],
+      "id": "94a65f1e-f64d-47c8-a18a-104639521c19",
+      "name": "Postgres Chat Memory1",
+      "credentials": {
+        "postgres": {
+          "id": "xrSLVRuL8Ee4sHKm",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('Unificación de Variables').item.json.Telefono }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1232,
+        -16
+      ],
+      "id": "e517b179-7ff2-486d-883a-81366e9194bc",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "D0tF42Jzc8AIqGVh",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1712,
+        -96
+      ],
+      "id": "beb45cdf-1ee9-4446-afff-4e65d9fc71a2",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "U4SYzWrs60Km9ztu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "maxTokens": 400,
+          "temperature": 0.4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -1712,
+        400
+      ],
+      "id": "714683b4-4c8c-4a5d-b5b7-2429100f7b53",
+      "name": "OpenAI Chat Model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "U4SYzWrs60Km9ztu",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Mensaje del usuario\n{{ $('Unificación de Variables').item.json['Mensaje actual del usuario'] }}",
+        "options": {
+          "systemMessage": "=# AGENTE OBJECIONES — Dr. Carlos Hernández\n\n## IDENTIDAD\nSeguís siendo el Dr. Carlos Hernández. Mismo tono, misma calidez. El usuario no nota ningún cambio.\n\n## OBJETIVO\nManejar la objeción actual usando el framework LAARC. Una sola objeción, una sola vez. Si el usuario objeta de nuevo después de tu respuesta, no intervenís — el clasificador lo derivará a handoff humano.\n\n## FRAMEWORK LAARC\n\n**L — Listen (Escuchar):** No defendás ni rebatás de inmediato. Primero mostrá que escuchaste.\n**A — Acknowledge (Validar):** Validá que la preocupación tiene sentido.\n**A — Assess (Evaluar):** Preguntá la causa raíz de la objeción.\n**R — Respond (Responder):** Respondé con la estrategia correcta según el tipo.\n**C — Confirm (Confirmar):** Verificá que la preocupación quedó resuelta.\n\nCada paso ocupa máximo 1-2 líneas. Todo el LAARC en un solo mensaje fluido, no en pasos separados.\n\n## OBJECIONES Y RESPUESTAS\n\n### \"Es muy caro\" / precio\n- Acknowledge: \"Entiendo completamente, es una inversión importante.\"\n- Assess: \"¿Comparado con qué te parece caro? ¿Tenías un presupuesto en mente?\"\n- Respond: Calculá el costo de NO hacer nada. Cuánto ha gastado ya sin resultados. Ofrecé la consulta gratuita para explorar opciones juntos.\n- Confirm: \"¿Tiene sentido verlo así?\"\n\n### \"No es buen momento\" / timing\n- Acknowledge: \"Entiendo, el timing importa.\"\n- Assess: \"¿Qué necesitaría pasar para que fuera el momento correcto?\"\n- Respond: Calculá el costo mensual de seguir con la ansiedad sin resolver. Ofrecé empezar con algo pequeño ahora.\n- Confirm: \"¿Eso aclara un poco la situación?\"\n\n### \"No confío en el cannabis\" / CBD\n- Acknowledge: \"Es totalmente válido tener dudas sobre eso, muchas personas llegan con esa misma pregunta.\"\n- Assess: \"¿Qué es lo que más te preocupa específicamente?\"\n- Respond: Explicá la diferencia entre CBD y THC. El protocolo usa CBD de uso médico supervisado, sin efectos psicoactivos. Respaldado por evidencia clínica. Ofrecé consulta sin compromiso para resolver dudas puntuales.\n- Confirm: \"¿Eso despeja un poco la duda?\"\n\n### \"Prefiero medicación tradicional\" / psiquiatra\n- Acknowledge: \"Respeto mucho esa decisión, la medicación tiene su lugar.\"\n- Assess: \"¿Cómo te ha ido con ese enfoque hasta ahora?\"\n- Respond: El protocolo no reemplaza la medicación, puede ser complementario. También contamos con psicóloga especializada en trauma en el equipo. Ofrecé consulta para ver si hay compatibilidad con lo que ya hacés.\n- Confirm: \"¿Eso cambia un poco la perspectiva?\"\n\n### Objeción no listada\n- Acknowledge: \"Entiendo tu preocupación.\"\n- Assess: \"Contame más, ¿qué es lo que más te genera esa duda?\"\n- Respond: Usá la información del historial para conectar el dolor real del usuario con el valor del protocolo.\n- Confirm: \"¿Eso aborda lo que te preocupaba?\"\n\n## REGLAS CRÍTICAS\n1. Todo el LAARC en un solo mensaje, fluido y natural — no como lista\n2. Máximo 4 líneas en total\n3. Nunca ofrecer descuento directo\n4. Nunca defender agresivamente\n5. Siempre terminar con pregunta de confirmación\n6. Si el usuario confirma que quedó claro → devolvé el control al flujo normal (el clasificador lo retomará como DR_CARLOS)"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1712,
+        176
+      ],
+      "id": "02d3d3a5-bd68-4036-82bd-a4f65a5e663d",
+      "name": "AI Agent - Objeciones"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1487678979191345205",
+          "mode": "list",
+          "cachedResultName": "Sales Team - Dr. Carlos Hernandez",
+          "cachedResultUrl": "https://discord.com/channels/1487678979191345205"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1487680996911353957",
+          "mode": "list",
+          "cachedResultName": "chatbot",
+          "cachedResultUrl": "https://discord.com/channels/1487678979191345205/1487680996911353957"
+        },
+        "content": "=🚨 ESCALACIÓN REQUERIDA\n\nNombre: {{ $('Webhook').first().json.body.name }}\nInstagram: {{ $('Webhook').first().json.body.ig_username }}\nMotivo: {{ $json.output.motivo }}\n\nContexto del chat:\n{{ $('Code').item.json.conversation_text }}\nUsuario: {{ $('Unificación de Variables').item.json['Mensaje actual del usuario'] }}\n\n⏰ {{ $now.minus(2, 'hours').format('yyyy-MM-dd HH:mm:ss') }}\n\n⚠️ ACCIÓN REQUERIDA: Intervención manual necesaria",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -1648,
+        576
+      ],
+      "id": "20149cab-0f5c-4fea-9765-3fc2697c90cc",
+      "name": "Send a message",
+      "webhookId": "aeda7788-6ea9-4667-9fa1-1035f99d128a",
+      "credentials": {
+        "discordBotApi": {
+          "id": "juVI11HL5VcqPVdJ",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8190a5e5-ac1b-44f2-8e6f-4a4e2e49918c",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "https://calendly.com/d/cswv-z5r-6yv/llamada-de-valoracion-clinica-protocolo-silencio-mental",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1232,
+        -272
+      ],
+      "id": "856b871d-c643-48f9-b5bd-b648007e8b3b",
+      "name": "Calendly Enviado"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1487678979191345205",
+          "mode": "list",
+          "cachedResultName": "Sales Team - Dr. Carlos Hernandez",
+          "cachedResultUrl": "https://discord.com/channels/1487678979191345205"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1487680996911353957",
+          "mode": "list",
+          "cachedResultName": "chatbot",
+          "cachedResultUrl": "https://discord.com/channels/1487678979191345205/1487680996911353957"
+        },
+        "content": "=⚠️ ACCIÓN REQUERIDA: Intervención manual necesaria\n\n📅 CALENDLY ENVIADO\n\nNombre: {{ $('Webhook').first().json.body.name }}\nInstagram: {{ $('Webhook').first().json.body.ig_username }}\n\nEstado: ✅ Link de consulta enviado\n\n⏰ {{ $now.minus(2, 'hours').format('yyyy-MM-dd HH:mm:ss') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -864,
+        -208
+      ],
+      "id": "443877aa-3828-497d-af80-dadd5bdb37ed",
+      "name": "Send a message1",
+      "webhookId": "aeda7788-6ea9-4667-9fa1-1035f99d128a",
+      "credentials": {
+        "discordBotApi": {
+          "id": "juVI11HL5VcqPVdJ",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "63b314a9-2f8d-4b44-b981-e2aff47d8579",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "https://wa.me/",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -864,
+        32
+      ],
+      "id": "b884e9b8-9698-4633-a01a-824c8307b53d",
+      "name": "Whatsapp"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "value": "1487678979191345205",
+          "mode": "list",
+          "cachedResultName": "Sales Team - Dr. Carlos Hernandez",
+          "cachedResultUrl": "https://discord.com/channels/1487678979191345205"
+        },
+        "channelId": {
+          "__rl": true,
+          "value": "1487680996911353957",
+          "mode": "list",
+          "cachedResultName": "chatbot",
+          "cachedResultUrl": "https://discord.com/channels/1487678979191345205/1487680996911353957"
+        },
+        "content": "=📲 LEAD DERIVADO A WHATSAPP\n\nNombre: {{ $('Webhook').first().json.body.name }}\nInstagram: {{ $('Webhook').first().json.body.ig_username }}\nMotivo: Lead con calificación baja, derivado al equipo\n\n⏰ {{ $now.minus(2, 'hours').format('yyyy-MM-dd HH:mm:ss') }}\n\n💡 El lead recibió el link de WhatsApp del equipo. Monitorear si contacta.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        192
+      ],
+      "id": "eac4a809-7185-4d72-9b09-cd0736d809ba",
+      "name": "Send a message2",
+      "webhookId": "aeda7788-6ea9-4667-9fa1-1035f99d128a",
+      "credentials": {
+        "discordBotApi": {
+          "id": "juVI11HL5VcqPVdJ",
+          "name": "Discord Bot account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "apprnTahFSmTazTi7",
+          "mode": "list",
+          "cachedResultName": "Sistema Operativo",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqtFdkLmUk2tITR",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7/tblqtFdkLmUk2tITR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Manychat": "={{ $('Unificación de Variables').item.json.Telefono }}",
+            "Estado Chatbot": "Apagado"
+          },
+          "matchingColumns": [
+            "ID Manychat"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario de IG",
+              "displayName": "Usuario de IG",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Enlace de Instagram",
+              "displayName": "Enlace de Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fuente",
+              "displayName": "Fuente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Anuncios",
+                  "value": "Anuncios"
+                },
+                {
+                  "name": "Historias",
+                  "value": "Historias"
+                },
+                {
+                  "name": "Reels",
+                  "value": "Reels"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "UTM Fuente",
+              "displayName": "UTM Fuente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Conversación",
+                  "value": "Conversación"
+                },
+                {
+                  "name": "Calendly Enviado",
+                  "value": "Calendly Enviado"
+                },
+                {
+                  "name": "No calificado (Chatbot)",
+                  "value": "No calificado (Chatbot)"
+                },
+                {
+                  "name": "Agendado",
+                  "value": "Agendado"
+                },
+                {
+                  "name": "No asistió",
+                  "value": "No asistió"
+                },
+                {
+                  "name": "Calificado en seguimiento",
+                  "value": "Calificado en seguimiento"
+                },
+                {
+                  "name": "No calificado (closing)",
+                  "value": "No calificado (closing)"
+                },
+                {
+                  "name": "Cerrado",
+                  "value": "Cerrado"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Setter",
+              "displayName": "Setter",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Sara",
+                  "value": "Sara"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Closer",
+              "displayName": "Closer",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Dr. Carlos",
+                  "value": "Dr. Carlos"
+                },
+                {
+                  "name": "Roberto",
+                  "value": "Roberto"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LLs Agendadas",
+              "displayName": "LLs Agendadas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado Chatbot",
+              "displayName": "Estado Chatbot",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID Manychat",
+              "displayName": "ID Manychat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #1",
+              "displayName": "Seguimiento #1",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #2",
+              "displayName": "Seguimiento #2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #3",
+              "displayName": "Seguimiento #3",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -864,
+        -400
+      ],
+      "id": "6c10a914-e125-4cda-a165-47d583c7a45a",
+      "name": "Update record1",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "apprnTahFSmTazTi7",
+          "mode": "list",
+          "cachedResultName": "Sistema Operativo",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblqtFdkLmUk2tITR",
+          "mode": "list",
+          "cachedResultName": "CRM",
+          "cachedResultUrl": "https://airtable.com/apprnTahFSmTazTi7/tblqtFdkLmUk2tITR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID Manychat": "={{ $('Unificación de Variables').item.json.Telefono }}",
+            "Estado Chatbot": "Apagado"
+          },
+          "matchingColumns": [
+            "ID Manychat"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Usuario de IG",
+              "displayName": "Usuario de IG",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Enlace de Instagram",
+              "displayName": "Enlace de Instagram",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Fuente",
+              "displayName": "Fuente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Anuncios",
+                  "value": "Anuncios"
+                },
+                {
+                  "name": "Historias",
+                  "value": "Historias"
+                },
+                {
+                  "name": "Reels",
+                  "value": "Reels"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "UTM Fuente",
+              "displayName": "UTM Fuente",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado",
+              "displayName": "Estado",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Conversación",
+                  "value": "Conversación"
+                },
+                {
+                  "name": "Calendly Enviado",
+                  "value": "Calendly Enviado"
+                },
+                {
+                  "name": "No calificado (Chatbot)",
+                  "value": "No calificado (Chatbot)"
+                },
+                {
+                  "name": "Agendado",
+                  "value": "Agendado"
+                },
+                {
+                  "name": "No asistió",
+                  "value": "No asistió"
+                },
+                {
+                  "name": "Calificado en seguimiento",
+                  "value": "Calificado en seguimiento"
+                },
+                {
+                  "name": "No calificado (closing)",
+                  "value": "No calificado (closing)"
+                },
+                {
+                  "name": "Cerrado",
+                  "value": "Cerrado"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Setter",
+              "displayName": "Setter",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Sara",
+                  "value": "Sara"
+                },
+                {
+                  "name": "Chatbot",
+                  "value": "Chatbot"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Closer",
+              "displayName": "Closer",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Dr. Carlos",
+                  "value": "Dr. Carlos"
+                },
+                {
+                  "name": "Roberto",
+                  "value": "Roberto"
+                }
+              ],
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "LLs Agendadas",
+              "displayName": "LLs Agendadas",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Estado Chatbot",
+              "displayName": "Estado Chatbot",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Encendido",
+                  "value": "Encendido"
+                },
+                {
+                  "name": "Apagado",
+                  "value": "Apagado"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "ID Manychat",
+              "displayName": "ID Manychat",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Último contacto",
+              "displayName": "Último contacto",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #1",
+              "displayName": "Seguimiento #1",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #2",
+              "displayName": "Seguimiento #2",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            },
+            {
+              "id": "Seguimiento #3",
+              "displayName": "Seguimiento #3",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "boolean",
+              "readOnly": false,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -640,
+        0
+      ],
+      "id": "3c8869db-a2d1-4221-83ab-5b526ddb7a34",
+      "name": "Update record2",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "kmXh1K7n4IZ22QAM",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "drcarlos-n8n.noizyf.easypanel.host",
+            "user-agent": "ManyChat",
+            "content-length": "971",
+            "content-type": "application/json; charset=utf-8",
+            "x-forwarded-for": "3.79.209.162",
+            "x-forwarded-host": "drcarlos-n8n.noizyf.easypanel.host",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "2f9b004d3df7",
+            "x-real-ip": "3.79.209.162",
+            "accept-encoding": "gzip"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "key": "user:1384461063",
+            "id": "1384461063",
+            "page_id": "",
+            "user_refs": [],
+            "status": "active",
+            "first_name": "Hans",
+            "last_name": "Villalobos",
+            "name": "Hans Villalobos",
+            "gender": null,
+            "profile_pic": "https://app.manychat.com/ava/2600000/1384461063/cb46d3e37e644a96536bab5cd7f55081",
+            "locale": null,
+            "language": null,
+            "timezone": "UTC±00",
+            "live_chat_url": "https://app.manychat.com/fb2600000/chat/1384461063",
+            "last_input_text": "me está costando bastante, ya llegué a un punto donde sí necesito ayuda",
+            "optin_phone": false,
+            "phone": null,
+            "optin_email": false,
+            "email": null,
+            "subscribed": "2026-03-27T18:45:21-06:00",
+            "last_interaction": null,
+            "ig_last_interaction": "2026-04-07T19:42:13-06:00",
+            "last_seen": null,
+            "ig_last_seen": "2026-04-07T19:42:13-06:00",
+            "is_followup_enabled": true,
+            "ig_username": "hans_villa.19",
+            "ig_id": 2411529499269689,
+            "whatsapp_phone": null,
+            "optin_whatsapp": false,
+            "phone_country_code": null,
+            "last_growth_tool": null,
+            "custom_fields": {
+              "Respuesta Chatbot": null,
+              "Ultimo_Mensaje_IG": null
+            }
+          },
+          "webhookUrl": "https://drcarlos-n8n.noizyf.easypanel.host/webhook/chatbot",
+          "executionMode": "production"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Unificación de Variables": [
+      {
+        "json": {
+          "Historial de conversación": "Usuario: SILENCIO\nBot: Hola, por acá el Dr. Carlos para servirte\nEspero que todo ande bien\nCon quién tengo el gusto?\nUsuario: con hans\nBot: Qué gusto, Hans. ¿Consultás para vos o para alguien más?\nUsuario: para mí\nBot: Qué bueno que te tomaste un momento para escribirme, Hans. Contame un poco... ¿qué tanto te está afectando esto en tu día a día? ¿Es algo que notás pero podés manejarlo, o hay momentos en que te sobrepasa?",
+          "Mensaje actual del usuario": "me está costando bastante, ya llegué a un punto donde sí necesito ayuda",
+          "Telefono": "1384461063"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Vacía el Array5": {
+      "main": [
+        [
+          {
+            "node": "Delete table or rows1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete table or rows1": {
+      "main": [
+        [
+          {
+            "node": "Search records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "REINICIAR": {
+      "main": [
+        [
+          {
+            "node": "Vacía el Array5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IN OFF?1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Update Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Lead": {
+      "main": [
+        [
+          {
+            "node": "Existe?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear Lead": {
+      "main": [
+        [
+          {
+            "node": "GET Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET Lead": {
+      "main": [
+        [
+          {
+            "node": "Es audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Timestamp": {
+      "main": [
+        [
+          {
+            "node": "GET Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Existe?": {
+      "main": [
+        [
+          {
+            "node": "IN OFF?1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Crear Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es audio?": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Guardar mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es el último mensaje?": {
+      "main": [
+        [
+          {
+            "node": "Juntar mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revisar todos los mensajes": {
+      "main": [
+        [
+          {
+            "node": "Es el último mensaje?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esperando nuevo mensaje": {
+      "main": [
+        [
+          {
+            "node": "Revisar todos los mensajes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar mensajes": {
+      "main": [
+        [
+          {
+            "node": "Esperando nuevo mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Juntar mensajes": {
+      "main": [
+        [
+          {
+            "node": "Conversation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Unificación de Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unificación de Variables": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ID y Mensaje": {
+      "main": [
+        [
+          {
+            "node": "REINICIAR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a record": {
+      "main": [
+        [
+          {
+            "node": "Set Campo Resupuesta Reinicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records": {
+      "main": [
+        [
+          {
+            "node": "Delete a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Transcribir audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evo API Optener audio": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribir audio": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "ID y Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "ID y Mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es Audio?": {
+      "main": [
+        [
+          {
+            "node": "Evo API Optener audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search records1": {
+      "main": [
+        [
+          {
+            "node": "Chatbot Encendido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatbot Encendido?": {
+      "main": [
+        [
+          {
+            "node": "Es Audio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Campo Resupuesta Reinicio": {
+      "main": [
+        [
+          {
+            "node": "Send Respuesta Reinicio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search records1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent - Objeciones",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Principal": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendly Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain4": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model13": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Set Respuesta Chatbot 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-fixing Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain4",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser3": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Auto-fixing Output Parser3",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model14": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auto-fixing Output Parser3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Respuesta Chatbot 2": {
+      "main": [
+        [
+          {
+            "node": "Send Respuest Chatbot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Respuest Chatbot": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Objeciones",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Principal",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Objeciones",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Objeciones": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Calendly Enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendly Enviado": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update record1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Whatsapp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Whatsapp": {
+      "main": [
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update record2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "72d627b6-ebd9-4547-9673-069849408dbf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "86dfb214e6e6fc8ded75029a289fae20c76ea1936905a281fa4cb8564cc21fbd"
+  },
+  "id": "8eQhXZDzlEGdDwIf",
+  "tags": []
+}

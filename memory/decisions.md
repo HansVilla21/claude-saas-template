@@ -6,6 +6,62 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-08-11 — Jacó Dream Rentals a producción: número WhatsApp + catálogo real en el bot
+
+**Contexto:** El founder conectó el número `+50671328394` a YCloud para Jacó y pidió "toda la configuración". El tenant ya estaba casi armado (owner, funnel, módulo, `bot_enabled`), así que el trabajo real fue el canal + destapar por qué el bot no usaba el catálogo. En el camino salieron 5 defectos encadenados que no estaban a la vista.
+
+**Decisiones tomadas:**
+
+1. **Lo que el flow puede saber, lo pone el flow — nunca el LLM.** La `capacidad` para la búsqueda del catálogo se extrae del texto del lead en `Unificacion de Variables` (mensaje actual → si no, historial), en vez de `$fromAI(...)`. Mismo criterio que ya se usaba para `agency_id`. **Se descartó** pelear con por qué n8n no expone el placeholder: el input llegaba como `query:{}` (verificado en 2 ejecuciones por 2 caminos), y el fix determinístico no depende de resolver esa incógnita.
+2. **El playground NO prueba producción.** `bot-test-playground` y `bot-c-v1` leen el mismo `bot_config` (los prompts viajan solos) pero **las tools son nodos del grafo y no viajan**. Jacó tenía la `Catalog Search Tool` en el playground desde el 06/08 y en producción nunca. → gotcha **#-1** en la skill `onboarding-cliente-crm`.
+3. **Portar nodos copiándolos, nunca reescribiéndolos**, con script idempotente + snapshot + verificación por hash contra el n8n vivo (`build-bot-c-v1-set30-catalog-tool.js`).
+4. **Merge quirúrgico en `bot_config`:** `load-jaco-prompts.js` solo pisa las llaves de `agent_prompts` pedidas. El script de Roberto reescribe el objeto entero y a Jacó le habría borrado sus `routes`.
+5. **Antes de tocar `catalog-search`, chequear qué otros tenants la consumen.** Al hacer que `capacidad` llegara de verdad se activó un bug latente: El Canal (25 items) y Costa Verde demo (8) **no tienen `capacidad` cargada**, así que un lead diciendo "somos 4 personas" habría descartado todas sus propiedades. Guarda: si ningún item del conjunto define capacidad, el filtro se ignora.
+6. **Estado derivado se calcula en el render, no con `setState` en un effect** (fix del único error de lint del repo, en `create-client-modal.tsx`). No se silenció la regla: apuntaba a un problema real de diseño.
+
+**Los 5 defectos encontrados (todos verificados contra la fuente de verdad, no supuestos):**
+
+| # | Defecto | Cómo se manifestaba |
+|---|---|---|
+| 1 | `bot-c-v1` sin la `Catalog Search Tool` | el prompt exigía "OBLIGATORIO usar la tool"; producción describía las villas de memoria |
+| 2 | `byCap` leía `capacidad_min`/`capacidad_max`, campos inexistentes | habría devuelto **0 items** apenas llegara el parámetro |
+| 3 | `diversify` ordenaba con `Number("x")=NaN` | Zen Villa 1 (sin `dormitorios`) caía fuera del cap de 6 |
+| 4 | La tool no exponía parámetros al LLM | llegaban 6 villas y el bot mezclaba amenidades entre ellas ("villa Frankenstein") |
+| 5 | `Expand Property Images` esperaba un código, no una URL | el marcador `[IMG:https://…]` llegó **crudo al lead** por WhatsApp |
+
+**Aclaración a un registro previo:** la fila del backlog *"Catálogo — el bot ENVÍA las fotos"* (2026-08-06) decía como pendiente *"replicar en workflows de producción"*. Eso quedó cerrado hoy.
+
+**Pendientes inmediatos:** rotar el token de Apify hardcodeado (nodo `Apify - Scrape Link`, ya en el historial de git); 2 warnings de lint preexistentes.
+
+## 2026-06-12 — Iteración profunda del bot (prompts v2→v4.2, modelos gpt-4.1 full, 3 bugs de flujo) + fix "Devolver al bot"
+
+**Contexto:** Sesión larga de pulido del bot Mateo. El founder trajo iteraciones sucesivas de prompts (v2, v3, v4, v4.1, v4.2) y pidió aplicarlas una por una. En el camino destapamos 3 bugs de RAÍZ que no eran de los prompts sino del flujo alrededor. Cerró con el bot "respondiendo bastante bien". **Análisis completo persistido en `memory/leccion-2026-06-12-pipeline-completo-bot-momentum.md` ⭐ (documento de replicabilidad).**
+
+**Decisiones tomadas:**
+
+1. **División de responsabilidades firme:** el founder escribe los prompts en otro proyecto; yo solo los APLICO al workflow, DIAGNOSTICO bugs técnicos y VERIFICO. No redacto ni cambio contenido de prompts.
+2. **Prompts aplicados** vía build scripts idempotentes SET18→SET24 desde `test-prompts/v{N}/`. Estado final: Principal v4.1, Formateador v4.2, Router v4, Objeciones v4. Verificados por hash SHA-256 contra el canon.
+3. **Formateador "bobo" (v4):** la inteligencia de división de burbujas vive en el AGENTE (separa con líneas en blanco); el formateador solo mapea cada bloque a un MENSAJE y limpia puntuación. Reemplaza el Criterio A+B previo.
+4. **Los 6 nodos LLM a `gpt-4.1` FULL** (SET22). Aclaración: `gpt-4o-mini` ≠ "4.0 mini"; 4/6 nodos ya estaban en `4.1-mini`. El salto real es a full.
+5. **Memoria a 30 mensajes** (Principal + Objeciones).
+6. **Parser del Formateador → "Generate From JSON Example"** con `{output:{MENSAJE 1..4}}` (cambio manual del founder). Sube el límite de 3 a 4 burbujas. Trade-off: con fromJson todos los campos quedan required (vigilar relleno en turnos cortos; si molesta → JSON Schema con solo MENSAJE 1 required).
+7. **Verificación post-deploy obligatoria:** traer el N8N vivo y comparar hash de cada prompt + modelos + memoria. "Está actualizado" se demuestra, no se afirma.
+
+**3 bugs de raíz resueltos (ninguno era del prompt):**
+
+1. **`Expand Property Images` aplastaba los `\n`** (`/\s+/g` → espacio). Rompía las listas numeradas. Fix SET24: `[^\S\n]` para preservar saltos. (Nodo heredado del bot inmobiliario v6, módulo properties apagado pero igual procesaba el texto.)
+2. **Parser cortaba a 3 mensajes** (`additionalProperties:false` + solo MENSAJE 1/2/3). Fix: founder lo pasó a fromJson con 4 mensajes.
+3. **`bot_paused_until` dejaba el bot mudo tras handoff.** El handoff pausa el bot 24h; el botón "Devolver al bot" del inbox (`inbox-client.tsx`) solo cambiaba `handler` sin limpiar la pausa → bot mudo aunque handler='bot'. Fix manual inmediato (`UPDATE ... bot_paused_until=NULL`) + **PR #25** en `momentum-ai-crm`: "Devolver al bot" ahora hace `{handler:'bot', bot_paused_until:null}`.
+
+**Qué se descartó:**
+- Predicción mía de "doble wrapper" al poner `{output:{...}}` en el parser: FALSA, confirmado con ejecución real que el Basic LLM Chain agrega el wrapper `output` solo.
+
+**Insight para modularización (objetivo del founder):** hoy conviven 2 sistemas de prompt — el systemMessage hardcodeado en el nodo (el que se usa) y el `bot_config` de la agencia en Supabase (`core_template`, `system_rules_template`, `custom_instructions`, `business_info`, `conversation_flow`) que YA es modular pero NO está cableado al Agente Principal. Camino natural a "replicable/personalizable/rápido": armar el prompt del agente desde `bot_config` para que dar de alta un cliente = llenar una fila, no editar el workflow.
+
+**Pendientes inmediatos:** commitear el trabajo de N8N (SET15→25 sin commitear) · mergear PR #25 tras probar el preview · vigilar relleno del parser en turnos cortos · evaluar cablear el Agente Principal a `bot_config` · testear paths no ejercitados (objeción precio, "lo pienso", pedir humano, descalificación) · Meta Ads.
+
+**Estado workflow:** versionId vivo tras la sesión = el del parser editado por el founder (rama de prompts v4.1/v4.2 + parser 4-msg + modelos gpt-4.1 full + memoria 30). Snapshots PRE-SET18→25 en `crm-v2/n8n/workflows/snapshots/`.
+
 ## 2026-06-10 — Prompts Mateo deployados + fix duplicación de leads por rotación de wa_user_id
 
 **Contexto:** El founder llegó harto de iteraciones que no funcionaban ("estamos dando vueltas sin llegar a ningún lado"). Trajo sus propios prompts en `clients/momentum-ai-crm/test-prompts/` (bot "Mateo", diseñados con `architecture.md` previo). Sesión larguísima: MCP fix + demo agency + deploy Mateo + primera conversación e2e excelente + bug de leads duplicados encontrado y fixeado.

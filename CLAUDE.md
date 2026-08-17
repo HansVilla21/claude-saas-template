@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        37 skills de proceso reusables:
+│   └── skills/        78 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -87,12 +87,103 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      'append') + n8n-information-extractor-schema-mode
 │                      (fromJson espera ejemplo, NO schema literal; usar
 │                      'manual' + inputSchema para schemas dinámicos).
-│                      Tier 7 — SaaS/Scraping patterns (3, capturadas 2026-06-11):
-│                      async-job-pattern (UI→job→worker→polling+refund créditos),
-│                      apify-integration-pattern (fetch directo, normalización -1/null,
-│                      ScraperError tipado), debugging-silent-errors (console.error
-│                      estructurado, reproducir antes de instrumentar, error codes).
-│                      Tier 8 — Auth/UX/Deploy SaaS (5, capturadas 2026-06-18, de Mi Menudo):
+│                      Tier 7 — Flujo de salida del bot (1 nueva + 2
+│                      extensiones, capturadas 2026-06-12 del pulido de
+│                      bot-c-v1): bot-multibubble-output-flow (flujo
+│                      Formateador→Parser→Split Out→Expand para responder
+│                      en burbujas; wrapper output del Basic LLM Chain, el
+│                      límite de burbujas lo pone el parser no el prompt, no
+│                      aplastar \n con /\s+/g) + extensiones a
+│                      bot-handoff-system-end-to-end (reactivar bot limpia
+│                      bot_paused_until, no solo handler) y a
+│                      n8n-workflow-build-script (deploy vía API PUT +
+│                      verificación por hash SHA-256 contra el N8N vivo).
+│                      Tier 8 — Arquitectura de datos (1, capturada 2026-06-14
+│                      de la Misión 6 de crm-v2): fuente-unica-derivar-de-hijos
+│                      (cuando dos vistas muestran "lo mismo" leyendo columnas
+│                      distintas y divergen: elegir UNA fuente de verdad y
+│                      DERIVAR el dato en la otra vista desde las filas hijas —
+│                      repuntar writes + patch realtime + fallback; sin trigger,
+│                      sin backfill, sin doble-columna sincronizada).
+│                      Tier 9 — Seguridad DB (1, capturada 2026-06-15 de la
+│                      Misión 8 de crm-v2): habilitar-rls-tabla-expuesta
+│                      (prender RLS en una tabla viva sin romper el backend:
+│                      auditar TODOS los consumidores y su ROL DB —¿service_role
+│                      bypassa?—, calcar las policies de una tabla hermana, usar
+│                      los helpers SECURITY DEFINER existentes, verificar
+│                      adversarialmente, recién ahí aplicar; enable+policies
+│                      juntos o queda deny-all silencioso).
+│                      Tier 10 — Infra SaaS producción (1, capturada 2026-06-15
+│                      de la Misión 9 de crm-v2): setup-correo-auth-saas
+│                      (poner un SaaS en prod: subdominio Vercel + Resend
+│                      verificado sin pisar el correo existente —usa subdominio
+│                      send.— + Supabase Auth SMTP + Site URL/NEXT_PUBLIC_SITE_URL
+│                      + flujos reset/invite-only/invitación-fija-contraseña +
+│                      plantillas de correo branded; checklist e2e).
+│                      Tier 11 — Patrones de CRM web (3 nuevas + 1 update,
+│                      capturadas 2026-06-22 de M5-M8 de crm-v2):
+│                      umbral-compartido-cron-cliente (un mismo umbral en un
+│                      cron SQL y un filtro cliente TS: helper puro + constante
+│                      nombrada + cross-reference + verificación contra la DB
+│                      viva, para que notificación y filtro nunca diverjan) +
+│                      inicio-dia-timezone-fija ("hoy"/corte de día anclado a
+│                      una TZ fija con aritmética de offset, NO setHours del
+│                      runtime —bug clásico server-UTC vs negocio-local—) +
+│                      intencion-ui-persistir-sessionstorage (persistir una
+│                      intención que la DB no distingue —marcar no-leído— en
+│                      sessionStorage + guard en el auto-read + re-armado en
+│                      mount, para que sobreviva F5/back-nav). Update a
+│                      setup-correo-auth-saas: links de correo con token_hash
+│                      + verifyOtp en /auth/confirm, NO PKCE code (rompe
+│                      cross-device; fix del reset de Pietro).
+│                      Tier 12 — Roles/permisos + UI (2, capturadas 2026-07-08
+│                      del onboarding de Givi en crm-v2):
+│                      rls-write-bloqueada-por-policy-desalineada (un rol
+│                      no-privilegiado no puede GUARDAR y no aparece error, pero
+│                      a owner/admin sí; causa: WITH CHECK divergido del USING
+│                      tras mover una fuente de verdad entre tablas + triggers
+│                      SECURITY INVOKER que propagan el 42501 a otra tabla;
+│                      incluye el método de reproducir bajo el rol real
+│                      —set local role + jwt.claims + rollback— y verificar
+│                      positivo Y negativo) + dialogo-confirmacion-no-nativo
+│                      (nunca window.confirm/alert/prompt; usar/armar un
+│                      <ConfirmDialog> del design system con variantes
+│                      default/warning/destructive; regla del founder).
+│                      Tier 13 — Inbox estilo WhatsApp + método (4 nuevas + 1
+│                      extensión, capturadas 2026-07-16 de la sesión de
+│                      adjuntos/reacciones/citas del CRM):
+│                      bsp-media-expira-archivar-propio (⭐ cross-project: el
+│                      CDN del BSP BORRA la media a los 7 días —medido: 7.0d
+│                      HTTP 206 / 7.1d 404—; se perdieron 54 archivos para
+│                      siempre antes de detectarlo. Archivar a Storage propio
+│                      al recibir, en background, degradando si falla; el
+│                      filtro del rescate NO es direction='inbound' sino DÓNDE
+│                      APUNTA la URL —el echo de coexistencia muere igual) +
+│                      webhook-contar-event-types-antes-de-arreglar ("solo el
+│                      lead hace las cosas" es FALSO: las reacciones llegan por
+│                      3 event_type distintos; el mismo error se cometió 3
+│                      veces en una sesión. `group by event_type` ANTES de
+│                      tocar el webhook; el `default` que hace JSON.stringify
+│                      envenena la memoria del bot) +
+│                      probar-migracion-contra-base-viva-con-rollback (BEGIN +
+│                      migración + assertions de invariantes + controles
+│                      negativos + ROLLBACK; verificar después que prod quedó
+│                      intacta. Da números medidos, no estimados) +
+│                      verificar-visual-midiendo-contraste (medir el ratio WCAG
+│                      real en el browser componiendo el velo sobre el fondo:
+│                      el instinto de "aclarar el velo" daba 3.2:1, oscurecerlo
+│                      6.42:1). Extensión a
+│                      rls-write-bloqueada-por-policy-desalineada: causa 4 —
+│                      la policy de SELECT y la de WRITE de la MISMA tabla
+│                      mirando fuentes de verdad distintas (el rol VE y hace
+│                      clic, no pasa nada, sin error).
+│                      Tier 14 — SaaS/Scraping patterns (3, capturadas 2026-06-11,
+│                      de Hookly): async-job-pattern (UI→job→worker→polling+refund
+│                      créditos), apify-integration-pattern (fetch directo,
+│                      normalización -1/null, ScraperError tipado),
+│                      debugging-silent-errors (console.error estructurado,
+│                      reproducir antes de instrumentar, error codes).
+│                      Tier 15 — Auth/UX/Deploy SaaS (5, capturadas 2026-06-18, de Mi Menudo):
 │                      auth-supabase-google-nativo (email/clave + Google nativo GIS que
 │                      muestra tu dominio + fix 'Database error saving new user'),
 │                      prototipo-ui-a-datos-reales (conectar un prototipo mock a Supabase
@@ -102,6 +193,215 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      deploy-seguro-vercel-preview-prod (preview→prod sin romper),
 │                      ingesta-email-cloudflare-worker (forwarding → Worker → Edge
 │                      Function, idempotente, por usuario, nunca botar).
+│                      Tier 16 — Finanzas + Auth/Onboarding SaaS (7, capturadas
+│                      2026-06-18/20 de Mi Menudo): dinero-multimoneda-app-financiera
+│                      (precisión decimal + moneda nativa por cuenta + saldo en vivo;
+│                      evita "plata fantasma") + tipo-de-cambio-real-bccr-hacienda
+│                      (FX real CR vía BCCR/Hacienda JSON sin API key, endpoint propio
+│                      + caché + fallback; nunca hardcodear el tipo de cambio) +
+│                      supabase-google-login-movil-vs-desktop (login Google+Supabase
+│                      en SPA: GIS/signInWithIdToken en desktop vs OAuth redirect en
+│                      móvil —la sesión no se establecía en el cel y rebotaba al login) +
+│                      gmail-forwarding-auto-confirm (auto-confirmar el reenvío de Gmail
+│                      server-side; el usuario no toca el link de confirmación) +
+│                      onboarding-estado-server-side (estado de onboarding desde señales
+│                      reales del server, NO localStorage por-dispositivo —reaparecía como
+│                      cuenta nueva en otro device) + ui-distintiva-no-ai-default (no caer
+│                      en el "default genérico de IA" al crear/rediseñar landing o UI;
+│                      distintivo y de alta calidad desde la v1) + reskin-marca-coherente
+│                      (migrar un template heredado a una marca propia coherente: auditar
+│                      la capa de tokens + cazar overrides de --accent en runtime + barrer
+│                      colores hardcodeados; landing == app).
+│                      Tier 17 — WhatsApp proactivo a staff (1, capturada 2026-08-05
+│                      de crm-v2): whatsapp-proactivo-a-staff (avisar por WhatsApp a
+│                      un agente/staff cuando pasa un evento en la DB —caso canónico:
+│                      handoff— vía plantilla Meta aprobada: colgarse de la fila
+│                      `notifications` que ya hace el fan-out + trigger pg_net que lee
+│                      secretos de Vault → Edge Function que resuelve teléfono + número
+│                      del negocio + datos del lead y manda la plantilla YCloud, con
+│                      tabla de log/anti-spam y degradación total. Gotchas no-obvios:
+│                      proactivo fuera de la ventana de 24h EXIGE plantilla aprobada;
+│                      la plantilla no puede empezar/terminar en variable; las
+│                      "variables con nombre" de YCloud son posicionales por debajo;
+│                      hardcodear lo que es igual para todos los tenants; botón URL
+│                      dinámico = base fija + sufijo `<slug>/inbox?conv=<id>`; revocar
+│                      EXECUTE del trigger SECURITY DEFINER a anon; guardado del perfil
+│                      por server action —el update client-side falla silencioso—).
+│                      Tier 18 — Catálogo multifuncional (1, capturada 2026-08-05
+│                      de crm-v2): catalogo-multifuncional-por-preset (sección donde
+│                      cada negocio carga LO QUE VENDE —propiedades, servicios,
+│                      productos— con UNA base que se adapta a cualquier rubro por
+│                      configuración y que el bot consume. Enfoque híbrido: tabla base
+│                      `catalog_items` (columnas compartidas + `attributes` jsonb) +
+│                      "preset" por vertical sobre el sistema de módulos existente
+│                      (`module_definitions`: config_schema=ficha de atributos,
+│                      extractor_schema, tool_config.mode, prompt_fragment, ui_slots).
+│                      Plomería una vez, rubro nuevo = preset nuevo sin código. Dos
+│                      modos de bot: `search` (rubro grande → tool con fallback
+│                      multi-pass, cap 5) vs `inline` (rubro chico → lista completa
+│                      inyectada en el prompt, `list_all`). UI con form dinámico
+│                      derivado de la ficha (cero forms por rubro) + fotos a Storage
+│                      por agencia + server action con gate de rol. Gotchas: jsonb
+│                      `->>` es TEXTO —filtrar numéricos en memoria—; el camino de
+│                      lectura debe servir al owner REAL no solo master (presets
+│                      scope=global + agency_modules is_member_of); `agency_id` lo pone
+│                      el flow nunca el LLM; confirmar enums/uniques del schema antes;
+│                      solo `available`+`is_published`+no borrado se muestra al lead).
+│                      Tier 19 — Método de trabajo (3, capturadas 2026-08-11 de la
+│                      sesión de etiquetas + drill-down del CRM):
+│                      verificar-base-del-pr-antes-de-mergear (⭐ cross-project:
+│                      `mergeable: MERGEABLE` responde "¿se puede mergear?", NO
+│                      "¿a dónde?" — dos PRs figuraban MERGED pero su
+│                      `baseRefName` era otra rama y el código NUNCA llegó a
+│                      producción; casi se repite el mismo día porque GitHub solo
+│                      reapunta un PR apilado si la rama base se BORRA. Incluye
+│                      cómo auditar PRs viejos mergeados fuera de main y cómo
+│                      rescatarlos) + drill-down-numero-a-lista (hacer clickeable
+│                      un número del dashboard: enlazar a la lista que ya existe
+│                      en vez de construir un modal; comparar las DEFINICIONES de
+│                      las dos pantallas antes de enlazar —si "sin atender" y "sin
+│                      asignar" cuentan distinto, ese número NO se enlaza—; una
+│                      fuente única que construye Y lee la URL; y verificar el
+│                      ROUND-TRIP completo exigiendo número === filas, no que se
+│                      armó un string) + worktree-para-no-pisar-el-checkout
+│                      (trabajar cuando el founder está en el mismo repo: un
+│                      `git checkout` suyo movió HEAD a mitad de una feature y
+│                      otro commit quedó HUÉRFANO; incluye el gotcha de que un
+│                      worktree FUERA del repo da ~96 errores fantasma de tsc con
+│                      idéntica versión de paquetes → va DENTRO para heredar el
+│                      node_modules, y el reflog como red de seguridad).
+│                      Tier 20 — La escritura que no avisa (2 nuevas + 2
+│                      extensiones, capturadas 2026-08-13 de las acciones en
+│                      lote del CRM): detectar-escritura-filtrada-rls
+│                      (⭐ cross-project: bajo RLS un `update` que NO matchea el
+│                      USING **no devuelve error** — afecta 0 filas y responde
+│                      éxito, así que `if (error)` nunca entra y la UI optimista
+│                      queda mintiendo. La única detección es pedir `.select()` y
+│                      CONTAR filas. Incluye dónde NO sirve: cuando el write
+│                      vuelve la fila invisible para quien la hizo —reasignar a
+│                      otro— el RETURNING viene vacío aunque haya funcionado, y
+│                      eso va por server action. 3 incidentes del proyecto salen
+│                      de este mismo modo de fallo) + acciones-en-lote-seguras
+│                      (selección múltiple + acciones masivas sin los 3 desastres
+│                      típicos: actuar sobre filas que el usuario ya no ve —se
+│                      resuelve DERIVANDO la selección como intersección con lo
+│                      visible, garantía estructural y no un efecto que compite
+│                      con el clic—; decir "50" cuando cambiaron 40 —reportar
+│                      `appliedIds` de la base + los motivos, y tratar "ya
+│                      estaban así" como ÉXITO—; y ser más permisivo que la app
+│                      de a una fila —si escribís con admin client el gate propio
+│                      es la ÚNICA barrera: tenant del contexto nunca del
+│                      navegador, destino validado, tope por lote—).
+│                      **Extensiones:** probar-migracion-contra-base-viva-con-rollback
+│                      suma el **bloque que SIEMPRE aborta** (`DO` que termina en
+│                      `raise exception`, con el reporte dentro del mensaje del
+│                      error): no existe camino en que la escritura persista, y
+│                      como la DDL es transaccional permite aplicar la policy
+│                      NUEVA adentro y medir antes/después en el mismo bloque —
+│                      reemplaza al paso de "confirmar que el rollback funciona".
+│                      Y rls-write-bloqueada-por-policy-desalineada suma la
+│                      **causa 5** (policies de TABLAS DISTINTAS que expresan el
+│                      MISMO permiso y divergen: el agente VE el lead y PUEDE
+│                      etiquetarlo pero NO cambiarle el estado) + el aviso
+│                      **3d: leé la policy VIVA, no la migración** — se reportó
+│                      un bug inexistente por leer un `.sql` que una migración
+│                      posterior ya había arreglado.
+│                      Tier 21 — Reportar lo que no se puede reconstruir (1,
+│                      capturada 2026-08-13 de la sección de reportes del CRM):
+│                      reporte-in-app-con-snapshot-efimero (⭐ cross-project:
+│                      poner "reportar un bug" DENTRO del producto cuando lo que
+│                      hay que reportar es EFÍMERO — un playground, un preview,
+│                      una vista derivada que tu base no guarda. La pregunta que
+│                      decide todo el diseño es una sola: *"¿el servidor puede ir
+│                      a buscar después lo que el usuario vio?"*. Si no puede, el
+│                      **snapshot viaja con el reporte en el instante del clic**
+│                      —jsonb, no FK: no hay a qué apuntar— y de ahí sale todo lo
+│                      demás. Lo no-obvio: la evidencia la manda el CLIENTE y no
+│                      hay alternativa, así que la línea que importa es cuál campo
+│                      viene del navegador y cuál del contexto autenticado —un
+│                      transcript inventado solo ensucia el reporte de quien lo
+│                      inventó, un `agency_id` del navegador escribe en la cuenta
+│                      de otro—; una burbuja rota se DESCARTA pero lo que ni
+│                      siquiera es un array SÍ falla (front roto, conviene
+│                      enterarse); al recortar por tamaño se tira lo VIEJO porque
+│                      el final es donde está la evidencia; la selección se
+│                      congela DESMONTANDO el modal al cerrar, no con un efecto
+│                      que sincronice —el linter de React rechaza eso y tiene
+│                      razón—; nombre y correo del que reportó se COPIAN o darlo
+│                      de baja vuelve el reporte anónimo; e INSERT y UPDATE van
+│                      como policies SEPARADAS porque no expresan el mismo
+│                      permiso —reportar es de todos, gestionar es del dueño del
+│                      panel—. Incluye el chequeo que ni tsc ni el build ven: si
+│                      el join con la tabla del tenant viene vacío bajo RLS,
+│                      TODA la bandeja dice "Negocio eliminado").
+│                      Tier 22 — El número que dirige la plata (1, capturada
+│                      2026-08-13 rediseñando "Por campaña" del CRM):
+│                      porcentaje-necesita-minimo-muestra (⭐ cross-project:
+│                      una tasa —conversión, cierre, apertura, rating, error—
+│                      que ORDENA una lista necesita un mínimo de muestra. Caso
+│                      real: un anuncio con **1 lead y 1 cierre daba 100%** y
+│                      encabezaba la tabla, en verde, por encima del que trajo
+│                      **89 con 3 cierres (3%)** — en la pantalla donde el
+│                      cliente decide en qué anuncio pone el presupuesto. El
+│                      fondo es de razonamiento, no de diseño: una tasa es una
+│                      ESTIMACIÓN y su incertidumbre depende del denominador
+│                      (con n=1, el intervalo de "100%" va de ~2% a 100%), así
+│                      que ordenar por el valor puntual sin mirar n pone el
+│                      ruido arriba SIEMPRE. Lo no-obvio del arreglo: (1)
+│                      SEGMENTAR y no filtrar —esconder las filas de poca
+│                      muestra hace que el cliente crea que su anuncio nuevo no
+│                      se está midiendo—, con los insuficientes abajo ordenados
+│                      por VOLUMEN; (2) apagar el color y la barra, que es la
+│                      mitad del daño porque el color se lee ANTES que el
+│                      número; (3) escalar la barra solo con los significativos
+│                      o el ruido aplasta a los datos reales; (4) el CSV
+│                      necesita su columna `datosSuficientes` porque en Excel lo
+│                      primero que hacen es reordenar por el %. Incluye el
+│                      control negativo que hace que el test discrimine
+│                      —"ordenar solo por tasa lo pondría primero"— y por qué
+│                      se eligió el umbral duro sobre el lower-bound de Wilson
+│                      o el suavizado bayesiano: en un dashboard de CLIENTE el
+│                      orden tiene que poder explicarse en una línea).
+│                      Tier 23 — Lo que no encoge, desborda (1, capturada
+│                      2026-08-14 del arreglo responsive completo del CRM):
+│                      auditar-responsive-midiendo (⭐ cross-project: el
+│                      desborde horizontal en celular casi nunca es "algo es
+│                      muy ancho" — es algo que **se niega a encogerse**, y en
+│                      CSS eso tiene tres formas, TODAS invisibles para tsc,
+│                      el linter y el build: (1) un track de grid `1fr` es
+│                      `minmax(auto, 1fr)` y ese `auto` es un PISO —el olor
+│                      delator es que la rama de desktop ya usa `minmax(0,1fr)`
+│                      porque alguien ya se peleó con esto, y la de mobile
+│                      quedó en `1fr`—; (2) `flex-1` sin `min-w-0`, y peor con
+│                      un control de formulario adentro porque su ancho
+│                      intrínseco (~180px) pasa a ser piso duro —medido: el
+│                      composer del chat pedía 398px en una caja de 375—; (3)
+│                      texto sin corte, que muerde en los campos que caen a un
+│                      email cuando falta el nombre. Más la cuarta: restar
+│                      alturas a mano (`calc(100dvh - 49px)`) ignora los
+│                      banners condicionales —el de impersonación se enciende
+│                      JUSTO en el caso de todos los días—; se reemplaza por
+│                      un shell que define el alto y pantallas que piden
+│                      `h-full`, avisando que eso mueve el scroll del `body` a
+│                      `main`. Trae el script de auditoría con las dos piezas
+│                      no obvias (ignorar lo que vive dentro de un scroller
+│                      horizontal INTENCIONAL, y reportar solo el ancestro más
+│                      alto), el control negativo que prueba que la medición
+│                      discrimina, los blancos táctiles por NIVELES (44 suelto
+│                      / 36 denso / 24 piso duro de WCAG 2.5.8) con el truco
+│                      del `<label>` que agranda el área sin agrandar lo que se
+│                      ve —y reenvía el clic con el `shiftKey` intacto—, y la
+│                      regla de NO inflar lo que WCAG exime por estar dentro de
+│                      una frase: un reporte en cero puede ser peor producto.
+│                      Incluye el bug que no es de tamaño sino de EXISTENCIA
+│                      —una acción colgada de `group-hover` no existe en una
+│                      pantalla sin hover— y los 4 gotchas que hacen MENTIR al
+│                      reporte: medir sobre el esqueleto de carga, el bucle que
+│                      no espera el cambio de ruta —delator: el mismo número de
+│                      caracteres en rutas distintas—, un panel que no compone
+│                      frames congela las animaciones y una geometría de modal
+│                      parece rota, y el ROL de la sesión decidiendo qué podés
+│                      ver —con `agent` el composer roto ni se renderiza—).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
@@ -109,8 +409,27 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │       └── hormozi.md        Síntesis de $100M Offers + Money Models + GOATed Ads.
 │                             Biblia operativa de hormozi-strategist, saas-strategist,
 │                             pain-discovery y las skills construir-oferta + evaluar-icp.
+├── clients/                   UN cliente = UNA carpeta (comercial + técnico juntos).
+│                              Tiene su propio README.md = REGISTRO MAESTRO con la
+│                              tabla de clientes (sector, servicios, estado, valor,
+│                              mant./mes) + `_plantilla/` para dar de alta uno nuevo.
+│                              Por cliente: lo comercial (00-perfil, llamadas/,
+│                              propuesta-y-contrato/, planning/, onboarding/,
+│                              entregables/, marca-y-assets/) y lo técnico
+│                              (architecture.md, prompts/ con sus `_compiled/`,
+│                              test-prompts/ versionados v1→v4.x). No todas las
+│                              subcarpetas son obligatorias: un lead puede tener solo
+│                              la ficha, y un bot solo los prompts.
+│                              ⚠️ Antes de tocar acá, LEER `clients/README.md` — el
+│                              proceso de alta y la leyenda de estados están ahí.
+│                              (Hasta 2026-07-16 esto vivía partido en dos árboles por
+│                              idioma —`clientes/` comercial y `clients/` técnico—; se
+│                              unificaron. Si ves `clientes/` en algún lado, es viejo.)
 ├── inputs/repos-referencia/   10 repos de calidad como referencia para los agentes
-├── templates/
+├── templates/                 Plantillas reusables:
+│   ├── onboarding/            el proceso de onboarding genérico que se le manda a
+│   │                          CUALQUIER cliente (.docx + texto extraído). Reusable ⇒
+│   │                          NO va bajo un cliente.
 │   └── supabase-email-templates/  4 HTML de Auth parametrizados (confirm, magic-link,
 │                                  reset-password, change-email). Reemplazar placeholders
 │                                  {{PRODUCT_NAME}}, {{PRODUCT_TAGLINE}}, etc.

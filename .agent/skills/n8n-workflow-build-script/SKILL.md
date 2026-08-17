@@ -164,6 +164,35 @@ Resumen al founder con: ruta del JSON, tamaño KB, número de nodos, qué cambi�
 - **NO duplicar IDs**: dejar n8n regenerar IDs en import. Solo regenerar `wf.versionId` con `crypto.randomUUID()`.
 - **NO commitear sin correr el validator.** Si el validator falla, los `$('NodeName')` apuntan a nodos que ya no existen → bug silencioso en runtime.
 
+## Deploy vía API + verificación por hash (capturado 2026-06-12)
+
+El build script no termina cuando escribe el JSON. **Deploya y verifica contra el N8N vivo** — el editor de N8N cachea y "lo veo igual" no significa nada.
+
+**Deploy (en el mismo script, tras los smoke tests):**
+```js
+// La API PUT SOLO acepta name/nodes/connections/settings.
+// versionId, active, createdAt, etc. la hacen fallar con "additional properties".
+const payload = JSON.stringify({ name: wf.name, nodes: wf.nodes,
+                                 connections: wf.connections, settings: wf.settings });
+https.request({ hostname: N8N_HOST, path: `/api/v1/workflows/${ID}`, method: 'PUT',
+  headers: { 'Content-Type':'application/json', 'X-N8N-API-KEY': KEY,
+             'Content-Length': Buffer.byteLength(payload) } }, ...);
+```
+
+**Verificación post-deploy (la que da confianza real):** traer el workflow vivo y comparar **hash SHA-256** de cada prompt/campo contra el archivo canónico. "Está actualizado" se DEMUESTRA, no se afirma.
+```js
+const live = await GET(`/api/v1/workflows/${ID}`);     // estado vivo
+const livePrompt = live.nodes.find(n => n.name===NODE).parameters.options.systemMessage;
+const ok = sha256(canonPrompt) === sha256(livePrompt);  // idénticos o no, sin ambigüedad
+```
+Para confirmar COMPORTAMIENTO (no solo contenido), leer una ejecución real:
+`GET /api/v1/executions/{id}?includeData=true` → mirar el output real del nodo. Nunca afirmar cómo se comporta un nodo sin esto.
+
+**Gotchas de entorno:**
+- En Windows, leer/escribir el JSON con **Node.js, no Python** (`UnicodeDecodeError: charmap`).
+- Tras deploy, el editor de N8N necesita **cerrar y reabrir la pestaña** para mostrar el cambio.
+- `N8N_API_KEY` / `N8N_HOST` se leen del `.env`, nunca hardcodeados en el repo.
+
 ## Skills relacionadas
 
 - `n8n-expression-validator` (ya existe en `.claude/skills/`) — el validator que se corre después del build.
