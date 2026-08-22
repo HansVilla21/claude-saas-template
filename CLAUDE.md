@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        99 skills de proceso reusables:
+│   └── skills/        107 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -402,7 +402,96 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      frames congela las animaciones y una geometría de modal
 │                      parece rota, y el ROL de la sesión decidiendo qué podés
 │                      ver —con `agent` el composer roto ni se renderiza—).
-│                      Tier 24 — Lo que se quedó en el espejo (8 + 3 apéndices,
+│                      Tier 24 — Sitio + catálogo + CMS para cliente PYME
+│                      (8, capturadas 2026-08-22 de un proyecto de 4 meses:
+│                      web pública + catálogo + panel + chatbot, Next.js 15 +
+│                      Supabase + Vercel). Es la vertical que faltaba: hasta
+│                      acá el template era casi todo n8n/WhatsApp/CRM.
+│                      · auditar-datos-antes-de-programar-features (⭐ el más
+│                        transferible: antes de convertir el feedback de una
+│                        llamada en un plan, CONTÁ las filas de producción.
+│                        Caso medido: 3 quejas que sonaban distintas eran un
+│                        solo agujero —81/83 sin precio, 0/83 con descripción,
+│                        0 variantes—, así que media lista pedida NO se veía
+│                        aunque se programara. La Fase 1 pasó a ser importar
+│                        datos, no UI. Incluye el SQL del censo, el mapa
+│                        queja→causa con `archivo:línea`, y por qué el seed
+│                        local nunca sirve para esto).
+│                      · catalogo-desde-pdf-del-cliente (el catálogo del
+│                        cliente vive en 4 PDF de Canva: Canva exporta el texto
+│                        letra por letra —"C Ó D I G OC M - 2 0"— así que las
+│                        regex no matchean nunca y hace falta pdfjs; y agrupar
+│                        filas redondeando la Y a una rejilla INVIERTE precios
+│                        —pasó, Queen/King— hay que agrupar por proximidad con
+│                        tolerancia. Importador que NO escribe en la base
+│                        —produce CSV para Excel + JSON + informe de cruce— y
+│                        cargador aparte, idempotente, con los nuevos en
+│                        visible=false y sin pisar precios ya publicados.
+│                        Trae `lib-catalogo-pdf.mjs` reusable tal cual).
+│                      · fotos-de-pdf-con-revision-humana (extraer imágenes con
+│                        pdfjs+sharp, filtrar por geometría + dispersión +
+│                        NITIDEZ —medida: degradado ~0.1, borrosa ~0.14, foto
+│                        usable 1.4–7.0— y NUNCA subir automático: los
+│                        catálogos del propio cliente traían stock y un render
+│                        de IA con marca de agua, que pasó todos los filtros
+│                        por ser nítido. Hoja de revisión HTML para que el
+│                        cliente marque cuáles son suyas. Gotcha caro:
+│                        preguntar con `has()` en page.objs/commonObjs devuelve
+│                        false para objetos que se están resolviendo y perdió
+│                        un catálogo entero, en silencio).
+│                      · chatbot-web-tools-sobre-datos-vivos (asistente EN LA
+│                        WEB —no WhatsApp, no n8n— con Vercel AI SDK + OpenAI:
+│                        el catálogo NO va en el prompt, va en herramientas, y
+│                        por eso los precios son exactos y el costo no crece
+│                        con el catálogo. Sin RAG ni embeddings. Los 3 bugs
+│                        reales de producción: el modelo INVENTA el slug —el
+│                        fix es que la tool se defienda con fallback por nombre
+│                        y desambiguación devuelta como datos, no instruir el
+│                        prompt—, expone slugs al usuario, y escribe los montos
+│                        en formato gringo. Más: 503 + fallback a WhatsApp sin
+│                        API key para poder desplegar antes de que el cliente
+│                        apruebe el gasto, columna `fuente` para trazar el
+│                        lead, y stream de texto plano en vez de useChat para
+│                        no atarse a la versión del SDK).
+│                      · supabase-free-se-pausa-y-tumba-el-sitio (el plan
+│                        gratis se pausa por INACTIVIDAD: sitio 500 y builds
+│                        con `fetch failed`. Se cae por no usarse, o sea justo
+│                        en pilotos y demos. Diagnóstico en 30s por API
+│                        —status INACTIVE— antes de leer un solo log de Next,
+│                        restore ~4 min sin pérdida de datos, y keep-alive con
+│                        cron de Vercel. Gotchas: los crons se identifican por
+│                        PATH —dos con la misma ruta es UNO— y solo corren en
+│                        producción).
+│                      · completitud-de-contenido-en-el-panel (que el cliente
+│                        no técnico SÍ termine de llenar 230 fichas: completitud
+│                        como función pura, badge que dice QUÉ falta, filtro de
+│                        incompletos, drawer con "Guardar y siguiente" y lote
+│                        solo-sobre-vacíos. Regla de oro: la IA redacta prosa
+│                        —descripción, como borrador que el humano aprueba— y
+│                        el HUMANO pone los hechos —maderas, plazos—, porque
+│                        una IA que "deduce" el material publica una mentira
+│                        comercial firmada por el cliente).
+│                      · panel-en-subdominio-por-middleware (admin.cliente.com
+│                        sirve /panel en la raíz vía rewrite, el dominio público
+│                        redirige, y la sesión de Supabase se refresca en el
+│                        mismo middleware — una sola app, un deploy, tipos
+│                        compartidos. Gotcha que aparece sí o sí: en el host de
+│                        admin TODO se reescribe a /panel/*, así que apagar un
+│                        widget del sitio público con usePathname no alcanza,
+│                        hay que mirar el HOST — el dueño veía el chatbot de
+│                        atención al cliente dentro de su propio gestor).
+│                      · reporte-de-estado-para-cliente-no-tecnico (los TRES
+│                        documentos son distintos y mezclarlos cuesta la
+│                        reunión: resumen del cliente —solo logros, HTML
+│                        autocontenido que abre de un toque en WhatsApp—, hoja
+│                        de revisión —decisiones como preguntas, para pantalla
+│                        compartida— y reporte de estado —el completo, en el
+│                        repo—. Con plantilla HTML parametrizable, mobile-first
+│                        y con modo oscuro. Gotcha: antes de pedir un insumo,
+│                        verificá que sea del cliente — se le pidieron "las
+│                        reseñas de Google" dos reportes seguidos siendo que
+│                        son públicas y tomarlas era trabajo nuestro).
+│                      Tier 25 — Lo que se quedó en el espejo (8 + 3 apéndices,
 │                      capturadas 2026-07-06/08/10 en FreshAdFlow, subidas
 │                      2026-08-22): son las skills que FreshAdFlow numeró como
 │                      sus Tiers 9/10/11, se commitearon en la rama
@@ -440,7 +529,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      redeploy; y verificar que estén en la PLATAFORMA, no
 │                      solo en el `.env`) y onvo-troubleshooting (sandbox
 │                      caído, monto mínimo ~$0.50, período de gracia).
-│                      Tier 25 — Lo que el motor no dijo (12, capturadas
+│                      Tier 26 — Lo que el motor no dijo (12, capturadas
 │                      2026-08-22 de la auditoría completa de FreshAdFlow —
 │                      aprendizajes de julio que nunca se habían capturado):
 │                      ⭐ causa-raiz-mala-calidad-ia-esta-en-el-input (el
