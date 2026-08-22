@@ -34,6 +34,12 @@ importar.** Sin ese botón, el archivo grande se queda sin subir "por si acaso" 
 
 ---
 
+> ⚠️ **Antes de confiar en tu `createAdminClient()`, abrilo.** Si por dentro usa
+> `createServerClient` de `@supabase/ssr` con la service_role key **y cookies**, no es un cliente
+> de servicio: con sesión corre como el usuario y **sin sesión bypasea la RLS**, lo que ya produjo
+> una fuga de datos personales en un endpoint sin auth. Tiene que estar hecho con el SDK plano
+> (`@supabase/supabase-js`), sin cookies. Ver `service-role-con-cookies-fuga-de-pii`.
+
 ## Proceso
 
 ### 1. Una columna, una migración
