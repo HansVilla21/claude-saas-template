@@ -969,7 +969,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      hidratación; si aparece Skype, `sip:`; y decir que un enlace
 │                      abre el marcador y NO registra la llamada: eso es integración
 │                      telefónica y se cotiza).
-│                      Tier 30 — Cosechar en paralelo (1, capturada 2026-08-22
+│                      Tier 31 — Cosechar en paralelo (1, capturada 2026-08-22
 │                      de la propia madrugada de 4 cosechas simultáneas):
 │                      cosechas-en-paralelo-sin-pisarse (⭐ cross-project:
 │                      correr N sesiones a la vez sobre el mismo repo hace que
