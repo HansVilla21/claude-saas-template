@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**143 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**147 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -52,6 +52,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `rol-aislado-cartera-rls` | Rol que ve solo su cartera. El bug a cazar es la "cola abierta" que expone las carteras privadas — excluirlas del SELECT **y** del UPDATE |
 | `importacion-con-lote-deshacible` | `import_batch_id`: deshacer por `created_at` se lleva lo que entró por el formulario y los webhooks en la misma ventana |
 | `supabase-storage-borra-en-silencio` | `storage.remove()` devuelve `error: null, data: []` sin policy de SELECT: subir funciona y borrar no. Más el índice único parcial que se viola **por el camino**, no por el destino |
+| ⭐⭐ `service-role-con-cookies-fuga-de-pii` | `createServerClient` de `@supabase/ssr` **lee cookies y la cookie le gana a la llave**: con sesión la RLS aplica, sin sesión bypasea todo. Un `GET /api/investors` sin login devolvía cédulas y teléfonos reales, con status 200 |
+| `borrar-entidad-con-fk-no-action` | El default de Postgres es **bloquear**. El orden de borrado lo dicta la base: se valida con `BEGIN … ROLLBACK` contra datos reales, y los dependientes de segundo nivel van primero |
 
 ## 🏢 Multi-tenant y SaaS
 
@@ -167,6 +169,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `trabajar-en-la-cuenta-del-cliente` | Su GitHub y su Vercel: una credencial por host en Windows, la regla `insteadOf` que reescribe SSH→HTTPS, y por qué **`git push` no deploya** en Hobby |
 | `dominio-que-envia-pero-no-recibe` | Enviar y recibir son dos sistemas. Sin **MX** cada respuesta a un boletín rebota, y el proveedor no avisa porque su tablero está verde |
 | `programar-envios-cron-vercel` | ⚠️ El gotcha decide la feature: Hobby corre el cron 1×/día y no a la hora exacta. En su proyecto la feature se **quitó** en vez de mentirle al cliente |
+| `firma-electronica-simple-con-validez-legal` | Firmar sin comprar DocuSign y que la firma pruebe algo: identidad → código de un solo uso al canal ya registrado → confirmación, con el PDF **congelado** y su hash. Lo que falta casi siempre no es la identidad, es la integridad |
+| `rate-limit-en-memoria-no-existe-en-serverless` | Un `Map` de módulo no cuenta nada en producción, pero **frena perfecto en local** — así termina marcado como hecho. El estado del límite vive fuera del proceso y se prueba contra producción |
 
 ## 📦 Entregar el proyecto
 
