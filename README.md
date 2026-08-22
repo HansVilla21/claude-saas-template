@@ -136,8 +136,11 @@ Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, T
 │                              Momentum + workflows de referencia para DUPLICAR
 ├── docs/training/             11 módulos de entrenamiento (filosofía →
 │                              arquitectura → prompts → workflow → entrega)
-├── clients/                   Registro maestro de clientes: lo comercial y lo
-│                              técnico juntos (ver clients/README.md)
+├── clients/                   Registro maestro de clientes (ver clients/README.md).
+│                              ⚠️ Solo se versionan README.md y _plantilla/ — este
+│                              repo es público y las carpetas de clientes reales
+│                              viven solo en tu disco (gitignoreadas desde
+│                              2026-08-22), con respaldo en el vault privado
 ├── inputs/repos-referencia/   10 repos de referencia
 ├── templates/                 Plantillas reusables (onboarding, correos de Auth)
 ├── proyectos/                 ← Subproyectos (gitignored, repos independientes)
