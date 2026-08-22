@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**98 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**118 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -25,6 +25,9 @@ Cómo saber que algo funciona de verdad. Si vas a decir "listo", empezá acá.
 | `worktree-para-no-pisar-el-checkout` | Trabajar cuando otra persona está en el mismo repo (un commit quedó huérfano) |
 | `mesa-arquitectonica-multiagente` | Panel multi-agente + jueces adversariales para decisiones arquitectónicas grandes |
 | `creador-de-skills` | La meta-skill: cuándo y cómo capturar un proceso |
+| ⭐ `git-footguns-de-sesion` | Los 3 que borran trabajo **sin dar error**: untrackear un dir con ediciones sin commitear, dos sesiones sobre la misma rama con `git add -A`, y el Credential Manager multicuenta |
+| `respaldo-total-espejo-privado-repo-de-repos` | Cuando el repo del deploy excluye `memory/`, ese cerebro queda en un solo disco. Espejo privado con rama `respaldo-full-<fecha>`, y el trade-off de los `.env` en claro decidido explícito |
+| `handoff-dossier-a-otro-proyecto` | Empaquetar un proyecto para que otro agente lo retome sin la conversación |
 
 ## 🗄️ Datos, RLS y seguridad de base
 
@@ -39,6 +42,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `jsonb-config-save-no-pisar-campos-ajenos` | Un "Guardar" de config jsonb que borra los campos de otros writers |
 | `supabase-edge-function-secret-auth` | Endpoints internos autenticados por secret |
 | `chatbot-db-schema-supabase` | Schema multi-canal + multi-nicho |
+| `migraciones-postgres-directo-con-guard-de-proyecto` | La Management API da 403 en `security definer` / `create policy`. Y con el MCP apuntando a **otra** base, el guard del ref en el aplicador es requisito, no paranoia |
 
 ## 🏢 Multi-tenant y SaaS
 
@@ -113,6 +117,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `inbox-message-bubble-render` | Render de burbujas multi-tipo |
 | `crm-inbox-conv-list-filters-strip` | Tira de filtros horizontal con scroll + fades |
 | `crm-contact-detail-tabs` | Ficha de contacto full-page con pestañas |
+| `selector-que-obliga-eleccion-consciente` | Cero preselección + tarjeta con descripción y ejemplos, jerga interna fuera. El `null` de "todavía no eligió" vive en el estado **local** de la pantalla, nunca asciende al tipo del dominio |
+| `galeria-rapida-thumbnails-url-estable` | El polling que re-firma signed URLs recarga **todas** las imágenes en cada tick. La cura es una URL estable por id, no optimizar el polling |
 
 ## 📊 Números, dinero y tiempo
 
@@ -123,6 +129,11 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `inicio-dia-timezone-fija` | "Hoy" anclado a una TZ fija, no al runtime (bug clásico server-UTC vs negocio-local) |
 | `dinero-multimoneda-app-financiera` | Precisión decimal + moneda nativa por cuenta (evita "plata fantasma") |
 | `tipo-de-cambio-real-bccr-hacienda` | FX real de Costa Rica sin API key, con caché y fallback |
+| `creditos-por-imagen-reserva-y-refund` | Cobrar por la unidad que **cuesta**, no por la request: ledger append-only, refund por unidad fallida, y el founder exento por **saldo**, no por código |
+| `pagina-de-cuenta-billing-saas` | Tarjeta de estado + período de gracia + historial del ledger |
+| `probar-pasarela-de-pago-en-prod` | Validar pagos end-to-end con productos de $1 cuando el sandbox está caído |
+| `feedback-con-recompensa-en-creditos` | Otorgamiento **manual**, para controlar costo y evitar gaming |
+| `watermark-en-display-plan-gating` | Nunca servir el master limpio a un free. Un overlay CSS es decoración, no seguridad |
 
 ## 🔐 Auth y deploy
 
@@ -131,6 +142,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `auth-supabase-google-nativo` | Email/clave + Google nativo que muestra tu dominio |
 | `supabase-google-login-movil-vs-desktop` | GIS en desktop vs OAuth redirect en móvil (la sesión no se establecía en el celular) |
 | `deploy-seguro-vercel-preview-prod` | Preview → prod sin romper |
+| `verificar-ui-detras-de-auth-en-local` | Verificar una pantalla detrás de login sin poder loguearte: sacar la ruta de `PROTECTED_PREFIXES` en local **y revertir** — el revert es parte del cambio |
 
 ## 💡 Estrategia, marca y oferta
 
@@ -156,6 +168,21 @@ La vertical que no es n8n/WhatsApp/CRM: web pública + catálogo + panel para qu
 | `panel-en-subdominio-por-middleware` | `admin.cliente.com` sirviendo el panel por rewrite, con la sesión refrescada en el mismo middleware |
 | `reporte-de-estado-para-cliente-no-tecnico` | Los **tres** documentos son distintos y mezclarlos cuesta la reunión: resumen, hoja de revisión y reporte de estado |
 | `supabase-free-se-pausa-y-tumba-el-sitio` | El plan gratis se pausa por **inactividad** — o sea justo en pilotos y demos. Diagnóstico en 30s por API |
+
+## 🖼️ SaaS con motor de IA generativa
+
+Construir un producto donde el valor lo produce un modelo. El patrón que las une: **el motor casi nunca es el problema**.
+
+| Skill | Qué resuelve |
+|---|---|
+| ⭐ `causa-raiz-mala-calidad-ia-esta-en-el-input` | El hallazgo madre: cuando un producto de IA saca output malo con usuarios reales, la causa raíz casi nunca es el motor — es un **input malo que el producto aceptó sin avisar**. Orden de sospecha de 5 pasos y plan de 3 capas |
+| ⭐⭐ `motor-de-recetas-de-prompts-para-imagen` | El moat: prompt por bloques + rotación con paso **coprimo** para que no salgan gemelas (el bug era `angles[i % 5]` con count=9 — aritmética, no modelo) + las 7 reglas que sobrevivieron a producción |
+| ⭐ `probar-motor-ia-fuera-de-la-app` | Correr el módulo **real** desde un script standalone: A/B sobre datos reales por ~$0.50, sin auth, sin créditos y sin ensuciar la base |
+| `gate-0-validar-motor-antes-de-construir` | Harness aislado con criterios de PASS escritos **antes**. 12 imágenes y $0.76 decidieron endpoint, costo por unidad y latencia — y descartaron un subsistema entero |
+| `limites-del-motor-de-imagen` | Los 3 techos: la moderación la dispara la **foto**, no el prompt · las imágenes-referencia no transfieren estilo en `edits` · el residuo del modelo se anota, no se pelea |
+| `generar-creativos-de-anuncios-con-ia` | Incluye la regla de coherencia de marca: producto simple → anuncio simple |
+| `anexar-creativos-a-pack-existente` | "Generar más" y "variar UNO" sobre el mismo job: claim atómico done→running, offset de path, `finally` siempre a done, reserva/refund |
+| `anti-abuso-costo-ia-saas` | Defensa en profundidad para un SaaS con motor de IA: email-verify, blocklist de desechables, tope por IP/día y tope global de costo — env-tunable y fail-open |
 
 ## 🎯 Ejecución y modo de trabajo del founder
 

@@ -126,3 +126,11 @@ console.log(JSON.stringify(data, null, 2)); // ver qué devuelve exactamente
 - Hacer `JSON.stringify(err)` — los objetos `Error` se serializan como `{}` en JSON; usar el shape estructurado de arriba
 - Dejar scripts de repro en el repo — contienen contexto de credenciales
 - Asumir que el problema es el código cuando puede ser un valor inesperado del provider
+
+## Herramienta — leer los logs de PROD con el MCP de Vercel (2026-07-08)
+
+- Cuando algo falla en producción y no sabés por qué, **leé los logs reales ANTES de hipotetizar**:
+  el MCP de Vercel `get_runtime_errors` (agregado de errores por ruta) y `get_runtime_logs`
+  (búsqueda full-text por `since`/`level`/`query`).
+- Nos ahorró adivinar: supuse "rate limit de OpenAI" por la firma del fallo, pero los logs
+  mostraron el error REAL (`billing_hard_limit_reached`). La causa correcta cambia el fix.

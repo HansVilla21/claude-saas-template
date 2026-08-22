@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        98 skills de proceso reusables:
+│   └── skills/        118 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -691,6 +691,109 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        verificá que sea del cliente — se le pidieron "las
 │                        reseñas de Google" dos reportes seguidos siendo que
 │                        son públicas y tomarlas era trabajo nuestro).
+│                      Tier 27 — Lo que se quedó en el espejo (8 + 3 apéndices,
+│                      capturadas 2026-07-06/08/10 en FreshAdFlow, subidas
+│                      2026-08-22): son las skills que FreshAdFlow numeró como
+│                      sus Tiers 9/10/11, se commitearon en la rama
+│                      `feat/skills-seguridad-saas` de su espejo privado y
+│                      NUNCA llegaron al madre — mientras tanto el madre reusó
+│                      los números 9/10/11 para otras cosas, así que entran
+│                      renumeradas. **Seguridad free→pago:**
+│                      watermark-en-display-plan-gating (nunca servir el master
+│                      limpio a un free; un overlay CSS es decoración, no
+│                      seguridad) + anti-abuso-costo-ia-saas (defensa en
+│                      profundidad para un SaaS con motor de IA: email-verify,
+│                      blocklist de desechables, tope por IP/día y tope global
+│                      de costo, todo env-tunable y fail-open).
+│                      **Crecimiento/ops + pagos:**
+│                      generar-creativos-de-anuncios-con-ia (incluye la regla
+│                      de coherencia de marca: producto simple → anuncio
+│                      simple) + probar-pasarela-de-pago-en-prod (validar pagos
+│                      E2E con productos de $1 cuando el sandbox está caído) +
+│                      feedback-con-recompensa-en-creditos (otorgamiento
+│                      manual, para controlar costo y evitar gaming) +
+│                      pagina-de-cuenta-billing-saas (tarjeta de estado +
+│                      período de gracia + historial de ledger) +
+│                      handoff-dossier-a-otro-proyecto (empaquetar un proyecto
+│                      para otro agente). **Iteración sobre lo generado:**
+│                      anexar-creativos-a-pack-existente ("generar más" y
+│                      "variar UNO" sobre el mismo job: claim atómico
+│                      done→running + bump de count, offset de path, finally
+│                      siempre a done, reserva/refund; el enabler es guardar el
+│                      prompt por ítem). Más 3 apéndices append-only sobre
+│                      skills que ya estaban: debugging-silent-errors (leer los
+│                      logs de prod con el MCP de Vercel ANTES de hipotetizar —
+│                      la firma decía "rate limit", el log decía
+│                      `billing_hard_limit_reached`), deploy-seguro-vercel-
+│                      preview-prod (las env vars se snapshotean en el build →
+│                      redeploy; y verificar que estén en la PLATAFORMA, no
+│                      solo en el `.env`) y onvo-troubleshooting (sandbox
+│                      caído, monto mínimo ~$0.50, período de gracia).
+│                      Tier 28 — Lo que el motor no dijo (12, capturadas
+│                      2026-08-22 de la auditoría completa de FreshAdFlow —
+│                      aprendizajes de julio que nunca se habían capturado):
+│                      ⭐ causa-raiz-mala-calidad-ia-esta-en-el-input (el
+│                      hallazgo madre: cuando un producto de IA saca output
+│                      malo con usuarios reales, la causa raíz casi nunca es el
+│                      motor — es un input malo que el producto aceptó sin
+│                      avisar. Las 2 primeras usuarias generaron TODO en modo
+│                      "Producto" —el default preseleccionado— vendiendo una
+│                      masajes y la otra un e-book; el motor, obligado a
+│                      "mantener el producto exactamente igual", inventó un
+│                      tarro de crema y un libro pegado. Trae el orden de
+│                      sospecha de 5 pasos y el plan de 3 capas: UI primero,
+│                      guards después, techo del modelo se anota) +
+│                      ⭐ probar-motor-ia-fuera-de-la-app (correr el módulo de
+│                      recetas REAL —no una copia— desde un script standalone
+│                      con `node --experimental-strip-types` + file URL: A/B
+│                      sobre datos reales de usuarios por ~$0.50, sin auth, sin
+│                      créditos y sin ensuciar la base) +
+│                      selector-que-obliga-eleccion-consciente (cero
+│                      preselección + tarjeta con descripción y ejemplos en el
+│                      idioma del usuario + jerga interna fuera —"Concepto"
+│                      pasó a "Digital"—, y el detalle que ahorra un día: el
+│                      `null` de "todavía no eligió" vive en el estado LOCAL de
+│                      la pantalla, nunca asciende al tipo del dominio) +
+│                      gate-0-validar-motor-antes-de-construir (harness aislado
+│                      cero-dependencias con criterios de PASS escritos ANTES;
+│                      12 imágenes y $0.76 decidieron endpoint, costo por
+│                      unidad, latencia —y con ella que el job asíncrono era
+│                      requisito, no opción— y descartaron un subsistema
+│                      entero) + ⭐⭐ motor-de-recetas-de-prompts-para-imagen
+│                      (el moat: prompt compuesto por bloques, rotación con
+│                      paso COPRIMO para que no salgan gemelas —el bug era
+│                      `angles[i % 5]` con count=9, aritmética, no modelo—,
+│                      `coreRules` con las 7 reglas que sobrevivieron a
+│                      producción, y "poco texto ≠ texto vago") +
+│                      migraciones-postgres-directo-con-guard-de-proyecto (la
+│                      Management API da 403 en `security definer`/`create
+│                      policy`; y con el MCP apuntando a OTRA base, el guard
+│                      del ref en el aplicador es el requisito, no la paranoia)
+│                      + creditos-por-imagen-reserva-y-refund (cobrar por la
+│                      unidad que CUESTA, ledger append-only, refund por unidad
+│                      fallida, y el founder exento por SALDO y no por código)
+│                      + limites-del-motor-de-imagen (los 3 techos: la
+│                      moderación la dispara la FOTO y no el prompt · las
+│                      imágenes-referencia NO transfieren estilo en `edits` —el
+│                      logo sí porque es un objeto a colocar, la estética no—,
+│                      solución real = vision-to-text · y el residuo del modelo
+│                      se anota, no se pelea) +
+│                      galeria-rapida-thumbnails-url-estable (el polling que
+│                      re-firma signed URLs recarga TODAS las imágenes en cada
+│                      tick; la cura es una URL estable por id, no optimizar el
+│                      polling) + respaldo-total-espejo-privado-repo-de-repos
+│                      (cuando el repo del deploy excluye `memory/`, ese cerebro
+│                      queda en un solo disco: espejo privado con rama
+│                      `respaldo-full-<fecha>`, y el trade-off de los `.env` en
+│                      texto plano decidido explícito, con git-crypt como
+│                      alternativa) + git-footguns-de-sesion (los 3 que borran
+│                      trabajo sin dar error: untrackear un dir con ediciones
+│                      sin commitear, dos sesiones sobre la misma rama con
+│                      `git add -A`, y el Credential Manager multicuenta) +
+│                      verificar-ui-detras-de-auth-en-local (quitar la ruta de
+│                      `PROTECTED_PREFIXES` en local y REVERTIR — el revert es
+│                      parte del cambio; Google GIS no corre en un preview de
+│                      Vercel).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
