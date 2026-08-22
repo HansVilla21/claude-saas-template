@@ -98,6 +98,21 @@ mismo mecanismo del "tu código es 1234" de un banco.
 - **Costo del fan-out a pool:** cada plantilla utility es facturable; un handoff
   sin asignar avisa a N agentes = N mensajes. El cooldown corta rebotes, pero si
   el volumen crece, considerá limitar el pool a owner/admin.
+- **⚠️ El endpoint `?wabaId=` de YCloud IGNORA el filtro** (agregado 2026-08-18).
+  Devuelve las plantillas de **toda la cuenta**, no las del WABA que pediste. En
+  multi-tenant eso hace que veas la plantilla de OTRO cliente y concluyas que el
+  tuyo ya la tiene. Pasó: se reportó `aviso_handoff` como existente en el WABA de
+  un cliente nuevo, era falsa, y el aviso murió esa noche con `ycloud_403`.
+  **Verificá el campo `wabaId` de cada plantilla en la respuesta**, no confíes en
+  el query param. Regla general: si un filtro de una API de tercero no está
+  probado, tratá la respuesta como sin filtrar.
+- **Parámetros fantasma** (agregado 2026-08-18): el nodo que notifica mandaba
+  `send_lead_message` en el payload a la Edge Function, y la función **nunca lo
+  lee**. El campo existía, se seteaba, se revisaba en code review — y no hacía
+  nada. Antes de confiar en un flag del payload, **buscá su lector**: si nadie lo
+  referencia del otro lado, el comportamiento que creés configurado no existe.
+  (Mismo modo de fallo que las llaves de config sin consumidor — ver
+  `config-por-tenant-no-literal-en-el-flujo`.)
 
 ## Output esperado
 
