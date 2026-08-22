@@ -77,3 +77,12 @@ Si faltan, el build puede fallar (ej. `supabaseUrl is required` al prerenderizar
 ## Skills relacionadas
 - `vercel-domain-migration` — mover/migrar dominios en Vercel.
 - `auth-supabase-google-nativo` — recordá agregar el dominio prod a los orígenes/redirects de Google y Supabase.
+
+## Gotcha — las env vars se snapshotean en el build (2026-07-08, FreshAdFlow)
+
+- Cambiar un env var (incluidas las `NEXT_PUBLIC_*`, que se inlinean en el bundle) **NO afecta al
+  deployment activo** → hay que **redeploy** para que tome efecto.
+- **Verificar que la env var esté en la PLATAFORMA (Vercel), no solo en `.env` local.** Nos pasó:
+  `RESEND_API_KEY` estaba en `.env` pero faltaba en Vercel → los recibos fallaban silenciosos
+  ("falta RESEND_API_KEY" en los logs). Chequear con `GET /v9/projects/{id}/env`.
+- Los cambios de precio (priceIds de la pasarela) también son env vars → redeploy tras cambiarlos.
