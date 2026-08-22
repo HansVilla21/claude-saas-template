@@ -976,9 +976,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                             Biblia operativa de hormozi-strategist, saas-strategist,
 │                             pain-discovery y las skills construir-oferta + evaluar-icp.
 ├── clients/                   UN cliente = UNA carpeta (comercial + técnico juntos).
-│                              Tiene su propio README.md = REGISTRO MAESTRO con la
-│                              tabla de clientes (sector, servicios, estado, valor,
-│                              mant./mes) + `_plantilla/` para dar de alta uno nuevo.
+│                              ⚠️ **Las carpetas de clientes NO se versionan** — este
+│                              repo es público. Del árbol solo se commitean `README.md`
+│                              (la convención) y `_plantilla/`; `clients/*` está en
+│                              `.gitignore` desde 2026-08-22. Las carpetas reales viven
+│                              solo en tu disco, con respaldo íntegro en el vault
+│                              privado (`projects/_clientes-privado/`, 98 archivos).
 │                              Por cliente: lo comercial (00-perfil, llamadas/,
 │                              propuesta-y-contrato/, planning/, onboarding/,
 │                              entregables/, marca-y-assets/) y lo técnico
@@ -987,7 +990,10 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                              subcarpetas son obligatorias: un lead puede tener solo
 │                              la ficha, y un bot solo los prompts.
 │                              ⚠️ Antes de tocar acá, LEER `clients/README.md` — el
-│                              proceso de alta y la leyenda de estados están ahí.
+│                              proceso de alta, la leyenda de estados y qué hacer si
+│                              tu `clients/` desaparece tras un pull están ahí.
+│                              El registro maestro (la tabla con sector, estado, valor,
+│                              mant./mes) se mantiene LOCAL, no en el repo.
 │                              (Hasta 2026-07-16 esto vivía partido en dos árboles por
 │                              idioma —`clientes/` comercial y `clients/` técnico—; se
 │                              unificaron. Si ves `clientes/` en algún lado, es viejo.)

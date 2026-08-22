@@ -56,3 +56,14 @@ temp/
 # Material de referencia personal con copyright (libros, etc.)
 # No subir al repo — bloat + zona gris legal
 docs/books/
+
+# Datos de clientes reales — repo PÚBLICO, nunca se versionan (destrackeado 2026-08-22)
+# Solo se versionan la convención (README.md) y la plantilla vacía.
+# Respaldo íntegro en el vault privado: projects/_clientes-privado/
+/clients/*
+!/clients/README.md
+!/clients/_plantilla/
+!/clients/_plantilla/**
+
+# Transcripciones de llamadas con clientes nombrados
+/docs/calls/

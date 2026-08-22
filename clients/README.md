@@ -1,17 +1,20 @@
 # 📇 Registro de clientes
 
-Registro y análisis de todos los clientes que usan (o usarán) el sistema (chatbot + CRM + sitios web).
+> ⚠️ **Las carpetas de clientes reales NO se versionan.** Este repo es **público**.
+> Solo viven acá el `README.md` (la convención) y `_plantilla/`. Todo lo demás — fichas,
+> llamadas, contratos, prompts, assets — existe **solo en tu disco** y está en `.gitignore`.
+> Ver "Por qué esto no se versiona" abajo.
+
+Registro y análisis de los clientes que usan (o usarán) el sistema (chatbot + CRM + sitios web).
 
 **UN cliente = UNA carpeta**, con lo comercial y lo técnico juntos. Un cliente puede tener solo una de las dos partes (un lead sin construir aún, o un bot armado sin ficha comercial) — no todas las subcarpetas son obligatorias.
 
-> **Nota histórica (2026-07-16):** esto vivía partido en dos árboles por idioma — `clientes/` (comercial, con este registro) y `clients/` (técnico, con los prompts). Dos carpetas con el mismo nombre en distinto idioma y nadie sabía cuál era cuál. Se unificaron acá.
-
 ```
 clients/
-├── README.md                    ← este registro maestro
-├── _plantilla/                  ← template para arrancar un cliente nuevo
+├── README.md                    ← este archivo (versionado)
+├── _plantilla/                  ← template para arrancar un cliente nuevo (versionado)
 │   └── 00-perfil.md
-└── <slug-del-cliente>/
+└── <slug-del-cliente>/          ← ⚠️ LOCAL, nunca se commitea
     │  ── comercial ──
     ├── 00-perfil.md             ← ficha: negocio, gente, dolores, deal, estado
     ├── llamadas/                ← transcripciones con resumen + insights al inicio
@@ -33,23 +36,49 @@ El **proceso de onboarding genérico** (el que se le manda a cualquier cliente) 
 1. Copiar `_plantilla/` a `clients/<slug-del-cliente>/`.
 2. Llenar `00-perfil.md`.
 3. Tirar las transcripciones de llamadas en `llamadas/` y agregarles resumen + insights arriba.
-4. Agregar la fila al cuadro de abajo.
+4. Agregar la fila a tu registro **local** (ver abajo).
 
-## Clientes
+## El registro maestro
+
+La tabla con los clientes reales (sector, servicios, estado, valor, mantenimiento, fecha de cierre)
+**no vive en el repo**. Mantenela en tu copia local de este archivo, o en tu vault privado —
+donde no se publique.
+
+Columnas de la tabla, para que todos los clientes se registren igual:
 
 | Cliente | Sector | Servicios | Estado | Valor | Mant./mes | Cerrado | Ficha |
 |---|---|---|---|---|---|---|---|
-| **Mueblería Pérez Luna** | Muebles premium (CR) | Chatbot · CRM · Sitio web | Onboarding | $2.000 | $200 | 2026-06-03 | [perfil](muebleria-perez-luna/00-perfil.md) |
-| **Desarrollos Ecológicos El Canal** | Inmobiliaria / desarrollo residencial (Grecia, CR) | Chatbot · CRM | ⚠️ por confirmar | — | — | — | [perfil](desarrollos-ecologicos-el-canal/00-perfil.md) |
-| **Givi** | App de fidelización / lealtad para comercios (CR) | CRM (producción) · Chatbot (por construir) | producción | ⚠️ s/d | ⚠️ s/d | — | [perfil](givi/00-perfil.md) |
-
-> **Carpetas con parte TÉCNICA pero todavía sin ficha comercial** (tienen prompts, no `00-perfil.md`). Si entran al registro: copiarles `_plantilla/00-perfil.md` y sumar la fila arriba.
-> `momentum-ai-crm/` (el bot del propio CRM: prompts + test-prompts v1→v4.4.2) · `jaco-dream-rentals/` · `roberto/`
->
-> Otros clientes de chatbot mencionados por Hans, sin carpeta todavía: Dr. Carlos (SmartCheck), asesores financieros (demo), una inmobiliaria (versión CRM base).
-> (Givi salió de esta lista el 2026-08-13: ya tiene carpeta y ficha con los datos verificados contra la base viva.)
-> (Varela / Condominio del Canal salió de esta lista el 2026-08-04: ya tiene carpeta como **Desarrollos Ecológicos El Canal**.)
 
 ## Leyenda de estados
 
 `lead` → `propuesta` → `cerrado` → `onboarding` → `en desarrollo` → `producción` → `mantenimiento` → `pausado` / `cerrado-baja`
+
+---
+
+## Por qué esto no se versiona
+
+Este repo es **público**. Las carpetas de clientes contenían perfiles de negocio, transcripciones
+de llamadas, prompts de producción, assets de marca y contratos firmados con nombres reales —
+datos de terceros que nunca debieron publicarse.
+
+Se destrackearon el **2026-08-22** (`git rm --cached`, sin borrar del disco) y `clients/*` entró
+al `.gitignore`.
+
+### Si hacés `pull` y tu `clients/` desaparece
+
+Es esperable: git borra localmente lo que se eliminó upstream. **Respaldá antes de pulsar pull.**
+Existe una copia íntegra en el vault privado (`projects/_clientes-privado/`, 98 archivos) —
+copiala de vuelta a `clients/` y el `.gitignore` ya evita que se vuelva a subir.
+
+### Lo que este cambio NO hace
+
+**El historial de git sigue teniendo todo.** Destrackear evita publicar de acá en adelante, pero
+los commits viejos son públicos y accesibles. Limpiar el historial exige reescribirlo
+(`git filter-repo` + force-push), lo que rompe todos los clones y los PRs abiertos — se hace
+como operación coordinada, cuando no haya nadie más trabajando.
+
+### Referencias sueltas
+
+Varios archivos de `memory/` citan rutas como `clients/<cliente>/prompts/…`. Siguen resolviendo
+en tu disco; para alguien que clone el repo de cero, apuntan a carpetas que no existen. Es
+intencional. Las skills que usan `clients/{cliente}/` como placeholder no se ven afectadas.
