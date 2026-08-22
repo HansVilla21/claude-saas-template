@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**83 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**90 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -132,11 +132,23 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `supabase-google-login-movil-vs-desktop` | GIS en desktop vs OAuth redirect en móvil (la sesión no se establecía en el celular) |
 | `deploy-seguro-vercel-preview-prod` | Preview → prod sin romper |
 
-## 💡 Estrategia y oferta
+## 💡 Estrategia, marca y oferta
 
 | Skill | Qué resuelve |
 |---|---|
 | `evaluar-icp` · `definir-avatar` · `descubrir-dolor` · `construir-oferta` | El pipeline de oferta sobre el framework Hormozi (`memory/frameworks/hormozi.md`) |
+| `arrancar-angosto-antes-de-ensanchar` | El negocio hace muchas cosas: separar el **paraguas** (todo lo que vendés) de la **cuña visible** (LA cosa que mostrás una y otra vez) |
+| `filtro-de-esencia-de-marca` | El gate previo a publicar: ¿esto se rastrea al posicionamiento, o nos subimos a un tema porque estaba de moda? Corre **al entrar** al plan, no al publicar |
+| `matar-el-olor-a-ia` | Catálogo de tells del texto generado y cómo borrarlos sin mover el claim. En mensajes de bot no es estilo: es producto |
+| `destripar-video-de-competencia` | Que Claude **vea** el video, no que lo lea: frames con ffmpeg + separar OBSERVADO de INFERIDO. Leer por caption daba "reels de 15-30s"; medir dio ~83s |
+
+## 🎯 Ejecución y modo de trabajo del founder
+
+| Skill | Qué resuelve |
+|---|---|
+| ⭐ `tarjeta-de-hoy-una-sola-cosa` | Toda la estrategia lista y cero output: el bloqueo no es falta de plan, es que abrir el proyecto exige **decidir**. `HOY.md` ejecutable sin abrir nada más + gate numérico de salida |
+| ⭐ `perfil-de-operador-del-founder` | El `CLAUDE.md` documenta **qué** se construye; nadie documenta **cómo** responderle al humano que dirige. La corrección que el founder hace dos veces es una regla que falta en un archivo |
+| `archivar-en-vez-de-borrar` | La maquinaria sobrante cobra renta. Cambiar "¿esto sirve?" (irrefutable) por "¿se usó en 4 semanas?" y archivar con `git mv` |
 
 ---
 
