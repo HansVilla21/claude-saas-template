@@ -51,7 +51,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
 │                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
 ├── .agent/
-│   └── skills/        78 skills de proceso reusables:
+│   └── skills/        85 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -402,6 +402,72 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      frames congela las animaciones y una geometría de modal
 │                      parece rota, y el ROL de la sesión decidiendo qué podés
 │                      ver —con `agent` el composer roto ni se renderiza—).
+│                      Tier 24 — Ejecución y marca (7, capturadas 2026-08-22 del
+│                      sistema de contenido Content OS; ninguna es de contenido
+│                      en sí, todas son método transferible a cualquier proyecto):
+│                      tarjeta-de-hoy-una-sola-cosa (⭐ cuando el proyecto tiene
+│                      TODA la estrategia lista y CERO output: el bloqueo no es
+│                      falta de plan, es que abrir el proyecto exige DECIDIR.
+│                      Se reduce a `HOY.md` —una tarjeta ejecutable sin abrir
+│                      otro archivo ni elegir nada— + `COLA.md`, triggers de
+│                      rotación en lenguaje natural, umbral de reposición y un
+│                      GATE numérico de salida —N unidades publicadas— porque
+│                      el riesgo #1 es que "mejorar el sistema" reemplace a
+│                      producir) + perfil-de-operador-del-founder (⭐ el
+│                      `CLAUDE.md` documenta QUÉ se construye y nadie documenta
+│                      CÓMO responderle al humano que dirige; la corrección de
+│                      estilo o de ritmo que el founder hace DOS veces es una
+│                      regla que falta en un archivo, y mientras viva en el chat
+│                      se re-aprende cada sesión. Se llena por observación con
+│                      citas textuales, no por entrevista; incluye plantilla de
+│                      6 secciones y la separación dura entre lo operativo —va
+│                      al repo— y lo personal/clínico —vive fuera—) +
+│                      matar-el-olor-a-ia (catálogo de tells del texto generado
+│                      y cómo borrarlos SIN mover el claim: paralelismo negativo
+│                      "no es X, sino Y" con tolerancia cero, frases plantilla,
+│                      vocabulario de modelo, ritmo parejo, simetría de tres,
+│                      puntuación de máquina —crítico en mensajes de bot, ahí no
+│                      es estilo sino producto—. Si falta un dato real se marca
+│                      [PENDIENTE], nunca se inventa) + destripar-video-de-
+│                      competencia (pipeline para que Claude VEA un video y no
+│                      solo lo lea: scraper de API → `videoUrl` del CDN +
+│                      transcript → `destripar-video.sh` extrae frames con
+│                      ffmpeg → Claude los lee con Read y escribe el teardown
+│                      separando OBSERVADO de INFERIDO. Analizar por caption da
+│                      conclusiones falsas con mucha confianza: la lectura de
+│                      texto decía "reels de 15-30s", la medición real dio ~83s.
+│                      Las URLs del CDN caducan en horas ⇒ bajar en la misma
+│                      sesión del scrape; <$0.10 por teardown) +
+│                      archivar-en-vez-de-borrar (la maquinaria sobrante cobra
+│                      renta: cada pieza que existe es una opción que hay que
+│                      descartar antes de trabajar. No se poda porque la
+│                      pregunta "¿esto sirve?" es irrefutable —habla del futuro—;
+│                      se desbloquea cambiándola por "¿se usó en 4 semanas?" y
+│                      archivando con `git mv` espejando rutas. Archivar vuelve
+│                      REVERSIBLE una decisión irreversible, y las reversibles se
+│                      toman rápido: 17→11 skills y 6→4 agentes en una sesión sin
+│                      una sola discusión. El `archive/README.md` con "cuándo
+│                      reactivar" es lo que separa un archivo de un cementerio;
+│                      el paso que siempre se olvida es actualizar las TABLAS DE
+│                      RUTEO —un orquestador que enruta a un agente archivado
+│                      falla en silencio) + filtro-de-esencia-de-marca (gate de
+│                      4 preguntas antes de publicar cualquier cosa de cara al
+│                      público; la que más piezas mata es "¿lo podría haber
+│                      publicado cualquier competidor?" —prueba de foso—. No
+│                      prohíbe las tendencias, prohíbe las tendencias SIN
+│                      traducir; lo descartado se anota con su condición de
+│                      reevaluación o la discusión se reabre cada mes) +
+│                      arrancar-angosto-antes-de-ensanchar (separar el PARAGUAS
+│                      —todo lo que se vende, amplio, es el ROI— de la CUÑA
+│                      visible —UNA sola cosa que se muestra una y otra vez—.
+│                      El error es hacer la cuña tan ancha como el paraguas
+│                      "para no perder clientes", y el resultado es el opuesto:
+│                      nadie puede terminar "ah, vos sos el de ___". La cuña es
+│                      la PUERTA, no el catálogo: angosto para entrar, ancho para
+│                      facturar. El instinto de variar llega mucho antes de que
+│                      el mercado se sature —ese cansancio interno es la trampa—;
+│                      se repite con muchos ángulos sobre UN sistema-bandera y se
+│                      ensancha por señal escrita, no por aburrimiento).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
