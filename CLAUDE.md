@@ -402,7 +402,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      frames congela las animaciones y una geometría de modal
 │                      parece rota, y el ROL de la sesión decidiendo qué podés
 │                      ver —con `agent` el composer roto ni se renderiza—).
-│                      Tier 24 — Sitio + catálogo + CMS para cliente PYME
+│                      Tier 26 — Sitio + catálogo + CMS para cliente PYME
 │                      (8, capturadas 2026-08-22 de un proyecto de 4 meses:
 │                      web pública + catálogo + panel + chatbot, Next.js 15 +
 │                      Supabase + Vercel). Es la vertical que faltaba: hasta
