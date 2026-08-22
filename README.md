@@ -125,7 +125,7 @@ Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, T
 ├── .agent/
 │   └── skills/
 │       ├── README.md          ← índice temático de las 140 skills
-│       └── <98 carpetas>/     una SKILL.md cada una
+│       └── <140 carpetas>/     una SKILL.md cada una
 ├── .githooks/
 │   └── pre-commit             Bloquea commits directos en main (ver abajo)
 ├── memory/
