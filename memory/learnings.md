@@ -55,3 +55,51 @@ Lecciones aprendidas de proyectos reales. Se agrega aqui cada vez que se descubr
 
 - **Air Canada:** Bot prometio descuento por duelo que no existia → lawsuit. LECCION: el bot NUNCA hace compromisos vinculantes.
 - **Chevy Dealership:** Bot confirmo compra de Tahoe por $1 sin guardrails de precio. LECCION: SIEMPRE validar rangos de precio.
+
+## CRM de Josué — el Pipeline rompía con las etapas propias (2026-07-15)
+
+**Síntoma:** creabas una etapa en /settings, arrastrabas una tarjeta hacia ella y la
+tarjeta volvía sola a su lugar. Cero mensajes. El vendedor concluye "no funciona".
+
+**Causa raíz — dos mitades, y la segunda es la que hace daño:**
+1. `app/(app)/pipeline/actions.ts` validaba contra `VALID_STAGES`, una lista fija con los
+   7 slugs del schema original. Pero /settings crea etapas con slug generado, así que la
+   lista rechazaba las etapas del propio cliente. Una lista hardcodeada de algo que el
+   usuario puede crear no es una validación: es una fecha de vencimiento.
+2. `PipelineBoard.tsx` tenía un **`catch {}` vacío** que revertía la tarjeta y se comía el
+   error. El bug era viejo; lo que lo volvió invisible fue el catch.
+
+**Reglas que dejamos:**
+- **Validar contra la fuente, no contra una copia.** Si el usuario puede crear/renombrar/
+  borrar algo, la lista válida se lee de la base (`select ... from stages where id = $1`).
+  Seguir validando: nunca pasar un id del cliente directo al UPDATE.
+- **Un `catch` que no muestra ni registra nada es un bug, no un manejo.** El catch se
+  reserva para el caso entendido (acá: fallo de transporte); los errores de negocio viajan
+  como `{ ok: false, error }`, que es el patrón del proyecto (`config-actions`,
+  `table-actions`, `BulkActionsBar`).
+- **Un tipo puede mentir igual que un dato.** `StageId` era la unión de los 7 slugs y se
+  sostenía sola porque las queries castean (`as Stage[]`): TypeScript nunca vio la etapa
+  que sí existía en la base, pero obligaba a un `as StageId` en cada borde — y ese cast
+  fue el que dejó pasar el `VALID_STAGES`. Si el dato es dinámico, el tipo es `string` y
+  la verdad la tiene la tabla + la FK.
+- **Derivar, no adivinar el slug.** El filtro "Solo con actividad" comparaba contra
+  `"nuevo"` a mano. Funcionaba, pero se volvía un no-op silencioso si alguien renombraba
+  esa etapa. Ahora la etapa de entrada se deriva del menor `sort`
+  (`lib/leads/activity.ts`). Tampoco sirve `sort === 1`: los sort son datos que
+  `moveStage` intercambia, no un contrato.
+
+**Escala:** el tablero renderizaba 649 tarjetas en una columna (79.886 px = 143 pantallas).
+Fix: cap de 25 por columna con "Ver más" + el toggle "Solo con actividad" de /leads. El
+contador del encabezado cuenta SIEMPRE el total real (649): si el número dependiera del
+cap, el tablero mentiría sobre cuánto hay en juego.
+
+**Gotcha de @dnd-kit (costó un ciclo):** `useDraggable` devuelve `listeners` que YA
+incluye un `onKeyDown` — es el activador del KeyboardSensor. Declarar un `onKeyDown`
+propio después de `{...listeners}` lo pisa y el drag por teclado deja de levantar, en
+silencio. Hay que encadenarlos (`listeners?.onKeyDown?.(e)` y después lo propio). Además
+dnd-kit ya pone `role="button"`, `tabindex` y anuncia "presioná espacio para levantar":
+sin KeyboardSensor registrado esa promesa es falsa.
+
+**Método:** el bug se confirmó contra la base con `pg` (nunca el MCP de Supabase) y se
+probó en el navegador creando una etapa real, arrastrando, y verificando con un `select`
+que el `stage_id` persistió — la UI optimista miente por diseño, la base no.

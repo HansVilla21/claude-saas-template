@@ -16,7 +16,7 @@ Hola, voy a iniciar un proyecto nuevo de SaaS y quiero usar como base mi templat
 Hacé lo siguiente, en este orden:
 
 1. Cloná el repo `https://github.com/HansVilla21/claude-saas-template.git` en esta carpeta.
-2. Leé `CLAUDE.md`, `README.md` y `.agent/skills/README.md` del template para entender qué tengo disponible (agentes, las 119 skills de proceso, frameworks, estructura).
+2. Leé `CLAUDE.md`, `README.md` y `.agent/skills/README.md` del template para entender qué tengo disponible (agentes, las 141 skills de proceso, frameworks, estructura).
 2b. Corré `git config core.hooksPath .githooks` en el clon — el hook que bloquea commits en `main` no viaja solo y sin eso no corre.
 3. Antes de empezar a setup, hacéme SOLO estas 3 preguntas:
    - ¿Cuál es el nombre del proyecto? (slug en kebab-case, ej. `mi-saas`)
@@ -70,7 +70,7 @@ El reviewer tiene **veto**: audita antes de que el workflow llegue al founder.
 - `langchain-prompt-designer` — system prompts de agentes LangChain (CO-STAR + TIDD-EC + pre-mortem)
 - `prompt-reviewer` — checklist pre-deploy de la metodología Momentum
 
-### 119 skills de proceso (`.agent/skills/`)
+### 141 skills de proceso (`.agent/skills/`)
 
 **El activo más valioso del template.** Cada una salió de un problema real que ya costó tiempo, y documenta **el gotcha**, no solo el procedimiento.
 
@@ -78,15 +78,16 @@ El reviewer tiene **veto**: audita antes de que el workflow llegue al founder.
 
 | Familia | Cuántas | Las imprescindibles |
 |---|---|---|
-| Método y verificación | 10 | `verificar-funcionamiento-end-to-end`, `probar-camino-produccion-sin-efectos-externos`, `probar-migracion-contra-base-viva-con-rollback`, `verificar-base-del-pr-antes-de-mergear` |
-| Datos, RLS y seguridad de base | 7 | `detectar-escritura-filtrada-rls`, `rls-write-bloqueada-por-policy-desalineada` |
-| Multi-tenant y SaaS | 8 | `config-por-tenant-no-literal-en-el-flujo`, `catalogo-multifuncional-por-preset` |
+| Método y verificación | 12 | `verificar-funcionamiento-end-to-end`, `probar-camino-produccion-sin-efectos-externos`, `probar-migracion-contra-base-viva-con-rollback`, `verificar-base-del-pr-antes-de-mergear` |
+| Datos, RLS y seguridad de base | 12 | `detectar-escritura-filtrada-rls`, `rls-write-bloqueada-por-policy-desalineada` |
+| Multi-tenant y SaaS | 10 | `config-por-tenant-no-literal-en-el-flujo`, `catalogo-multifuncional-por-preset` |
 | Bot, n8n y LangChain | 16 | `n8n-workflow-build-script`, `bot-handoff-system-end-to-end` |
-| WhatsApp, webhooks e integraciones | 12 | `bsp-media-expira-archivar-propio`, `webhook-fanout-sin-reconciliacion` |
-| UI, UX y frontend | 18 | `auditar-responsive-midiendo`, `acciones-en-lote-seguras` |
+| WhatsApp, webhooks e integraciones | 17 | `bsp-media-expira-archivar-propio`, `webhook-fanout-sin-reconciliacion` |
+| UI, UX y frontend | 21 | `auditar-responsive-midiendo`, `acciones-en-lote-seguras` |
 | Números, dinero y tiempo | 5 | `porcentaje-necesita-minimo-muestra`, `inicio-dia-timezone-fija` |
 | Sitio, catálogo y CMS para PYME | 8 | `auditar-datos-antes-de-programar-features`, `chatbot-web-tools-sobre-datos-vivos`, `supabase-free-se-pausa-y-tumba-el-sitio` |
-| Auth y deploy | 3 | `deploy-seguro-vercel-preview-prod` |
+| Auth y deploy | 7 | `deploy-seguro-vercel-preview-prod` |
+| Entregar el proyecto | 1 | `reporte-de-traspaso-del-proyecto` |
 | Estrategia, marca y oferta | 8 | `arrancar-angosto-antes-de-ensanchar`, `filtro-de-esencia-de-marca`, `matar-el-olor-a-ia` |
 | Ejecución y modo de trabajo del founder | 3 | `tarjeta-de-hoy-una-sola-cosa`, `perfil-de-operador-del-founder`, `archivar-en-vez-de-borrar` |
 
@@ -123,8 +124,8 @@ Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, T
 │   └── skills/                62 skills de Claude Code (slash commands)
 ├── .agent/
 │   └── skills/
-│       ├── README.md          ← índice temático de las 119 skills
-│       └── <98 carpetas>/     una SKILL.md cada una
+│       ├── README.md          ← índice temático de las 141 skills
+│       └── <141 carpetas>/     una SKILL.md cada una
 ├── .githooks/
 │   └── pre-commit             Bloquea commits directos en main (ver abajo)
 ├── memory/
