@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**141 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**143 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -51,6 +51,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `datos-reales-vs-seed-demo` | Cuando llega el dato real: **borrar** los agregados sembrados, cazar los fallbacks tipo `?? 47`, blindar `db:seed` |
 | `rol-aislado-cartera-rls` | Rol que ve solo su cartera. El bug a cazar es la "cola abierta" que expone las carteras privadas — excluirlas del SELECT **y** del UPDATE |
 | `importacion-con-lote-deshacible` | `import_batch_id`: deshacer por `created_at` se lleva lo que entró por el formulario y los webhooks en la misma ventana |
+| `supabase-storage-borra-en-silencio` | `storage.remove()` devuelve `error: null, data: []` sin policy de SELECT: subir funciona y borrar no. Más el índice único parcial que se viola **por el camino**, no por el destino |
 
 ## 🏢 Multi-tenant y SaaS
 
@@ -137,6 +138,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `manual-de-ayuda-dentro-del-producto` | El manual vive en `/ayuda` y se **lee de las pantallas reales**, no de memoria. Contenido como dato tipado; el enlace no pasa por el gate del nav |
 | `construir-landings-cliente` | 3 landings de conversión sobre el material real del cliente: blueprint, autoridad por landing, audio-testimonios, subdominios DNS-only |
 | `boton-llamar-softphone-vs-telefono` | `tel:` en Mac se lo queda FaceTime. Los softphones registran `callto:`, que cae directo sin configurar nada |
+| ⭐ `portar-el-diseno-no-interpretarlo` | Si te pasaron un diseño, el trabajo no es diseñar: es **portar**. Grepear las etiquetas y construir con tu estética cuesta la pantalla entera — y cada superficie del handoff puede traer su propio sistema |
 
 ## 📊 Números, dinero y tiempo
 
