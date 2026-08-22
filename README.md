@@ -16,7 +16,8 @@ Hola, voy a iniciar un proyecto nuevo de SaaS y quiero usar como base mi templat
 Hacé lo siguiente, en este orden:
 
 1. Cloná el repo `https://github.com/HansVilla21/claude-saas-template.git` en esta carpeta.
-2. Leé `CLAUDE.md` y `README.md` del template para entender qué tengo disponible (agentes, skills, frameworks, estructura).
+2. Leé `CLAUDE.md`, `README.md` y `.agent/skills/README.md` del template para entender qué tengo disponible (agentes, las 83 skills de proceso, frameworks, estructura).
+2b. Corré `git config core.hooksPath .githooks` en el clon — el hook que bloquea commits en `main` no viaja solo y sin eso no corre.
 3. Antes de empezar a setup, hacéme SOLO estas 3 preguntas:
    - ¿Cuál es el nombre del proyecto? (slug en kebab-case, ej. `mi-saas`)
    - En 1-2 líneas, ¿qué es y para quién?
@@ -44,7 +45,7 @@ Eso es todo. Claude clona el madre, te hace 3 preguntas, prepara la estructura d
 
 ## Qué incluye el template
 
-### 12 agentes (`.claude/agents/`)
+### 17 agentes (`.claude/agents/`)
 
 **Técnicos (8):**
 - `arquitecto` — diseño técnico, decisiones de stack, modelo de datos
@@ -62,24 +63,34 @@ Eso es todo. Claude clona el madre, te hace 3 preguntas, prepara la estructura d
 - `pain-discovery` — mining de dolores reales en comunidades online
 - `billing-engineer` — Stripe / Onvo / sistema de créditos / afiliados
 
-### 12 skills genéricas de proceso (`.agent/skills/`)
+**Pipeline n8n (3):** `n8n-architect` → `n8n-builder` → `n8n-reviewer`
+El reviewer tiene **veto**: audita antes de que el workflow llegue al founder.
 
-**Estrategia (5):**
+**Prompting (2):**
+- `langchain-prompt-designer` — system prompts de agentes LangChain (CO-STAR + TIDD-EC + pre-mortem)
+- `prompt-reviewer` — checklist pre-deploy de la metodología Momentum
 
-- `creador-de-skills` (meta-skill)
-- `evaluar-icp`, `definir-avatar`, `descubrir-dolor`, `construir-oferta`
+### 83 skills de proceso (`.agent/skills/`)
 
-**Marketing (4):**
+**El activo más valioso del template.** Cada una salió de un problema real que ya costó tiempo, y documenta **el gotcha**, no solo el procedimiento.
 
-- `customer-research`, `email-sequence`, `launch-strategy`, `social-content`
+👉 **Índice temático completo: [`.agent/skills/README.md`](.agent/skills/README.md)**
 
-**Técnicas (3):**
+| Familia | Cuántas | Las imprescindibles |
+|---|---|---|
+| Método y verificación | 10 | `verificar-funcionamiento-end-to-end`, `probar-camino-produccion-sin-efectos-externos`, `probar-migracion-contra-base-viva-con-rollback`, `verificar-base-del-pr-antes-de-mergear` |
+| Datos, RLS y seguridad de base | 7 | `detectar-escritura-filtrada-rls`, `rls-write-bloqueada-por-policy-desalineada` |
+| Multi-tenant y SaaS | 8 | `config-por-tenant-no-literal-en-el-flujo`, `catalogo-multifuncional-por-preset` |
+| Bot, n8n y LangChain | 16 | `n8n-workflow-build-script`, `bot-handoff-system-end-to-end` |
+| WhatsApp, webhooks e integraciones | 12 | `bsp-media-expira-archivar-propio`, `webhook-fanout-sin-reconciliacion` |
+| UI, UX y frontend | 18 | `auditar-responsive-midiendo`, `acciones-en-lote-seguras` |
+| Números, dinero y tiempo | 5 | `porcentaje-necesita-minimo-muestra`, `inicio-dia-timezone-fija` |
+| Auth y deploy | 3 | `deploy-seguro-vercel-preview-prod` |
+| Estrategia y oferta | 4 | `evaluar-icp`, `construir-oferta` |
 
-- `async-job-pattern` — trigger desde UI → job en DB → worker → polling → resultado. Incluye idempotencia y refund de créditos en fallo.
-- `apify-integration-pattern` — fetch directo (sin SDK por bug de proxy-agent en Vercel), normalización segura de valores nulos/-1, ScraperError tipado, estimación de costos.
-- `debugging-silent-errors` — patrón de `console.error` estructurado en catch blocks, cómo reproducir antes de instrumentar, mapeo de códigos de error de Postgres/Supabase.
+**El hilo común de las que más duelen:** casi todas existen porque algo *parecía funcionar y no funcionaba*. Un `update` bajo RLS que afecta 0 filas y responde éxito. Un nodo que reporta `success` sin escribir. Un PR que dice `MERGED` y cuyo código nunca llegó a producción. Un CDN que borra los archivos a los 7 días sin avisar.
 
-### 50+ skills de Claude Code (`.claude/skills/`)
+### 62 skills de Claude Code (`.claude/skills/`)
 
 | Suite | Skills |
 |---|---|
@@ -106,21 +117,42 @@ Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, T
 ```
 .
 ├── .claude/
-│   ├── agents/                12 agentes reusables
-│   └── skills/                50+ skills de Claude Code
+│   ├── agents/                17 agentes reusables
+│   └── skills/                62 skills de Claude Code (slash commands)
 ├── .agent/
-│   └── skills/                9 skills de proceso genéricas
+│   ├── README.md              ← índice temático de las skills de proceso
+│   └── skills/                83 skills de proceso
+├── .githooks/
+│   └── pre-commit             Bloquea commits directos en main (ver abajo)
 ├── memory/
 │   ├── orquestacion.md        Patrón de routing en lenguaje natural
 │   └── frameworks/
 │       └── hormozi.md         Biblia de oferta/posicionamiento
+├── knowledge/                 Currículum de construcción n8n + metodología
+│                              Momentum + workflows de referencia para DUPLICAR
+├── docs/training/             11 módulos de entrenamiento (filosofía →
+│                              arquitectura → prompts → workflow → entrega)
+├── clients/                   Registro maestro de clientes: lo comercial y lo
+│                              técnico juntos (ver clients/README.md)
 ├── inputs/repos-referencia/   10 repos de referencia
-├── templates/                 Plantillas reusables
+├── templates/                 Plantillas reusables (onboarding, correos de Auth)
 ├── proyectos/                 ← Subproyectos (gitignored, repos independientes)
-│   └── hookly/                  primer proyecto
+│   └── hookly/                  SaaS de análisis viral de reels
+├── crm-v2/                    ← Momentum AI CRM (gitignored, repo independiente).
+│                              El proyecto que produjo la mayoría de las skills
 ├── CLAUDE.md                  Instrucciones globales para Claude Code
 └── README.md                  Este archivo
 ```
+
+### ⚠️ Un paso de instalación, una vez por clon
+
+`.git/hooks/` no se versiona, así que el hook que bloquea los commits directos a `main` **no viaja solo**. Después de clonar:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Sin eso el hook existe en el repo, se lee, da confianza y **no corre**. Verificá con `git config core.hooksPath` (debe decir `.githooks`). Ver la skill `enforcement-con-hook-no-con-regla`.
 
 ---
 
@@ -144,6 +176,7 @@ git init
 
 | Proyecto | Path | Estado |
 |---|---|---|
+| **Momentum AI CRM** | `crm-v2/` | **En producción con clientes reales** — CRM SaaS multi-tenant + bot de WhatsApp. Es la fuente de la mayoría de las 83 skills de proceso |
 | Hookly | `proyectos/hookly/` | En producción ([hooklylab.com](https://hooklylab.com)) — SaaS análisis viral de reels |
 
 ---
