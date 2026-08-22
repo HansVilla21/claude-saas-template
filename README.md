@@ -78,18 +78,21 @@ El reviewer tiene **veto**: audita antes de que el workflow llegue al founder.
 
 | Familia | Cuántas | Las imprescindibles |
 |---|---|---|
-| Método y verificación | 12 | `verificar-funcionamiento-end-to-end`, `probar-camino-produccion-sin-efectos-externos`, `probar-migracion-contra-base-viva-con-rollback`, `verificar-base-del-pr-antes-de-mergear` |
-| Datos, RLS y seguridad de base | 12 | `detectar-escritura-filtrada-rls`, `rls-write-bloqueada-por-policy-desalineada` |
+| Método y verificación | 16 | `verificar-funcionamiento-end-to-end`, `probar-camino-produccion-sin-efectos-externos`, `probar-migracion-contra-base-viva-con-rollback`, `verificar-base-del-pr-antes-de-mergear` |
+| Datos, RLS y seguridad de base | 13 | `detectar-escritura-filtrada-rls`, `rls-write-bloqueada-por-policy-desalineada` |
 | Multi-tenant y SaaS | 10 | `config-por-tenant-no-literal-en-el-flujo`, `catalogo-multifuncional-por-preset` |
 | Bot, n8n y LangChain | 16 | `n8n-workflow-build-script`, `bot-handoff-system-end-to-end` |
 | WhatsApp, webhooks e integraciones | 17 | `bsp-media-expira-archivar-propio`, `webhook-fanout-sin-reconciliacion` |
-| UI, UX y frontend | 21 | `auditar-responsive-midiendo`, `acciones-en-lote-seguras` |
-| Números, dinero y tiempo | 5 | `porcentaje-necesita-minimo-muestra`, `inicio-dia-timezone-fija` |
+| UI, UX y frontend | 23 | `auditar-responsive-midiendo`, `acciones-en-lote-seguras` |
+| Números, dinero y tiempo | 10 | `porcentaje-necesita-minimo-muestra`, `inicio-dia-timezone-fija` |
 | Sitio, catálogo y CMS para PYME | 8 | `auditar-datos-antes-de-programar-features`, `chatbot-web-tools-sobre-datos-vivos`, `supabase-free-se-pausa-y-tumba-el-sitio` |
-| Auth y deploy | 7 | `deploy-seguro-vercel-preview-prod` |
+| SaaS con motor de IA generativa | 8 | `causa-raiz-mala-calidad-ia-esta-en-el-input`, `motor-de-recetas-de-prompts-para-imagen`, `probar-motor-ia-fuera-de-la-app` |
+| Auth y deploy | 8 | `deploy-seguro-vercel-preview-prod` |
 | Entregar el proyecto | 1 | `reporte-de-traspaso-del-proyecto` |
 | Estrategia, marca y oferta | 8 | `arrancar-angosto-antes-de-ensanchar`, `filtro-de-esencia-de-marca`, `matar-el-olor-a-ia` |
 | Ejecución y modo de trabajo del founder | 3 | `tarjeta-de-hoy-una-sola-cosa`, `perfil-de-operador-del-founder`, `archivar-en-vez-de-borrar` |
+
+> Los números salen del índice temático, no se escriben a mano. `node scripts/verificar-indice-de-skills.mjs` avisa si algún contador o alguna familia dejó de cuadrar (y con `--arreglar` corrige la tabla).
 
 **El hilo común de las que más duelen:** casi todas existen porque algo *parecía funcionar y no funcionaba*. Un `update` bajo RLS que afecta 0 filas y responde éxito. Un nodo que reporta `success` sin escribir. Un PR que dice `MERGED` y cuyo código nunca llegó a producción. Un CDN que borra los archivos a los 7 días sin avisar.
 
