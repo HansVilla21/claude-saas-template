@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**98 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**99 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -24,6 +24,7 @@ Cómo saber que algo funciona de verdad. Si vas a decir "listo", empezá acá.
 | `debugging-silent-errors` | `console.error` estructurado, reproducir antes de instrumentar, códigos de error de Postgres/Supabase |
 | `worktree-para-no-pisar-el-checkout` | Trabajar cuando otra persona está en el mismo repo (un commit quedó huérfano) |
 | `mesa-arquitectonica-multiagente` | Panel multi-agente + jueces adversariales para decisiones arquitectónicas grandes |
+| ⭐ `cosechas-en-paralelo-sin-pisarse` | N sesiones a la vez sobre el mismo repo reclaman el mismo número y rompen el conteo. El número se reclama en el PR, el conteo se **deriva**, y el índice se **verifica** contra el disco |
 | `creador-de-skills` | La meta-skill: cuándo y cómo capturar un proceso |
 
 ## 🗄️ Datos, RLS y seguridad de base

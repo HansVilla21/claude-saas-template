@@ -16,7 +16,7 @@ Hola, voy a iniciar un proyecto nuevo de SaaS y quiero usar como base mi templat
 Hacé lo siguiente, en este orden:
 
 1. Cloná el repo `https://github.com/HansVilla21/claude-saas-template.git` en esta carpeta.
-2. Leé `CLAUDE.md`, `README.md` y `.agent/skills/README.md` del template para entender qué tengo disponible (agentes, las 98 skills de proceso, frameworks, estructura).
+2. Leé `CLAUDE.md`, `README.md` y `.agent/skills/README.md` del template para entender qué tengo disponible (agentes, las 99 skills de proceso, frameworks, estructura).
 2b. Corré `git config core.hooksPath .githooks` en el clon — el hook que bloquea commits en `main` no viaja solo y sin eso no corre.
 3. Antes de empezar a setup, hacéme SOLO estas 3 preguntas:
    - ¿Cuál es el nombre del proyecto? (slug en kebab-case, ej. `mi-saas`)
@@ -70,7 +70,7 @@ El reviewer tiene **veto**: audita antes de que el workflow llegue al founder.
 - `langchain-prompt-designer` — system prompts de agentes LangChain (CO-STAR + TIDD-EC + pre-mortem)
 - `prompt-reviewer` — checklist pre-deploy de la metodología Momentum
 
-### 98 skills de proceso (`.agent/skills/`)
+### 99 skills de proceso (`.agent/skills/`)
 
 **El activo más valioso del template.** Cada una salió de un problema real que ya costó tiempo, y documenta **el gotcha**, no solo el procedimiento.
 
@@ -78,7 +78,7 @@ El reviewer tiene **veto**: audita antes de que el workflow llegue al founder.
 
 | Familia | Cuántas | Las imprescindibles |
 |---|---|---|
-| Método y verificación | 10 | `verificar-funcionamiento-end-to-end`, `probar-camino-produccion-sin-efectos-externos`, `probar-migracion-contra-base-viva-con-rollback`, `verificar-base-del-pr-antes-de-mergear` |
+| Método y verificación | 11 | `verificar-funcionamiento-end-to-end`, `probar-camino-produccion-sin-efectos-externos`, `probar-migracion-contra-base-viva-con-rollback`, `verificar-base-del-pr-antes-de-mergear` |
 | Datos, RLS y seguridad de base | 7 | `detectar-escritura-filtrada-rls`, `rls-write-bloqueada-por-policy-desalineada` |
 | Multi-tenant y SaaS | 8 | `config-por-tenant-no-literal-en-el-flujo`, `catalogo-multifuncional-por-preset` |
 | Bot, n8n y LangChain | 16 | `n8n-workflow-build-script`, `bot-handoff-system-end-to-end` |
@@ -123,8 +123,8 @@ Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, T
 │   └── skills/                62 skills de Claude Code (slash commands)
 ├── .agent/
 │   └── skills/
-│       ├── README.md          ← índice temático de las 98 skills
-│       └── <98 carpetas>/     una SKILL.md cada una
+│       ├── README.md          ← índice temático de las 99 skills
+│       └── <99 carpetas>/     una SKILL.md cada una
 ├── .githooks/
 │   └── pre-commit             Bloquea commits directos en main (ver abajo)
 ├── memory/

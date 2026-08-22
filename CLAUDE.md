@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        98 skills de proceso reusables:
+│   └── skills/        99 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -691,6 +691,28 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        verificá que sea del cliente — se le pidieron "las
 │                        reseñas de Google" dos reportes seguidos siendo que
 │                        son públicas y tomarlas era trabajo nuestro).
+│                      Tier 27 — Cosechar en paralelo (1, capturada 2026-08-22
+│                      de la propia madrugada de 4 cosechas simultáneas):
+│                      cosechas-en-paralelo-sin-pisarse (⭐ cross-project:
+│                      correr N sesiones a la vez sobre el mismo repo hace que
+│                      todas reclamen el MISMO número de tier —pasó: tres PRs
+│                      pidiendo el 24— y que el conteo declarado quede mal en
+│                      todas, porque cada una calculó "lo que había + lo mío" y
+│                      lo que había cambió debajo. Ninguna sesión se equivocó:
+│                      el defecto es del índice, que asume UN escritor. Lo peor
+│                      no es el conflicto ruidoso sino el que git resuelve solo
+│                      —dos bloques en puntos distintos hacen auto-merge y el
+│                      número de arriba queda mintiendo—. Las 3 reglas: el
+│                      número se reclama en el PR (gana quien lo abrió primero)
+│                      no en el archivo; el conteo se DERIVA con `ls | wc -l`
+│                      después de cada merge, nunca de memoria; y el índice se
+│                      VERIFICA contra el disco por grep —chequeo que además
+│                      atrapa un nombre partido en dos líneas por el ancho de
+│                      columna, que deja de resolver—. Y al resolver: en un
+│                      índice acumulativo la resolución correcta es `ours +
+│                      theirs` con el contador recalculado, nunca elegir un
+│                      lado —eso borra el trabajo del otro y el archivo sigue
+│                      siendo válido, así que nadie se entera—).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
