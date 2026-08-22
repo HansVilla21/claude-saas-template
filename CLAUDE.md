@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        118 skills de proceso reusables:
+│   └── skills/        140 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -794,6 +794,180 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      `PROTECTED_PREFIXES` en local y REVERTIR — el revert es
 │                      parte del cambio; Google GIS no corre en un preview de
 │                      Vercel).
+│                      Tier 29 — La cosecha del CRM de Josué (13, capturadas entre
+│                      2026-07-15 y 2026-08-05, todas construidas y EN VIVO en un
+│                      CRM de asesor de inversiones): prospai-webhook-crm (LinkedIn
+│                      → CRM: los 16 eventos, el payload de prueba con placeholders
+│                      literales que hace fallar el test, webhook no editable →
+│                      crear-antes-de-borrar, guardar crudo antes de validar) +
+│                      fathom-transcripciones-al-crm (el body CRUDO antes de parsear
+│                      —re-serializar rompe la firma y parece que el proveedor firma
+│                      mal—; el webhook-id ES la clave de idempotencia; 200 a casi
+│                      todo porque reintentar lo que fallás VOS duplica; TRES estados
+│                      y no dos, porque un secreto de webhook solo se prueba
+│                      RECIBIENDO uno; preguntá por el HECHO (`is_won`) y no por el
+│                      NOMBRE, que el cliente lo renombra; 🔴 ON DELETE CASCADE en la
+│                      tabla de eventos = el botón de "quitar" borra el historial
+│                      entero; y el grande: EL CÓDIGO QUE YA EXISTE PUEDE SER UNA
+│                      FICCIÓN —ese webhook tenía CINCO invenciones y nadie lo notó
+│                      porque nunca corrió) + manychat-instagram-al-crm (IG → CRM SIN
+│                      la API de ManyChat —esa es pull y cuesta; se usa "Solicitud
+│                      externa", push, Pro estándar—; el disparador "Nuevo contacto"
+│                      YA es una-vez-por-persona y mata el reflejo del tag; el secret
+│                      se INVENTA y va idéntico en Vercel + ManyChat, y una env nueva
+│                      NO aplica sin redeploy; el reflejo a matar: el receptor YA
+│                      existía y estaba desplegado —grep + curl (401=vivo) antes de
+│                      reconstruir) + meta-ads-conexion-oficial (Standard Access
+│                      ALCANZA para multi-negocio —probado contra la API— pero un
+│                      tercero NO puede autorizar tu app, así que NO hay OAuth: el
+│                      cliente comparte su cuenta y tu token la lee; la cuenta se
+│                      FIJA —un token ve VARIAS y podés mostrarle a un cliente el
+│                      gasto de un tercero—; el gasto viene en la MONEDA y la ZONA de
+│                      la cuenta y ninguna falla ruidosamente; debug_token TE DICE
+│                      cuándo vence; y el hoyo que hay que NOMBRAR: el gasto no trae
+│                      los leads, y un "Leads: 0" al lado de la inversión le echa la
+│                      culpa a las campañas de un agujero propio) +
+│                      agendamiento-google-calendar (Calendly propio sobre Google
+│                      Calendar: lo que lo mata en silencio es dejar la app en
+│                      "Testing" —el refresh token se vence a los 7 días y la agenda
+│                      muere un martes cualquiera—; el cartel de "app no verificada"
+│                      se dispara por los scopes de CADA REQUEST y no del proyecto;
+│                      el token NO depende del dominio; sin conectar NO se ofrece ni
+│                      un horario, porque una tabla vacía de citas se lee como "todo
+│                      libre"; freeBusy con error TIRA, nunca devuelve []) +
+│                      key-de-ia-en-configuracion (la API key del proveedor se pega
+│                      en Configuración y vive CIFRADA en la base, no en el .env:
+│                      destraba la espera de la cuenta del cliente y deja el
+│                      multi-negocio servido; el modelo NO se hardcodea, se le
+│                      pregunta a /v1/models; la puerta `tieneSustancia()` corta
+│                      ANTES de llamar, porque un modelo sin material no dice "no sé",
+│                      inventa; y el gotcha que casi la mata: el texto más largo del
+│                      registro era el TEMPLATE DEL PROPIO CLIENTE) +
+│                      rol-aislado-cartera-rls (rol que ve SOLO su cartera; el bug a
+│                      cazar es la "cola abierta" que expone carteras privadas —hay
+│                      que excluirlas del SELECT Y del UPDATE—) +
+│                      valor-derivado-pendiente-config (comisión/valor calculado de
+│                      una tabla editable: SIN fallback —si falta la config el hecho
+│                      entra igual y el valor queda `pendiente_config` + alerta, se
+│                      congela al configurar; nunca inventar el número) +
+│                      programar-envios-cron-vercel (⚠️ el gotcha decide la feature:
+│                      HOBBY corre el cron 1×/día y NO a la hora exacta → en este
+│                      proyecto la feature se QUITÓ en vez de mentirle al cliente) +
+│                      datos-reales-vs-seed-demo (cuando el prototipo empieza a
+│                      recibir datos reales: BORRAR los agregados sembrados en vez de
+│                      ignorarlos, cazar los fallbacks hardcodeados tipo `?? 47`,
+│                      blindar db:seed para que no borre el trabajo del cliente) +
+│                      demo-con-datos-falsos (capturada después de casi dejar a dos
+│                      prospectos REALES marcados como que habían comprado $38.500 y
+│                      $62.000: las filas de demo son inventadas y rotuladas con
+│                      prefijo visible, NUNCA registros del cliente; el deshacer se
+│                      escribe ANTES del cambio; email y teléfono van en NULL, porque
+│                      un `@ejemplo.test` es un rebote duro contra el dominio del
+│                      cliente y la reputación de envío NO se arregla con un script) +
+│                      verificar-frontend-sin-ver (⭐ pedirle el CSS al server y listar
+│                      qué clases generó Tailwind DE VERDAD —sin sesión ni captura—:
+│                      el JIT se atrasa con clases y arbitrarios NUEVOS y deja el CSS
+│                      congelado con clases zombi; `min-width:auto` de flexbox le gana
+│                      a tu `w-80` y hace que las dimensiones las decida el TEXTO;
+│                      `toLocaleTimeString` rompe la hidratación por un espacio
+│                      invisible que cambia según la versión de ICU. Nació de 3 rondas
+│                      de "no me convence" con el diseño bien) +
+│                      construir-landings-cliente (3 landings de conversión sobre el
+│                      material real del cliente: blueprint, autoridad por landing,
+│                      audio-testimonios, subdominios en Cloudflare DNS-only).
+│                      Tier 30 — Entregar sin que el sistema muera con vos (9,
+│                      capturadas 2026-08-22 de la cosecha del CRM de Josué; son los
+│                      aprendizajes de agosto que nunca se habían escrito):
+│                      ⭐ subir-archivos-grandes-sin-pasar-por-el-servidor (Vercel
+│                      CORTA el cuerpo de todo request a 4.5 MB, límite duro de
+│                      plataforma en Hobby Y Pro, aplicado en el edge ANTES de tu
+│                      función: por eso `bodySizeLimit` de next.config no salva nada y
+│                      tu validación de tamaño NUNCA corre —el usuario no ve tu
+│                      mensaje porque el código no arranca—; el flujo correcto son 3
+│                      pasos desde el primer commit: el server FIRMA (createSigned
+│                      UploadUrl, gate intacto, ruta decidida por el server), el
+│                      navegador sube DIRECTO al storage, y recién ahí se registra el
+│                      metadato; en local NO se reproduce, así que todo "ya funciona"
+│                      probado con pnpm dev es falso) + ⭐ soft-delete-bloqueado-por-rls
+│                      (la papelera que no borra: poner `deleted_at` desde la sesión
+│                      VIOLA la RLS hasta para el admin y aun con `with check (true)`,
+│                      porque al borrar la fila deja de satisfacer la policy de SELECT
+│                      —la estás haciendo desaparecer para vos mismo—; el fix es
+│                      service role gateado por requireAdmin, que es como ya funciona
+│                      el "restaurar"; se confirma impersonando contra la base con RLS
+│                      on/off, JAMÁS por la UI, que refresca optimista y miente; y
+│                      arreglá la FUNCIÓN, no el botón: el mismo bug tenía dos puertas
+│                      reportadas como bugs distintos) + ⭐ manual-de-ayuda-dentro-del-
+│                      producto (el manual VIVE en el producto —ruta /ayuda— y su
+│                      contenido se LEE de las pantallas reales, no de memoria: un
+│                      manual que miente es peor que ninguno porque el usuario deja de
+│                      confiar al primer error; contenido como DATO tipado en
+│                      lib/help/content/*, la UI solo dibuja, con un bloque `botones`
+│                      que es lo que la gente busca parada frente a la pantalla; uno
+│                      solo para todos los roles —filtrar por rol duplica el
+│                      mantenimiento y rompe la llamada telefónica en la que el admin
+│                      le explica a su asistente—; el enlace NO pasa por el gate del
+│                      nav, porque el rol con menos permisos es el que más lo
+│                      necesita, y en mobile va un "?" o el manual no existe donde se
+│                      abre. 19 pantallas → 24 artículos; el inventario destapó un bug
+│                      real) + ⭐ trabajar-en-la-cuenta-del-cliente (su GitHub, su
+│                      Vercel: Windows guarda UNA credencial por host y actualizarla
+│                      en otro proyecto te saca del repo del cliente con un
+│                      "Repository not found" que suena a que te lo quitaron; una
+│                      regla global `insteadOf` reescribe TODA URL SSH a HTTPS y por
+│                      eso el remoto en `git@github.com:` no sirve —la forma
+│                      `ssh://git@github.com/` con BARRA la esquiva sin borrar la
+│                      regla—; y Vercel Hobby NO soporta colaboración: los deploys de
+│                      git se BLOQUEAN si el autor del commit no es el dueño de la
+│                      cuenta, así que `git push` NO deploya y el fallo es MUDO —un
+│                      commit quedó BLOCKED y nadie se dio cuenta—; se deploya por API
+│                      con gitSource y el script VERIFICA el dominio; el uso comercial
+│                      en Hobby está fuera de términos: se le dice al cliente y decide
+│                      él) + probar-todas-las-ramas-no-solo-la-feliz (`frío` VA CON
+│                      TILDE: un CHECK de Postgres vs un literal sin tilde hacía que
+│                      los leads C y D reventaran con 500 en producción y se PERDIERAN
+│                      los datos de la persona, mientras A y B guardaban bien —y la
+│                      primera prueba, hecha con el perfil de capital alto, dio
+│                      verde—; una prueba verde sobre una rama es evidencia sobre esa
+│                      rama y nada más: una prueba POR rama, verificada contra la
+│                      base, y los valores permitidos como tipo literal para que los
+│                      agarre el compilador. Segunda mitad: NO probar endpoints con
+│                      acentos usando curl desde la consola de Windows —rompe el UTF-8
+│                      antes de salir a la red y parece un bug de codificación de la
+│                      app— usar Node con Buffer.from(json,"utf8")) +
+│                      ⭐ reporte-de-traspaso-del-proyecto (un repo NO es un traspaso:
+│                      el código dice QUÉ hace el sistema, no de quién es cada cuenta,
+│                      por qué está así, ni qué falta y de quién depende; 13 secciones
+│                      probadas en un CRM real, con la #8 —accesos: dueño, quién paga,
+│                      qué vence— como la que salva el proyecto; los pendientes se
+│                      PARTEN por dueño (bloqueados por el CLIENTE / técnicos /
+│                      comerciales) o los 20 se leen como deuda tuya; cero secretos,
+│                      solo nombres de variables y dónde viven; y escribirlo ENCUENTRA
+│                      bugs, porque documentar obliga a mirar) +
+│                      importacion-con-lote-deshacible (`import_batch_id`: deshacer
+│                      por `created_at` se lleva por delante lo que entró por el
+│                      formulario y los webhooks en la misma ventana; un uuid por
+│                      corrida —el MISMO para todas las tandas— hace el lote
+│                      nombrable: "Ver solo estos" es la mitad más usada, el deshacer
+│                      va a PAPELERA, gateado a admin e idempotente, y las filas
+│                      viejas quedan SIN lote a propósito porque inventarles uno sería
+│                      fabricar un hecho) + dominio-que-envia-pero-no-recibe (enviar y
+│                      recibir son DOS sistemas: SPF/DKIM habilitan enviar, pero sin
+│                      MX el dominio NO recibe y cada respuesta a un boletín REBOTA
+│                      —el correo con más intención de compra del mes es justo el que
+│                      se pierde, y el proveedor no avisa porque su tablero está
+│                      verde—; se verifica en 30 segundos con nslookup -type=MX; se
+│                      presentan TRES opciones —reenvío gratis / casilla real /
+│                      bandeja en el sistema— y la tercera es DEV que se cotiza
+│                      aparte, no soporte; y se dice que los rebotes ya ocurridos no
+│                      se recuperan) + boton-llamar-softphone-vs-telefono (`tel:` en
+│                      una Mac se lo queda FaceTime; los softphones tipo Zoiper
+│                      registran `callto:`, que FaceTime no toca → cae directo sin que
+│                      el cliente configure nada; `tel:` se queda solo para mobile y
+│                      la decisión se toma DESPUÉS de montar, o hay desajuste de
+│                      hidratación; si aparece Skype, `sip:`; y decir que un enlace
+│                      abre el marcador y NO registra la llamada: eso es integración
+│                      telefónica y se cotiza).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
