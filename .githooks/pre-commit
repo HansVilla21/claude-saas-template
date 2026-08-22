@@ -1,0 +1,64 @@
+#!/bin/sh
+# ─────────────────────────────────────────────────────────────────────────────
+# Bloquea commits directos en main/master.
+#
+# POR QUÉ EXISTE (incidente real, CRM de Momentum, 2026-07-15): un cambio se
+# commiteó y pusheó directo a `main`, disparando un deploy a producción SIN
+# pasar por el preview. La regla ya estaba escrita en CLAUDE.md desde el
+# 2026-05-29 ("nunca push directo a main, todo vía PR + preview") — pero una
+# regla escrita depende de que alguien se acuerde. Esto no.
+#
+# Defensa en profundidad (filosofía del template):
+#   1. CLAUDE.md  → guía el comportamiento
+#   2. este hook  → enforcement determinístico   ← acá estás
+#   3. .gitignore → última línea de defensa
+#
+# Escapes legítimos (hay dos, y son a propósito):
+#   - Merges: `git merge` en main es normal (no se bloquea; ver MERGE_HEAD).
+#   - Emergencia (ej: revertir algo que ya está en prod):
+#         ALLOW_MAIN_COMMIT=1 git commit -m "..."
+#     Es explícito y deja rastro de que fue una decisión, no un descuido.
+#
+# INSTALACIÓN (una vez por clon — `.git/hooks/` NO se versiona, así que el
+# hook no viaja solo; sin esto el hook existe en el repo pero no corre):
+#     git config core.hooksPath .githooks
+#
+# Verificar:  git config core.hooksPath      → debe decir .githooks
+#
+# Ver la skill `.agent/skills/enforcement-con-hook-no-con-regla/SKILL.md`
+# ─────────────────────────────────────────────────────────────────────────────
+
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+
+# Un merge en curso no es un commit directo → dejarlo pasar.
+if [ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ]; then
+  exit 0
+fi
+
+case "$branch" in
+  main|master)
+    if [ "$ALLOW_MAIN_COMMIT" = "1" ]; then
+      echo "⚠️  Commit en '$branch' permitido por ALLOW_MAIN_COMMIT=1 (escape explícito)."
+      exit 0
+    fi
+    echo ""
+    echo "  ⛔  BLOQUEADO: estás commiteando directo en '$branch'."
+    echo ""
+    echo "  Política del proyecto: feature branch → PR → preview → merge."
+    echo "  Un commit acá puede disparar un deploy a PRODUCCIÓN sin validar."
+    echo ""
+    echo "  Qué hacer:"
+    echo "    git switch -c feat/<nombre>     # o fix/ · docs/ · refactor/"
+    echo "    git commit ...                  # y de ahí PR"
+    echo ""
+    echo "  Si ya commiteaste acá y querés mover el trabajo a una rama:"
+    echo "    git switch -c feat/<nombre>     # el commit se lleva la rama nueva"
+    echo ""
+    echo "  Emergencia real (ej: revertir algo que ya está en prod):"
+    echo "    ALLOW_MAIN_COMMIT=1 git commit ..."
+    echo ""
+    exit 1
+    ;;
+esac
+
+exit 0

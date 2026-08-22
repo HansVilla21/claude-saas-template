@@ -41,17 +41,49 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 ```
 .
 ├── .claude/
-│   ├── agents/        Agentes genéricos reusables (12):
+│   ├── agents/        Agentes genéricos reusables (17):
 │   │                  · técnicos (8): arquitecto, frontend-builder, backend-builder,
 │   │                    code-reviewer, debugger, security-auditor, penetration-tester,
 │   │                    orquestador (genérico)
 │   │                  · estrategia/SaaS (4): hormozi-strategist, saas-strategist,
 │   │                    pain-discovery, billing-engineer
-│   └── skills/        41 skills de Claude Code (slash commands): UI/UX (suite
-│                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
-│                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
+│   │                  · pipeline n8n (3): n8n-architect → n8n-builder → n8n-reviewer
+│   │                    (el reviewer tiene VETO; ver "Construcción de Workflows n8n")
+│   │                  · prompting (2): langchain-prompt-designer (system prompts de
+│   │                    agentes LangChain), prompt-reviewer (checklist pre-deploy)
+│   └── skills/        62 skills de Claude Code (slash commands), por familia:
+│                      · UI/UX y diseño (13): ui-ux-pro-max, ui-styling, design,
+│                        design-system, brand, brandkit, banner-design, slides,
+│                        emil-design-eng, taste-skill, minimalist-skill,
+│                        redesign-skill, soft-skill
+│                      · animación GSAP (7): gsap-core, gsap-timeline,
+│                        gsap-scrolltrigger, gsap-plugins, gsap-react,
+│                        gsap-performance, gsap-utils
+│                      · marketing y CRO (14): copywriting, customer-research,
+│                        product-marketing-context, marketing-psychology,
+│                        launch-strategy, social-content, email-sequence,
+│                        pricing-strategy, page-cro, onboarding-cro,
+│                        signup-flow-cro, paywall-upgrade-cro, meta-pixel-capi,
+│                        output-skill
+│                      · seguridad (12): owasp-security, supabase-pentest
+│                        (orquestador) + su suite: supabase-detect,
+│                        supabase-audit-rls, supabase-audit-authenticated,
+│                        supabase-audit-auth-config, supabase-audit-auth-signup,
+│                        supabase-audit-functions, supabase-audit-buckets-public,
+│                        supabase-evidence, supabase-report, supabase-help
+│                      · chatbot / n8n / prompting (10): momentum-architect,
+│                        momentum-prompt-gen, momentum-prompt-optimizer,
+│                        momentum-n8n-builder, momentum-workflow-variants,
+│                        n8n-workflow-audit, n8n-expression-validator,
+│                        n8n-langchain-prompts-rules,
+│                        n8n-postgres-prepared-statements,
+│                        langchain-agent-prompt-design
+│                      · infra y datos (6): chatbot-db-schema-supabase,
+│                        chatbot-manychat-supabase-multicanal,
+│                        vercel-domain-migration, onvo-setup,
+│                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        87 skills de proceso reusables:
+│   └── skills/        118 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -402,6 +434,174 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      frames congela las animaciones y una geometría de modal
 │                      parece rota, y el ROL de la sesión decidiendo qué podés
 │                      ver —con `agent` el composer roto ni se renderiza—).
+│                      Tier 24 — Ejecución y marca (7, capturadas 2026-08-22 del
+│                      sistema de contenido Content OS; ninguna es de contenido
+│                      en sí, todas son método transferible a cualquier proyecto):
+│                      tarjeta-de-hoy-una-sola-cosa (⭐ cuando el proyecto tiene
+│                      TODA la estrategia lista y CERO output: el bloqueo no es
+│                      falta de plan, es que abrir el proyecto exige DECIDIR.
+│                      Se reduce a `HOY.md` —una tarjeta ejecutable sin abrir
+│                      otro archivo ni elegir nada— + `COLA.md`, triggers de
+│                      rotación en lenguaje natural, umbral de reposición y un
+│                      GATE numérico de salida —N unidades publicadas— porque
+│                      el riesgo #1 es que "mejorar el sistema" reemplace a
+│                      producir) + perfil-de-operador-del-founder (⭐ el
+│                      `CLAUDE.md` documenta QUÉ se construye y nadie documenta
+│                      CÓMO responderle al humano que dirige; la corrección de
+│                      estilo o de ritmo que el founder hace DOS veces es una
+│                      regla que falta en un archivo, y mientras viva en el chat
+│                      se re-aprende cada sesión. Se llena por observación con
+│                      citas textuales, no por entrevista; incluye plantilla de
+│                      6 secciones y la separación dura entre lo operativo —va
+│                      al repo— y lo personal/clínico —vive fuera—) +
+│                      matar-el-olor-a-ia (catálogo de tells del texto generado
+│                      y cómo borrarlos SIN mover el claim: paralelismo negativo
+│                      "no es X, sino Y" con tolerancia cero, frases plantilla,
+│                      vocabulario de modelo, ritmo parejo, simetría de tres,
+│                      puntuación de máquina —crítico en mensajes de bot, ahí no
+│                      es estilo sino producto—. Si falta un dato real se marca
+│                      [PENDIENTE], nunca se inventa) +
+│                      destripar-video-de-competencia (pipeline para que Claude
+│                      VEA un video y no
+│                      solo lo lea: scraper de API → `videoUrl` del CDN +
+│                      transcript → `destripar-video.sh` extrae frames con
+│                      ffmpeg → Claude los lee con Read y escribe el teardown
+│                      separando OBSERVADO de INFERIDO. Analizar por caption da
+│                      conclusiones falsas con mucha confianza: la lectura de
+│                      texto decía "reels de 15-30s", la medición real dio ~83s.
+│                      Las URLs del CDN caducan en horas ⇒ bajar en la misma
+│                      sesión del scrape; <$0.10 por teardown) +
+│                      archivar-en-vez-de-borrar (la maquinaria sobrante cobra
+│                      renta: cada pieza que existe es una opción que hay que
+│                      descartar antes de trabajar. No se poda porque la
+│                      pregunta "¿esto sirve?" es irrefutable —habla del futuro—;
+│                      se desbloquea cambiándola por "¿se usó en 4 semanas?" y
+│                      archivando con `git mv` espejando rutas. Archivar vuelve
+│                      REVERSIBLE una decisión irreversible, y las reversibles se
+│                      toman rápido: 17→11 skills y 6→4 agentes en una sesión sin
+│                      una sola discusión. El `archive/README.md` con "cuándo
+│                      reactivar" es lo que separa un archivo de un cementerio;
+│                      el paso que siempre se olvida es actualizar las TABLAS DE
+│                      RUTEO —un orquestador que enruta a un agente archivado
+│                      falla en silencio) + filtro-de-esencia-de-marca (gate de
+│                      4 preguntas antes de publicar cualquier cosa de cara al
+│                      público; la que más piezas mata es "¿lo podría haber
+│                      publicado cualquier competidor?" —prueba de foso—. No
+│                      prohíbe las tendencias, prohíbe las tendencias SIN
+│                      traducir; lo descartado se anota con su condición de
+│                      reevaluación o la discusión se reabre cada mes) +
+│                      arrancar-angosto-antes-de-ensanchar (separar el PARAGUAS
+│                      —todo lo que se vende, amplio, es el ROI— de la CUÑA
+│                      visible —UNA sola cosa que se muestra una y otra vez—.
+│                      El error es hacer la cuña tan ancha como el paraguas
+│                      "para no perder clientes", y el resultado es el opuesto:
+│                      nadie puede terminar "ah, vos sos el de ___". La cuña es
+│                      la PUERTA, no el catálogo: angosto para entrar, ancho para
+│                      facturar. El instinto de variar llega mucho antes de que
+│                      el mercado se sature —ese cansancio interno es la trampa—;
+│                      se repite con muchos ángulos sobre UN sistema-bandera y se
+│                      ensancha por señal escrita, no por aburrimiento).
+│                      Tier 25 — Lo que parece config y no lo es (4 nuevas + 2
+│                      extensiones, capturadas 2026-08-17/18 de las sesiones de
+│                      Roberto a producción y del flujo del handoff):
+│                      config-por-tenant-no-literal-en-el-flujo (⭐ cross-project:
+│                      en multi-tenant, la lógica de UN rubro cableada en el
+│                      flujo COMPARTIDO. El MISMO modo de fallo apareció dos
+│                      veces en dos días: el nodo Router tenía el clasificador de
+│                      un cliente escrito a mano —los prompts de router que cada
+│                      cliente tenía cargados NUNCA se ejecutaron, y una alarma
+│                      médica la venía atendiendo el bot en vez de escalar—, y un
+│                      nodo inyectaba, haciéndose pasar por el mensaje del lead,
+│                      "pedile la zona o el código de la propiedad" a los leads
+│                      de un fisioterapeuta. Lo no-obvio: (1) no hay error, log
+│                      ni test que lo agarre —funciona perfecto para el cliente
+│                      cuyo literal quedó cableado—; (2) el guard NO es un flag
+│                      (`usar_router_propio:true` dice "quiero", no "funciona"):
+│                      se verifica que lo cargado declare el CONTRATO del
+│                      consumidor, porque un cliente tenía bajo la llave `router`
+│                      un filtro pre-bot con otro schema y sin guard quedaba MUDO
+│                      en producción; (3) un valor FUERA del contrato no degrada
+│                      —el Switch descarta el ítem y el bot no contesta; el
+│                      BACKUP solo dispara si el campo NO EXISTE—; (4) el default
+│                      va en el flujo con nombre de default y los que dependían
+│                      del texto viejo lo conservan por override cargado ANTES
+│                      del deploy; (5) el control que NO discrimina se reporta
+│                      igual) + probar-camino-produccion-sin-efectos-externos
+│                      (⭐ cross-project: probar el camino REAL de producción
+│                      cortando en el último centímetro, justo antes del nodo que
+│                      sale al mundo. Un flag EN EL DATO —`__eval_synthetic`— no
+│                      en el entorno: una env var apaga el envío para TODOS,
+│                      incluido el lead que escriba en ese momento. Trae la
+│                      matriz mínima de 4 —caso nuevo · el camino de TODOS ·
+│                      no-regresión de un cliente VIVO · idempotencia—, y los dos
+│                      rastros a limpiar: las filas sintéticas y la memoria
+│                      conversacional del agente, que si volvés a probar por el
+│                      mismo hilo los recuerda) +
+│                      webhook-fanout-sin-reconciliacion (el proveedor entrega el
+│                      MISMO evento a dos endpoints independientes —uno persiste,
+│                      otro reacciona— y si una entrega falla NADIE reconcilia:
+│                      el bot contestó una foto que en la base no existe. Dos
+│                      suscriptores al mismo evento no son redundancia, son dos
+│                      formas independientes de perderse el evento. Arreglo:
+│                      INSERT idempotente por la llave natural del proveedor
+│                      colgado EN PARALELO —en serie convierte la red de
+│                      seguridad en un punto de falla nuevo— con la unicidad
+│                      garantizada por constraint, nunca por select-previo. Y el
+│                      hueco se documenta: si el evento perdido es el PRIMER
+│                      mensaje de un lead nuevo, el rescate no lo salva) +
+│                      enforcement-con-hook-no-con-regla (una regla escrita
+│                      depende de que alguien se acuerde; un hook no. La regla
+│                      "nunca push directo a main" estaba escrita desde el
+│                      2026-05-29 y el 2026-07-15 un commit directo deployó a
+│                      producción sin preview. Trae el filtro de 3 preguntas para
+│                      decidir si algo merece hook, las 3 propiedades del hook
+│                      que sobrevive —explica en vez de solo bloquear, escape
+│                      explícito con nombre propio en vez de `--no-verify`,
+│                      y conoce sus falsos positivos: un merge en main NO es un
+│                      commit directo— y el gotcha que lo anula: `.git/hooks/` NO
+│                      se versiona, así que sin `git config core.hooksPath
+│                      .githooks` el hook existe en el repo, se lee, da confianza
+│                      y NO corre. El hook real viaja en `.githooks/pre-commit`
+│                      de este template).
+│                      **Extensiones:** verificar-funcionamiento-end-to-end suma
+│                      **"el nodo corrió" ≠ "el nodo escribió"** (un INSERT
+│                      reportaba `success` sin escribir: nombre de enum mal
+│                      escrito + `onError: continueRegularOutput` —que es lo
+│                      CORRECTO en producción— convirtiendo el error en un ítem
+│                      silencioso; el manejo de errores que necesitás en prod es
+│                      justo el que esconde el bug en la prueba). Y
+│                      whatsapp-proactivo-a-staff suma dos: el endpoint
+│                      **`?wabaId=` de YCloud IGNORA el filtro** (devuelve las
+│                      plantillas de toda la cuenta → creés que tu cliente ya
+│                      tiene la plantilla, es de otro, y el aviso muere con
+│                      `ycloud_403`) y los **parámetros fantasma** (se mandaba
+│                      `send_lead_message` en el payload y la función nunca lo
+│                      lee: antes de confiar en un flag, buscá su LECTOR).
+│                      Sin tier (capturadas en el camino, faltaban del índice):
+│                      verificar-funcionamiento-end-to-end (⭐ el estándar de
+│                      prueba del proyecto: "compila"/"corrió"/"respondió
+│                      200"/"se ve bien" NO son "funciona"; fuente de verdad por
+│                      capa + Definition of Done de 3 preguntas) ·
+│                      onboarding-cliente-crm (alta de un cliente externo de
+│                      punta a punta, con gotchas numerados desde #-2) ·
+│                      conexion-whatsapp-ycloud-supabase-n8n (montar la conexión
+│                      WhatsApp en un proyecto/cliente nuevo) ·
+│                      jsonb-config-save-no-pisar-campos-ajenos (un "Guardar" de
+│                      una config jsonb que borra los campos de otros writers) ·
+│                      realtime-canal-muere-en-silencio (el canal se cae y la UI
+│                      queda vieja hasta F5) · desktop-notifications-from-realtime
+│                      (notificaciones del SO enganchadas a un realtime
+│                      por-usuario) · refrescar-vista-server-tras-mutacion-cliente
+│                      ("hago algo y tengo que refrescar para verlo") ·
+│                      popover-portal-no-absolute (popovers SIEMPRE con portal,
+│                      NUNCA `absolute` — el mismo bug 3+ veces) ·
+│                      toaster-montado-por-scope (toasts que no aparecen y no dan
+│                      error: falta el `<Toaster>` en ese scope) ·
+│                      nota-de-voz-real-whatsapp (nota de voz con la ondita, no
+│                      adjunto) · bot-whatsapp-unsupported-fallback (recuperar
+│                      los mensajes `unsupported` del clic de anuncio cableando
+│                      el fallback del Switch — 3 leads reales quedaron sin
+│                      respuesta).
 │                      Tier 26 — Sitio + catálogo + CMS para cliente PYME
 │                      (8, capturadas 2026-08-22 de un proyecto de 4 meses:
 │                      web pública + catálogo + panel + chatbot, Next.js 15 +
@@ -491,6 +691,109 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        verificá que sea del cliente — se le pidieron "las
 │                        reseñas de Google" dos reportes seguidos siendo que
 │                        son públicas y tomarlas era trabajo nuestro).
+│                      Tier 27 — Lo que se quedó en el espejo (8 + 3 apéndices,
+│                      capturadas 2026-07-06/08/10 en FreshAdFlow, subidas
+│                      2026-08-22): son las skills que FreshAdFlow numeró como
+│                      sus Tiers 9/10/11, se commitearon en la rama
+│                      `feat/skills-seguridad-saas` de su espejo privado y
+│                      NUNCA llegaron al madre — mientras tanto el madre reusó
+│                      los números 9/10/11 para otras cosas, así que entran
+│                      renumeradas. **Seguridad free→pago:**
+│                      watermark-en-display-plan-gating (nunca servir el master
+│                      limpio a un free; un overlay CSS es decoración, no
+│                      seguridad) + anti-abuso-costo-ia-saas (defensa en
+│                      profundidad para un SaaS con motor de IA: email-verify,
+│                      blocklist de desechables, tope por IP/día y tope global
+│                      de costo, todo env-tunable y fail-open).
+│                      **Crecimiento/ops + pagos:**
+│                      generar-creativos-de-anuncios-con-ia (incluye la regla
+│                      de coherencia de marca: producto simple → anuncio
+│                      simple) + probar-pasarela-de-pago-en-prod (validar pagos
+│                      E2E con productos de $1 cuando el sandbox está caído) +
+│                      feedback-con-recompensa-en-creditos (otorgamiento
+│                      manual, para controlar costo y evitar gaming) +
+│                      pagina-de-cuenta-billing-saas (tarjeta de estado +
+│                      período de gracia + historial de ledger) +
+│                      handoff-dossier-a-otro-proyecto (empaquetar un proyecto
+│                      para otro agente). **Iteración sobre lo generado:**
+│                      anexar-creativos-a-pack-existente ("generar más" y
+│                      "variar UNO" sobre el mismo job: claim atómico
+│                      done→running + bump de count, offset de path, finally
+│                      siempre a done, reserva/refund; el enabler es guardar el
+│                      prompt por ítem). Más 3 apéndices append-only sobre
+│                      skills que ya estaban: debugging-silent-errors (leer los
+│                      logs de prod con el MCP de Vercel ANTES de hipotetizar —
+│                      la firma decía "rate limit", el log decía
+│                      `billing_hard_limit_reached`), deploy-seguro-vercel-
+│                      preview-prod (las env vars se snapshotean en el build →
+│                      redeploy; y verificar que estén en la PLATAFORMA, no
+│                      solo en el `.env`) y onvo-troubleshooting (sandbox
+│                      caído, monto mínimo ~$0.50, período de gracia).
+│                      Tier 28 — Lo que el motor no dijo (12, capturadas
+│                      2026-08-22 de la auditoría completa de FreshAdFlow —
+│                      aprendizajes de julio que nunca se habían capturado):
+│                      ⭐ causa-raiz-mala-calidad-ia-esta-en-el-input (el
+│                      hallazgo madre: cuando un producto de IA saca output
+│                      malo con usuarios reales, la causa raíz casi nunca es el
+│                      motor — es un input malo que el producto aceptó sin
+│                      avisar. Las 2 primeras usuarias generaron TODO en modo
+│                      "Producto" —el default preseleccionado— vendiendo una
+│                      masajes y la otra un e-book; el motor, obligado a
+│                      "mantener el producto exactamente igual", inventó un
+│                      tarro de crema y un libro pegado. Trae el orden de
+│                      sospecha de 5 pasos y el plan de 3 capas: UI primero,
+│                      guards después, techo del modelo se anota) +
+│                      ⭐ probar-motor-ia-fuera-de-la-app (correr el módulo de
+│                      recetas REAL —no una copia— desde un script standalone
+│                      con `node --experimental-strip-types` + file URL: A/B
+│                      sobre datos reales de usuarios por ~$0.50, sin auth, sin
+│                      créditos y sin ensuciar la base) +
+│                      selector-que-obliga-eleccion-consciente (cero
+│                      preselección + tarjeta con descripción y ejemplos en el
+│                      idioma del usuario + jerga interna fuera —"Concepto"
+│                      pasó a "Digital"—, y el detalle que ahorra un día: el
+│                      `null` de "todavía no eligió" vive en el estado LOCAL de
+│                      la pantalla, nunca asciende al tipo del dominio) +
+│                      gate-0-validar-motor-antes-de-construir (harness aislado
+│                      cero-dependencias con criterios de PASS escritos ANTES;
+│                      12 imágenes y $0.76 decidieron endpoint, costo por
+│                      unidad, latencia —y con ella que el job asíncrono era
+│                      requisito, no opción— y descartaron un subsistema
+│                      entero) + ⭐⭐ motor-de-recetas-de-prompts-para-imagen
+│                      (el moat: prompt compuesto por bloques, rotación con
+│                      paso COPRIMO para que no salgan gemelas —el bug era
+│                      `angles[i % 5]` con count=9, aritmética, no modelo—,
+│                      `coreRules` con las 7 reglas que sobrevivieron a
+│                      producción, y "poco texto ≠ texto vago") +
+│                      migraciones-postgres-directo-con-guard-de-proyecto (la
+│                      Management API da 403 en `security definer`/`create
+│                      policy`; y con el MCP apuntando a OTRA base, el guard
+│                      del ref en el aplicador es el requisito, no la paranoia)
+│                      + creditos-por-imagen-reserva-y-refund (cobrar por la
+│                      unidad que CUESTA, ledger append-only, refund por unidad
+│                      fallida, y el founder exento por SALDO y no por código)
+│                      + limites-del-motor-de-imagen (los 3 techos: la
+│                      moderación la dispara la FOTO y no el prompt · las
+│                      imágenes-referencia NO transfieren estilo en `edits` —el
+│                      logo sí porque es un objeto a colocar, la estética no—,
+│                      solución real = vision-to-text · y el residuo del modelo
+│                      se anota, no se pelea) +
+│                      galeria-rapida-thumbnails-url-estable (el polling que
+│                      re-firma signed URLs recarga TODAS las imágenes en cada
+│                      tick; la cura es una URL estable por id, no optimizar el
+│                      polling) + respaldo-total-espejo-privado-repo-de-repos
+│                      (cuando el repo del deploy excluye `memory/`, ese cerebro
+│                      queda en un solo disco: espejo privado con rama
+│                      `respaldo-full-<fecha>`, y el trade-off de los `.env` en
+│                      texto plano decidido explícito, con git-crypt como
+│                      alternativa) + git-footguns-de-sesion (los 3 que borran
+│                      trabajo sin dar error: untrackear un dir con ediciones
+│                      sin commitear, dos sesiones sobre la misma rama con
+│                      `git add -A`, y el Credential Manager multicuenta) +
+│                      verificar-ui-detras-de-auth-en-local (quitar la ruta de
+│                      `PROTECTED_PREFIXES` en local y REVERTIR — el revert es
+│                      parte del cambio; Google GIS no corre en un preview de
+│                      Vercel).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
@@ -531,9 +834,19 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 ├── outputs/                   Entregables del template (vacío por defecto)
 ├── proyectos/                 ← Aquí viven los proyectos concretos (gitignored)
 │   └── hookly/                  primer proyecto (repo independiente)
+├── crm-v2/                    ← Momentum AI CRM (repo independiente, gitignored).
+│                              Es el proyecto que produjo la mayoría de las skills
+│                              de los Tiers 8→24. Su `memory/backlog.md` es la
+│                              fuente de verdad de ESE proyecto, no de este.
+├── .githooks/
+│   └── pre-commit             Bloquea commits directos en main/master. NO viaja
+│                              solo: cada clon corre UNA VEZ
+│                              `git config core.hooksPath .githooks`.
+│                              Ver skill `enforcement-con-hook-no-con-regla`.
 ├── CLAUDE.md                  Este archivo
 ├── README.md
-└── .gitignore                 Incluye `proyectos/` (subproyectos no se versionan aquí)
+└── .gitignore                 Incluye `proyectos/` y `crm-v2/` (subproyectos no se
+                               versionan aquí)
 ```
 
 ## Versionado / GitHub
@@ -579,7 +892,11 @@ Detalles en `memory/orquestacion.md`.
 
 ### Reglas inviolables
 
-- Nunca commits directos a `main`/`master` (en cualquier proyecto)
+- Nunca commits directos a `main`/`master` (en cualquier proyecto). **Esto no depende de acordarse:** el template trae `.githooks/pre-commit` que lo bloquea. Instalarlo **una vez por clon** — `.git/hooks/` no se versiona, así que sin esto el hook existe pero no corre:
+  ```bash
+  git config core.hooksPath .githooks
+  ```
+  Verificar con `git config core.hooksPath` (debe decir `.githooks`). Escapes a propósito: los merges pasan solos, y `ALLOW_MAIN_COMMIT=1 git commit ...` para una emergencia real. Ver skill `enforcement-con-hook-no-con-regla`.
 - Nunca instalar global sin OK explícito del usuario
 - `.env` siempre en `.gitignore`, secretos nunca hardcodeados
 - Antes de instalar un repo nuevo: investigar a fondo, verificar qué instala el CLI vs qué hay en el repo
@@ -589,7 +906,10 @@ Detalles en `memory/orquestacion.md`.
 
 | Proyecto | Path | Repo GitHub | Descripción |
 |---|---|---|---|
+| **Momentum AI CRM** | `crm-v2/` | `momentum-ai-crm` | CRM SaaS multi-tenant + bot de WhatsApp. **En producción con clientes reales.** Es la fuente de los Tiers 8→24 de skills. |
 | Hookly | `proyectos/hookly/` | `hookly` | SaaS análisis viral de reels (Instagram MVP, TikTok V1) |
+
+> Los clientes que corren sobre el CRM (fichas comerciales + prompts) viven en `clients/` — ver `clients/README.md`, que es el registro maestro.
 
 ## Convenciones
 

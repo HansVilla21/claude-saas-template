@@ -594,3 +594,15 @@ Devuelve **array directo**, no envuelto en `{data: [...]}`.
 
 Cancela al fin del período actual. La sub queda con `status: "canceled"`.
 A veces NO manda webhook `subscription.canceled` para subs en `trialing` — usar optimistic updates en el server action.
+
+## Gotchas nuevos (2026-07-08, FreshAdFlow — probado en prod real)
+
+- **Sandbox caído/poco confiable:** el sandbox de Onvo puede dar 503 en todo (y su dashboard dev
+  no resolver). Estrategia: probar en **producción con productos de $1** (ver skill
+  `probar-pasarela-de-pago-en-prod`), luego swap a precios reales.
+- **Monto mínimo:** un cobro por debajo de ~$0.50 USD falla con `"Invalid amount"` (código 13).
+  ₡1 NO funciona. Usar ~$1.
+- **Período de gracia al cancelar:** cancelar mantiene acceso hasta `current_period_end`; el plan
+  efectivo debe contar la sub cancelada como válida hasta esa fecha (no caer a free al instante).
+- **Verificar por API antes de que el usuario pague:** que la key autentica + que cada priceId es
+  del tipo correcto (recurrente vs one_time) + que el checkout devuelve URL.
