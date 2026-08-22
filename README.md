@@ -16,7 +16,7 @@ Hola, voy a iniciar un proyecto nuevo de SaaS y quiero usar como base mi templat
 Hacé lo siguiente, en este orden:
 
 1. Cloná el repo `https://github.com/HansVilla21/claude-saas-template.git` en esta carpeta.
-2. Leé `CLAUDE.md`, `README.md` y `.agent/skills/README.md` del template para entender qué tengo disponible (agentes, las 140 skills de proceso, frameworks, estructura).
+2. Leé `CLAUDE.md`, `README.md` y `.agent/skills/README.md` del template para entender qué tengo disponible (agentes, las 141 skills de proceso, frameworks, estructura).
 2b. Corré `git config core.hooksPath .githooks` en el clon — el hook que bloquea commits en `main` no viaja solo y sin eso no corre.
 3. Antes de empezar a setup, hacéme SOLO estas 3 preguntas:
    - ¿Cuál es el nombre del proyecto? (slug en kebab-case, ej. `mi-saas`)
@@ -70,7 +70,7 @@ El reviewer tiene **veto**: audita antes de que el workflow llegue al founder.
 - `langchain-prompt-designer` — system prompts de agentes LangChain (CO-STAR + TIDD-EC + pre-mortem)
 - `prompt-reviewer` — checklist pre-deploy de la metodología Momentum
 
-### 140 skills de proceso (`.agent/skills/`)
+### 141 skills de proceso (`.agent/skills/`)
 
 **El activo más valioso del template.** Cada una salió de un problema real que ya costó tiempo, y documenta **el gotcha**, no solo el procedimiento.
 
@@ -124,8 +124,8 @@ Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, T
 │   └── skills/                62 skills de Claude Code (slash commands)
 ├── .agent/
 │   └── skills/
-│       ├── README.md          ← índice temático de las 140 skills
-│       └── <140 carpetas>/     una SKILL.md cada una
+│       ├── README.md          ← índice temático de las 141 skills
+│       └── <141 carpetas>/     una SKILL.md cada una
 ├── .githooks/
 │   └── pre-commit             Bloquea commits directos en main (ver abajo)
 ├── memory/
@@ -136,8 +136,11 @@ Material curado para los agentes — Vercel agent-skills, GSAP, Emil Kowalski, T
 │                              Momentum + workflows de referencia para DUPLICAR
 ├── docs/training/             11 módulos de entrenamiento (filosofía →
 │                              arquitectura → prompts → workflow → entrega)
-├── clients/                   Registro maestro de clientes: lo comercial y lo
-│                              técnico juntos (ver clients/README.md)
+├── clients/                   Registro maestro de clientes (ver clients/README.md).
+│                              ⚠️ Solo se versionan README.md y _plantilla/ — este
+│                              repo es público y las carpetas de clientes reales
+│                              viven solo en tu disco (gitignoreadas desde
+│                              2026-08-22), con respaldo en el vault privado
 ├── inputs/repos-referencia/   10 repos de referencia
 ├── templates/                 Plantillas reusables (onboarding, correos de Auth)
 ├── proyectos/                 ← Subproyectos (gitignored, repos independientes)

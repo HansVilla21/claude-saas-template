@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**140 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**141 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -23,6 +23,7 @@ Cómo saber que algo funciona de verdad. Si vas a decir "listo", empezá acá.
 | `verificar-visual-midiendo-contraste` | Medir el ratio WCAG real en el browser. El instinto daba 3.2:1; medir dio el camino a 6.42:1 |
 | `debugging-silent-errors` | `console.error` estructurado, reproducir antes de instrumentar, códigos de error de Postgres/Supabase |
 | `worktree-para-no-pisar-el-checkout` | Trabajar cuando otra persona está en el mismo repo (un commit quedó huérfano) |
+| ⭐ `cosechas-en-paralelo-sin-pisarse` | N sesiones a la vez sobre el mismo repo reclaman el mismo número y rompen el conteo. El número se reclama en el PR, el conteo se **deriva**, el índice se **verifica** contra el disco — y un push a una rama no es un cambio entregado |
 | `mesa-arquitectonica-multiagente` | Panel multi-agente + jueces adversariales para decisiones arquitectónicas grandes |
 | `creador-de-skills` | La meta-skill: cuándo y cómo capturar un proceso |
 | ⭐ `git-footguns-de-sesion` | Los 3 que borran trabajo **sin dar error**: untrackear un dir con ediciones sin commitear, dos sesiones sobre la misma rama con `git add -A`, y el Credential Manager multicuenta |
