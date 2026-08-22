@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**90 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**98 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -141,6 +141,21 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `filtro-de-esencia-de-marca` | El gate previo a publicar: ¿esto se rastrea al posicionamiento, o nos subimos a un tema porque estaba de moda? Corre **al entrar** al plan, no al publicar |
 | `matar-el-olor-a-ia` | Catálogo de tells del texto generado y cómo borrarlos sin mover el claim. En mensajes de bot no es estilo: es producto |
 | `destripar-video-de-competencia` | Que Claude **vea** el video, no que lo lea: frames con ffmpeg + separar OBSERVADO de INFERIDO. Leer por caption daba "reels de 15-30s"; medir dio ~83s |
+
+## 🌐 Sitio público, catálogo y CMS para cliente PYME
+
+La vertical que no es n8n/WhatsApp/CRM: web pública + catálogo + panel para que el cliente lo mantenga solo.
+
+| Skill | Qué resuelve |
+|---|---|
+| ⭐ `auditar-datos-antes-de-programar-features` | Antes de convertir el feedback de una llamada en un plan, **contá las filas de producción**. Tres quejas que sonaban distintas eran un solo agujero: 81/83 sin precio, 0/83 con descripción |
+| `catalogo-desde-pdf-del-cliente` | El catálogo vive en PDFs de Canva, que exporta el texto letra por letra. Importador que **no** escribe en la base: produce CSV + informe de cruce |
+| `fotos-de-pdf-con-revision-humana` | Extraer fotos midiendo nitidez, y **nunca** subirlas automático: los catálogos del cliente traían stock y un render de IA con marca de agua |
+| `chatbot-web-tools-sobre-datos-vivos` | Asistente en la web (no WhatsApp): el catálogo va en **herramientas**, no en el prompt — precios exactos y costo que no crece con el catálogo |
+| `completitud-de-contenido-en-el-panel` | Que un cliente no técnico termine de llenar 230 fichas. La IA redacta prosa, el **humano** pone los hechos |
+| `panel-en-subdominio-por-middleware` | `admin.cliente.com` sirviendo el panel por rewrite, con la sesión refrescada en el mismo middleware |
+| `reporte-de-estado-para-cliente-no-tecnico` | Los **tres** documentos son distintos y mezclarlos cuesta la reunión: resumen, hoja de revisión y reporte de estado |
+| `supabase-free-se-pausa-y-tumba-el-sitio` | El plan gratis se pausa por **inactividad** — o sea justo en pilotos y demos. Diagnóstico en 30s por API |
 
 ## 🎯 Ejecución y modo de trabajo del founder
 

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!--
+  Plantilla de "resumen para el cliente" — un solo archivo, sin dependencias.
+
+  Reemplazar los placeholders {{...}} y duplicar/borrar los bloques .row.
+  Ajustar --acento (y su --acento-bg) a la marca del cliente; el resto de la
+  paleta es neutra y funciona con cualquier marca.
+
+  Reglas al llenarlo (ver SKILL.md):
+   · Solo logros. Los pendientes van en la hoja de revisión, no acá.
+   · Idioma del cliente: nada de tablas, rutas, ramas ni nombres de librerías.
+   · Los números salen de la base, el día de la reunión.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITULO_CORTO}} · {{NOMBRE_CLIENTE}}</title>
+<style>
+  :root {
+    --papel:#F6F4F1; --surface:#FFFFFF; --linea:#E3DED7;
+    --tinta:#1C1917; --texto:#514B44; --muted:#857D73;
+    --acento:#C0723F; --acento-bg:#F5E9DD; --verde:#4C7A4F;
+    --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --papel:#151312; --surface:#1F1C1A; --linea:#332E29;
+      --tinta:#EFEAE4; --texto:#C3BBB1; --muted:#9C938A;
+      --acento:#D68A57; --acento-bg:#2A1E14; --verde:#7FB183;
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel:#151312; --surface:#1F1C1A; --linea:#332E29;
+    --tinta:#EFEAE4; --texto:#C3BBB1; --muted:#9C938A;
+    --acento:#D68A57; --acento-bg:#2A1E14; --verde:#7FB183;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--papel); color:var(--texto); font-family:var(--sans);
+         line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:760px; margin:0 auto; padding:clamp(32px,6vw,72px) clamp(20px,5vw,40px) 80px; }
+  .eyebrow { font-size:11px; letter-spacing:.24em; text-transform:uppercase;
+             color:var(--acento); font-weight:600; margin-bottom:16px; }
+  h1 { font-family:var(--serif); font-weight:500; color:var(--tinta);
+       font-size:clamp(30px,5.5vw,46px); line-height:1.06; margin:0 0 16px; text-wrap:balance; }
+  .lead { font-size:16px; color:var(--muted); max-width:52ch; }
+  .live { display:inline-flex; align-items:center; gap:8px; margin-top:20px;
+          font-size:14px; color:var(--verde); font-weight:600; text-decoration:none; }
+  .live .dot { width:9px; height:9px; border-radius:50%; background:var(--verde);
+               box-shadow:0 0 0 4px color-mix(in srgb, var(--verde) 18%, transparent); }
+  h2 { font-family:var(--serif); font-weight:500; color:var(--tinta); font-size:22px; margin:52px 0 20px; }
+  .list { display:flex; flex-direction:column; gap:14px; }
+  .row { display:flex; gap:14px; align-items:flex-start; }
+  .check { flex:none; width:26px; height:26px; border-radius:50%; background:var(--acento-bg);
+           color:var(--acento); display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .row .t { font-size:16px; font-weight:600; color:var(--tinta); }
+  .row .d { font-size:14.5px; color:var(--muted); margin-top:2px; }
+  .nuevo { display:inline-block; margin-left:8px; font-size:10.5px; font-weight:700;
+           letter-spacing:.04em; text-transform:uppercase; color:var(--acento);
+           border:1px solid color-mix(in srgb, var(--acento) 45%, transparent);
+           border-radius:20px; padding:1px 8px; vertical-align:middle; }
+  .destacado { background:var(--surface); border:1px solid var(--linea);
+               border-left:4px solid var(--acento); border-radius:14px;
+               padding:22px 24px; margin:24px 0 8px; }
+  .destacado h3 { font-family:var(--serif); font-weight:500; color:var(--tinta);
+                  font-size:20px; margin:0 0 8px; }
+  .destacado p { margin:0; font-size:15px; color:var(--texto); }
+  .cifras { display:flex; flex-wrap:wrap; gap:12px; margin-top:22px; }
+  .cifra { flex:1 1 150px; background:var(--surface); border:1px solid var(--linea);
+           border-radius:12px; padding:16px 18px; }
+  .cifra .n { font-family:var(--serif); font-size:26px; color:var(--tinta); line-height:1; }
+  .cifra .l { font-size:13px; color:var(--muted); margin-top:6px; }
+  footer { margin-top:56px; padding-top:22px; border-top:1px solid var(--linea);
+           font-size:13px; color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">{{NOMBRE_CLIENTE}} · {{TIPO_PROYECTO}}</div>
+  <h1>{{TITULO_PRINCIPAL}}</h1>
+  <p class="lead">{{BAJADA_UNA_LINEA}}</p>
+
+  <a class="live" href="{{URL_PRODUCCION}}" target="_blank" rel="noopener">
+    <span class="dot"></span> Entrá a verlo: {{URL_VISIBLE}}
+  </a>
+
+  <!-- La novedad de ESTA entrega. Si no hay novedad, borrar el bloque. -->
+  <div class="destacado">
+    <h3>{{TITULO_NOVEDAD}} <span class="nuevo">Nuevo</span></h3>
+    <p>{{DESCRIPCION_NOVEDAD}}</p>
+  </div>
+
+  <!-- Antes/después con números de la base. Borrar si no aplica. -->
+  <div class="cifras">
+    <div class="cifra"><div class="n">{{CIFRA_1}}</div><div class="l">{{ETIQUETA_1}}</div></div>
+    <div class="cifra"><div class="n">{{CIFRA_2}}</div><div class="l">{{ETIQUETA_2}}</div></div>
+    <div class="cifra"><div class="n">{{CIFRA_3}}</div><div class="l">{{ETIQUETA_3}}</div></div>
+  </div>
+
+  <!-- Un bloque por área del NEGOCIO, no por módulo técnico. -->
+  <h2>{{AREA_1}}</h2>
+  <div class="list">
+    <div class="row">
+      <span class="check">✓</span>
+      <div><div class="t">{{LOGRO}}</div><div class="d">{{QUE_SIGNIFICA_PARA_EL_NEGOCIO}}</div></div>
+    </div>
+    <!-- duplicar .row por cada logro -->
+  </div>
+
+  <h2>{{AREA_2}}</h2>
+  <div class="list">
+    <div class="row">
+      <span class="check">✓</span>
+      <div><div class="t">{{LOGRO}}</div><div class="d">{{QUE_SIGNIFICA_PARA_EL_NEGOCIO}}</div></div>
+    </div>
+  </div>
+
+  <footer>
+    {{FECHA_LARGA}} · Preparado para {{NOMBRE_CLIENTE}}.
+  </footer>
+
+</div>
+</body>
+</html>
