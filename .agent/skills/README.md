@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**118 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**140 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -28,6 +28,8 @@ Cómo saber que algo funciona de verdad. Si vas a decir "listo", empezá acá.
 | ⭐ `git-footguns-de-sesion` | Los 3 que borran trabajo **sin dar error**: untrackear un dir con ediciones sin commitear, dos sesiones sobre la misma rama con `git add -A`, y el Credential Manager multicuenta |
 | `respaldo-total-espejo-privado-repo-de-repos` | Cuando el repo del deploy excluye `memory/`, ese cerebro queda en un solo disco. Espejo privado con rama `respaldo-full-<fecha>`, y el trade-off de los `.env` en claro decidido explícito |
 | `handoff-dossier-a-otro-proyecto` | Empaquetar un proyecto para que otro agente lo retome sin la conversación |
+| ⭐ `verificar-frontend-sin-ver` | Pedirle el CSS al server y listar qué clases generó Tailwind **de verdad**, sin sesión ni captura. El JIT deja clases zombi; `min-width:auto` le gana a tu `w-80` |
+| ⭐ `probar-todas-las-ramas-no-solo-la-feliz` | Una prueba verde sobre una rama es evidencia sobre **esa** rama. `frío` con tilde: los leads C y D reventaban con 500 y la primera prueba dio verde |
 
 ## 🗄️ Datos, RLS y seguridad de base
 
@@ -43,6 +45,11 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `supabase-edge-function-secret-auth` | Endpoints internos autenticados por secret |
 | `chatbot-db-schema-supabase` | Schema multi-canal + multi-nicho |
 | `migraciones-postgres-directo-con-guard-de-proyecto` | La Management API da 403 en `security definer` / `create policy`. Y con el MCP apuntando a **otra** base, el guard del ref en el aplicador es requisito, no paranoia |
+| ⭐ `soft-delete-bloqueado-por-rls` | La papelera que no borra **ni para el admin**: al poner `deleted_at` la fila deja de satisfacer la policy de SELECT. `with check (true)` no lo evita |
+| ⭐ `demo-con-datos-falsos` | Las filas de demo son inventadas y rotuladas, **nunca** registros del cliente. Casi se dejan dos prospectos reales marcados como compradores de $38.500 y $62.000 |
+| `datos-reales-vs-seed-demo` | Cuando llega el dato real: **borrar** los agregados sembrados, cazar los fallbacks tipo `?? 47`, blindar `db:seed` |
+| `rol-aislado-cartera-rls` | Rol que ve solo su cartera. El bug a cazar es la "cola abierta" que expone las carteras privadas — excluirlas del SELECT **y** del UPDATE |
+| `importacion-con-lote-deshacible` | `import_batch_id`: deshacer por `created_at` se lleva lo que entró por el formulario y los webhooks en la misma ventana |
 
 ## 🏢 Multi-tenant y SaaS
 
@@ -56,6 +63,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `embudo-activacion-saas` | Diseñar el camino confianza → completar → usar → pagar |
 | `onboarding-estado-server-side` | Estado de onboarding desde señales reales, no `localStorage` por dispositivo |
 | `async-job-pattern` | UI → job → worker → polling + refund de créditos |
+| `key-de-ia-en-configuracion` | La API key del proveedor se pega en Configuración y vive **cifrada en la base**, no en el `.env`. El modelo se pregunta a `/v1/models`, no se hardcodea |
+| `valor-derivado-pendiente-config` | Comisión/valor calculado de una tabla editable, **sin fallback**: si falta la config el hecho entra igual y el valor queda `pendiente_config` + alerta |
 
 ## 🤖 Bot, n8n y LangChain
 
@@ -94,6 +103,11 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `ingesta-email-cloudflare-worker` | Correo → Worker → Edge Function, idempotente y por usuario |
 | `gmail-forwarding-auto-confirm` | Auto-confirmar el reenvío server-side |
 | `apify-integration-pattern` | Fetch directo, normalización `-1`/null, `ScraperError` tipado |
+| `prospai-webhook-crm` | LinkedIn → CRM: los 16 eventos, el payload de prueba con placeholders literales que hace fallar el test, guardar crudo antes de validar |
+| `fathom-transcripciones-al-crm` | El body **crudo** antes de parsear (re-serializar rompe la firma); el webhook-id es la clave de idempotencia; 🔴 `ON DELETE CASCADE` en la tabla de eventos borra el historial |
+| `manychat-instagram-al-crm` | IG → CRM **sin** la API de ManyChat (esa es pull y cuesta): "Solicitud externa", push, Pro estándar. El receptor ya existía — grep + curl antes de reconstruir |
+| `meta-ads-conexion-oficial` | Standard Access alcanza para multi-negocio, pero un tercero no puede autorizar tu app → no hay OAuth. La cuenta se **fija**, nunca se lista |
+| `agendamiento-google-calendar` | Calendly propio sobre Google Calendar. Lo que lo mata en silencio: dejar la app en "Testing" — el refresh token vence a los 7 días y la agenda muere un martes |
 
 ## 🎨 UI, UX y frontend
 
@@ -119,6 +133,9 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `crm-contact-detail-tabs` | Ficha de contacto full-page con pestañas |
 | `selector-que-obliga-eleccion-consciente` | Cero preselección + tarjeta con descripción y ejemplos, jerga interna fuera. El `null` de "todavía no eligió" vive en el estado **local** de la pantalla, nunca asciende al tipo del dominio |
 | `galeria-rapida-thumbnails-url-estable` | El polling que re-firma signed URLs recarga **todas** las imágenes en cada tick. La cura es una URL estable por id, no optimizar el polling |
+| ⭐ `manual-de-ayuda-dentro-del-producto` | El manual vive en `/ayuda` y se **lee de las pantallas reales**, no de memoria. Contenido como dato tipado; el enlace no pasa por el gate del nav |
+| `construir-landings-cliente` | 3 landings de conversión sobre el material real del cliente: blueprint, autoridad por landing, audio-testimonios, subdominios DNS-only |
+| `boton-llamar-softphone-vs-telefono` | `tel:` en Mac se lo queda FaceTime. Los softphones registran `callto:`, que cae directo sin configurar nada |
 
 ## 📊 Números, dinero y tiempo
 
@@ -143,6 +160,19 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `supabase-google-login-movil-vs-desktop` | GIS en desktop vs OAuth redirect en móvil (la sesión no se establecía en el celular) |
 | `deploy-seguro-vercel-preview-prod` | Preview → prod sin romper |
 | `verificar-ui-detras-de-auth-en-local` | Verificar una pantalla detrás de login sin poder loguearte: sacar la ruta de `PROTECTED_PREFIXES` en local **y revertir** — el revert es parte del cambio |
+| ⭐ `subir-archivos-grandes-sin-pasar-por-el-servidor` | Vercel corta todo request a **4.5 MB** en el edge: `bodySizeLimit` no salva y tu validación de tamaño nunca corre. URL firmada + subida directa al storage |
+| ⭐ `trabajar-en-la-cuenta-del-cliente` | Su GitHub y su Vercel: una credencial por host en Windows, la regla `insteadOf` que reescribe SSH→HTTPS, y por qué **`git push` no deploya** en Hobby |
+| `dominio-que-envia-pero-no-recibe` | Enviar y recibir son dos sistemas. Sin **MX** cada respuesta a un boletín rebota, y el proveedor no avisa porque su tablero está verde |
+| `programar-envios-cron-vercel` | ⚠️ El gotcha decide la feature: Hobby corre el cron 1×/día y no a la hora exacta. En su proyecto la feature se **quitó** en vez de mentirle al cliente |
+
+## 📦 Entregar el proyecto
+
+Que el sistema no muera con vos. Los dos documentos tienen lectores distintos.
+
+| Skill | Qué resuelve |
+|---|---|
+| ⭐ `reporte-de-traspaso-del-proyecto` | Un repo **no** es un traspaso: 13 secciones, y la #8 (accesos — dueño, quién paga, qué vence) es la que salva el proyecto. Los pendientes se parten por dueño |
+| ⭐ `manual-de-ayuda-dentro-del-producto` | El documento hermano, para quien **usa** el sistema (ver arriba, en UI) |
 
 ## 💡 Estrategia, marca y oferta
 
