@@ -49,7 +49,8 @@ Mismo error, distinta capa. La cura es una sola: **verificar el efecto real cont
 ### n8n / chatbot
 - **Fuente de verdad:** la **ejecución real** (`GET /api/v1/executions/{id}?includeData=true` — el output nodo por nodo), y el **estado vivo del workflow** (hash SHA-256 del JSON deployado contra el JSON local). NO "el PUT respondió 200", NO "lo veo en el editor" (el editor cachea).
 - Después de un deploy: re-fetch del workflow vivo + comparar hash. Después de un cambio de lógica: disparar una ejecución y leer el `includeData`, no asumir por el prompt.
-- Ver skills del proyecto: `n8n-workflow-build-script` (deploy + verificación por hash), `bot-multibubble-output-flow`, `bot-handoff-system-end-to-end`.
+- **"El nodo corrió" NO es "el nodo escribió"** (agregado 2026-08-18). Un nodo de INSERT reportaba `executionStatus: success` y **no escribía nada**: el enum se llamaba `message_sender_kind` y no `sender_kind`, y el `onError: continueRegularOutput` del nodo —que es **correcto** en producción, para que un fallo de esa rama no corte al bot— convertía el error en **un ítem silencioso**. O sea: el manejo de errores que necesitás en producción es exactamente el que esconde el bug en la prueba. **Mirá el output del nodo Y contá filas en la base**, nunca el estado de la ejecución. Y contá duplicados también, si el nodo pretende ser idempotente.
+- Ver skills del proyecto: `n8n-workflow-build-script` (deploy + verificación por hash), `bot-multibubble-output-flow`, `bot-handoff-system-end-to-end`, `probar-camino-produccion-sin-efectos-externos` (probar el camino real sin mandar nada afuera).
 
 ### Backend / Edge Functions / API / webhooks
 - **Fuente de verdad:** el camino ejecutado al menos una vez, con su respuesta Y su error mirados. No asumir por leer el código.
