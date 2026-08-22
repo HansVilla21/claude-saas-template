@@ -41,17 +41,49 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 ```
 .
 ├── .claude/
-│   ├── agents/        Agentes genéricos reusables (12):
+│   ├── agents/        Agentes genéricos reusables (17):
 │   │                  · técnicos (8): arquitecto, frontend-builder, backend-builder,
 │   │                    code-reviewer, debugger, security-auditor, penetration-tester,
 │   │                    orquestador (genérico)
 │   │                  · estrategia/SaaS (4): hormozi-strategist, saas-strategist,
 │   │                    pain-discovery, billing-engineer
-│   └── skills/        41 skills de Claude Code (slash commands): UI/UX (suite
-│                      ui-ux-pro-max + emil + taste + vercel) + animación (GSAP) +
-│                      marketing (8 TIER 1) + seguridad (OWASP + supabase-pentest)
+│   │                  · pipeline n8n (3): n8n-architect → n8n-builder → n8n-reviewer
+│   │                    (el reviewer tiene VETO; ver "Construcción de Workflows n8n")
+│   │                  · prompting (2): langchain-prompt-designer (system prompts de
+│   │                    agentes LangChain), prompt-reviewer (checklist pre-deploy)
+│   └── skills/        62 skills de Claude Code (slash commands), por familia:
+│                      · UI/UX y diseño (13): ui-ux-pro-max, ui-styling, design,
+│                        design-system, brand, brandkit, banner-design, slides,
+│                        emil-design-eng, taste-skill, minimalist-skill,
+│                        redesign-skill, soft-skill
+│                      · animación GSAP (7): gsap-core, gsap-timeline,
+│                        gsap-scrolltrigger, gsap-plugins, gsap-react,
+│                        gsap-performance, gsap-utils
+│                      · marketing y CRO (14): copywriting, customer-research,
+│                        product-marketing-context, marketing-psychology,
+│                        launch-strategy, social-content, email-sequence,
+│                        pricing-strategy, page-cro, onboarding-cro,
+│                        signup-flow-cro, paywall-upgrade-cro, meta-pixel-capi,
+│                        output-skill
+│                      · seguridad (12): owasp-security, supabase-pentest
+│                        (orquestador) + su suite: supabase-detect,
+│                        supabase-audit-rls, supabase-audit-authenticated,
+│                        supabase-audit-auth-config, supabase-audit-auth-signup,
+│                        supabase-audit-functions, supabase-audit-buckets-public,
+│                        supabase-evidence, supabase-report, supabase-help
+│                      · chatbot / n8n / prompting (10): momentum-architect,
+│                        momentum-prompt-gen, momentum-prompt-optimizer,
+│                        momentum-n8n-builder, momentum-workflow-variants,
+│                        n8n-workflow-audit, n8n-expression-validator,
+│                        n8n-langchain-prompts-rules,
+│                        n8n-postgres-prepared-statements,
+│                        langchain-agent-prompt-design
+│                      · infra y datos (6): chatbot-db-schema-supabase,
+│                        chatbot-manychat-supabase-multicanal,
+│                        vercel-domain-migration, onvo-setup,
+│                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        78 skills de proceso reusables:
+│   └── skills/        83 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -402,6 +434,107 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      frames congela las animaciones y una geometría de modal
 │                      parece rota, y el ROL de la sesión decidiendo qué podés
 │                      ver —con `agent` el composer roto ni se renderiza—).
+│                      Tier 24 — Lo que parece config y no lo es (4 nuevas + 2
+│                      extensiones, capturadas 2026-08-17/18 de las sesiones de
+│                      Roberto a producción y del flujo del handoff):
+│                      config-por-tenant-no-literal-en-el-flujo (⭐ cross-project:
+│                      en multi-tenant, la lógica de UN rubro cableada en el
+│                      flujo COMPARTIDO. El MISMO modo de fallo apareció dos
+│                      veces en dos días: el nodo Router tenía el clasificador de
+│                      un cliente escrito a mano —los prompts de router que cada
+│                      cliente tenía cargados NUNCA se ejecutaron, y una alarma
+│                      médica la venía atendiendo el bot en vez de escalar—, y un
+│                      nodo inyectaba, haciéndose pasar por el mensaje del lead,
+│                      "pedile la zona o el código de la propiedad" a los leads
+│                      de un fisioterapeuta. Lo no-obvio: (1) no hay error, log
+│                      ni test que lo agarre —funciona perfecto para el cliente
+│                      cuyo literal quedó cableado—; (2) el guard NO es un flag
+│                      (`usar_router_propio:true` dice "quiero", no "funciona"):
+│                      se verifica que lo cargado declare el CONTRATO del
+│                      consumidor, porque un cliente tenía bajo la llave `router`
+│                      un filtro pre-bot con otro schema y sin guard quedaba MUDO
+│                      en producción; (3) un valor FUERA del contrato no degrada
+│                      —el Switch descarta el ítem y el bot no contesta; el
+│                      BACKUP solo dispara si el campo NO EXISTE—; (4) el default
+│                      va en el flujo con nombre de default y los que dependían
+│                      del texto viejo lo conservan por override cargado ANTES
+│                      del deploy; (5) el control que NO discrimina se reporta
+│                      igual) + probar-camino-produccion-sin-efectos-externos
+│                      (⭐ cross-project: probar el camino REAL de producción
+│                      cortando en el último centímetro, justo antes del nodo que
+│                      sale al mundo. Un flag EN EL DATO —`__eval_synthetic`— no
+│                      en el entorno: una env var apaga el envío para TODOS,
+│                      incluido el lead que escriba en ese momento. Trae la
+│                      matriz mínima de 4 —caso nuevo · el camino de TODOS ·
+│                      no-regresión de un cliente VIVO · idempotencia—, y los dos
+│                      rastros a limpiar: las filas sintéticas y la memoria
+│                      conversacional del agente, que si volvés a probar por el
+│                      mismo hilo los recuerda) +
+│                      webhook-fanout-sin-reconciliacion (el proveedor entrega el
+│                      MISMO evento a dos endpoints independientes —uno persiste,
+│                      otro reacciona— y si una entrega falla NADIE reconcilia:
+│                      el bot contestó una foto que en la base no existe. Dos
+│                      suscriptores al mismo evento no son redundancia, son dos
+│                      formas independientes de perderse el evento. Arreglo:
+│                      INSERT idempotente por la llave natural del proveedor
+│                      colgado EN PARALELO —en serie convierte la red de
+│                      seguridad en un punto de falla nuevo— con la unicidad
+│                      garantizada por constraint, nunca por select-previo. Y el
+│                      hueco se documenta: si el evento perdido es el PRIMER
+│                      mensaje de un lead nuevo, el rescate no lo salva) +
+│                      enforcement-con-hook-no-con-regla (una regla escrita
+│                      depende de que alguien se acuerde; un hook no. La regla
+│                      "nunca push directo a main" estaba escrita desde el
+│                      2026-05-29 y el 2026-07-15 un commit directo deployó a
+│                      producción sin preview. Trae el filtro de 3 preguntas para
+│                      decidir si algo merece hook, las 3 propiedades del hook
+│                      que sobrevive —explica en vez de solo bloquear, escape
+│                      explícito con nombre propio en vez de `--no-verify`,
+│                      y conoce sus falsos positivos: un merge en main NO es un
+│                      commit directo— y el gotcha que lo anula: `.git/hooks/` NO
+│                      se versiona, así que sin `git config core.hooksPath
+│                      .githooks` el hook existe en el repo, se lee, da confianza
+│                      y NO corre. El hook real viaja en `.githooks/pre-commit`
+│                      de este template).
+│                      **Extensiones:** verificar-funcionamiento-end-to-end suma
+│                      **"el nodo corrió" ≠ "el nodo escribió"** (un INSERT
+│                      reportaba `success` sin escribir: nombre de enum mal
+│                      escrito + `onError: continueRegularOutput` —que es lo
+│                      CORRECTO en producción— convirtiendo el error en un ítem
+│                      silencioso; el manejo de errores que necesitás en prod es
+│                      justo el que esconde el bug en la prueba). Y
+│                      whatsapp-proactivo-a-staff suma dos: el endpoint
+│                      **`?wabaId=` de YCloud IGNORA el filtro** (devuelve las
+│                      plantillas de toda la cuenta → creés que tu cliente ya
+│                      tiene la plantilla, es de otro, y el aviso muere con
+│                      `ycloud_403`) y los **parámetros fantasma** (se mandaba
+│                      `send_lead_message` en el payload y la función nunca lo
+│                      lee: antes de confiar en un flag, buscá su LECTOR).
+│                      Sin tier (capturadas en el camino, faltaban del índice):
+│                      verificar-funcionamiento-end-to-end (⭐ el estándar de
+│                      prueba del proyecto: "compila"/"corrió"/"respondió
+│                      200"/"se ve bien" NO son "funciona"; fuente de verdad por
+│                      capa + Definition of Done de 3 preguntas) ·
+│                      onboarding-cliente-crm (alta de un cliente externo de
+│                      punta a punta, con gotchas numerados desde #-2) ·
+│                      conexion-whatsapp-ycloud-supabase-n8n (montar la conexión
+│                      WhatsApp en un proyecto/cliente nuevo) ·
+│                      jsonb-config-save-no-pisar-campos-ajenos (un "Guardar" de
+│                      una config jsonb que borra los campos de otros writers) ·
+│                      realtime-canal-muere-en-silencio (el canal se cae y la UI
+│                      queda vieja hasta F5) · desktop-notifications-from-realtime
+│                      (notificaciones del SO enganchadas a un realtime
+│                      por-usuario) · refrescar-vista-server-tras-mutacion-cliente
+│                      ("hago algo y tengo que refrescar para verlo") ·
+│                      popover-portal-no-absolute (popovers SIEMPRE con portal,
+│                      NUNCA `absolute` — el mismo bug 3+ veces) ·
+│                      toaster-montado-por-scope (toasts que no aparecen y no dan
+│                      error: falta el `<Toaster>` en ese scope) ·
+│                      nota-de-voz-real-whatsapp (nota de voz con la ondita, no
+│                      adjunto) · bot-whatsapp-unsupported-fallback (recuperar
+│                      los mensajes `unsupported` del clic de anuncio cableando
+│                      el fallback del Switch — 3 leads reales quedaron sin
+│                      respuesta).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
@@ -436,9 +569,19 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 ├── outputs/                   Entregables del template (vacío por defecto)
 ├── proyectos/                 ← Aquí viven los proyectos concretos (gitignored)
 │   └── hookly/                  primer proyecto (repo independiente)
+├── crm-v2/                    ← Momentum AI CRM (repo independiente, gitignored).
+│                              Es el proyecto que produjo la mayoría de las skills
+│                              de los Tiers 8→24. Su `memory/backlog.md` es la
+│                              fuente de verdad de ESE proyecto, no de este.
+├── .githooks/
+│   └── pre-commit             Bloquea commits directos en main/master. NO viaja
+│                              solo: cada clon corre UNA VEZ
+│                              `git config core.hooksPath .githooks`.
+│                              Ver skill `enforcement-con-hook-no-con-regla`.
 ├── CLAUDE.md                  Este archivo
 ├── README.md
-└── .gitignore                 Incluye `proyectos/` (subproyectos no se versionan aquí)
+└── .gitignore                 Incluye `proyectos/` y `crm-v2/` (subproyectos no se
+                               versionan aquí)
 ```
 
 ## Versionado / GitHub
@@ -484,7 +627,11 @@ Detalles en `memory/orquestacion.md`.
 
 ### Reglas inviolables
 
-- Nunca commits directos a `main`/`master` (en cualquier proyecto)
+- Nunca commits directos a `main`/`master` (en cualquier proyecto). **Esto no depende de acordarse:** el template trae `.githooks/pre-commit` que lo bloquea. Instalarlo **una vez por clon** — `.git/hooks/` no se versiona, así que sin esto el hook existe pero no corre:
+  ```bash
+  git config core.hooksPath .githooks
+  ```
+  Verificar con `git config core.hooksPath` (debe decir `.githooks`). Escapes a propósito: los merges pasan solos, y `ALLOW_MAIN_COMMIT=1 git commit ...` para una emergencia real. Ver skill `enforcement-con-hook-no-con-regla`.
 - Nunca instalar global sin OK explícito del usuario
 - `.env` siempre en `.gitignore`, secretos nunca hardcodeados
 - Antes de instalar un repo nuevo: investigar a fondo, verificar qué instala el CLI vs qué hay en el repo
@@ -494,7 +641,10 @@ Detalles en `memory/orquestacion.md`.
 
 | Proyecto | Path | Repo GitHub | Descripción |
 |---|---|---|---|
+| **Momentum AI CRM** | `crm-v2/` | `momentum-ai-crm` | CRM SaaS multi-tenant + bot de WhatsApp. **En producción con clientes reales.** Es la fuente de los Tiers 8→24 de skills. |
 | Hookly | `proyectos/hookly/` | `hookly` | SaaS análisis viral de reels (Instagram MVP, TikTok V1) |
+
+> Los clientes que corren sobre el CRM (fichas comerciales + prompts) viven en `clients/` — ver `clients/README.md`, que es el registro maestro.
 
 ## Convenciones
 
