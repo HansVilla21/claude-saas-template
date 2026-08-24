@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        147 skills de proceso reusables:
+│   └── skills/        150 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -998,6 +998,57 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      Más: un push exitoso a una rama NO es un cambio
 │                      entregado —confirmar con `git merge-base --is-ancestor
 │                      <commit> origin/main`).
+│                      Tier 32 — El silencio que nadie reporta (2, capturadas 2026-08-24
+│                      activando el bot nocturno de un cliente):
+│                      config-que-deja-el-sistema-mudo (⭐ cross-project: un guard escrito
+│                      para el caso feliz vuelve IMPOSIBLE una configuración que la UI sí
+│                      deja guardar, y el resultado no es un error sino el SILENCIO
+│                      permanente. Caso medido: `fromMin < toMin` hacía que un turno de
+│                      18:00 a 05:00 —justo lo que el cliente necesitaba— nunca pudiera
+│                      estar adentro: el bot contestaba "fuera de horario" las 24 h y se
+│                      pausaba ~23, todos los días, sin una sola línea roja. Nunca es uno
+│                      solo: el MISMO nodo tenía `days: []` —que el panel documenta como
+│                      "sin restricción de día"— produciendo la misma mudez por otra
+│                      puerta. Trae la pregunta que los desenmascara (¿existe una config
+│                      guardable que haga esta condición falsa PARA SIEMPRE?), la regla de
+│                      fallar hacia el lado barato —en un bot el modo caro es el silencio,
+│                      en cobros o permisos es el opuesto—, por qué la UI tiene que
+│                      EXPLICAR el caso raro y no solo permitirlo —"de 18:00 a 05:00" se
+│                      lee al revés y el negocio marca el día equivocado—, y cómo probar
+│                      el motor REAL con el reloj inyectado más el control negativo sin el
+│                      cual el verde es falso) + distinguir-detenido-a-proposito-de-roto
+│                      (⭐ cross-project: un estado que significa "en vuelo" pero que
+│                      también se usa para "se detuvo a propósito" NO es un estado, es una
+│                      ausencia de información —y con esa ausencia no se decide nada. El
+│                      founder iba a sacar la extracción del flujo de n8n porque el 26 %
+│                      de los turnos quedaba colgado; al medirlos de a uno, 237 de 264
+│                      eran conversaciones en manos humanas, 183 con handoff, 87 con pausa
+│                      y solo 7 sin explicación —y la rama de error del extractor NUNCA
+│                      se había disparado. El bot se detenía BIEN y nadie lo anotaba: una
+│                      decisión de arquitectura cara estaba por tomarse sobre un número
+│                      que no medía lo que parecía. Causa única: la traza se crea ANTES de
+│                      los portones, y `Chatbot Activado?` tenía la rama false COLGANDO EN
+│                      EL VACÍO —una rama muerta no figura como final en ningún listado—.
+│                      Lo no-obvio: NO cerrar el registro en una rama PARALELA (lo
+│                      cerrarías mientras el proceso trabaja, y desde ahí tus métricas
+│                      mienten al revés); el valor nuevo necesita migración o el CHECK lo
+│                      rechaza y —con el cierre en modo no-romper-el-flujo— el error queda
+│                      INVISIBLE; guardar el MOTIVO y no solo el estado, porque el portón
+│                      evaluaba 3 condiciones con AND; no pisar la metadata al cerrar; y
+│                      marcar el backfill para que la fila de prueba tenga que venir SIN
+│                      esa marca —si no, el backfill te "confirma" el nodo nuevo y no
+│                      probaste nada—. El backfill solo donde el motivo es inequívoco:
+│                      adivinárselo a un registro viejo es fabricar un dato).
+│                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
+│                      2026-08-24 con el grep carpeta-por-carpeta que manda
+│                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
+│                      (borrar una entidad con FKs `NO ACTION`) ·
+│                      firma-electronica-simple-con-validez-legal (sin comprar DocuSign) ·
+│                      portar-el-diseno-no-interpretarlo ·
+│                      rate-limit-en-memoria-no-existe-en-serverless ·
+│                      service-role-con-cookies-fuga-de-pii (el cliente "admin" que filtra
+│                      datos sin login) · supabase-storage-borra-en-silencio (y el índice
+│                      único parcial que rompe a mitad).
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
