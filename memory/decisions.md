@@ -6,6 +6,34 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-08-24 — Mejoras del sistema: el horario que dejaba bots mudos, la traza que no distinguía, y el Router config-driven de punta a punta
+
+**Contexto:** El founder pasó una lista priorizada de 18 mejoras y bugs, con el Grupo 0 marcado urgente porque Givi esperaba activación ese día. La auditoría contra el código y la base VIVA cambió el plan antes de escribir una línea.
+
+**Decisiones tomadas:**
+
+1. **Auditar contra la fuente de verdad antes de planificar, no después.** De los 18 ítems, **4 ya estaban hechos** (horarios backend y panel, adjuntar documentos/videos, plantillas fuera de ventana) y 3 de los 4 sub-ítems de deuda técnica también. Varios números del ticket no coincidían con producción: los "15 leads atascados en Nuevo" eran **80, y en nuestro propio tenant**, no en Givi; los "0 leads calificados por bot" eran **3**. Planificar sobre el ticket habría producido trabajo duplicado y prioridades equivocadas.
+2. **El turno nocturno pertenece al día en que EMPIEZA.** Con "viernes" marcado, el turno corre del viernes 18:00 al sábado 05:00. Decisión del founder; define qué marca el negocio en el panel.
+3. **Fallar hacia el lado barato.** Un rango horario ambiguo (`from === to`) hace que el bot **conteste**: en atención al cliente el modo de fallo caro es el silencio. En cobros o permisos la regla sería la opuesta, y eso queda escrito en el código.
+4. **`skipped` no es `done`.** La traza del turno pasa a distinguir "se detuvo a propósito" de "se rompió", con el motivo en `metadata.reason`. El backfill retroactivo se hizo **solo donde el motivo es inequívoco** (Givi con el bot apagado, 2.765 filas); el resto se dejó en `running` porque adivinarle el motivo a un registro viejo es fabricar un dato.
+5. **NO sacar la extracción del flujo de n8n — decisión revertida por medición.** El founder planteaba moverla a código porque el 26 % de los turnos quedaba colgado. Al medirlos de a uno: 237 de 264 eran conversaciones en manos humanas, y **solo 7 (2,6 %) sin explicación**. La preocupación de fondo era correcta (nada reintenta ni reconcilia) pero la tasa de falla real no era la que se creía. Se instrumentó primero; el rediseño se decide con datos.
+6. **El flujo cuenta, no el LLM.** El Information Extractor es sin estado por turno y no acumula bien (medido: un contador subió 1→2 y se quedó en 2 al tercer evento, así que la regla de las 3 insistencias nunca disparaba). Se invierte: el sistema calcula el total y **se lo dice** al router; el router solo reporta 0 o 1 por turno.
+7. **Todo cambio a un nodo compartido va con opt-in por tenant.** Los contadores solo se activan con `bot_config.counters_mode = 'per_turn'`. Sin la llave, nada cambia. Es la tercera vez que aparece el mismo modo de fallo (texto de media, prompt del router, esquema del router): lógica de un cliente cableada en el flujo de todos.
+8. **El playground va primero cuando el riesgo es que se rompa para todos.** El esquema del Router se cableó como expresión en el playground, se probó, y recién ahí se tocó producción. Si una expresión no evaluara en `inputSchema`, ningún tenant rutearía.
+9. **Lo de un cliente puntual va a su propia sesión.** Roberto salió de esta sesión a una aparte, para mantener el foco en mejoras del producto.
+
+**Qué se descartó:**
+
+- **Rediseñar la extracción fuera de n8n** (por ahora): el número que lo justificaba no medía lo que parecía. Queda abierto el hueco real —no hay reintento ni reconciliación si un turno muere— para decidirlo con el conteo ya limpio.
+- **Prender el bot de Givi:** decisión explícita del founder de seguir sin prenderlo. La captura de campos no se puede verificar sin eso.
+- **Ofrecer listas cerradas de opciones en el extractor:** `field_type='enum'` no restringe nada (el schema builder lo trata como texto y el escritor solo deja una advertencia). Se documentó como bloqueante de la UI del extractor en vez de construir una pantalla que le mienta al dueño del negocio.
+
+**Pendientes inmediatos:**
+
+- 🔴 Rotar el token de Apify y `BOT_TEST_SECRET` — verificado el 2026-08-24 que **siguen hardcodeados** en los nodos vivos, así que cada export los vuelve a filtrar.
+- ⚠️ Verificar el esquema config-driven del Router con una **ejecución real de producción**: no hubo ninguna que llegara al Router ese día.
+- Roberto (contadores, alineación del router, teléfonos del equipo) → sesión aparte.
+
 ## 2026-08-11 — Jacó Dream Rentals a producción: número WhatsApp + catálogo real en el bot
 
 **Contexto:** El founder conectó el número `+50671328394` a YCloud para Jacó y pidió "toda la configuración". El tenant ya estaba casi armado (owner, funnel, módulo, `bot_enabled`), así que el trabajo real fue el canal + destapar por qué el bot no usaba el catálogo. En el camino salieron 5 defectos encadenados que no estaban a la vista.
