@@ -62,6 +62,25 @@ En Jacó, `en-conversacion` se llama hoy **"Link enviado"** y `descartado` se ll
 
 **Decisión:** el significado deja de vivir en el identificador y pasa a una descripción que el cliente edita. El slug sigue siendo el contrato; el sentido ahora es un dato.
 
+### Decisión 9 — Una feature a la que no se puede llegar es una feature que no existe
+
+Seguimientos se mergeó, se deployó y quedó funcionando… y el menú la seguía marcando como "Pronto":
+deshabilitada, sin link. Solo se llegaba escribiendo la URL. Lo reportó el founder con una captura.
+
+**Lo que hay que retener:** no lo agarró **nada**. `tsc` limpio, build en verde, la pantalla medida a
+375px en las dos pestañas y las dos ramas del modal, y un mensaje entregado a un WhatsApp real. Todo
+verde sobre algo **inalcanzable**. Verificamos que la pantalla funcionara por dentro y no verificamos
+que se pudiera **llegar** a ella.
+
+**Regla:** cuando la entrega es una pantalla NUEVA, el último chequeo no es que renderice — es abrir el
+menú y confirmar que el camino existe. Es la misma familia que el `.githooks/` que no viaja solo o la
+plantilla de correo que estaba en el repo y no en la config viva: **la pieza existe y el camino no**.
+
+**Trampa del arreglo:** el encabezado "Pronto" del sidebar se pinta antes del PRIMER ítem deshabilitado
+que no venga precedido de otro igual. Quitarle el flag a Seguimientos dejándolo en medio del bloque
+habría partido la sección en dos y duplicado el encabezado. Se verificó simulando el render **contra el
+array real del archivo**, no contra una copia.
+
 ### Pendientes que dispara
 
 - 🔴 **Rotar el token de Apify y el `BOT_TEST_SECRET`** — 13 días, en los nodos vivos, y cada export los refiltra. Lo único accionable sin depender de nadie.
