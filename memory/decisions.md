@@ -6,6 +6,68 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-08-27 — Calificación config-driven, tres bugs de producción, y Seguimientos
+
+**Contexto:** el founder preguntó si el auto-etiquetado y la calificación automática ya funcionaban. La medición dio vuelta la premisa y ordenó media sesión. Después reportó tres bugs con capturas, y cerramos con la funcionalidad de Seguimientos completa. 10 PRs, #140 → #149.
+
+### Decisión 1 — Cuando un producto de IA saca mal output, sospechar del INPUT antes que del motor
+
+De 4.147 turnos, los que tenían una herramienta **bloqueada** por el gate o los toggles eran **0**. Nada estaba frenado. El extractor contestaba `unknown` el **98,7 %** porque el nodo le pedía decidir *"según los criterios del negocio"* y esos criterios **no viajaban a ningún lado**.
+
+**Por qué:** es la segunda vez que este modo de fallo aparece (la primera, en FreshAdFlow, con las usuarias generando todo en el modo equivocado). El orden de sospecha correcto es: ¿qué le estamos dando de comer? antes que ¿está roto el modelo?
+
+**Qué se descartó:** tocar prompts o cambiar de modelo. Ninguna de las dos habría movido la aguja.
+
+### Decisión 2 — Un control que no puede fallar no es un control
+
+El entrante duplicado corrió **9 días** con una verificación en verde: *"0 `external_id` duplicados"*. Los duplicados tenían ids **distintos** —uno de Meta, otro de YCloud— así que ese conteo **nunca podía dar otra cosa**.
+
+**Por qué importa:** el chequeo nuevo compara los dos **productores**, no valores repetidos, y por eso el corte del 18-ago salta a la vista sin buscarlo. Antes de confiar en una verificación, preguntarse **qué tendría que pasar para que fallara**. Si no hay respuesta, no está midiendo nada.
+
+### Decisión 3 — Un cancelado no es un fallo: el motivo es parte del dato
+
+En Seguimientos, que algo se cancele porque el contacto respondió es **exactamente lo que uno quiere**. Por eso cada cancelación guarda su motivo y la UI lo muestra en el tono que corresponde.
+
+**Por qué:** sin el motivo, la pantalla es una lista de "cancelados" donde nadie distingue el sistema funcionando de un sistema roto. Es el mismo aprendizaje que las trazas del bot del 24-ago (`skipped` vs `failed`), aplicado a otra capa.
+
+### Decisión 4 — Lo que el sistema puede deducir, no se le pregunta al usuario
+
+Un seguimiento "para dentro de 2 días" **siempre** cae fuera de la ventana de 24 h de WhatsApp, así que solo puede salir por plantilla. En vez de hacer que el usuario entienda las reglas de Meta, el sistema mira la hora programada contra el último mensaje del contacto y **elige solo**, explicando por qué.
+
+**Qué se descartó:** un selector de modo. Habría dejado programar cosas que el motor cancela dos días después, en silencio.
+
+### Decisión 5 — Las barandas viven donde se pueden probar
+
+Las cinco condiciones que impiden que un lead reciba lo que no correspondía viven en **SQL**, no en la función de envío. En SQL se prueban contra la base viva con el bloque que siempre aborta; en el envío serían código que solo se prueba mandando WhatsApps a gente real.
+
+**Corolario que se verificó:** el control que importa no es que las barandas cancelen, es que **algo pase**. Si nada pasara, parecerían perfectas y la feature nacería muerta.
+
+### Decisión 6 — El tercer consumidor obliga a unificar, y el código puede decirlo
+
+`resolveWhatsAppRoute` estaba duplicada con una nota al lado: *"deuda consciente… si aparece un TERCER consumidor, unificar"*. Apareció. Se extrajo el núcleo sin sesión (`lib/inbox/deliver`) y la server action se quedó solo con lo que necesita sesión.
+
+**Qué se descartó:** una Edge Function que duplicara el envío. Es literalmente el modo de fallo que acabábamos de arreglar — dos escritores del mismo dato que divergen.
+
+**Aprendizaje de método:** dejar escrita la condición de reevaluación al lado de la deuda funciona. Un año después, el que la lee sabe exactamente cuándo pagarla.
+
+### Decisión 7 — La plomería se entrega lista y apagada; la enciende el usuario
+
+Decisión explícita del founder: la funcionalidad se entrega **sin nada activo**. 0 reglas, 0 pendientes, cron creado con `active = false`.
+
+**Por qué:** el que va a encenderla es el que entiende su negocio. Y encender no es un acto reversible en el mismo sentido: un mensaje que salió, salió.
+
+### Decisión 8 — El identificador inmutable protege del rename, pero se lleva el significado
+
+En Jacó, `en-conversacion` se llama hoy **"Link enviado"** y `descartado` se llama "Perdido". El bot razona sobre el slug —inmutable a propósito— así que venía pensando una cosa mientras el negocio quería decir otra. Sin dar un solo error.
+
+**Decisión:** el significado deja de vivir en el identificador y pasa a una descripción que el cliente edita. El slug sigue siendo el contrato; el sentido ahora es un dato.
+
+### Pendientes que dispara
+
+- 🔴 **Rotar el token de Apify y el `BOT_TEST_SECRET`** — 13 días, en los nodos vivos, y cada export los refiltra. Lo único accionable sin depender de nadie.
+- Limpiar las 388 filas duplicadas **exigiendo gemela**: 16 de las 404 son rescates legítimos.
+- Confirmar con tráfico real el cableado del extractor y el fix del duplicado.
+
 ## 2026-08-24 — Mejoras del sistema: el horario que dejaba bots mudos, la traza que no distinguía, y el Router config-driven de punta a punta
 
 **Contexto:** El founder pasó una lista priorizada de 18 mejoras y bugs, con el Grupo 0 marcado urgente porque Givi esperaba activación ese día. La auditoría contra el código y la base VIVA cambió el plan antes de escribir una línea.
