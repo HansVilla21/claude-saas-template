@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        150 skills de proceso reusables:
+│   └── skills/        151 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1039,6 +1039,48 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      esa marca —si no, el backfill te "confirma" el nodo nuevo y no
 │                      probaste nada—. El backfill solo donde el motivo es inequívoco:
 │                      adivinárselo a un registro viejo es fabricar un dato).
+│                      Tier 33 — El cajón de sastre que le habla al cliente (1 nueva +
+│                      1 extensión, capturadas 2026-08-28 del bot que se disculpaba
+│                      con quien le mandaba un corazón):
+│                      clasificar-por-lista-no-por-fallback (⭐ cross-project: una
+│                      rama fallback responde "todo lo que no reconocí", así que
+│                      desde el momento en que produce SALIDA VISIBLE, cada tipo
+│                      que no listaste —y cada tipo que el proveedor invente
+│                      mañana— es un mensaje equivocado a un cliente real. Caso
+│                      medido: un lead reaccionó con ❤️ y el bot le contestó "no
+│                      pude abrir el mensaje"; preguntó "Esto es IA?", el bot dijo
+│                      que era humano, volvió a pasar, y cerró con "No parece
+│                      porque has caído dos veces en el mismo error". En el cajón
+│                      había 72 eventos que NO merecían la disculpa (reaction 35,
+│                      revoke 25, edit 12) contra 54 que sí —más de la mitad mal
+│                      clasificado, dos meses y medio sin un error en ningún log,
+│                      porque para los tipos que SÍ listaste funciona perfecto y
+│                      el único detector es contar—. Peor: el evento `edit` TRAE
+│                      el texto completo, o sea el bot tenía el mensaje en la mano
+│                      y se disculpó por no poder abrirlo, tres veces al mismo
+│                      prospecto. La pregunta que lo desenmascara: ¿esta rama le
+│                      habla a alguien de afuera? Si sí, no puede definirse por
+│                      exclusión. Trae: el SQL que parte los tipos en merece/no
+│                      merece —y el segundo, el que verifica que la lista SE PUEDE
+│                      cerrar, porque si hay eventos con el campo vacío cerrarla
+│                      DESCARTA tráfico—; tres ramas y no dos (whitelist ·
+│                      contenido recuperable se PROCESA · descarte con NOMBRE, que
+│                      un NoOp sin nombre vuelve "no contestó a propósito"
+│                      indistinguible de "está roto"); la tabla del lado barato de
+│                      fallar —en un bot el modo caro es hablar de más, en cobros
+│                      y permisos es callarse, misma decisión con el signo
+│                      invertido—; y el paso que rompe todo si lo hacés ORDENADO:
+│                      la whitelist va en el índice donde el fallback YA estaba
+│                      cableado, o el off-by-one desconecta justo el caso que ese
+│                      fallback rescataba y reintroduce el bug anterior en
+│                      silencio. Más el test que miente: con el off-by-one el bot
+│                      IGUAL responde —responde mal—, así que hay que verificar la
+│                      RUTA de ejecución y no que hubo salida.
+│                      **Extensión:** bot-whatsapp-unsupported-fallback —la skill
+│                      que CAUSÓ este bug— suma el apéndice de que cablear una
+│                      salida fallback muerta no rescata un caso, te SUSCRIBE a
+│                      todos los valores desconocidos de ese campo, y qué hay que
+│                      pagar en el mismo commit para que no vuelva.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
