@@ -107,4 +107,20 @@ Un lead de anuncio que llega como `unsupported` recibe el **saludo de inicio del
 
 ---
 
-Relacionada con: `conexion-whatsapp-ycloud-supabase-n8n` (el canal y el schema de eventos), `n8n-workflow-build-script` (deploy PUT + verificación por hash), `n8n-workflow-versioning` (snapshots/rollback), `bot-multibubble-output-flow` (el carril de salida que recibe la respuesta del agente). Caso real: build `crm-v2/scripts/build-bot-c-v1-unsupported-fallback.js`.
+## ⚠️ Apéndice 2026-08-28 — este fix tiene una factura, pagala en el mismo commit
+
+Cablear la salida fallback **no rescata un caso: te suscribe a todos los valores desconocidos de ese campo, presentes y futuros**. La rama dice "todo lo que no reconocí", así que desde el momento en que produce salida visible, cada tipo que no listaste es un mensaje equivocado a un cliente real.
+
+Lo que pasó por no anotar esto acá: a los dos meses y medio, ese mismo fallback le contestaba *"no pude abrir el mensaje"* a los leads que **reaccionaban con un 👍**. Medido sobre el histórico, en el cajón había **72 eventos que no merecían la disculpa** (`reaction` 35, `revoke` 25, `edit` 12) contra **54 que sí** (`unsupported` 46 + `sticker`/`video`/`contacts`/`document`). Un prospecto preguntó *"Esto es IA?"* y cerró con *"No parece porque has caído dos veces en el mismo error."*
+
+**Al aplicar esta skill, en el mismo cambio:**
+
+1. La rama que produce la disculpa se define por **whitelist** (`document`, `video`, `sticker`, `location`, `contacts`, `unsupported`), no por exclusión.
+2. El resto va a un **descarte con nombre**, no a la disculpa.
+3. Los tipos que traen contenido recuperable (`edit` trae el texto completo del mensaje corregido) se **procesan**, no se disculpan.
+
+El procedimiento completo, con el orden de índices que evita desconectar justo el clic de anuncio que este fix rescató, está en `clasificar-por-lista-no-por-fallback`.
+
+---
+
+Relacionada con: `conexion-whatsapp-ycloud-supabase-n8n` (el canal y el schema de eventos), `n8n-workflow-build-script` (deploy PUT + verificación por hash), `n8n-workflow-versioning` (snapshots/rollback), `bot-multibubble-output-flow` (el carril de salida que recibe la respuesta del agente), `clasificar-por-lista-no-por-fallback` (la factura de este fix). Caso real: build `crm-v2/scripts/build-bot-c-v1-unsupported-fallback.js`.
