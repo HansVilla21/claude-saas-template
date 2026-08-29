@@ -6,6 +6,61 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-08-28 — El onboarding del cliente entra al producto (y lo que enseñó probarlo)
+
+**Contexto:** cuando un cliente paga, se le mandaba al grupo de WhatsApp un `.docx` con 32 preguntas y 8 assets. Las carpetas `clients/*/onboarding/` de los tres clientes estaban **vacías**: nadie lo llenaba. El material que terminó cambiando el bot de Roberto llegó meses después y suelto. En la misma sesión se construyó, se probó y se puso en producción el reemplazo.
+
+### Decisión 1 — Una pregunta que no tiene destino en el sistema, sobra
+
+De 32 preguntas a **8 bloques**, cada uno con su destino escrito al lado (identidad del prompt, campos del extractor, reglas de handoff, catálogo). Lo que se cayó era lo que "estaría bueno saber".
+
+**Por qué:** el cliente que acaba de pagar está en su pico de entusiasmo y su piso de paciencia burocrática. Si el primer contacto post-pago es un formulario largo, se gasta el pico en trámite.
+
+### Decisión 2 — Se puede saltar, pero no perder
+
+El formulario es salteable y **saltar una pregunta cuenta como contestarla**. La contraparte obligatoria: aterrizaje automático la primera vez + recordatorio permanente hasta que lo mande.
+
+**Qué se descartó:** hacerlo obligatorio. Produce respuestas de relleno, que son peores que no tenerlas — contaminan el prompt con material que nadie dijo en serio.
+
+### Decisión 3 — Sin fila, no se le pide nada (sin backfill)
+
+Pedido explícito del founder: *"no debemos pedirle a los clientes que ya existen toda esa información, porque claramente ya la pasamos"*. La regla quedó al revés de lo intuitivo: **la ausencia de fila es la señal**. Los 6 clientes actuales no ven absolutamente nada (verificado uno por uno).
+
+### Decisión 4 — La vista del founder es de solo lectura
+
+Ya existía una forma de leer las respuestas —impersonar al cliente— y es justamente el problema: ahí el formulario es editable y guarda solo, así que un clic distraído le cambia las respuestas al cliente sin que nadie se entere.
+
+### Decisión 5 — Los avisos se derivan, no se guardan
+
+Cuando el founder pidió "una parte de notificaciones para estar al tanto", la respuesta NO fue una tabla con columna `leido`, sino derivar cada aviso de la señal que ya dice si el asunto está atendido.
+
+**Por qué:** con tabla propia, el estado del trabajo y el de la notificación son dos verdades que hay que sincronizar; el día que alguien resuelva algo sin tocar la notificación, la campana muestra trabajo ya hecho. **Costo asumido y dicho:** no hay historial de avisos viejos.
+
+**Corolario caro:** el trigger genérico de `updated_at` rompía esa regla — el sello de "yo lo miré" pisaba la fecha del último cambio del cliente, o sea que **mirar las respuestas quedaba registrado como si el cliente acabara de escribir**. Cuando dos actores distintos escriben la misma fila, un `updated_at` automático deja de significar algo.
+
+### Decisión 6 — El aviso va donde la persona YA entra
+
+Textual: *"al panel admin casi no entro"*. Un aviso al que hay que ir a buscar no avisa nada. Quedó en la pantalla de inicio **y** en una campana visible desde cualquier lugar del panel, cada uno llevando de un clic a donde se atiende.
+
+### Lo que enseñó probarlo: 4 bugs, ninguno lo agarró el compilador
+
+1. **El cliente que ya tenía cuenta se quedaba sin ningún aviso.** El mensaje del formulario colgaba de "fijó la contraseña", y ese evento **no ocurre** para quien ya tiene clave. Regla general: cuando colgás un aviso de un evento, preguntá si ese evento puede no ocurrir.
+2. **Borrar un cliente no borraba sus archivos.** Las FK cascadean; el almacenamiento no tiene FK. Medido al borrar el cliente de prueba: base impecable y **768 KB** de material privado vivos en la carpeta de una agencia que ya no existía. No se detectaba porque la verificación natural es contar filas, y daba todo en cero.
+3. El sello de "ya lo vi" pisando la fecha del cliente (decisión 5).
+4. Se guardaban bloques que nadie tocó.
+
+### Y tres veces mintió la verificación, no el código
+
+Una función que devuelve filas dentro del `select` hizo desaparecer una fila que sí existía (falso negativo); `now()` congelado dentro de una transacción hizo que un test de orden temporal no pudiera dar verdadero jamás (falso negativo); y —el peligroso— medir el responsive contra una UI **que nunca se hidrató** dio "8 bloques sin desbordes" siendo falso (falso positivo). El delator de este último: los 8 bloques daban resultados idénticos.
+
+**La regla que quedó:** antes de creerle a una verificación, preguntarse **qué tendría que pasar para que falle** — también cuando el resultado es el que esperabas.
+
+### Pendientes inmediatos
+
+1. 🔴 **Recargar YCloud ($0.0108).** Excede al onboarding: con ese saldo **el aviso de handoff de Roberto, Givi y Jacó tampoco sale**, y es invisible mirando el inbox porque las respuestas dentro de la ventana de 24 h son gratis.
+2. Crear las 2 plantillas en el WABA de Momentum + env vars en Vercel para prender los WhatsApp del onboarding.
+3. El audio desde iPhone sigue sin probarse (la prueba se hizo desde Android).
+
 ## 2026-08-27 — Calificación config-driven, tres bugs de producción, y Seguimientos
 
 **Contexto:** el founder preguntó si el auto-etiquetado y la calificación automática ya funcionaban. La medición dio vuelta la premisa y ordenó media sesión. Después reportó tres bugs con capturas, y cerramos con la funcionalidad de Seguimientos completa. 10 PRs, #140 → #149.
