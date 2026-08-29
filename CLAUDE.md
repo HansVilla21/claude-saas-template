@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        151 skills de proceso reusables:
+│   └── skills/        154 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1091,6 +1091,95 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      service-role-con-cookies-fuga-de-pii (el cliente "admin" que filtra
 │                      datos sin login) · supabase-storage-borra-en-silencio (y el índice
 │                      único parcial que rompe a mitad).
+│                      Tier 34 — Lo que el cliente nunca llenó (3 nuevas + 1
+│                      extensión, capturadas 2026-08-28 construyendo y probando
+│                      EN PRODUCCIÓN el onboarding del CRM):
+│                      onboarding-cliente-en-el-producto (⭐ cross-project:
+│                      mover el cuestionario que le pedís al cliente DESDE un
+│                      Word mandado al grupo de WhatsApp HACIA adentro del
+│                      producto. El síntoma que confirma que aplica: las
+│                      carpetas de onboarding de tus clientes están VACÍAS —3
+│                      de 3 en este proyecto— y el material que terminó
+│                      cambiando el bot llegó meses después y suelto. Trae: el
+│                      corte de 32 preguntas a 8 bloques por la regla "una
+│                      pregunta que no tiene destino en el sistema sobra", las
+│                      4 que nadie contesta si no se preguntan —precios y si el
+│                      bot puede decirlos, qué NUNCA puede prometer, quién
+│                      sigue cuando el bot corta CON su teléfono, y qué pasa
+│                      DESPUÉS de que el cliente dice que sí—, una sola forma
+│                      de respuesta para todo tipo de pregunta, y por qué
+│                      SALTAR cuenta como contestar. Lo no obvio: el grabador
+│                      del chat NO se reusa —exige Ogg/Opus porque lo pide Meta
+│                      y por eso no se ofrece en iPhone, justo el cliente que
+│                      más va a contestar por audio—; el aterrizaje necesita un
+│                      `opened_at` propio porque "pendiente" significa "no
+│                      contestó", no "no lo vio", y va en la base y no en el
+│                      navegador o el que arrancó en el celular vuelve a ser
+│                      recién llegado en la laptop; y la regla que decide a
+│                      quién se le pide es SIN FILA = no se le muestra nada, sin
+│                      backfill, para que los clientes viejos no vean un
+│                      recordatorio de algo que nadie les pidió. Más los 4 bugs
+│                      que salen sí o sí —los 4 aparecieron PROBANDO, ninguno
+│                      compilando—: el cliente que YA tenía cuenta se queda sin
+│                      ningún aviso porque el mensaje cuelga de "fijó la
+│                      contraseña" y ese evento NO OCURRE; borrar deja los
+│                      archivos; la fecha del cliente pisada por quien la mira;
+│                      y guardar bloques que nadie tocó) +
+│                      borrar-entidad-deja-sus-archivos (⭐ cross-project: las
+│                      FK cascadean, el almacenamiento NO tiene FK. El DELETE
+│                      limpia toda la base en un movimiento y se siente
+│                      completo, pero los audios, las capturas y el logo del
+│                      cliente quedan para siempre —y no es basura acumulada,
+│                      es material privado de alguien a quien le dijiste que
+│                      borraste su cuenta—. No se detecta porque la
+│                      verificación natural es contar filas y da TODO EN CERO:
+│                      medido borrando el cliente de prueba, base impecable y
+│                      768 KB vivos en la carpeta de una agencia que ya no
+│                      existía. Trae el recorrido de 2 niveles —en un
+│                      almacenamiento de objetos las carpetas son prefijos y se
+│                      distinguen por si traen id—, por qué va ANTES del DELETE
+│                      —después no tenés de dónde sacar el id—, por qué es
+│                      best-effort con conteo devuelto —un tercer nivel de
+│                      carpetas no lo alcanza y el número es lo único que lo
+│                      delata—, y el paso que casi nadie hace: probar el
+│                      recorrido SIN borrar) +
+│                      aviso-derivado-que-se-apaga-solo (⭐ cross-project:
+│                      cuando piden "notificaciones para estar al tanto", NO
+│                      crear una tabla con una columna `leido`: derivar el aviso
+│                      de la señal que YA dice si el asunto está atendido. Con
+│                      tabla propia, el estado del trabajo y el de la
+│                      notificación son dos verdades que hay que sincronizar, y
+│                      el día que alguien resuelva algo sin tocar su
+│                      notificación la campana muestra trabajo ya hecho. El
+│                      costo asumido: no hay historial. Lo no obvio y caro: el
+│                      TRIGGER GENÉRICO de `updated_at` rompe la regla, porque
+│                      esa fecha significa "el cliente tocó esto" y el trigger
+│                      se dispara también con el sello de "yo lo miré" —o sea
+│                      que mirar las respuestas quedaba registrado como si el
+│                      cliente acabara de escribir—: cuando DOS ACTORES
+│                      escriben la misma fila, `updated_at` automático deja de
+│                      significar algo. Más: sellar "ya lo vi" donde de verdad
+│                      se miró —una ficha que renderiza todas las pestañas lo
+│                      apagaría sin que nadie lea—, y ponerlo donde la persona
+│                      YA entra, textual del founder: "al panel admin casi no
+│                      entro").
+│                      **Extensión:** verificar-funcionamiento-end-to-end suma
+│                      **cuando el que miente es TU CHEQUEO** — tres casos del
+│                      mismo día, los tres con el código bien y la verificación
+│                      mal: una función que devuelve FILAS dentro del `select`
+│                      hace desaparecer la fila entera (reporté que no existía y
+│                      existía); `now()` está CONGELADO dentro de una
+│                      transacción, así que un test de ORDEN temporal no puede
+│                      dar verdadero jamás; y —el peligroso, falso POSITIVO—
+│                      medir una UI que nunca se hidrató: 8 bloques "sin
+│                      desbordes" cuando en realidad los clics no hacían nada y
+│                      se estaba midiendo solo el bloque ya abierto, con el
+│                      delator de que los 8 daban resultados IDÉNTICOS y el
+│                      control de abrir el login del propio proyecto para ver
+│                      que tampoco reaccionaba. La regla: antes de creerle a una
+│                      verificación, preguntá qué tendría que pasar para que
+│                      FALLE — y hacé esa pregunta también cuando el resultado
+│                      es el que esperabas.
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
