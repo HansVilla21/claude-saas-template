@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        151 skills de proceso reusables:
+│   └── skills/        153 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1081,6 +1081,54 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      salida fallback muerta no rescata un caso, te SUSCRIBE a
 │                      todos los valores desconocidos de ese campo, y qué hay que
 │                      pagar en el mismo commit para que no vuelva.
+│                      Tier 34 — El bot que se mudó de casa (2, capturadas
+│                      2026-09-02 pasando a Leo (Level CR) de su workflow propio
+│                      de n8n al CRM): portar-bot-n8n-propio-al-crm (⭐ mover el
+│                      bot que un cliente YA tenía andando a la plataforma
+│                      multi-tenant. Lo primero: los prompts NO se le piden al
+│                      cliente, se sacan del JSON del workflow por API —salen
+│                      exactos, medido: 50.310 chars el principal—. Y el paso
+│                      que falló las TRES veces que se hizo (Roberto → `ROBERTO`,
+│                      Jacó → `PRINCIPAL`, Level → `LEO_PRINCIPAL` ×22): el
+│                      prompt del cliente emite el nombre de SU bot como destino
+│                      y el CRM solo entiende 3 valores, con DOS formas distintas
+│                      de morir —el guard lo descarta y rutea con el clasificador
+│                      de Momentum (tu fisioterapeuta clasificando por "aceptó la
+│                      DEMO"), o si forzás el paso el Switch descarta el turno y
+│                      el bot queda MUDO, porque el BACKUP solo dispara cuando el
+│                      campo NO EXISTE, no cuando trae basura—. El fix es un sed
+│                      global y se PRUEBA neutralizando la palabra en los dos
+│                      lados: el diff tiene que salir vacío. Más: el TIPO de cada
+│                      router_field se lee EN el prompt y no se adivina —el de
+│                      Level dice "entero de COLONES (no string)" y declararlo
+│                      string lo hacía llegar entrecomillado—; las tools son
+│                      nodos del grafo y NO viajan con el prompt; `bot_enabled`
+│                      es COALESCE(...,true) así que una agency con settings
+│                      vacío tiene el bot ARMADO desde que le conectás el número;
+│                      el playground EXIGE bot_enabled=true, así que el orden
+│                      seguro es cargar→prender→probar→apagar; y la verificación
+│                      NO es que el bot conteste bien —eso solo prueba el
+│                      principal— sino `router_source: tenant` en los datos de la
+│                      ejecución) + workflow-n8n-activo-sin-recibir (⭐
+│                      cross-project: un workflow ACTIVO puede no estar
+│                      recibiendo nada, y no falla —no hay ejecución, no hay
+│                      error, no hay log—. Medido: un bot 3 días mudo, en verde,
+│                      porque su webhook escuchaba un path que ya no estaba
+│                      registrado en el proveedor. "Activo" es una propiedad del
+│                      workflow: dice que n8n lo ejecutaría SI le llegara algo,
+│                      no que algo le llegue. Se detecta contando ejecuciones y
+│                      mirando `mode` —"webhook" es que te hablaron, "trigger" es
+│                      que te despertaste solo— y cruzando el path contra los
+│                      endpoints del proveedor. Trae el hermano del bug:
+│                      "success" ≠ "envió" —dos workflows en success todo el día
+│                      con 0 mensajes despachados, porque `onError:
+│                      continueRegularOutput`, que es lo CORRECTO en producción,
+│                      convierte el error en un ítem silencioso—, el alcance por
+│                      CUENTA de los webhooks de YCloud (agregar un número lo
+│                      engancha solo a todos los consumidores que ya estaban), y
+│                      el gotcha que te hace confirmar el bug equivocado: un
+│                      `limit=200` fuera de rango devuelve 0 items en vez de un
+│                      error).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
