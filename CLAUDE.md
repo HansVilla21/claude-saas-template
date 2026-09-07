@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        153 skills de proceso reusables:
+│   └── skills/        154 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1129,6 +1129,48 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      el gotcha que te hace confirmar el bug equivocado: un
 │                      `limit=200` fuera de rango devuelve 0 items en vez de un
 │                      error).
+│                      Tier 35 — Lo aceptado que todavía no está guardado (1,
+│                      capturada 2026-09-07 del formulario de puesta en marcha de
+│                      Di Garda): brecha-entre-aceptado-y-guardado (⭐
+│                      cross-project: entre que el sistema ACEPTA el trabajo de
+│                      alguien —los bytes ya están en el Storage, las teclas ya
+│                      están en el estado— y que lo REGISTRA hay una ventana, y
+│                      todo lo que muere ahí se pierde SIN UN SOLO ERROR: la
+│                      subida devolvió 200, el guardado devolvió 200, no hay línea
+│                      roja en ningún log. Medido: **21 archivos en el Storage, 11
+│                      anotados en la base**; en el log de esa tanda, once tickets
+│                      firmados, once subidas completas y UN solo guardado —tres
+│                      minutos después, subidas de a una, nueve y nueve—. Lo no
+│                      obvio: (1) la detección es CONTAR huérfanos con un left
+│                      join entre el almacén y el índice, no leer logs; (2) el
+│                      REINTENTO del usuario ensucia la evidencia —quien no ve su
+│                      archivo lo vuelve a subir—, así que hay que separar la
+│                      pérdida real comparando por HASH (eTag/MD5) y no por tamaño
+│                      ni fecha: de los 10 huérfanos, 9 tenían gemelo idéntico y
+│                      **1 era pérdida de verdad**, o sea que sin el hash le
+│                      decías al cliente "perdimos 10"; (3) el arreglo es registrar
+│                      cada pieza APENAS llega y escribir la colección con un
+│                      updater sobre el estado vivo, nunca con un valor absoluto
+│                      calculado antes del `await` —25 segundos de subidas con la
+│                      lista vieja en la mano; el mismo patrón al QUITAR resucita
+│                      elementos—; (4) el autoguardado con debounce tiene que
+│                      GUARDAR cuando la pantalla se va (`visibilitychange` +
+│                      `pagehide` + desmontaje) en vez de cancelar el timer,
+│                      porque en móvil iOS CONGELA los timers al bloquear el
+│                      teléfono; y (5) un guardado en vuelo por vez, o el que
+│                      salió primero llega último y pisa lo nuevo con lo viejo.
+│                      ⛔ **El gotcha que ahorra el arreglo equivocado: un botón
+│                      de Guardar NO arregla esto** —lo perdido nunca llegó al
+│                      estado que ese botón guardaría— y el guardado solo-manual
+│                      es PEOR que el automático, porque pierde la sesión entera
+│                      en vez de un segundo; el botón resuelve la CEGUERA (que
+│                      "hay cambios sin guardar" se dibujaba igual que "no hay
+│                      nada"), no la pérdida, y hacen falta los dos. Trae la
+│                      reproducción determinística sin dependencias con su control
+│                      negativo —si el código viejo no falla en tu prueba, el
+│                      verde es falso—, y el aviso de no deducirle el nombre
+│                      original a un huérfano: ese nombre vivía en el índice, que
+│                      es justo lo que se perdió).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
