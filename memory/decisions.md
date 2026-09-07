@@ -6,6 +6,56 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-08-28 — La lentitud no estaba en la base: los flujos de seguimientos y la sesión que salía a preguntar
+
+**Contexto:** el founder reportó el CRM "extremadamente lento, incluso cambiar entre secciones". En la misma jornada se rehízo Seguimientos tres veces a partir de su feedback mirando la pantalla.
+
+### Decisión 1 — Antes de optimizar una consulta, contar los VIAJES
+
+La sospecha razonable era la base. **La base tardaba 5,17 ms** con 100 % de cache hit y 937 conversaciones. De cada segundo de espera usaba **5 milésimos**.
+
+El costo real era la cantidad de idas y vueltas: **~215 ms cada una** (Vercel en `iad1`, Supabase en `us-west-2`) y **~11-14 en fila** por navegación — `getUser()` dos veces y tres consultas del layout **repetidas** en el gate de cada página, dentro del mismo request.
+
+**Razón:** una consulta lenta se ve en `EXPLAIN`. Un viaje de más no se ve en ningún lado: cada pieza está bien, y la suma no. La pregunta que lo destapa es *"¿cuántos `await` a la base hay EN FILA antes de que se dibuje algo?"*.
+
+**Cross-project:** aplica a cualquier app serverless contra una base gestionada.
+
+### Decisión 2 — El cómputo va DONDE están los datos, y eso hay que amarrarlo por escrito
+
+`vercel.json` con `"regions": ["pdx1"]` porque **`pdx1` ES `us-west-2`**, la misma región de la base — no una cercana. Medido: el costo por viaje bajó de **~215 ms a ~43 ms**, cinco veces.
+
+**Lo que hay que dejar escrito y casi nadie escribe:** si algún día se mueve el proyecto de la base, hay que mover la región del cómputo. Un desacuerdo entre las dos **no rompe nada y no da ningún error** — solo hace todo más lento, para siempre. Quedó en `AGENTS.md §7.5` con el grep de una línea que lo verifica.
+
+**Contrapartida honesta:** una ruta SIN base se puso más lenta (125 → 222 ms), porque el salto usuario→función se alargó. El punto de equilibrio está por debajo de **una** consulta por request.
+
+### Decisión 3 — Verificar la sesión sin salir a la red, con el trade-off dicho en voz alta
+
+`getClaims()` en vez de `getUser()`: verifica la firma del JWT **localmente** cuando el proyecto usa llaves asimétricas. Sigue refrescando la sesión y cachea el JWKS por proceso; si las llaves fueran simétricas, el SDK **cae solo** a `getUser()` — más lento, nunca inseguro.
+
+**El trade-off, escrito y no escondido:** `getUser()` pregunta al servidor si el usuario sigue vigente y detecta al instante una sesión cerrada en otro lado; `getClaims()` confía en la firma hasta que el token vence. **La autorización no cambia** — cada consulta sigue pasando por RLS con el mismo JWT.
+
+### Decisión 4 — Dos interruptores en serie son dos formas de quedar mudo
+
+Se aplicó **tres veces** el mismo día: se le sacó el switch a cada paso del flujo, y después se borraron **dos llaves de configuración con defaults OPUESTOS** que ninguna pantalla escribía —una hacía que el generador no creara nada, la otra habría cancelado todo al instante—.
+
+**Razón:** cada interruptor extra es una forma independiente de que el sistema no haga nada **y no lo diga**. El síntoma no es un error: es silencio.
+
+**Qué se descartó:** construir el interruptor que faltaba. La UI apuntaba a un control que nunca existió; la respuesta correcta no era construirlo, era borrar el concepto.
+
+### Decisión 5 — Un estado que afirma algo tiene que poder respaldarlo
+
+`conversations.handler` nacía en `'bot'` por el DEFAULT del schema, sin preguntar si el bot del negocio existía. Con el bot apagado, tres leads reales quedaron **6,5 h sin respuesta** mostrando el chip "Bot" — que es lo que un agente lee como *"esto ya está atendido"*.
+
+**Razón:** el invariante va en la BASE, no en el código, cuando el valor lo escriben varios consumidores. Uno que dependa de que cada uno se acuerde no es un invariante.
+
+**Hallazgo de paso:** el valor "sin asignar" **no lo escribía nadie** — 0 filas en toda la base —, así que la tarjeta del dashboard que lo contaba mostró **0 para todos, siempre**, desde que existe.
+
+### Pendientes que dispara
+
+- **Sin verificar:** el camino de master impersonando tras el cambio de sesión.
+- La ficha de contacto hace **15 viajes en fila** — la peor pantalla; el resto anda en 5-6.
+- El token de Apify **sigue** dentro del workflow vivo. (El `BOT_TEST_SECRET` ya no: ese pendiente era falso.)
+
 ## 2026-08-27 — Calificación config-driven, tres bugs de producción, y Seguimientos
 
 **Contexto:** el founder preguntó si el auto-etiquetado y la calificación automática ya funcionaban. La medición dio vuelta la premisa y ordenó media sesión. Después reportó tres bugs con capturas, y cerramos con la funcionalidad de Seguimientos completa. 10 PRs, #140 → #149.
