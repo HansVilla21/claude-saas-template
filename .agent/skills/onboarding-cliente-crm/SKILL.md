@@ -27,6 +27,9 @@
 3. **Compilar + cargar los prompts del bot.** Extraer el system prompt de cada `.md` a
    `clients/<slug>/prompts/_compiled/*.txt`, y cargarlos con `load-roberto-prompts.js` a
    **`agencies.bot_config.agent_prompts.{router,principal,objeciones}`**.
+   Si el cliente trae router propio, cargar TAMBIÉN **`bot_config.router_fields`** con los
+   campos que debe extraer (ver gotcha #-2.3) — sin eso el prompt es del cliente pero los
+   campos extraídos son los de Momentum.
    ⚠️ **GOTCHA #1 (costó iteraciones): la llave es `agent_prompts`, NO `prompts`.** El
    workflow n8n `bot-test-playground` (id `dxZTZdwzyIcimZv0`) lee `bot_config.agent_prompts.*`;
    el Agente Principal tiene fallback al nodo "Componer System Prompt" (que lee
@@ -76,7 +79,7 @@
   calificación comercial"). Hoy el prompt del tenant se usa **solo si declara el contrato**: la
   palabra `destino` + los 3 destinos válidos (`AGENTE_PRINCIPAL`, `AGENTE_OBJECIONES`,
   `HANDOFF_HUMANO`).
-  **Dos cosas que hay que saber al dar de alta un cliente:**
+  **Tres cosas que hay que saber al dar de alta un cliente:**
   1. **El prompt del router del cliente DEBE emitir `AGENTE_PRINCIPAL`**, no el nombre de su bot. El
      `Switch — Destino Router` **descarta el turno** si `destino` trae un valor desconocido — el
      BACKUP solo dispara cuando `destino` **no existe**. Un destino fuera del contrato = **bot mudo**,
@@ -84,6 +87,33 @@
   2. **No todo lo que está bajo la llave `router` es un router.** El de Jacó es un *filtro pre-bot*
      con otro schema (`tipo_mensaje`, `debe_continuar_bot`). Antes de dar por bueno un prompt heredado,
      leer qué emite — no asumirlo por el nombre de la llave.
+  3. **Cargar el prompt del router NO alcanza: el SCHEMA sale de OTRA llave.** (Medido
+     2026-09-08 conectando a El Canal.) El guard valida el PROMPT (`length > 500` + la palabra
+     `destino` + los 3 destinos) y expone `router_source`. Pero los CAMPOS que el Information
+     Extractor devuelve NO salen del prompt: salen de **`bot_config.router_fields`**, y sin esa
+     llave se usa el schema de Momentum. La ejecución decía `router_source: tenant` y
+     `router_schema_source: default` — el prompt era del cliente y los `datos_extraidos` eran
+     `nombre_negocio`, `rubro`, `corre_ads`, `facturacion_signal`: una inmobiliaria clasificando
+     con los campos de una agencia de bots, **sin un solo error en ningún log**.
+     Contrato: array de `{key, type, desc}`, `key` que matchee `^[a-z][a-z0-9_]{1,40}$` y `type`
+     en string|number|boolean. Los campos deben espejar los `extractor_field_defs` del cliente,
+     o el CRM guarda una cosa y el router extrae otra.
+     **Por qué la prueba obvia no sirve:** que el bot conteste bien NO prueba nada — el router
+     default es genérico y acierta seguido; en El Canal ruteó los 3 turnos correctamente *con los
+     campos equivocados*. Hay que abrir la ejecución en n8n y exigir las DOS fuentes en `tenant`:
+     ```bash
+     node -e "
+       const H={'X-N8N-API-KEY':process.env.N8N_API_KEY};
+       fetch('https://'+process.env.N8N_HOST+'/api/v1/executions?workflowId=dxZTZdwzyIcimZv0&limit=1&includeData=true',{headers:H})
+         .then(r=>r.json()).then(x=>{
+           const rd=x.data[0].data.resultData.runData;
+           const j=rd['Componer System Prompt'][0].data.main[0][0].json;
+           const o=rd['Router'][0].data.main[0][0].json;
+           console.log('router_source:',j.router_source,'| schema:',j.router_schema_source);
+           console.log('campos:',Object.keys(o.datos_extraidos||{}).join(','));
+         });
+     "
+     ```
   El script `crm-v2/scripts/build-router-config-driven-v1.js` es idempotente, deja snapshot y verifica
   por hash contra el n8n vivo (incluido que el default embebido sea idéntico char a char al literal
   anterior).
