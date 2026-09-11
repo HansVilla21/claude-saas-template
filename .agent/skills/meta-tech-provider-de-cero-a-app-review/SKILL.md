@@ -46,7 +46,7 @@ La frase *"becoming a Tech Provider is not mandatory"* de YCloud es del programa
 | 4 | Verificación como proveedor de tecnología | Caso de uso WhatsApp → Conviértete en socio | **mismo día** |
 | 5 | Verificación de acceso | idem | **mismo día** |
 | 6 | **REGISTRO** como proveedor (asistente) | Caso de uso WhatsApp → Conviértete en proveedor de tecnología | inmediato |
-| 7 | Revisión de la app (acceso avanzado) | Revisar → Revisión de la app | ~24 h promedio (Meta) |
+| 7 | Revisión de la app (acceso avanzado) | Revisar → Revisión de la app | el panel dice "la mayoría en 20 días" |
 
 La **4 y la 6 no son lo mismo** — ver el bloqueo 3.
 
@@ -213,7 +213,10 @@ mandarlo en capturas (vence solo en horas, pero igual).
 ### 3. Las llamadas de prueba a la API (el check que tarda)
 
 Cada permiso exige **al menos una llamada de la app en los últimos 30 días**, y Meta
-**tarda en contarla** (avisa hasta 24 h; la de mensajes se contó en menos de 1 h).
+**tarda en contarla** (avisa hasta 24 h). Medido: la de mensajes se contó en menos de
+1 h; la de plantillas, el mismo día, poco después de una **segunda** llamada
+(`GET <WABA_DE_PRUEBA>/phone_numbers`). Si el check sigue gris, repetir la llamada
+no hace daño.
 - Mensajes: la del panel "Enviar mensaje" cuenta.
 - Plantillas: **crear la plantilla en WhatsApp Manager NO cuenta** (no es una llamada
   de la app). Se hace desde el **Graph API Explorer**
@@ -293,8 +296,14 @@ Completing the flow requires a real WhatsApp Business phone number. The attached
 
 Con los cinco pasos en verde (Verificación, Configuración de apps, Uso permitido,
 Tratamiento de datos, Instrucciones) se habilita **"Enviar para revisión"**. Lo
-aprieta el dueño. Promedio de Meta: ~24 h. Al aprobarse: **republicar** la app
-(puede pedir la renovación de acceso a datos) y recién ahí conectar números reales.
+aprieta el dueño. Al enviarla, el estado pasa a **"Revisión en curso"** con el aviso
+*"La mayoría de las solicitudes se revisan en un plazo de 20 días"* (enviada el
+2026-09-11 en el CRM). Mientras tanto no hay nada que hacer salvo mirar la
+**Bandeja de entrada de alertas** y el correo, por si Meta pide más información.
+
+Al aprobarse: **republicar** la app desde **Publicar** en el menú de la izquierda
+(muestra "Sin publicar" mientras está despublicada; puede pedir la renovación de
+acceso a datos) y recién ahí conectar números reales.
 
 ## Checklist rápido
 
