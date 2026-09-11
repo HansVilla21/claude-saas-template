@@ -1191,8 +1191,11 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      el fallback como burbuja falsa —ya resuelto en el webhook
 │                      viejo y perdido al portar, lo encontró la revisión y no las
 │                      pruebas—; estados fuera de orden que exigen un UPDATE
-│                      atómico; un CHECK que tiraba el valor nuevo en silencio; y
-│                      200 vs 500 clasificando por SQLSTATE, porque siempre 200
+│                      atómico; un CHECK que tiraba el valor nuevo en silencio;
+│                      con los nombres de usuario de WhatsApp Meta puede no
+│                      mandar el teléfono —solo el BSUID— y exigir `from`
+│                      descarta esos mensajes en silencio; y 200 vs 500
+│                      clasificando por SQLSTATE, porque siempre 200
 │                      pierde mensajes y siempre 500 hace un bucle).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
