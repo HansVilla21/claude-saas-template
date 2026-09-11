@@ -6,6 +6,59 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-10 — El sistema de productividad del CRM, entero y en producción: Tareas, Agenda y "Mi día"
+
+**Contexto:** el founder pidió convertir Agenda y Tareas en un gestor profesional y sumar una pantalla "Mi día" con *"todo lo mío"*, incluidos los leads que le escribieron y no les contestó. Se planificó en 4 fases (spec en `crm-v2/docs/superpowers/specs/2026-09-08-productividad-fase1-generadores-design.md`). Entre el 8 y el 10 de septiembre se construyeron y pasaron a producción las cuatro; las Fases 2 a 4 son los PRs #186 a #196 de `momentum-ai-crm`. El detalle de cada entrega, con cómo se verificó, está en `crm-v2/memory/backlog.md`.
+
+### Decisión 1 — Construir todo, sin gate de medición
+
+**Decisión:** se construyó la funcionalidad completa sin esperar datos de uso.
+
+**Razón:** decisión explícita del founder, textual: *"no quiero hacer pruebas ni nada. Quiero que hagamos la funcionalidad al 100%. Me da igual ahorita si lo utilicen o no."*
+
+**Qué se descartó:** el plan de la Fase 1 exigía prender los 4 generadores en Givi y medir 7 días —qué proporción de tareas se trabajaba y cuál caducaba— antes de construir la pantalla de Tareas. **No reabrir.**
+
+**Consecuencia a saber:** al 2026-09-10 hay 0 generadores prendidos, 1 tarea en toda la base y 0 planificadas. Las pantallas nuevas se ven vacías hasta que el equipo las use o se prenda un generador.
+
+### Decisión 2 — "Tuyo" es UNA regla en todo el sistema: lo asignado a vos MÁS lo que no tiene dueño
+
+**Decisión:** `esDelDiaDe` (en `crm-v2/src/lib/tareas/dia.ts`) decide de quién es algo en la tira "Tu día", en la Agenda por persona, en los huecos y en "Mi día". Todo lo que no tiene dueño lo dice en pantalla ("Sin dueño").
+
+**Razón:** en 7 de 10 agencias no hay nada asignado; una vista personal que dejara afuera lo sin dueño estaría vacía justo ahí, y una cita que nadie ve es el peor error de una agenda.
+
+**Qué se descartó:** "solo lo mío" (dejaba vacías 7 de 10 agencias) y un umbral por tamaño de agencia (magia que cambia la pantalla sin que nadie lo pida).
+
+**Bug que destapó:** la tira "Tu día" de Tareas mostraba y SUMABA lo de todo el equipo. Se arregló volviendo obligatorio el parámetro `persona`: quien llama tiene que decidir de quién es el día.
+
+### Decisión 3 — "Te escribieron y no contestaste" = la definición del generador G2, NO el "Sin atender" del Resumen
+
+**Decisión:** "espera respuesta" es `archived_at is null and handler <> 'bot' and last_inbound_at is not null and (last_outbound_at is null or last_outbound_at < last_inbound_at)` —la condición del generador G2 (migración 0084)—, escrita en TS en `crm-v2/src/lib/hoy/esperando.ts` con el comentario que cruza las dos.
+
+**Razón:** una sola definición para "Mi día" y para las tareas automáticas; si divergen, se contradicen. **Verificado contra la base viva:** TS y SQL dan el mismo número en las 10 agencias, sobre las 1.228 conversaciones (84 · 16 · 10 · 4 · 1 · 1 · 0 · 0 · 0 · 0).
+
+**Qué se descartó:** reutilizar el "Sin atender" del Resumen, que cuenta `handler = 'unassigned'`. Es otro conjunto —una conversación que alguien tomó y no contestó está en uno y no en el otro—, así que tienen nombres distintos y no se enlazan entre sí.
+
+**Y:** las de hace más de una semana se CUENTAN y no se listan. Givi tenía 84 esperando: 14 de la última semana y 39 de hace más de un mes.
+
+### Decisión 4 — Los huecos del día se calculan en una jornada A LA VISTA y editable, no con el horario de la agencia
+
+**Decisión:** "Huecos entre las 08:00 y las 18:00 · Cambiar", en horas enteras, guardado en el navegador y dicho en pantalla.
+
+**Razón:** 7 de 10 agencias no tienen horario cargado, y las 2 que sí lo usan para la ventana nocturna del bot. Es la misma razón por la que se descartó un número de "capacidad" del día: un supuesto escondido se ve autoritario y engaña; uno que se ve y se cambia, no.
+
+**Y:** poner una tarea sin dueño en el hueco de alguien la hace de esa persona, pero **nunca le quita la tarea a otro**: el dueño solo se escribe con `assigned_user_id IS NULL` en el WHERE (verificado contra la base: con dueño, el primer update toca 0 filas y el dueño no cambia).
+
+### Decisión 5 — La Agenda pide datos al servidor por el RANGO de la vista, y la ventana es la `key` del cliente
+
+**Decisión:** la Agenda trae ±45 días. Si hay que pedir otra ventana se decide mirando el rango ENTERO de la vista (día, semana o mes), y la ventana es la `key` del componente cliente.
+
+**Razón:** octubre visto desde el 10 de septiembre empieza adentro de la ventana y termina afuera; sus últimos días se verían vacíos sin serlo. Y sin la `key`, al salir de la ventana el servidor traía las citas nuevas pero la pantalla seguía mostrando las viejas (`useState` no vuelve a leer sus props): un bug que venía desde la Agenda original, reproducido con una copia de la página SIN el arreglo en el mismo build antes de corregirlo.
+
+**Pendientes inmediatos:**
+- Las dos esperas de terceros siguen arriba de todo y no dependen de código: publicar la app de Google Cloud (la sincronización con Google Calendar depende de eso) y las plantillas de Meta para las 6 agencias que no tienen (`crm-v2/memory/plan-ejecucion-2026-09-07.md`).
+- Decidir si se prende algún generador y en qué agencia.
+- Un número de pendientes al lado de "Mi día" en el menú: medir antes, porque sería una consulta más en el layout de TODAS las páginas.
+
 ## 2026-08-27 — Calificación config-driven, tres bugs de producción, y Seguimientos
 
 **Contexto:** el founder preguntó si el auto-etiquetado y la calificación automática ya funcionaban. La medición dio vuelta la premisa y ordenó media sesión. Después reportó tres bugs con capturas, y cerramos con la funcionalidad de Seguimientos completa. 10 PRs, #140 → #149.
