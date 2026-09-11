@@ -139,6 +139,20 @@ De ahí salen las dos decisiones que ordenan todo:
 15. **El handler con el que nace la conversación decide si alguien se entera.** En un
     canal donde ningún bot escucha, `bot` es silencio. `unassigned` ("Sin asignar") la
     deja a la vista. Dejalo en una sola constante, para cambiarlo cuando el bot escuche.
+16. **Con los nombres de usuario de WhatsApp, puede no llegar el teléfono.** Si la
+    persona elige ocultar su número, el mensaje llega SIN `from` y el contacto SIN
+    `wa_id`: solo el id de usuario con alcance de negocio (BSUID, en `from_user_id` y
+    `contacts[].user_id`, formato `US.1349…`), más `profile.username`. Un webhook que
+    exige `from` descarta esos mensajes en silencio: pasó, y se vio porque el panel de
+    Meta deja mandar los tres escenarios (ver cómo se prueba, abajo). Uno que le quita
+    al id todo lo que no es dígito lo convierte en un teléfono falso. Reconocé al
+    contacto por BSUID primero y por teléfono después, guardá el BSUID la primera vez
+    que llega (así sigue siendo la misma persona si mañana oculta el número), y ponele
+    índice único por negocio: sin teléfono no hay otro que frene un duplicado. Al
+    migrar desde YCloud: su `fromUserId` tiene el mismo formato (`CR.2510…`, 1.229 de
+    1.241 contactos) y casi seguro es el mismo id, así que los contactos que ya
+    existen se reconocen. Falta el otro lado: responderle a alguien sin teléfono
+    exige mandar por BSUID.
 
 ## Cómo se prueba sin levantar Deno ni la base
 
@@ -153,11 +167,18 @@ De ahí salen las dos decisiones que ordenan todo:
   (`probar-migracion-contra-base-viva-con-rollback`), con controles que discriminen:
   "un `read` no retrocede con `delivered`", "la misma cuenta en dos negocios queda
   bloqueada".
+- **Nombres de usuario:** en Webhooks → Whatsapp Business Account → `messages` →
+  Probar, el cuadro deja elegir el "Escenario de nombre de usuario" (sin usuario, con
+  usuario y teléfono, con usuario sin teléfono). Mandá los tres al servidor y leé el
+  crudo de tu tabla de log: es el payload exacto, sin pedir capturas. Ojo: al
+  reabrirlo, el cuadro vuelve solo a la opción por defecto, y por eso una vez se mandó
+  el ejemplo equivocado. Mirá la forma del crudo, no solo el resultado.
 - **Después de desplegar, en este orden:** el GET de salud (confirma el deploy y qué
   variables faltan, sin mostrarlas), un GET de alta con token equivocado (403), un POST
   sin firma (queda en el log con `signature_valid=false`), el botón "Probar" del panel
   de Meta (firma REAL, cuenta inventada: `canal_no_conectado`) y recién ahí un número
-  de prueba de punta a punta.
+  de prueba de punta a punta. Si el alta falla, los logs de la función dicen si
+  respondiste 403 (el token no es idéntico) antes de ponerse a adivinar.
 
 ## Output esperado
 
@@ -176,11 +197,11 @@ Signup. Hay que hacer que los mensajes entren al inbox, y después Instagram."
 
 **Output:** una función `meta-webhook` con una URL para los tres canales; el negocio se
 resuelve por `phone_number_id` / página / cuenta de IG; el contacto de WhatsApp por
-teléfono en los dos formatos; reintentos cortados antes de tocar nada; estados
-atómicos; media copiada con token y tope; borrados y ediciones sobre el original;
-conversaciones "Sin asignar" hasta que el bot escuche; 32 pruebas; 4 migraciones
-probadas contra la base viva, y los pasos del founder (secretos, URL en Meta, botón
-"Probar") en el orden en que se verifican.
+BSUID y por teléfono en los dos formatos; reintentos cortados antes de tocar nada;
+estados atómicos; media copiada con token y tope; borrados y ediciones sobre el
+original; conversaciones "Sin asignar" hasta que el bot escuche; 38 pruebas; 5
+migraciones probadas contra la base viva, y los pasos del founder (secretos, URL en
+Meta, botón "Probar") en el orden en que se verifican.
 
 ## Checklist antes de desplegar
 
@@ -189,7 +210,9 @@ probadas contra la base viva, y los pasos del founder (secretos, URL en Meta, bo
 - [ ] Cada tipo de evento que no se guarda tiene un motivo con nombre.
 - [ ] Borrado y edición van al original, en entrantes y en ecos.
 - [ ] El reintento se corta antes de tocar el contacto y el límite.
-- [ ] Contacto de WhatsApp por teléfono, en todos los formatos que tenga tu tabla.
+- [ ] Contacto de WhatsApp por BSUID y después por teléfono (en todos los formatos de
+      tu tabla); uno sin teléfono entra igual, y lo que no es un teléfono no se guarda
+      como teléfono.
 - [ ] Estados en un UPDATE atómico que solo avanza.
 - [ ] Media: `file_size` antes de bajar, de a una, con el motivo anotado si falla, y la
       UI con techo para "cargando".
