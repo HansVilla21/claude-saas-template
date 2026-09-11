@@ -227,3 +227,22 @@ Meta, botón "Probar") en el orden en que se verifican.
 `webhook-contar-event-types-antes-de-arreglar` · `clasificar-por-lista-no-por-fallback` ·
 `bsp-media-expira-archivar-propio` · `webhook-fanout-sin-reconciliacion` ·
 `probar-migracion-contra-base-viva-con-rollback` · `verificar-funcionamiento-end-to-end`
+
+## Apéndice (2026-09-11) — lo que se sumó con la coexistencia
+
+La función pasó a la versión 1.3.0 para recibir un número que **sigue en la app de
+WhatsApp Business del celular**. Cuatro campos nuevos, cada uno con su trampa:
+
+| Campo del webhook | Qué trae | La trampa |
+|---|---|---|
+| `history` | Los chats de hasta 6 meses, en tandas desordenadas; o `errors[]` 2593109 si el negocio no quiso compartir; o `messages[]` plano con el archivo de un mensaje viejo | Importarlos por el camino de los mensajes en vivo dispara avisos, "no leídos" y realtime por cada mensaje viejo. Van por una RPC que aparta los triggers |
+| `smb_app_state_sync` | La agenda del celular (`add` / `remove`) | Renombrar solo los contactos que todavía no tienen nombre |
+| `smb_message_echoes` | Lo que el negocio escribe desde el celular, en vivo | **Viene apagado** en el panel de Meta: sin prenderlo a mano, esos mensajes no llegan y no hay error |
+| `account_update` | `PARTNER_REMOVED` / `ACCOUNT_OFFBOARDED` / `ACCOUNT_RECONNECTED` | Solo anotar. El evento no dice con claridad de qué partner se trata; desactivar por eso deja al negocio sin bandeja |
+
+`account_update` se resuelve **antes** que el negocio (puede no traer
+`phone_number_id`). La media de un mensaje viejo que llega antes que su chat tira
+error a propósito, para que Meta reintente.
+
+Todo el detalle —flujo de conexión, RPC, pruebas y los seis hallazgos de la
+revisión— en `whatsapp-coexistencia-embedded-signup`.

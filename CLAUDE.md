@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        157 skills de proceso reusables:
+│   └── skills/        160 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1197,6 +1197,54 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      descarta esos mensajes en silencio; y 200 vs 500
 │                      clasificando por SQLSTATE, porque siempre 200
 │                      pierde mensajes y siempre 500 hace un bucle).
+│                      Tier 37 — Las puertas de Meta que el panel no avisa (3
+│                      nuevas + 1 apéndice, capturadas 2026-09-11 del camino
+│                      completo del CRM hacia Meta, de la primera verificación
+│                      a la revisión de la app):
+│                      meta-tech-provider-de-cero-a-app-review (⭐ cross-project:
+│                      que cada cliente conecte SU WhatsApp/IG/Messenger desde
+│                      tu producto. Siete puertas en orden y CUATRO bloqueos que
+│                      aparecen recién al conectar el primer número, cada uno
+│                      escondido detrás del anterior: FedCM tirando el
+│                      config_id, el callback async, "X no puede registrar
+│                      clientes" —proveedor VERIFICADO pero NO REGISTRADO: falta
+│                      el asistente "Independent Tech Provider"— y el #2655111:
+│                      sin App Review aprobada no se conecta NINGÚN número, ni
+│                      el propio. Lo falso que se creyó: que un BSP te ahorra la
+│                      revisión. Trae el círculo "para aprobar hay que mandar un
+│                      mensaje y para mandarlo hay que estar aprobado" y cómo lo
+│                      rompe el número de prueba de Meta; la revisión pantalla
+│                      por pantalla —limpiar permisos ajenos, un video por
+│                      permiso, la llamada de prueba que crear la plantilla en
+│                      WhatsApp Manager NO cuenta y sí el Graph API Explorer,
+│                      textos en inglés, tratamiento de datos, cuenta de revisor
+│                      que tiene que VER el botón—; y el costo de despublicar la
+│                      app como diagnóstico: hasta 10 días de renovación) +
+│                      fb-login-sdk-fedcm-y-callback (⭐ el SDK de Facebook adopta
+│                      FedCM solo si Meta lo marca para tu app, y entonces
+│                      resuelve `FB.login` como un OAuth común con
+│                      `scope=openid`: tu config no llega y Meta dice que la app
+│                      "necesita al menos un permiso compatible". Se ve en diez
+│                      segundos en la URL de la ventana —`dialog_source=fedcm`—
+│                      y se arregla con `fedCM: false`. Detrás venía la segunda:
+│                      el SDK valida el callback con `{}.toString` y rechaza una
+│                      función async, TypeScript no lo ve y el botón queda en
+│                      "Conectando…". Ninguna de las dos existe en localhost) +
+│                      whatsapp-coexistencia-embedded-signup (conectar el número
+│                      que el negocio sigue usando en el celular y traer 6 meses
+│                      de chats. Nunca registrar un número que está en la app;
+│                      pedir la sincronización —una vez, 24 h— solo después de
+│                      suscribir la WABA; importar por una RPC que prende una
+│                      marca local a la transacción para que el pasado no
+│                      dispare avisos, "no leídos" ni realtime; y NO llenar las
+│                      columnas de la ventana de 24 h con mensajes viejos. Con
+│                      los payloads literales de Meta, el SQL y los seis
+│                      hallazgos de la revisión).
+│                      **Apéndice:** webhook-meta-multicanal suma los cuatro
+│                      campos de la coexistencia (`history`,
+│                      `smb_app_state_sync`, `smb_message_echoes` —viene
+│                      apagado en el panel— y `account_update`, que se anota y
+│                      nunca desactiva).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
