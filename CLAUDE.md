@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        156 skills de proceso reusables:
+│   └── skills/        157 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1171,6 +1171,29 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      verde es falso—, y el aviso de no deducirle el nombre
 │                      original a un huérfano: ese nombre vivía en el índice, que
 │                      es justo lo que se perdió).
+│                      Tier 36 — Una URL para tres canales (1, capturada
+│                      2026-09-10 al construir la recepción directa con Meta en
+│                      el CRM): webhook-meta-multicanal (⭐ cross-project: recibir
+│                      WhatsApp Cloud API, Instagram y Messenger sin proveedor en
+│                      el medio. Una app de Meta tiene UNA URL para los tres, con
+│                      el mismo sobre, la misma firma y el mismo alta: traductores
+│                      puros por sobre → eventos normalizados → un solo
+│                      procesador. Lo no obvio, todo medido o casi pasado: el bot
+│                      que antes tenía su propio webhook del proveedor queda SORDO
+│                      (y si la conversación nace `bot`, nadie se entera); el id
+│                      de usuario del proveedor es opaco y buscar por él al migrar
+│                      duplica todos los contactos —la identidad es el teléfono—;
+│                      3 de 7 clientes guardaban el número sin `+` y conectar por
+│                      Meta los dejaba con dos líneas activas y sin poder enviar;
+│                      la media de WhatsApp es un id cuyo link vence a los 5
+│                      minutos y pide token; varios adjuntos bajo un solo `mid`;
+│                      los ecos de tu propia app; borrado y edición que caían en
+│                      el fallback como burbuja falsa —ya resuelto en el webhook
+│                      viejo y perdido al portar, lo encontró la revisión y no las
+│                      pruebas—; estados fuera de orden que exigen un UPDATE
+│                      atómico; un CHECK que tiraba el valor nuevo en silencio; y
+│                      200 vs 500 clasificando por SQLSTATE, porque siempre 200
+│                      pierde mensajes y siempre 500 hace un bucle).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
