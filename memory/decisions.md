@@ -6,6 +6,53 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-11 — Los estados de un mensaje: el check azul, y lo que WhatsApp no deja hacer
+
+**Contexto:** el founder preguntó si se podía editar o borrar un mensaje como en WhatsApp, y después si se podía saber cuándo lo leyeron. Las dos respuestas salieron de la documentación viva de Meta y de YCloud (revisada el 2026-09-11) y de medir la base de producción. Terminó en tres entregas a producción del CRM (PRs #205, #206 y #207 de `momentum-ai-crm`, migración `0092` y la función `ycloud-webhook` v28) y una skill nueva en este repo (el cuarto footgun de `git-footguns-de-sesion`, PR #37).
+
+### Decisión 1 — Editar y borrar desde el CRM: no se construye, se espera a Meta
+
+**Decisión:** no se construye nada; queda anotado en el backlog del CRM con qué vigilar.
+
+**Razón:** la API no lo permite. Ni Meta ni YCloud tienen forma de editar o borrar un mensaje ya enviado — revisado en la referencia y en los dos changelogs, al día. Lo que sí llega, y el CRM ya mostraba: las ediciones y borrados del lead (58 casos en 5 agencias) y los que el negocio hace desde su propio celular (9, en Givi).
+
+**Qué se descartó:** un "borrar" que solo esconda el mensaje en el CRM. El agente creería que lo borró y el cliente lo seguiría viendo en su teléfono: el sistema mentiría sobre lo único que importa.
+
+### Decisión 2 — El check azul se muestra; el visto hacia el cliente no se manda
+
+**Decisión:** la burbuja de un saliente muestra reloj, una rayita gris, dos grises o dos azules, con la hora de entrega y de lectura al tocarla. Marcar como leído hacia el lead —que la API sí permite, igual que el "escribiendo…"— **no se hace**.
+
+**Razón:** el dato de lectura llegaba y se guardaba desde hacía meses; lo único que faltaba era mostrarlo. Lo del visto hacia el cliente es decisión de producto del founder: *"no hace falta que los leads vean el visto"*.
+
+**Consecuencia a saber:** que no haya azul NO quiere decir "no lo leyó". El cliente puede tener apagada la confirmación de lectura, y los mensajes escritos desde el celular casi nunca traen el aviso (523 de 596 se quedan en "enviado"). La pantalla lo explica al tocar los checks, para que nadie persiga a un cliente por nada.
+
+### Decisión 3 — El estado de un mensaje solo AVANZA, y una fecha es un hecho
+
+**Decisión:** los dos webhooks escriben el estado con la misma función SQL (`aplicar_estado_meta`), que lo calcula sobre la fila bloqueada y nunca retrocede; y se aplica el estado más avanzado que el propio aviso demuestra con sus fechas.
+
+**Razón:** YCloud no garantiza el orden de sus avisos. Guardar el último que llegaba dejó **641 mensajes con el estado atrasado** (263 leídos figurando como entregados o enviados, 378 entregados figurando como enviados). Medido además: 3 de cada ~3 horas de avisos traen status "sent" con la hora de ENTREGA adentro.
+
+**Y:** la pantalla deriva lo que dibuja del estado **y** de las fechas, así que un estado atrasado no se ve mal. Si WhatsApp dijo a qué hora se leyó, se leyó.
+
+### Decisión 4 — Un tope que recorta un prompt se sube; no decide él qué regla del negocio se cae
+
+**Decisión:** el tope de la persona del asistente de IA pasó de 24.000 a 60.000 caracteres, con la regla escrita de volver a subirlo —después de medir el costo— si otro prompt real lo pasa.
+
+**Razón:** el prompt de Level (49.926 caracteres) perdía ~26.000 del MEDIO, y ahí vivían el gate duro de calificación y "lo que no podés decir": la sugerencia podía empujar a un lead sin calificar. El tope era nuestro, no del modelo — la ventana es de 1M y el prompt entero cuesta menos de un centavo por sugerencia.
+
+**Cómo apareció:** por un chequeo que venía fallando y mostraba un número tranquilizador, 23.963 caracteres, que era el largo DESPUÉS de recortar.
+
+### Decisión 5 — Un chequeo tiene que separar "no lo mandaron" de "lo perdimos"
+
+**Decisión:** el verificador de anuncios dejó de exigir siempre el texto del anuncio: ahora falla solo si el crudo del webhook SÍ lo trae y nosotros no lo mostramos. Y la ficha del contacto dice "Meta no mandó el texto de este anuncio" en vez de esconder el bloque.
+
+**Razón:** el caso real era 1 lead de 937, y el crudo tampoco traía el texto — Meta no lo manda cuando el anuncio no tiene texto propio. Un chequeo que falla por algo ajeno se vuelve ruido, y un hueco mudo en la ficha hace dudar de si el dato falta o si no cargó.
+
+**Pendientes inmediatos:**
+- Confirmar la v28 de `ycloud-webhook` con un aviso real: los salientes con `read_at` y `status <> 'read'` tienen que dar 0.
+- Vigilar los changelogs de Meta y de YCloud por si habilitan editar y borrar.
+- Siguen arriba las dos esperas de terceros: publicar la app de Google Cloud y las plantillas de Meta para las agencias que no tienen.
+
 ## 2026-09-10 — El sistema de productividad del CRM, entero y en producción: Tareas, Agenda y "Mi día"
 
 **Contexto:** el founder pidió convertir Agenda y Tareas en un gestor profesional y sumar una pantalla "Mi día" con *"todo lo mío"*, incluidos los leads que le escribieron y no les contestó. Se planificó en 4 fases (spec en `crm-v2/docs/superpowers/specs/2026-09-08-productividad-fase1-generadores-design.md`). Entre el 8 y el 10 de septiembre se construyeron y pasaron a producción las cuatro; las Fases 2 a 4 son los PRs #186 a #196 de `momentum-ai-crm`. El detalle de cada entrega, con cómo se verificó, está en `crm-v2/memory/backlog.md`.
