@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        160 skills de proceso reusables:
+│   └── skills/        162 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1251,6 +1251,51 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      `smb_app_state_sync`, `smb_message_echoes` —viene
 │                      apagado en el panel— y `account_update`, que se anota y
 │                      nunca desactiva).
+│                      Tier 38 — Lo que el primer número real destapó (2 nuevas +
+│                      extensiones, capturadas 2026-09-12 conectando por
+│                      coexistencia el primer WhatsApp real del CRM, con la
+│                      revisión de Meta aprobada en menos de un día):
+│                      nombre-de-relleno-visible (⭐ cross-project: el texto que
+│                      el sistema pone cuando NO sabe cómo se llama alguien
+│                      —"Lead sin nombre"— se trataba como un nombre en diez
+│                      lugares. En pantalla le ganaba al teléfono, que era lo
+│                      único que identificaba a la persona; en una plantilla
+│                      salía "Hola Lead," hacia el cliente; y la IA de los
+│                      seguimientos lo recibía como el nombre del cliente. El
+│                      fallback de siempre `display_name || full_name || phone`
+│                      no lo arregla porque el relleno no es vacío. Trae las dos
+│                      funciones —`nombreReal` para dirigirse a la persona,
+│                      `nombreVisible` para mostrar, con el teléfono antes que
+│                      el relleno—, cuándo usar cada una, el grep que encuentra
+│                      los lugares y cómo completar el nombre cuando llega sin
+│                      pisar uno cargado a mano) +
+│                      estado-antes-que-mensaje (⭐ cross-project: un aviso del
+│                      proveedor sobre algo —entregado, pagado, firmado— que
+│                      llega antes que la cosa. El webhook buscaba el mensaje, no
+│                      estaba y descartaba el aviso con un motivo prolijo; el
+│                      mensaje quedaba "enviado" para siempre. Medido: 36 ms de
+│                      diferencia, y la prueba en vivo del arreglo repitió la
+│                      carrera al primer intento. Por qué no se pide reintento
+│                      al proveedor, y el patrón: tabla de pendientes + función
+│                      "aplicar o guardar" + trigger AFTER INSERT y AFTER UPDATE
+│                      SOLO si cambia el id, candado `pg_advisory_xact_lock` por
+│                      id en los dos lados —y por qué eso no hace deadlock salvo
+│                      que el UPDATE reescriba el mismo id—, SECURITY DEFINER,
+│                      limpieza a los 2 días y el control negativo de borrar el
+│                      trigger dentro del bloque que aborta).
+│                      **Extensiones:** whatsapp-coexistencia-embedded-signup
+│                      suma `prueba-real.md` —el flujo de Meta pantalla por
+│                      pantalla, el #3441003 genérico que era el QR sin
+│                      escanear, la agenda que NO llega al conectar sino cuando
+│                      cambia un contacto, el mensaje oficial de Meta que se
+│                      importaba como contacto basura, el historial sin
+│                      nombres, y probar en una cuenta nueva con el número
+│                      vacío porque conectar en una cuenta viva apaga su línea—;
+│                      meta-tech-provider-de-cero-a-app-review anota que la
+│                      revisión se aprobó en menos de un día pese al aviso de 20
+│                      y que publicar no pidió renovación; y
+│                      webhook-meta-multicanal suma el despliegue de la función
+│                      por CLI con `--use-api`.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

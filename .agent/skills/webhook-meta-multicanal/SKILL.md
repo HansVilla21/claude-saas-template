@@ -246,3 +246,19 @@ error a propósito, para que Meta reintente.
 
 Todo el detalle —flujo de conexión, RPC, pruebas y los seis hallazgos de la
 revisión— en `whatsapp-coexistencia-embedded-signup`.
+
+## Apéndice (2026-09-12) — lo que enseñó el primer número real
+
+- **Estados de un mensaje que todavía no existe:** con coexistencia pasa seguido
+  (el `delivered` de un eco llegó 36 ms antes, y en otra prueba el eco tardó 0,7 s
+  en guardarse). Descartarlos deja mensajes en "enviado" para siempre. Se guardan
+  y un trigger los aplica al aparecer el mensaje → skill `estado-antes-que-mensaje`.
+- **El historial trae basura sin contenido:** `type: errors` (el mensaje oficial de
+  Meta del QR, +44) y `unsupported`. En chats viejos se saltan; en vivo no.
+- **Ningún webhook del historial trae nombres** y los contactos nacen con relleno
+  → skill `nombre-de-relleno-visible`.
+- **Desplegar la función sin pegar 110 KB en una llamada:**
+  `npx supabase functions deploy meta-webhook --project-ref <ref> --no-verify-jwt --use-api`
+  desde la raíz del repo, con `SUPABASE_ACCESS_TOKEN` en el entorno. Sube solo los
+  archivos que importa el `index.ts` (las pruebas quedan afuera) y se confirma con
+  el `GET` de salud, que devuelve la versión.

@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**160 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**162 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -115,6 +115,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `fb-login-sdk-fedcm-y-callback` | `FB.login` con `config_id` que falla solo en producción: FedCM tira tu configuración ("la app necesita al menos un permiso compatible") y el SDK rechaza un callback `async`. Se diagnostica leyendo la URL de la ventana |
 | ⭐ `whatsapp-coexistencia-embedded-signup` | Conectar el número que el negocio sigue usando en el celular y traer 6 meses de chats sin que el pasado dispare avisos, "no leídos", realtime ni ventanas de 24 h falsas |
 | ⭐ `webhook-meta-multicanal` | Recibir WhatsApp, Instagram y Messenger directo de Meta con una sola URL: traductores puros por sobre → eventos normalizados → un procesador |
+| ⭐ `estado-antes-que-mensaje` | El aviso del proveedor (entregado, pagado) llega antes que la cosa y el webhook lo descarta: tabla de pendientes + trigger + candado por id, sin deadlock |
+| ⭐ `nombre-de-relleno-visible` | "Lead sin nombre" tratado como nombre: le gana al teléfono en pantalla y sale "Hola Lead," en plantillas. `nombreReal` para hablarle a la persona, `nombreVisible` para mostrarla |
 | `agendamiento-google-calendar` | Calendly propio sobre Google Calendar. Lo que lo mata en silencio: dejar la app en "Testing" — el refresh token vence a los 7 días y la agenda muere un martes |
 
 ## 🎨 UI, UX y frontend
