@@ -79,7 +79,10 @@ bloquea, y queda para siempre.
   `SECURITY DEFINER` (sesiones del CRM también escriben `messages`), respeta la
   marca de importación y se prueba con control negativo: sin el trigger el
   estado queda esperando. La misma carrera existe con lo que manda el CRM: el
-  wamid se guarda recién cuando Meta contesta el envío.
+  wamid se guarda recién cuando Meta contesta el envío. **No es un caso raro:** en
+  la verificación en vivo se repitió al primer intento — el eco llegó primero,
+  pero tardó ~0,7 s en guardarse (buscar o crear el contacto) y el `delivered`,
+  que llegó 22 ms después, se procesó antes. Quedó guardado y se aplicó solo.
 
 Resultado en la base: coexistencia true, las dos sincronizaciones ok, 5 mensajes,
 la foto archivada en Storage, **0 notificaciones, 0 no leídos**, las columnas de la
