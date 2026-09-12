@@ -60,8 +60,18 @@ bloquea, y queda para siempre.
   idempotente dejó 5, sin duplicar. Sin el `on conflict`, se duplicaban.
 - Todo el historial de un número nuevo llegó en ~10 segundos.
 - Los mensajes del contacto traen `history_context.status: "pending"`.
-- **No llegó `smb_app_state_sync`**: el celular no tenía contactos guardados. La
-  agenda solo trae contactos **guardados** en el teléfono.
+- **Al conectar no llegó `smb_app_state_sync`**, aunque el pedido dio ok y el
+  teléfono SÍ tenía contactos guardados. Viajó 44 minutos después, **cuando se
+  guardó un contacto nuevo**: primero los que ya estaban (`metadata.version: 1`) y
+  enseguida el nuevo (`version: 2`). No asumas que la agenda llega al conectar. El
+  payload real trae además `contact.user_id` (BSUID) y `metadata.version`, que no
+  están en el ejemplo de la doc. La agenda solo trae contactos **guardados**.
+- **El eco funciona:** lo escrito desde la app llega por `smb_message_echoes` con
+  `from` = el negocio y `to` = el contacto.
+- **Un estado puede llegar antes que su mensaje:** el `delivered` del eco llegó 36 ms
+  antes que el eco, no encontró el mensaje y se descartó, así que quedó en `sent`.
+  Si el webhook descarta estados de mensajes desconocidos, en coexistencia pierde
+  algunos: hay que guardarlos y aplicarlos cuando llega el mensaje.
 
 Resultado en la base: coexistencia true, las dos sincronizaciones ok, 5 mensajes,
 la foto archivada en Storage, **0 notificaciones, 0 no leídos**, las columnas de la
