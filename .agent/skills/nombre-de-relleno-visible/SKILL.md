@@ -118,3 +118,83 @@ prompts del bot.
 - **Arreglarlo en el componente** que se ve roto: hay otros nueve.
 - **`nombre || telefono`** sin excluir el relleno: no cambia nada.
 - **Usar el nombre visible para saludar**: "Hola +506 8821 7229,".
+
+---
+
+## Apéndice 2026-09-12 (tarde) — Los lugares que el grep de `src` no ve
+
+Con las pantallas arregladas, el relleno seguía vivo en **cuatro lugares fuera
+del front**. Ninguno lo encontraba el grep de arriba:
+
+| Dónde | Qué hacía | Medido |
+|---|---|---|
+| **Otro webhook que escribe** (el del segundo proveedor) | Al llegar el nombre solo llenaba `display_name`; `full_name` quedaba en el relleno para siempre | 16 leads con el nombre guardado al lado del relleno |
+| **El asistente de respuestas con IA** del inbox | Le decía al modelo *"El contacto se llama Lead sin nombre"* | — |
+| **Funciones SQL** que arman textos (notificaciones, títulos de tareas) | `coalesce(display_name, full_name, 'el contacto')`: solo saltan `NULL`, el relleno pasa | 22 etiquetas con el relleno |
+| **Edge Function** del aviso al equipo por WhatsApp | `full_name?.trim() \|\| …`: el relleno primero | — |
+
+### Buscar en todas las capas
+
+```bash
+grep -rn "full_name\|display_name" supabase/functions --include=*.ts | grep -v test
+```
+```sql
+select proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and prosrc ilike '%full_name%' and prosrc ilike '%leads%';
+```
+Y todo `select('full_name')` suelto en server actions: el que alimenta un prompt es
+el peor, porque el modelo lo repite al cliente.
+
+### En SQL: el mismo helper, una sola vez
+
+```sql
+-- ⚠️ Mismos rellenos que lib/format/nombre-lead.ts y los webhooks.
+create or replace function public.nombre_real_lead(p_display_name text, p_full_name text)
+returns text language sql immutable set search_path = public as $$
+  select coalesce(
+    case when btrim(coalesce(p_display_name, '')) not in ('', 'Lead sin nombre', 'Contacto de Instagram', 'Contacto de Messenger')
+         then btrim(p_display_name) end,
+    case when btrim(coalesce(p_full_name, '')) not in ('', 'Lead sin nombre', 'Contacto de Instagram', 'Contacto de Messenger')
+         then btrim(p_full_name) end);
+$$;
+```
+
+Más `telefono_legible(phone)`, copia en SQL del `prettyPhone` de la app,
+**verificada contra salidas de referencia sacadas del TS con node** (8 casos).
+Si no, la notificación dice `50672055814` y la pantalla `+506 7205 5814`.
+Cada lector conserva su orden y su texto genérico:
+`coalesce(nombre_real_lead(...), telefono_legible(phone), 'el contacto')`.
+
+### El fallback depende de lo que ya muestra el mensaje
+
+En el aviso de WhatsApp al agente el teléfono **ya va en su propia línea**. Caer
+al teléfono en el nombre lo mostraba dos veces. Ahí va **"Sin nombre"**. Es la
+misma regla de los selectores que ya muestran el teléfono al lado.
+
+### Corregir lo que ya estaba: backfill medido
+
+```sql
+update leads set full_name = btrim(display_name)
+ where btrim(coalesce(full_name, '')) in ('', 'Lead sin nombre', …)
+   and nullif(btrim(display_name), '') is not null
+   and btrim(display_name) not in ('Lead sin nombre', …);
+```
+
+Probado en el bloque que aborta: **16 afectadas, 0 nombres reales tocados,
+segunda corrida 0**. El webhook que escribe se arregla con la misma regla del
+apéndice de arriba, en un helper puro con prueba. El control negativo es el
+comportamiento viejo (solo `display_name`), y con él fallan justo las pruebas
+del relleno.
+
+### Lo que NO se reescribe
+
+Notificaciones y títulos de tareas **ya creados** quedan con el texto que tenían
+(185 notificaciones en el CRM). Son historia, y reescribir notificaciones
+re-emite su broadcast a las pantallas de los usuarios. Se arregla lo que se genera
+de acá en adelante, y se avisa.
+
+### De paso: mirá los permisos de la función que tocás
+
+Al reemplazar `notif_lead_label` apareció que era SECURITY DEFINER y ejecutable
+por `anon`. Devolvía nombre o teléfono de cualquier lead por id. Ver skill
+`revocar-execute-incluye-public`.

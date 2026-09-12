@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**162 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**163 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -53,6 +53,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `importacion-con-lote-deshacible` | `import_batch_id`: deshacer por `created_at` se lleva lo que entró por el formulario y los webhooks en la misma ventana |
 | `supabase-storage-borra-en-silencio` | `storage.remove()` devuelve `error: null, data: []` sin policy de SELECT: subir funciona y borrar no. Más el índice único parcial que se viola **por el camino**, no por el destino |
 | ⭐⭐ `service-role-con-cookies-fuga-de-pii` | `createServerClient` de `@supabase/ssr` **lee cookies y la cookie le gana a la llave**: con sesión la RLS aplica, sin sesión bypasea todo. Un `GET /api/investors` sin login devolvía cédulas y teléfonos reales, con status 200 |
+| ⭐⭐ `revocar-execute-incluye-public` | `revoke execute … from anon, authenticated` **no cierra una función**: nace con EXECUTE para PUBLIC y anon lo hereda. En el CRM, una función devolvía nombre o teléfono de cualquier contacto a un `curl` sin sesión, y la de al lado tenía el revoke incompleto |
 | `borrar-entidad-con-fk-no-action` | El default de Postgres es **bloquear**. El orden de borrado lo dicta la base: se valida con `BEGIN … ROLLBACK` contra datos reales, y los dependientes de segundo nivel van primero |
 
 ## 🏢 Multi-tenant y SaaS

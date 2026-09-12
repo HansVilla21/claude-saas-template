@@ -47,9 +47,12 @@ mismo mecanismo del "tu código es 1234" de un banco.
 4. **Trigger de dispatch.** `AFTER INSERT ... WHEN (new.type = '<evento>')` que
    llama a la función con `net.http_post` (pg_net). La **URL y el secret salen de
    Vault** (`vault.create_secret` out-of-band, nunca hardcodeados en la
-   migración). El trigger es `security definer`; **revocá EXECUTE a anon/
-   authenticated** (advisor 0028: una función SECURITY DEFINER queda invocable por
-   REST; el trigger la corre igual sin ese grant). Blindá con `exception when
+   migración). El trigger es `security definer`; **revocá EXECUTE a `public`,
+   `anon` y `authenticated`** (advisor 0028: una función SECURITY DEFINER queda
+   invocable por REST; el trigger la corre igual sin ese grant). ⚠️ `from anon,
+   authenticated` solo NO alcanza: las funciones nacen con EXECUTE para PUBLIC y
+   anon lo hereda. Verificá con `has_function_privilege('anon', …)`. Ver skill
+   `revocar-execute-incluye-public` (corregido 2026-09-12). Blindá con `exception when
    others then return new` — el aviso jamás debe abortar el INSERT del evento.
 
 5. **Config/secretos.** En la función: `WA_DISPATCH_SECRET` (= el de Vault),
@@ -117,7 +120,7 @@ mismo mecanismo del "tu código es 1234" de un banco.
 ## Output esperado
 
 - Migración: `wa_notification_log` (+ RLS) · trigger `dispatch_wa_notification`
-  (pg_net + Vault, EXECUTE revocado a anon).
+  (pg_net + Vault, EXECUTE revocado a public, anon y authenticated).
 - Edge Function `notify-agent-whatsapp` deployada (verify_jwt off, auth por
   secret).
 - Plantilla YCloud aprobada + secretos en la función.

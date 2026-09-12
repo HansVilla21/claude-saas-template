@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        162 skills de proceso reusables:
+│   └── skills/        163 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1296,6 +1296,45 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      y que publicar no pidió renovación; y
 │                      webhook-meta-multicanal suma el despliegue de la función
 │                      por CLI con `--use-api`.
+│                      Tier 39 — El permiso que nadie revocó (1 nueva + 3
+│                      extensiones, capturadas 2026-09-12 persiguiendo el
+│                      "Lead sin nombre" fuera de las pantallas del CRM):
+│                      revocar-execute-incluye-public (⭐⭐ cross-project: en
+│                      Postgres toda función nace con EXECUTE para PUBLIC, así
+│                      que `revoke execute … from anon, authenticated` NO la
+│                      cierra —anon lo hereda— y la migración se lee prolija
+│                      igual. Con tablas el mismo reflejo sí funciona, por eso
+│                      engaña. Salió reemplazando una función que ponía el
+│                      relleno en las notificaciones: era SECURITY DEFINER y
+│                      devolvía nombre o teléfono de cualquier contacto por id,
+│                      sin sesión; la de al lado tenía el revoke incompleto.
+│                      Las dos se cerraron y el `curl` anónimo pasó a 401, pero
+│                      casi nunca es una sola: el reflejo que escribió el revoke
+│                      incompleto está en todas. Trae la query con
+│                      `has_function_privilege` —que resuelve la herencia; leer
+│                      los grants de las migraciones no—, cómo confirmarlo desde
+│                      afuera SIN llamar a las que escriben, la tabla de
+│                      llamadores —trigger y cron corren como postgres; la app
+│                      con sesión es la que rompe— y el orden: buscar quién la
+│                      llama, revocar a public/anon/authenticated, grant al rol
+│                      que la usa, 401 desde afuera).
+│                      **Extensiones:** nombre-de-relleno-visible suma los
+│                      cuatro lugares que el grep de `src` no ve —otro webhook
+│                      que solo llenaba `display_name` (16 leads), el asistente
+│                      de IA que le decía al modelo "El contacto se llama Lead
+│                      sin nombre", funciones SQL con `coalesce` que solo saltan
+│                      NULL y la Edge Function del aviso al equipo—, el helper
+│                      SQL `nombre_real_lead` + `telefono_legible` verificado
+│                      contra salidas de `prettyPhone`, por qué en el aviso va
+│                      "Sin nombre" y no el teléfono, y por qué las notificaciones
+│                      viejas no se reescriben; probar-migracion-contra-base-viva-
+│                      con-rollback suma cómo reemplazar una función VIVA sin
+│                      cambiar nada más —copiar de `pg_get_functiondef`, generar
+│                      los `execute $mN$` desde el archivo y probar
+│                      `replace(vieja) = nueva` textualmente, con la columna de
+│                      "forma" que explicó 40 cambios inesperados—; y
+│                      whatsapp-proactivo-a-staff corrige su propio consejo de
+│                      revocar solo a anon/authenticated.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
