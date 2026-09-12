@@ -71,7 +71,15 @@ bloquea, y queda para siempre.
 - **Un estado puede llegar antes que su mensaje:** el `delivered` del eco llegó 36 ms
   antes que el eco, no encontró el mensaje y se descartó, así que quedó en `sent`.
   Si el webhook descarta estados de mensajes desconocidos, en coexistencia pierde
-  algunos: hay que guardarlos y aplicarlos cuando llega el mensaje.
+  algunos. **Cómo se arregló** (migración 0093 del CRM): si el mensaje no existe,
+  el estado se guarda en una tabla de pendientes; un trigger en `messages`
+  (AFTER INSERT, y AFTER UPDATE solo cuando **cambia** `external_id`) lo aplica
+  cuando aparece la fila. Los dos lados toman `pg_advisory_xact_lock` por
+  `external_id`, así el segundo espera al primero y ve lo que dejó. El trigger va
+  `SECURITY DEFINER` (sesiones del CRM también escriben `messages`), respeta la
+  marca de importación y se prueba con control negativo: sin el trigger el
+  estado queda esperando. La misma carrera existe con lo que manda el CRM: el
+  wamid se guarda recién cuando Meta contesta el envío.
 
 Resultado en la base: coexistencia true, las dos sincronizaciones ok, 5 mensajes,
 la foto archivada en Storage, **0 notificaciones, 0 no leídos**, las columnas de la
