@@ -301,9 +301,14 @@ aprieta el dueño. Al enviarla, el estado pasa a **"Revisión en curso"** con el
 2026-09-11 en el CRM). Mientras tanto no hay nada que hacer salvo mirar la
 **Bandeja de entrada de alertas** y el correo, por si Meta pide más información.
 
+**Medido en el CRM:** enviada el 2026-09-11, **aprobada el 2026-09-12** — menos de un
+día, los tres permisos juntos, pese al aviso de 20 días.
+
 Al aprobarse: **republicar** la app desde **Publicar** en el menú de la izquierda
-(muestra "Sin publicar" mientras está despublicada; puede pedir la renovación de
-acceso a datos) y recién ahí conectar números reales.
+(muestra "Sin publicar" mientras está despublicada). Avisa que puede pedir la
+renovación de acceso a datos; en el CRM **no la pidió** y quedó "Publicada" al
+instante. Recién ahí conectar números reales (el flujo de coexistencia, pantalla por
+pantalla, está en `whatsapp-coexistencia-embedded-signup/prueba-real.md`).
 
 ## Checklist rápido
 

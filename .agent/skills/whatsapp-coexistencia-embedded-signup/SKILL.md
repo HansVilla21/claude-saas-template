@@ -11,7 +11,8 @@
 > familia: un mensaje viejo que entra por el camino de un mensaje nuevo dispara
 > todo lo que se pensó para uno nuevo.
 >
-> Archivos de referencia: `payloads-y-sql.md` (esta carpeta). Skills hermanas:
+> Archivos de referencia: `payloads-y-sql.md` y `prueba-real.md` (la primera
+> conexión real, pantalla por pantalla, 2026-09-12). Skills hermanas:
 > `meta-tech-provider-de-cero-a-app-review`, `fb-login-sdk-fedcm-y-callback`,
 > `webhook-meta-multicanal`, `probar-migracion-contra-base-viva-con-rollback`.
 
@@ -255,6 +256,16 @@ la producción quedó intacta. En la función del webhook, 14 pruebas con los
 6. Contactos importados contados como nuevos de hoy. → bajar `created_at` solo a
    los que nacieron del historial.
 
+## Lo que agregó la primera conexión real (detalle en `prueba-real.md`)
+
+- **#3441003 genérico** al confirmar la zona horaria = el QR de la app no se escaneó.
+- El mensaje oficial de Meta del QR llega en el historial como `type: errors` y
+  creaba un contacto basura → saltar `errors` y `unsupported` en el historial.
+- **El historial no trae nombres.** Contactos "Lead sin nombre" → completar
+  `full_name` con el perfil cuando vuelven a escribir y mostrar el teléfono en vez
+  del relleno (y cuidar las plantillas y la IA: saludaban "Hola Lead").
+- Meta repite mensajes entre fases del historial: la idempotencia no es opcional.
+
 ## Pendientes conocidos (documentados, no resueltos)
 
 - **Handler congelado:** las conversaciones importadas nacen con el handler del
@@ -280,3 +291,5 @@ la producción quedó intacta. En la función del webhook, 14 pruebas con los
 - [ ] Ventana de 24 h intacta; escáneres revisados uno por uno
 - [ ] Prueba con bloque que aborta **y** control negativo
 - [ ] Texto de ayuda con los límites (grupos, temporales, dispositivos vinculados)
+- [ ] Probar en una cuenta nueva con el número vacío: conectar en una cuenta viva apaga su línea
+- [ ] Historial sin `errors`/`unsupported`; nombres de relleno nunca a la vista ni en mensajes
