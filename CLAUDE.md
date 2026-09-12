@@ -786,10 +786,16 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      queda en un solo disco: espejo privado con rama
 │                      `respaldo-full-<fecha>`, y el trade-off de los `.env` en
 │                      texto plano decidido explícito, con git-crypt como
-│                      alternativa) + git-footguns-de-sesion (los 3 que borran
-│                      trabajo sin dar error: untrackear un dir con ediciones
-│                      sin commitear, dos sesiones sobre la misma rama con
-│                      `git add -A`, y el Credential Manager multicuenta) +
+│                      alternativa) + git-footguns-de-sesion (los 4 que borran
+│                      o pisan trabajo sin dar error: untrackear un dir con
+│                      ediciones sin commitear, dos sesiones sobre la misma
+│                      rama con `git add -A`, el Credential Manager
+│                      multicuenta, y el paso que falla sin frenar a los
+│                      siguientes: el `git worktree add` murió por rutas
+│                      largas y el `git commit` corrió en el checkout con
+│                      trabajo ajeno. En la terminal de Claude Code `set -e`
+│                      no frena; el arreglo es commitear con la plomería de
+│                      git sin tocar el checkout. Sumado 2026-09-10) +
 │                      verificar-ui-detras-de-auth-en-local (quitar la ruta de
 │                      `PROTECTED_PREFIXES` en local y REVERTIR — el revert es
 │                      parte del cambio; Google GIS no corre en un preview de
