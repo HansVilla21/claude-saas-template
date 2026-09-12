@@ -6,6 +6,59 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-12 — Conexión directa con Meta: de proveedor de tecnología a un WhatsApp real por coexistencia
+
+**Contexto:** cierre del camino que arrancó el 2026-09-09 para que cada negocio conecte SU WhatsApp desde el CRM, sin YCloud en el medio. El 2026-09-11 se destrabó el registro insertado (FedCM, callback async, proveedor sin registrar) y se envió la revisión de la app; el 2026-09-12 Meta la aprobó, la app se publicó y se conectó el primer número real por coexistencia. Entregas del día en `momentum-ai-crm`: PRs #211, #212 y #213, migración `0093`, `meta-webhook` 1.3.1 y 1.3.2. Skills: Tier 37 (tres) y Tier 38 (dos) en este repo.
+
+> **Corrige un registro viejo:** más abajo (sesión de Casa CRM) figura *"NO necesitamos Tech Provider status de Meta"*. Para Momentum AI CRM es al revés: sin ser proveedor de tecnología registrado **y** con la revisión aprobada, Meta no deja conectar ningún número por Embedded Signup, ni el propio.
+
+### Decisión 1 — Proveedor de tecnología directo, no un BSP
+
+**Decisión:** Momentum es **Independent Tech Provider** de Meta; cada cliente paga sus mensajes a Meta con su tarjeta.
+
+**Razón:** WhatsApp, Instagram y Messenger salen por la misma app; no hay un saldo del partner que, si se vacía, apaga a todos los clientes; y la revisión de la app era inevitable igual (el carril de socio tecnológico de YCloud pide los mismos videos).
+
+**Qué se descartó:** quedarse en YCloud como proveedor, y su programa de socio tecnológico.
+
+### Decisión 2 — Coexistencia sí o sí, con los chats viejos
+
+**Decisión:** la conexión es **coexistencia** (el número sigue en WhatsApp Business del celular y en WhatsApp Web) y se importan los chats de los últimos 6 meses.
+
+**Razón:** palabras del founder: *"mis clientes siempre deben también poder acceder al WhatsApp desde el celular o desde WhatsApp web"*, y después *"trae los chats viejos también"*.
+
+**Cómo, para que el pasado no se haga pasar por presente:** la importación corre en una función que aparta los avisos, los "no leídos" y el realtime, y **no llena la ventana de 24 h** (a quien escribió antes de conectar solo se le puede escribir con plantilla). Nunca se registra con PIN un número que está en la app.
+
+### Decisión 3 — La prueba real va en una cuenta aparte; "Momentum AI CRM" sigue en YCloud
+
+**Decisión:** el número de prueba se conectó en una cuenta nueva, **Pruebas Meta**, creada con el número vacío. "Momentum AI CRM" y los clientes siguen en YCloud por ahora.
+
+**Razón:** un negocio tiene una sola línea activa, y conectar por Meta en una cuenta viva **apaga su línea de YCloud**. Palabras del founder: *"necesitamos que todavía esté funcionando con Ycloud, porque siguen llegando mensajes"*. La demo tampoco servía: mezcla chats reales con datos inventados.
+
+### Decisión 4 — Un nombre de relleno nunca se muestra ni se usa para hablarle a nadie
+
+**Decisión:** "Lead sin nombre" y los demás rellenos pasan por un helper único: en pantalla se ve el **teléfono**, y en plantillas o prompts de IA no se usa. Cuando la persona vuelve a escribir, su nombre de WhatsApp reemplaza el relleno, nunca un nombre cargado a mano.
+
+**Razón:** Meta no manda nombres en los chats viejos, así que la importación iba a llenar el CRM de "Lead sin nombre". Al revisarlo aparecieron dos daños que venían de antes: plantillas saludando **"Hola Lead,"** y la IA de seguimientos recibiendo el relleno como nombre del cliente.
+
+**Qué se descartó:** borrar el relleno de la base (el bot y el SQL comparan contra ese texto).
+
+### Decisión 5 — Un aviso de estado que llega antes que su mensaje se guarda, no se pide reintento
+
+**Decisión:** si Meta avisa "entregado" o "leído" de un mensaje que todavía no está guardado, el aviso va a una tabla de pendientes y un trigger lo aplica cuando aparece el mensaje (migración `0093`). La función que comparte con YCloud no se tocó.
+
+**Razón:** medido dos veces el mismo día (36 ms y 22 ms de diferencia): con coexistencia la carrera es lo normal. Pedirle a Meta que reintente dejaría reintentando durante días los avisos de mensajes que nunca van a existir en el CRM.
+
+### Decisión 6 — La importación de chats viejos salta los mensajes sin contenido
+
+**Decisión:** en el historial se ignoran `errors` y `unsupported`. En vivo se siguen mostrando.
+
+**Razón:** el mensaje oficial de Meta que pide tocar "Conectar" durante el QR llega así y creaba un contacto basura del Reino Unido. De un chat viejo, esos tipos solo dejan una burbuja vacía.
+
+**Pendientes inmediatos:**
+- Antes de pasar un cliente de YCloud a Meta: resolver los mensajes que el historial duplicaría (guardados con el id de YCloud; medido 25 en Givi/Jacó) y el handler de las conversaciones importadas cuando el bot escuche a Meta.
+- `ycloud-webhook`: completar el nombre de un contacto existente igual que `meta-webhook` (la app ya lo muestra bien).
+- Renombrar el portafolio "Hans Villalobos": es lo que ven los clientes al conectar ("Tu cuenta está conectada a Hans Villalobos").
+
 ## 2026-09-11 — Los estados de un mensaje: el check azul, y lo que WhatsApp no deja hacer
 
 **Contexto:** el founder preguntó si se podía editar o borrar un mensaje como en WhatsApp, y después si se podía saber cuándo lo leyeron. Las dos respuestas salieron de la documentación viva de Meta y de YCloud (revisada el 2026-09-11) y de medir la base de producción. Terminó en tres entregas a producción del CRM (PRs #205, #206 y #207 de `momentum-ai-crm`, migración `0092` y la función `ycloud-webhook` v28) y una skill nueva en este repo (el cuarto footgun de `git-footguns-de-sesion`, PR #37).
