@@ -6,6 +6,22 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-12 (tarde) — El relleno fuera de las pantallas, y las funciones que cualquiera podía ejecutar
+
+**Contexto:** después de arreglar "Lead sin nombre" en las pantallas (PR #211), el founder preguntó por el pendiente del webhook de YCloud. Siguiendo el relleno aparecieron cuatro lectores más fuera del front y, al reemplazar dos funciones SQL, un problema de permisos en toda la base. Entregas en `momentum-ai-crm`: PR #215 (`ycloud-webhook` 1.5.1, migración `0094`) y PR #216 (`notify-agent-whatsapp` 1.0.1, migración `0095`), las dos con OK del founder y en producción. Skills: Tier 39 en este repo.
+
+**Decisiones:**
+
+1. **El nombre de WhatsApp completa `full_name` solo si es el relleno o está vacío.** Nunca pisa un nombre que puso el negocio. Es el mismo criterio que `meta-webhook`. Los 16 leads que ya estaban así se corrigieron con un backfill medido (0 nombres reales tocados).
+2. **Cada lector conserva su orden y su texto genérico; lo único nuevo es saltar el relleno.** En SQL, con un helper (`nombre_real_lead` + `telefono_legible`) en vez de repetir la lista en cada `coalesce`. Se descartó unificar el orden de todos: habría cambiado lo que ven hoy los que tienen nombre.
+3. **En el aviso de WhatsApp al agente va "Sin nombre" y no el teléfono**, porque el teléfono ya va en su propia línea.
+4. **Las notificaciones y tareas ya creadas no se reescriben** (185 notificaciones con el relleno). Son historia, y reescribir notificaciones re-emite su broadcast a las pantallas.
+5. **Toda función SECURITY DEFINER se cierra con `revoke … from public, anon, authenticated`**, no solo anon/authenticated: el EXECUTE viene de PUBLIC. Se aplicó a `notif_lead_label` (devolvía nombre o teléfono de cualquier lead a un anónimo) y `tasks_scan_generadores`.
+
+**Qué se descartó:** llamar a funciones que escriben para "probar" que estaban abiertas (la prueba sería el daño); ampliar el cierre de permisos en el mismo PR sin buscar los llamadores de cada función (la app con sesión podría romperse).
+
+**Pendientes inmediatos:** auditoría de permisos del resto de las funciones de la base: el detalle vive SOLO en el backlog privado del CRM, porque este repo es público. Falta ver el primer aviso, notificación y tarea reales con el código nuevo.
+
 ## 2026-09-12 — Conexión directa con Meta: de proveedor de tecnología a un WhatsApp real por coexistencia
 
 **Contexto:** cierre del camino que arrancó el 2026-09-09 para que cada negocio conecte SU WhatsApp desde el CRM, sin YCloud en el medio. El 2026-09-11 se destrabó el registro insertado (FedCM, callback async, proveedor sin registrar) y se envió la revisión de la app; el 2026-09-12 Meta la aprobó, la app se publicó y se conectó el primer número real por coexistencia. Entregas del día en `momentum-ai-crm`: PRs #211, #212 y #213, migración `0093`, `meta-webhook` 1.3.1 y 1.3.2. Skills: Tier 37 (tres) y Tier 38 (dos) en este repo.
