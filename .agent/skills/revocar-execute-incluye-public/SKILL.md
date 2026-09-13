@@ -177,7 +177,12 @@ prueba con `curl`.
   eran `bot_apagado_en_la_agencia`, y el bot estaba apagado en esas cuentas
   (skill `distinguir-detenido-a-proposito-de-roto`).
 - Si la app la llama con sesión, entrar como un usuario de cada rol y usar la
-  pantalla.
+  pantalla. **No hace falta ver la pantalla para saber qué camino tomó:** pedile a
+  alguien que la abra y compará `pg_stat_statements` por rol antes y después. Si
+  el contador de `service_role` sube y el de `authenticated` queda quieto, la app
+  ya no depende del permiso quitado. Si sube el de `authenticated`, sigue
+  corriendo el deploy viejo. En el CRM: portada 0→1 y Métricas 0→2 por
+  service_role; authenticated quieto; 0 `permission denied` en los logs.
 
 ## Anti-patrones
 
