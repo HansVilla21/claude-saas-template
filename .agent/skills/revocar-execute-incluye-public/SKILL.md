@@ -9,7 +9,11 @@
 > migración un `revoke execute … from anon, authenticated` escrito a conciencia,
 > y **no había quitado nada**. Las dos se cerraron en la misma migración, con un
 > `curl` anónimo que pasó de devolver datos a **401**. Y la auditoría de toda la
-> base que vino después mostró que no eran las únicas.
+> base que vino después mostró que no eran las únicas: 18 más sin ningún chequeo
+> de quién llama, una de las cuales devolvía todas las cuentas de clientes. Se
+> cerraron ese mismo día sin romper nada: las funciones SECURITY DEFINER
+> ejecutables por `anon` pasaron de **33 a 15**, y las que quedan son de trigger
+> o helpers de RLS.
 
 ## Cuándo usar esta skill
 
@@ -113,6 +117,42 @@ select proname, prosecdef from pg_proc where prosrc ilike '%public.f(%';
 select jobname, username from cron.job where command ilike '%f(%';
 ```
 
+### ⭐ La fuente que no miente: `pg_stat_statements` por rol
+
+El grep encuentra el código que **existe**, pero no dice con qué rol corre, y no
+ve lo que vive fuera del repo (n8n, scripts, un panel). La base anota **quién la
+llamó de verdad**:
+
+```sql
+select r.rolname, sum(s.calls) as llamadas
+from extensions.pg_stat_statements s join pg_roles r on r.oid = s.userid
+where s.query ~ '\mmi_funcion\M'
+  and s.query not ilike 'create %' and s.query not ilike '%pg_stat_statements%'
+group by 1 order by 2 desc;
+
+-- ¿desde cuándo mide? Si dealloc > 0 se perdieron consultas raras.
+select stats_reset, dealloc from extensions.pg_stat_statements_info;
+```
+
+En el CRM: 3,5 meses de medición sin pérdidas. Separó las 18 funciones en tres
+grupos sin discusión: **postgres** (triggers y cron), **service_role** (Edge
+Functions y el cron de la app) y **authenticated** (solo el panel master). Y
+mostró una llamada de `anon`: la prueba con `curl`.
+
+### Si la app las llama con sesión: dos caminos
+
+- **Pasar la llamada al cliente de servicio DESPUÉS del gate de la app**
+  (`requireMaster()` y después `admin.rpc(...)`) y revocar también a
+  `authenticated`. No toca el cuerpo de la función. Elegido en el CRM para las 4
+  del panel master.
+- **Dejar `authenticated` y meter el chequeo adentro** (`is_master()`,
+  `is_member_of(p_agency)`). Sirve cuando la llaman usuarios de varios roles.
+
+⚠️ **Orden de deploy con el primer camino: primero la app, después la
+migración.** Si revocás antes, el panel queda roto mientras Vercel despliega.
+Se espera el deploy de producción en `success`, se aplica la migración y se
+prueba con `curl`.
+
 ## Verificación
 
 - Dentro del bloque que siempre aborta (skill
@@ -121,7 +161,15 @@ select jobname, username from cron.job where command ilike '%f(%';
   `perform` de la función como `postgres` para probar que el cron la sigue
   pudiendo correr. Medido en el CRM: `label anon=t auth=t` →
   `label anon=f auth=f svc=t`.
+- En el mismo bloque, **como `service_role`**, llamá a las de lectura que usa
+  la app, y dispará un camino de trigger con un `update` que no cambia nada
+  (`set bot_enabled = bot_enabled` activa un `AFTER UPDATE OF bot_enabled`).
+  Así probás que las funciones anidadas se chequean contra el dueño y no contra
+  quien escribe.
 - Aplicado: el mismo `curl` anónimo → **HTTP 401, `42501 permission denied`**.
+- Después, en los logs de Postgres: los únicos `permission denied` tienen que ser
+  los de tu `curl`. Y `cron.job_run_details` tiene que mostrar corridas
+  `succeeded` posteriores al cambio.
 - Si la app la llama con sesión, entrar como un usuario de cada rol y usar la
   pantalla.
 
@@ -135,7 +183,11 @@ select jobname, username from cron.job where command ilike '%f(%';
   cargar y parece otro bug.
 - **Arreglar solo la que encontraste.** Casi nunca es una sola: si una función
   tenía el revoke incompleto, el reflejo que lo escribió está en todas. Corré la
-  query de arriba sobre toda la base.
+  query de arriba sobre toda la base. En el CRM, las 2 primeras destaparon 18 más.
+- **Cerrar también los helpers de RLS** (`is_master()`, `is_member_of()`, …):
+  `anon` y `authenticated` los NECESITAN para evaluar las policies, y como solo
+  hablan de quién llama no exponen nada. Si les sacás el permiso, las pantallas
+  fallan con un 42501 en vez de devolver vacío.
 - **Publicar el resultado de la auditoría antes de cerrar.** Los nombres de las
   funciones abiertas, en un repo público o un canal compartido, son un mapa.
   El detalle va a un lugar privado hasta que estén cerradas.

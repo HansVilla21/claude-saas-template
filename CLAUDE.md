@@ -1309,15 +1309,20 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      devolvía nombre o teléfono de cualquier contacto por id,
 │                      sin sesión; la de al lado tenía el revoke incompleto.
 │                      Las dos se cerraron y el `curl` anónimo pasó a 401, pero
-│                      casi nunca es una sola: el reflejo que escribió el revoke
-│                      incompleto está en todas. Trae la query con
+│                      casi nunca es una sola: la auditoría destapó 18 más —una
+│                      devolvía todas las cuentas de clientes— y se cerraron el
+│                      mismo día, 33 → 15 ejecutables por anon, sin romper el
+│                      cron ni los seguimientos. Trae la query con
 │                      `has_function_privilege` —que resuelve la herencia; leer
 │                      los grants de las migraciones no—, cómo confirmarlo desde
-│                      afuera SIN llamar a las que escriben, la tabla de
-│                      llamadores —trigger y cron corren como postgres; la app
-│                      con sesión es la que rompe— y el orden: buscar quién la
-│                      llama, revocar a public/anon/authenticated, grant al rol
-│                      que la usa, 401 desde afuera).
+│                      afuera SIN llamar a las que escriben, los llamadores
+│                      REALES por rol con `pg_stat_statements` —el grep no ve
+│                      n8n ni con qué rol corre—, la tabla de qué rompe —trigger
+│                      y cron corren como postgres; la app con sesión es la que
+│                      rompe—, los dos caminos para el panel que llama con
+│                      sesión —cliente de servicio después del gate, o chequeo
+│                      adentro— con el orden de deploy: app primero, migración
+│                      después; y por qué los helpers de RLS NO se cierran).
 │                      **Extensiones:** nombre-de-relleno-visible suma los
 │                      cuatro lugares que el grep de `src` no ve —otro webhook
 │                      que solo llenaba `display_name` (16 leads), el asistente
