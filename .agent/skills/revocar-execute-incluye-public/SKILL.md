@@ -170,6 +170,12 @@ prueba con `curl`.
 - Después, en los logs de Postgres: los únicos `permission denied` tienen que ser
   los de tu `curl`. Y `cron.job_run_details` tiene que mostrar corridas
   `succeeded` posteriores al cambio.
+- Y el **primer tráfico real** que pasa por las funciones cerradas: filas nuevas
+  en la tabla que escribe cada llamador (mensajes, turnos del bot). ⚠️ Un turno
+  `skipped` justo después de un cambio de permisos **parece** la rotura y casi
+  nunca lo es: leé su motivo antes de revertir nada. En el CRM los 4 primeros
+  eran `bot_apagado_en_la_agencia`, y el bot estaba apagado en esas cuentas
+  (skill `distinguir-detenido-a-proposito-de-roto`).
 - Si la app la llama con sesión, entrar como un usuario de cada rol y usar la
   pantalla.
 
