@@ -20,7 +20,9 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 
 **Qué se descartó:** llamar a funciones que escriben para "probar" que estaban abiertas (la prueba sería el daño); ampliar el cierre de permisos en el mismo PR sin buscar los llamadores de cada función (la app con sesión podría romperse).
 
-**Pendientes inmediatos:** auditoría de permisos del resto de las funciones de la base: el detalle vive SOLO en el backlog privado del CRM, porque este repo es público. Falta ver el primer aviso, notificación y tarea reales con el código nuevo.
+**Cierre del mismo día (PR #218, migración `0096`, con OK del founder):** la auditoría encontró 18 funciones SECURITY DEFINER más sin chequeo de quién llama. Se cerraron con la misma regla. Los llamadores se midieron en `pg_stat_statements` por rol, no solo con grep. Las 4 que el panel master llamaba con sesión pasaron al cliente de servicio después de `requireMaster()`, y **la app se desplegó antes que la migración**. Resultado: funciones SECURITY DEFINER ejecutables por anon 33 → 15 (quedan las de trigger y los helpers de RLS, que las policies necesitan), `curl` anónimo → 401, y el cron y los seguimientos siguieron corriendo después.
+
+**Pendientes inmediatos:** ver el primer mensaje entrante, la primera apertura del panel master, y el primer aviso, notificación y tarea reales con el código nuevo.
 
 ## 2026-09-12 — Conexión directa con Meta: de proveedor de tecnología a un WhatsApp real por coexistencia
 
