@@ -6,6 +6,23 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-12 (noche) — Se reabre el socio tecnológico de YCloud; Instagram y Messenger van primero
+
+**Contexto:** con WhatsApp directo verificado, el founder retomó el programa *Tech Partner* de YCloud, que había quedado pendiente mientras no estaba lo de Meta. Victor, del equipo Business de YCloud, contestó por correo la duda que bloqueaba ese carril. Sesión de planificación, sin cambios en producción.
+
+> **Corrige** la Decisión 1 del 2026-09-12 más abajo, que anotaba el socio tecnológico de YCloud como descartado. Para el founder estaba pendiente, no descartado.
+
+**Decisiones:**
+
+1. **El carril de YCloud se reabre, pero no se crea nada hasta tener respuestas.** Victor confirmó que elegir "Only my partner" para enviar mensajes no impide usar la misma app de Meta para Instagram y Messenger. Se le mandaron 6 preguntas sobre lo que tiene que seguir funcionando: el tipo de proveedor registrado (Independent vs "Working with a Solution Partner"), los clientes actuales, los clientes nuevos desde el CRM, el saldo compartido, las plantillas y cómo salir sin perder el número.
+2. **La Partner Solution no se crea ni se guarda como borrador antes de esas respuestas.** El formulario de Meta avisa que sus permisos no se pueden cambiar después.
+3. **Instagram y Messenger son el siguiente bloque de construcción.** Hacen falta en cualquier escenario con YCloud. Se prueban con la página de Facebook y el Instagram de Momentum AI.
+4. **Coexistencia y chats viejos no son preguntas para YCloud.** Los clientes actuales ya están en coexistencia por YCloud, y según el founder los chats viejos no son prioridad.
+
+**Razón:** el único argumento que quedaba a favor de YCloud es comercial (el cliente no pone tarjeta en Meta y hay margen en WhatsApp). El riesgo operativo también sigue en pie y está escrito en su guía: si el saldo del partner no alcanza, los clientes pierden el canal.
+
+**Pendientes inmediatos:** respuesta de Victor; confirmar que el Instagram de Momentum AI es profesional y está vinculado a su página; arrancar la conexión de Instagram y Messenger en Canales.
+
 ## 2026-09-12 (tarde) — El relleno fuera de las pantallas, y las funciones que cualquiera podía ejecutar
 
 **Contexto:** después de arreglar "Lead sin nombre" en las pantallas (PR #211), el founder preguntó por el pendiente del webhook de YCloud. Siguiendo el relleno aparecieron cuatro lectores más fuera del front y, al reemplazar dos funciones SQL, un problema de permisos en toda la base. Entregas en `momentum-ai-crm`: PR #215 (`ycloud-webhook` 1.5.1, migración `0094`) y PR #216 (`notify-agent-whatsapp` 1.0.1, migración `0095`), las dos con OK del founder y en producción. Skills: Tier 39 en este repo.

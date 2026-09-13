@@ -36,6 +36,39 @@
 La frase *"becoming a Tech Provider is not mandatory"* de YCloud es del programa
 **white label**, que es otro. **El App Review es inevitable en cualquier carril.**
 
+### Los dos carriles a la vez: WhatsApp por el BSP, Instagram y Messenger directo (2026-09-12)
+
+*Carril en curso en el CRM de Momentum. Lo de abajo está leído en las guías y
+confirmado por el BSP por correo; todavía **no** se creó ninguna solución.*
+
+- **Se hace con una Partner Solution, dentro de la MISMA app** (no una app nueva).
+  En el panel por casos de uso: tarjeta **"Conectarte con los clientes a través de
+  WhatsApp"** → Personalizar → **"Conviértete en socio" → "Soluciones para
+  socios"** → "Crear solución para socios". La doc de Meta lo describe como
+  *App Dashboard > WhatsApp > Partner solutions*, un menú que ya no existe con ese
+  nombre.
+- **El formulario:** nombre, **App ID del socio** (el de YCloud es
+  `2892949377516980`, público en su guía), y permisos: plantillas, recursos de
+  teléfonos, y *enviar mensajes y hacer llamadas* ("Solo yo" / "Solo mi socio").
+  ⚠️ **"Los permisos no se pueden cambiar después de la configuración".** Hay un
+  "Guardar borrador", pero no crees ni guardes nada antes de tener las respuestas
+  del socio.
+- **"Only my partner" solo alcanza a WhatsApp:** YCloud confirmó que no impide
+  Instagram ni Messenger por la misma app. Aplica a los clientes que se conectan
+  con el Solution ID; la doc de Meta no aclara qué pasa con los que se conectan
+  sin él.
+- **La guía del BSP se renumera:** en YCloud el paso de la solución era el 8 y
+  pasó a ser el 4. Citá los pasos por nombre, no por número.
+- ⚠️ **Tipo de proveedor:** la guía de YCloud pide registrarse como *"Working with
+  a Solution Partner"*. Si ya elegiste *"Independent Tech Provider"* para ir
+  directo, preguntale al socio antes de crear la solución.
+- ⚠️ **El punto único de falla es contractual, no un rumor:** la guía de YCloud dice
+  que todos los mensajes se descuentan del saldo del partner y que *"If your
+  balance is insufficient, end customers will be unable to use their WhatsApp
+  Business channel"*. Preguntá por alertas, recarga automática, crédito o límites
+  por cliente antes de sumar clientes.
+- En ese mismo menú está **"Migrar clientes"**, para mover números entre socios.
+
 ## Las puertas, en orden
 
 | # | Puerta | Dónde | Tiempo medido |
