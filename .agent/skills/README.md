@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**163 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**166 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -87,6 +87,9 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `n8n-pipeline-rapido-vs-pesado` | Separar el camino que responde del que procesa |
 | `bot-multibubble-output-flow` | Responder en burbujas (Formateador → Parser → Split Out → Expand) |
 | `bot-handoff-system-end-to-end` | Handoff bot → humano completo |
+| ⭐ `marca-del-pase-en-el-chat` | `handoff_*` en columnas guarda solo el último pase: tabla de eventos llenada por trigger, el marcador corrido **después** de la despedida del bot, y el segundo pase que daba **0 filas** en silencio porque devolver al bot dejaba el pase `pending` |
+| ⭐ `escribir-toma-la-conversacion` | El equipo escribía y el bot contestaba encima (423 mensajes en 45 días). Trigger en `messages` —`sender_kind='agent'` solo no alcanza: los seguimientos también lo son—, portones otra vez después de esperar y después de pensar, y lo del equipo a la memoria del bot |
+| ⭐ `bot-lee-pdf-del-cliente` | El PDF se **resume una vez al llegar** (data URL, solo PDF, MIME antes de bajar, vacío no es éxito) y el texto al modelo **prohíbe opinar**. Con el generador de un estudio inventado en Python puro y los **tres** lugares que tienen que conocer un tipo nuevo |
 | `bot-anti-loop-detector` | Anti-loop + descalificación |
 | `bot-llm-marker-expand-pattern` | Marcadores del LLM expandidos aguas abajo |
 | `bot-whatsapp-unsupported-fallback` | Recuperar los mensajes `unsupported` del clic de anuncio |
