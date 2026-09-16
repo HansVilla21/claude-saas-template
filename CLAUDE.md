@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        163 skills de proceso reusables:
+│   └── skills/        166 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1340,6 +1340,69 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      "forma" que explicó 40 cambios inesperados—; y
 │                      whatsapp-proactivo-a-staff corrige su propio consejo de
 │                      revocar solo a anon/authenticated.
+│                      Tier 40 — Lo que el bot no veía y el equipo no sabía (3,
+│                      capturadas 2026-09-16 de lo construido el 2026-09-15
+│                      llevando a código el feedback de un cliente de
+│                      fisioterapia):
+│                      bot-lee-pdf-del-cliente (⭐ cross-project: el paciente
+│                      manda su resonancia en PDF y el bot contesta sin saber qué
+│                      dice; al profesional le llega el archivo sin una línea de
+│                      qué es. El PDF se RESUME una sola vez al llegar —como una
+│                      foto se describe y un audio se transcribe— y el resumen
+│                      queda como texto en el registro del turno y en la memoria.
+│                      Chat Completions con una parte `file` y `file_data` en
+│                      data URL —el link del proveedor vence a los 7 días y el
+│                      propio está firmado—, `filename` que termine en `.pdf`,
+│                      solo PDF porque eran 9 de 9 en 120 días, el MIME se mira
+│                      ANTES de bajar, tope de 10 MB, 30 s por debajo de la
+│                      espera del lote, y un resumen vacío NO es éxito. El texto
+│                      al modelo PROHÍBE opinar y deja que la regla del negocio
+│                      se aplique sobre el resumen; si la lectura falla, llegó y
+│                      no se inventa, nunca "no pude abrirlo". Trae el generador
+│                      de un estudio INVENTADO en Python puro —objetos y `xref`
+│                      a mano— para probar contra la API real: 2,7 s y USD
+│                      0,0004 por PDF. Gotchas: el TERCER lugar que enumera
+│                      tipos —el filtro de textos guardados del lote— quedó sin
+│                      tocar, y un PDF seguido de un texto llega como "no se pudo
+│                      leer"; un assert de "no contiene 'no se pudo abrir'" falla
+│                      con el código bien porque la instrucción que lo prohíbe
+│                      usa esas palabras; y son datos de salud que van a un
+│                      tercero: avisar antes, Ley 8968) +
+│                      marca-del-pase-en-el-chat (⭐ cross-project: `handoff_*`
+│                      en columnas guarda solo el ÚLTIMO pase. Tabla de eventos
+│                      —handoff / taken / returned_to_bot— llenada por UN
+│                      trigger en `conversations`: pase cuando cambia
+│                      `handoff_at`, tomar y devolver solo con `auth.uid()`
+│                      —apagar el bot en masa no llena cientos de chats—,
+│                      lectura calcada de la de mensajes y escritura revocada;
+│                      respaldo solo del último pase con su hora real (70, 8 con
+│                      resumen). En la UI, una función pura corre el marcador
+│                      DESPUÉS de las burbujas del bot dentro de 2 minutos,
+│                      porque la despedida se escribe después del `handoff_at`.
+│                      Y el segundo pase fallaba mudo: devolver al bot dejaba
+│                      `pending` y el guard contra la doble escalada daba 0
+│                      filas —el cliente leía "dame un chance" y a nadie le
+│                      llegaba nada—. Arreglo en dos capas: un BEFORE que cierra
+│                      el pase al volver al bot, NOMBRADO para correr después
+│                      del que ya existía porque Postgres ordena los triggers
+│                      del mismo evento por nombre, y un guard que ignora el
+│                      pendiente que ya tiene el bot. 3 pases → 3 eventos) +
+│                      escribir-toma-la-conversacion (⭐ cross-project: el
+│                      equipo escribió 423 mensajes en 45 días y el bot les
+│                      contestaba encima. Trigger en `messages` —las tres
+│                      puertas pasan por la base— que pasa la conversación a
+│                      `human` y la asigna si nadie la tenía;
+│                      `sender_kind='agent'` solo NO alcanza porque los
+│                      seguimientos automáticos también son 'agent'; y
+│                      `UPDATE OF` porque el eco del celular corrige la fila
+│                      después. La carrera: el turno espera 45 s y después
+│                      piensa, así que los portones se miran otra vez después
+│                      de la espera y después del modelo; si ya es de una
+│                      persona, el turno se suelta como `skipped` con motivo y
+│                      guarda lo que dijo el cliente. Y lo que escribe el equipo
+│                      entra a la memoria del bot con la misma llave de sesión
+│                      —audios transcritos en `after()`, fotos y documentos
+│                      como "[Foto]"—, para que al devolverla siga el hilo).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
