@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**166 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**167 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -102,6 +102,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `bsp-media-expira-archivar-propio` | El CDN del BSP **borra la media a los 7 días** (medido). Se perdieron 54 archivos antes de detectarlo |
 | ⭐ `webhook-fanout-sin-reconciliacion` | El proveedor entrega el mismo evento a dos endpoints y nadie reconcilia si uno falla |
 | `webhook-contar-event-types-antes-de-arreglar` | `group by event_type` **antes** de tocar el webhook. El mismo error se cometió 3 veces en una sesión |
+| ⭐ `conectar-numero-que-ya-recibe` | El número se conectó en el proveedor **antes** que en el CRM y los mensajes se descartaban. Bot apagado y canal en **una** escritura (cargar el canal lo enciende), reproceso firmado por el webhook real y cada mensaje con su **hora real** |
 | `conexion-whatsapp-ycloud-supabase-n8n` | Montar la conexión completa en un proyecto/cliente nuevo |
 | `ycloud-webhook-to-supabase` | La ingesta que persiste |
 | `whatsapp-proactivo-a-staff` | Avisar al equipo por plantilla aprobada cuando pasa un evento en la DB |

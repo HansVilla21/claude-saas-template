@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        166 skills de proceso reusables:
+│   └── skills/        167 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1403,6 +1403,34 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      entra a la memoria del bot con la misma llave de sesión
 │                      —audios transcritos en `after()`, fotos y documentos
 │                      como "[Foto]"—, para que al devolverla siga el hilo).
+│                      Tier 41 — El número que llegó antes que el sistema (1,
+│                      capturada 2026-09-16 conectando el WhatsApp de una
+│                      clínica de estética):
+│                      conectar-numero-que-ya-recibe (⭐ cross-project: el
+│                      cliente conecta su número en el proveedor ANTES de que el
+│                      CRM lo conozca, y en dos horas 218 eventos se descartan
+│                      con `unknown_agency_for_phone` sin un solo error
+│                      visible. El orden seguro: medir lo perdido sin leer
+│                      contenido, verificar el número contra la API del
+│                      proveedor, elegir el motor A PROPÓSITO —si un proceso lee
+│                      cada mensaje con un modelo aunque el bot esté apagado, un
+│                      negocio sin entrenar no va ahí—, y apagar el bot y cargar
+│                      el canal en UNA escritura, porque cargar el canal
+│                      ENCIENDE el bot: la ausencia de `bot_enabled` cuenta como
+│                      prendido en los dos motores. La recuperación va por el
+│                      webhook REAL, firmado como el proveedor, de a uno y por
+│                      orden de llegada, respetando el límite por contacto; y
+│                      después cada mensaje recupera su hora real
+│                      (`created_at = sent_at`) y se recalculan los campos
+│                      derivados de la conversación, porque la bandeja ordena
+│                      por la hora del guardado. Gotchas: probar con UN evento
+│                      no prueba el lote —el primero fue justo el que creó un
+│                      lead con el número del propio negocio, y los 14
+│                      siguientes chocaron—, así que se clasifica el lote antes
+│                      y se mira el log a los 20; un eco con `to` igual al
+│                      negocio nunca crea un lead; el borrado lógico no saca la
+│                      conversación de la bandeja; y el historial anterior a la
+│                      conexión no existe).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
