@@ -175,6 +175,8 @@ Sin el tercero, el caso más común (el cliente manda el PDF y enseguida escribe
 
 La primera versión tocó los lugares 1 y 2 y no el 3. **No falla ninguna prueba del lector**, porque el lector funciona. Se detectó leyendo el código del lote al capturar esta skill. La prueba que lo agarra es de **lote**: un PDF y un texto dentro de la misma espera, y assertar que el texto final trae *"Esto es lo que dice"*. El reflejo que sirve para cualquier tipo nuevo: `grep` de `'sticker'` (o del último tipo que se agregó) en todo el código del bot. Cada lugar donde aparece es un lugar donde el tipo nuevo tiene que decidir qué hacer.
 
+**Cómo se cerró (2026-09-16):** el `grep` encontró un **cuarto** lugar con la misma lista y el mismo hueco: el proceso que analiza la conversación, que también busca los textos guardados. El arreglo no fue agregar `'document'` en los dos: la lista pasó a **una sola función** (`necesitaTextoGuardado(m)`) que usan el lote y el analista, con una prueba que incluye el control negativo (un texto sin link y un video no se buscan). Así el próximo tipo se agrega en un solo lugar.
+
 ### 6. El nombre del archivo lo puso el cliente: se limpia
 
 ```ts
