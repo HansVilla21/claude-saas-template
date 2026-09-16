@@ -1,5 +1,8 @@
 # Session Handoff — 2026-08-11 (tarde)
 
+> ⚠️ **HANDOFF HISTÓRICO — superado por `session-handoff-2026-09-09.md`**
+> Se conserva como registro del estado al 2026-08-11. Para estado actual, leer el handoff nuevo primero.
+
 **Propósito:** snapshot del estado al 2026-08-11 13:20 (CR). Lectura al inicio de cualquier sesión que toque **Jacó Dream Rentals**, el **bot de producción** o **`catalog-search`**.
 
 **Reemplaza al handoff anterior** (`session-handoff-2026-06-12.md` queda como histórico).
