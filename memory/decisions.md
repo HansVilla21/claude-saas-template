@@ -194,6 +194,50 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 - Decidir si se prende algún generador y en qué agencia.
 - Un número de pendientes al lado de "Mi día" en el menú: medir antes, porque sería una consulta más en el layout de TODAS las páginas.
 
+## 2026-09-09 — El bot llegaba antes que el lead, y el 86 % del tráfico ni siquiera pasa por él
+
+**Contexto:** el founder reportó que el bot de Givi estaba encendido, en ventana 08:00–18:00, y no atendía.
+
+### Decisión 1 — Esperar 6 s antes de buscar el lead, en vez de reintentar
+
+YCloud entrega el MISMO evento a dos endpoints en paralelo: la Edge Function `ycloud-webhook` (crea lead + conversación + mensaje) y el workflow del bot (lo busca). El bot llegaba a `Buscar Lead (Supabase)` **antes** de que el lead existiera, la query devolvía `{}` y el flujo moría en `Abort - Lead No Encontrado`. Sin error, sin log, sin respuesta al lead — ni siquiera el aviso de fuera de horario.
+
+Medición de dos ejecuciones reales:
+
+| | Buscó | El lead existió | Resultado |
+|---|---|---|---|
+| Muda | 22:23:28.**272** | 22:23:28.**301** | perdió por **29 ms** |
+| OK | 19:37:26.**897** | 19:37:26.**851** | ganó por 46 ms |
+
+Delta webhook → lead creado: **3,70 s y 3,69 s**, muy consistente.
+
+**Decisión:** un nodo Wait de 6 s entre `Resolve Agency` y `Buscar Lead (Supabase)`.
+
+**Qué se descartó:** un nodo de reintento en la rama "no encontrado". **26 nodos aguas abajo leen `$('Buscar Lead (Supabase)')` por NOMBRE** — con un nodo de reintento aparte, todos ésos leerían la búsqueda vacía (la primera), rompiendo el trace, el handoff y las HTTP del extractor justo en el camino que se quería rescatar. Esperar antes del mismo nodo no cambia ninguna referencia.
+
+**Costo:** 6 s de latencia para todos los tenants. Despreciable frente al debounce de 45 s que el bot ya aplica después.
+
+### Decisión 2 — `handler` es terminal, y eso NO se cambia
+
+Al medir por qué no respondía dentro de la ventana, el reparto de 10 días fue: **282 mensajes en conversaciones `handler = human`** (el bot no las toca por diseño; 146 quedaron sin respuesta, de personas) contra **47 en `handler = bot`** (4 fallaron, la carrera de arriba).
+
+O sea: **el bot ve 47 de 329 mensajes, el 14 %**. Cuando una persona contesta desde el inbox, la conversación pasa a `human` y el bot no vuelve a entrar nunca, aunque el equipo la abandone.
+
+**Decisión del founder, textual:** *"No, no, no, eso no lo quiero. Eso de hecho es una funcionalidad que ni siquiera hemos implementado."* No se construye retoma automática.
+
+### Decisión 3 — Ventana nocturna en modo silencioso
+
+Se pasó a **18:00 → 05:00, todos los días**, y el modo de `office_hours` a **`office_hours_silencioso`**: con ventana nocturna y el modo anterior, quien escribiera a las 10 a.m. recibiría *"estamos fuera de horario"* mientras el equipo está trabajando.
+
+Probado con el código real del nodo inyectándole el reloj: 11 casos, bordes incluidos (contesta 18:00 en punto y 04:59, se calla 17:59 y 05:00 en punto).
+
+**Estado final:** `bot_enabled = false` a pedido del founder. La ventana y el modo quedan guardados para cuando lo prenda.
+
+**Pendientes inmediatos:**
+- Al prender en producción, verificar que la espera de 6 s eliminó los abortos por lead no encontrado
+- El video para la objeción "mandame info" sigue sin URL
+- Decisión abierta del estudio: el equipo nunca manda link (0 de 64) ni da precio en números (0 de 64); el bot hace las dos por pedido del cliente
+
 ## 2026-08-27 — Calificación config-driven, tres bugs de producción, y Seguimientos
 
 **Contexto:** el founder preguntó si el auto-etiquetado y la calificación automática ya funcionaban. La medición dio vuelta la premisa y ordenó media sesión. Después reportó tres bugs con capturas, y cerramos con la funcionalidad de Seguimientos completa. 10 PRs, #140 → #149.
