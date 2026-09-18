@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**167 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**168 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -128,6 +128,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐ `no-decidir-dentro-del-updater` | La pantalla lo muestra hecho y la base no se enteró: una bandera prendida **adentro** del updater de `setState` se lee antes de que React lo corra. Medirlo con 3 registros, sacar la decisión afuera y verificar contra la base |
 | ⭐ `auditar-responsive-midiendo` | El desborde no es "algo muy ancho": es algo que **se niega a encogerse**. Las 3 formas, invisibles para tsc y el linter |
 | ⭐ `acciones-en-lote-seguras` | Selección múltiple sin los 3 desastres típicos (actuar sobre lo que no se ve, decir 50 cuando cambiaron 40, ser más permisivo que la app) |
 | ⭐ `reporte-in-app-con-snapshot-efimero` | Reportar un bug cuando lo que hay que reportar es efímero y el servidor no puede reconstruirlo |
