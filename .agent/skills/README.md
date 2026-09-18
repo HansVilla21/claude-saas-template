@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**168 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**169 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -128,6 +128,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐ `selector-de-emojis-tipo-whatsapp` | Selector de emojis "como WhatsApp": se compra hecho (`emoji-picker-element`, carga tardía, datos propios) y el trabajo está en los bordes — el buscador no ignora **tildes** (4 → 26 resultados), las **banderas no existen en Windows** (polyfill de 77 KB solo donde hace falta), el botón aplasta la fila del composer (medir la **columna** con container query, no la ventana) y en celular enfocar sube el teclado encima del panel |
 | ⭐ `no-decidir-dentro-del-updater` | La pantalla lo muestra hecho y la base no se enteró: una bandera prendida **adentro** del updater de `setState` se lee antes de que React lo corra. Medirlo con 3 registros, sacar la decisión afuera y verificar contra la base |
 | ⭐ `auditar-responsive-midiendo` | El desborde no es "algo muy ancho": es algo que **se niega a encogerse**. Las 3 formas, invisibles para tsc y el linter |
 | ⭐ `acciones-en-lote-seguras` | Selección múltiple sin los 3 desastres típicos (actuar sobre lo que no se ve, decir 50 cuando cambiaron 40, ser más permisivo que la app) |
