@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        168 skills de proceso reusables:
+│   └── skills/        169 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1455,6 +1455,36 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      que caen mientras el menú se ubica dan falsos negativos,
 │                      y restaurar datos de prueba con el chat abierto los
 │                      vuelve a pisar).
+│                      Tier 43 — El chat que escribe como WhatsApp (1, capturada
+│                      2026-09-18 del selector de emojis de la bandeja de un CRM):
+│                      selector-de-emojis-tipo-whatsapp (⭐ cross-project: un
+│                      picker con buscador, categorías, tono de piel y recientes
+│                      se COMPRA hecho —`emoji-picker-element`, cargado con
+│                      `import()` solo al abrir y con datos propios en /public,
+│                      sin CDN— y el trabajo real está en cuatro bordes que ningún
+│                      tutorial cuenta, todos medidos: el buscador NO ignora
+│                      tildes ("corazón" 31 resultados, "corazon" 4; se arregla
+│                      agregando las palabras sin tilde a los datos, que son
+│                      tuyos: 4 → 26); en Windows Chromium las banderas no
+│                      existen (🇨🇷 sale "CR") y el picker no las oculta —
+│                      polyfill que descarga 77 KB solo donde hace falta, el
+│                      nombre de la fuente en el `font-family` del body (arregla
+│                      también las burbujas), y el crédito CC-BY de Twemoji—;
+│                      al sumar el botón el campo quedó en 71px a 375px, y
+│                      TAMBIÉN a 1280px con el panel de contacto abierto porque
+│                      el "compacto" se decidía por la ventana y no por la
+│                      columna (container query `@lg:contents`: bajo 32rem los
+│                      botones van en su propia fila); y en celular enfocar el
+│                      campo sube el teclado encima del panel. Trae la función
+│                      pura que inserta en el cursor —se lee el textarea, no el
+│                      estado; 🇨🇷 y 👨‍👩‍👧 entran enteros—, el `onPick` por ref
+│                      (el listener se crea una vez y guarda un cierre viejo), la
+│                      verificación en navegador y en el build de producción, y
+│                      los gotchas de la prueba: las teclas del automatizador no
+│                      mueven el cursor, el indicador de desarrollo de Next tapa
+│                      el botón de la esquina, el 404 de `database.js` es solo de
+│                      desarrollo y el proxy de auth redirige los `.json` de
+│                      /public sin sesión).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
