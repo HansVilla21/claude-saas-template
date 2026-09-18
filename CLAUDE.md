@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        169 skills de proceso reusables:
+│   └── skills/        170 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1485,6 +1485,28 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      el botón de la esquina, el 404 de `database.js` es solo de
 │                      desarrollo y el proxy de auth redirige los `.json` de
 │                      /public sin sesión).
+│                      Tier 44 — Escribir un carácter y que el chat responda (1, capturada
+│                      2026-09-18 de los menús `/` y `:` del composer de un CRM):
+│                      menu-de-comandos-en-composer (⭐ cross-project: escribir `/` abre las
+│                      plantillas y `:feliz` busca el emoji. Parece un `onChange` y una lista y
+│                      casi todo lo difícil está en los bordes, descubiertos uno por uno en el
+│                      navegador: se disparaba con `1/2`, la hora `10:30` y las caritas `:)`;
+│                      Enter enviaba el mensaje en vez de elegir; el menú se abría solo cuando una
+│                      plantilla o la IA cambiaba el texto por otro camino; y la vista grande
+│                      abierta desde un popover cerraba el popover con Escape. Trae el diseño con
+│                      su porqué —menú EN EL FLUJO y no flotante, detección como función pura que
+│                      mira solo antes del cursor y exige que el carácter EMPIECE la palabra,
+│                      cursor guardado junto al texto al que pertenece para que solo abra lo que
+│                      se ESCRIBE—, el teclado (con resultados Enter elige y no envía, sin
+│                      resultados no intercepta nada, el IME nunca), cómo colgar DOS menús del
+│                      mismo textarea, el menú de emojis (misma base que el panel, orden por
+│                      relevancia del nombre con el más corto primero, descartar lo que el
+│                      sistema no dibuja —un emoji compuesto salía como dos y tapaba el texto—) y
+│                      por qué la lista de plantillas mostraba todo el cuerpo: `line-clamp-2` y
+│                      `block` en el mismo elemento, `block` gana y nunca recorta. Gotchas de la
+│                      prueba: `Enter` sí y `Return` no, las flechas simuladas no mueven el
+│                      cursor, probar con Tab si el chat puede enviar de verdad, y un cambio de
+│                      código recarga la página y pierde el chat).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
