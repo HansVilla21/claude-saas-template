@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        167 skills de proceso reusables:
+│   └── skills/        168 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1431,6 +1431,30 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      negocio nunca crea un lead; el borrado lógico no saca la
 │                      conversación de la bandeja; y el historial anterior a la
 │                      conexión no existe).
+│                      Tier 42 — Lo que la pantalla mostraba y la base no (1,
+│                      capturada 2026-09-18 de la bandeja de mensajes del CRM):
+│                      no-decidir-dentro-del-updater (⭐ cross-project: abrir
+│                      un chat lo mostraba leído y la base seguía con el no
+│                      leído, que volvía al recargar; y "marcar como no leída"
+│                      parecía no andar. Era UN bug: la decisión de guardar era
+│                      una bandera que se prendía ADENTRO del updater de
+│                      `setState`, y React solo corre el updater en el momento
+│                      si no hay otra actualización pendiente —en el clic había
+│                      una, `setSeleccionado` justo antes—, así que la bandera
+│                      seguía en false y el guardado no salía nunca. Estaba desde
+│                      el primer commit y lo tapaba un cambio de URL por el
+│                      router que volvía a montar la pantalla; al pasar a
+│                      `history.replaceState` quedó expuesto. El cambio que lo
+│                      destapa no toca la función rota. Trae cómo medirlo con
+│                      tres registros —si "después del set: false" sale antes
+│                      que "updater corre", es esto—, las tres formas de sacar
+│                      la decisión del updater —que decida el servidor, el valor
+│                      en la mano o un `useEffect`—, el grep para encontrar el
+│                      patrón copiado y la verificación del ciclo contra la base
+│                      con el control negativo. Gotchas: los clics automáticos
+│                      que caen mientras el menú se ubica dan falsos negativos,
+│                      y restaurar datos de prueba con el chat abierto los
+│                      vuelve a pisar).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
