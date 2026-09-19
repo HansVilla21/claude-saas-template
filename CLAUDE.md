@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        170 skills de proceso reusables:
+│   └── skills/        172 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1507,6 +1507,28 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      prueba: `Enter` sí y `Return` no, las flechas simuladas no mueven el
 │                      cursor, probar con Tab si el chat puede enviar de verdad, y un cambio de
 │                      código recarga la página y pierde el chat).
+│                      Tier 45 — Lo que la persona edita y el sistema reescribe · lo que el filtro
+│                      no cuenta (2, capturadas 2026-09-18 de las mejoras de contactos de un CRM):
+│                      editar-dato-que-el-webhook-reescribe (⭐ cross-project: agregar "editar
+│                      contacto" a un sistema donde una integración también escribe los datos. El
+│                      webhook reescribía el nombre del perfil en CADA mensaje y la pantalla le daba
+│                      precedencia, así que editar el nombre se guardaba bien y volvía a verse el
+│                      viejo en el siguiente mensaje, sin un error: un bug DIFERIDO que la prueba de
+│                      30 segundos no ve. Cada campo tiene un dueño: dos columnas para el nombre
+│                      (negocio vs proveedor) y el resolver único le da precedencia a la del
+│                      negocio —medido antes de invertirla: 13 de 1.769—, el teléfono con id del
+│                      proveedor enlazado queda de solo lectura con el motivo escrito, y el resto se
+│                      edita libre. El modal no es optimista (`.select()` + contar), manda solo lo
+│                      que cambió y refresca con la fila que devolvió el UPDATE. Un cumpleaños es un
+│                      `date`, no un instante: aritmética sin `new Date(iso)`) +
+│                      contadores-que-siguen-los-filtros (⭐ tarjetas y chips con un número junto a
+│                      una barra de filtros: el número tiene que ser EXACTAMENTE las filas que
+│                      aparecen al tocarlo. Contar sobre el universo deja la tarjeta en 143 con la
+│                      búsqueda mostrando 1; contar sobre TODO también está mal, porque elegir
+│                      "Calificados" pondría "Sin asignar" en 0. La regla es un conteo por facetas:
+│                      todos los filtros MENOS el que la tarjeta misma controla, con la MISMA función
+│                      de filtrado que la tabla —no reimplementar el criterio—. Trae la prueba de
+│                      propiedad sobre combinaciones de filtros y su control negativo).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
