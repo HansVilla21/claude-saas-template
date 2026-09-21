@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        172 skills de proceso reusables:
+│   └── skills/        173 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1529,6 +1529,23 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      todos los filtros MENOS el que la tarjeta misma controla, con la MISMA función
 │                      de filtrado que la tabla —no reimplementar el criterio—. Trae la prueba de
 │                      propiedad sobre combinaciones de filtros y su control negativo).
+│                      Tier 46 — La lectura que dice "éxito" con menos filas (1, capturada 2026-09-21
+│                      de las etiquetas que "no se guardaban" en un CRM):
+│                      lectura-cortada-por-max-rows (⭐ cross-project: PostgREST devuelve como
+│                      máximo 1.000 filas por consulta y CORTA SIN ERROR. Un usuario reportó "trato de
+│                      agregar una etiqueta y no se guarda": sí se guardaba, pero el negocio tenía 1.140
+│                      asignaciones y las más NUEVAS —el corte cae atrás en el orden físico— nunca
+│                      llegaban a la pantalla; al recargar desaparecían y al reintentar la base rechazaba
+│                      el duplicado. El mismo tope escondía 111 contactos y 61 conversaciones, solo en
+│                      el único tenant sobre 1.000. Es `detectar-escritura-filtrada-rls` del lado de la
+│                      lectura. Trae el diagnóstico en orden —los logs de "clave duplicada", el conteo
+│                      por tenant y una prueba en la pantalla real CON control positivo, porque el
+│                      primer método dio falso negativo también en las filas viejas—, el helper
+│                      `leerTodo` (páginas con `.range()`, orden TOTAL con `id` de desempate, dedupe,
+│                      freno de 50 páginas; un tenant chico sigue costando un solo viaje), por qué
+│                      `.limit(5000)` y subir `max_rows` NO lo arreglan, que la cuenta demo de 183 filas
+│                      nunca lo va a reproducir, y que un `23505` al asignar es un ÉXITO: revertir el
+│                      chip fue lo que convenció a todos de que "no se guardaba").
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
