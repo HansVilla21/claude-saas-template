@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        173 skills de proceso reusables:
+│   └── skills/        174 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1546,6 +1546,30 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      `.limit(5000)` y subir `max_rows` NO lo arreglan, que la cuenta demo de 183 filas
 │                      nunca lo va a reproducir, y que un `23505` al asignar es un ÉXITO: revertir el
 │                      chip fue lo que convenció a todos de que "no se guardaba").
+│                      Tier 47 — La opción que el modelo elige por el nombre (1, capturada
+│                      2026-09-22 del motivo con que el bot de un CRM pasa conversaciones):
+│                      opciones-del-modelo-con-significado (⭐ cross-project: una lista cerrada
+│                      que devuelve el modelo y LEE UNA PERSONA —motivo del pase, categoría,
+│                      intención— es parte de la interfaz, no un detalle del esquema. El bot pasaba
+│                      bien las conversaciones y reportaba mal por qué: un estudio médico que una
+│                      regla del negocio manda al profesional salía "El bot se atascó" (17 veces),
+│                      una alarma médica "Lead calificado", un caso VIP "Lo pidió el cliente" sin
+│                      que nadie lo pidiera, y la campanita decía "Motivo: scheduling" en 258
+│                      avisos. Tres causas APILADAS: faltaba la opción "lo manda una regla del
+│                      negocio", nunca se le explicó al modelo qué significa cada una —elegía por el
+│                      nombre—, y los clientes habían dejado el parche escrito en su propio prompt
+│                      ("estudio → no_se_como_seguir"), que el modelo obedece por encima de
+│                      cualquier explicación genérica. Solo el código: 9/15; con la config de los
+│                      clientes: 18/18. Trae: medir la opción elegida contra el texto libre que la
+│                      acompaña, buscar el valor viejo en la config de cada tenant y cambiar solo
+│                      las líneas que lo usan como parche, explicar QUÉ etiqueta y no CUÁNDO actuar
+│                      —describir la última opción como "si no sabés cómo seguir" reintroducía un
+│                      disparador que hacía pasar al bot en el 2º mensaje—, los 5 consumidores de
+│                      la lista con su orden de despliegue (base → validador de otro servicio →
+│                      productor → config; al revés, el validador rechaza el pase y el lead queda
+│                      sin nadie, sin error), la prueba que lee la lista del validador de su
+│                      código en vez de una copia a mano, y el script con el modelo real con
+│                      controles que NO tienen que cambiar, primero con la config en memoria).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**173 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**174 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -75,6 +75,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐ `opciones-del-modelo-con-significado` | El modelo elige de una lista cerrada que lee una persona (motivo del pase, categoría) **por el nombre**: un estudio médico que manda una regla del negocio salía "El bot se atascó". Tres causas apiladas (falta la opción, nadie explicó qué significa cada una, y el cliente dejó el parche escrito en su propio prompt), cada consumidor de la lista con su orden de despliegue, y la prueba con el modelo real: 9/15 → 18/18 |
 | `n8n-workflow-build-script` | Deploy vía API PUT + verificación por hash SHA-256 contra el n8n vivo |
 | `n8n-workflow-versioning` | Snapshots, tags y procedimiento de rollback |
 | `n8n-code-node-debug-pattern` | Debug de Code nodes |
