@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        174 skills de proceso reusables:
+│   └── skills/        175 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1570,6 +1570,28 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      sin nadie, sin error), la prueba que lee la lista del validador de su
 │                      código en vez de una copia a mano, y el script con el modelo real con
 │                      controles que NO tienen que cambiar, primero con la config en memoria).
+│                      Tier 48 — El evento que Meta recibió y no procesó (1, capturada
+│                      2026-09-23 conectando un CRM de WhatsApp a la Conversions API de Meta):
+│                      eventos-a-meta-desde-crm-whatsapp (⭐ cross-project: el cliente pregunta si el
+│                      CRM puede avisarle a Meta qué lead calificó o compró "como el píxel". El
+│                      payload salió en una tarde; lo que costó fue el ACCESO, y cada bloqueo apareció
+│                      recién al sacar el anterior: con el número en un BSP, tu app no puede ser socio
+│                      de la cuenta de WhatsApp —"número máximo de socios asignados", el BSP ocupa el
+│                      lugar—; el portafolio del proveedor, por ser "nuevo", no puede compartir su app
+│                      por semanas; lo que funcionó fue que el portafolio del CLIENTE pida acceso a la
+│                      app ("Solicitar", NUNCA "Conectar", que la movería), un usuario del sistema con
+│                      acceso total a la cuenta y un token sin vencimiento que otro administrador
+│                      tiene que aprobar —y que al aprobar no se muestra: hay que generarlo de nuevo—.
+│                      La trampa cara: Meta respondió events_received: 1 cuatro veces y ningún evento
+│                      apareció en "Probar eventos", porque el permiso de eventos seguía sin revisar
+│                      aunque la guía dice que se aprueba solo. Trae el conteo de ctwa_clid por
+│                      negocio antes de prometer, lo que se le dice al cliente (solo se optimiza por
+│                      compras, con ≥ 10, y nada de más de 7 días), el BSP que reporta "compras" por
+│                      defecto con cualquier conversación de 2 mensajes, la arquitectura —trigger que
+│                      solo anota, un evento por tipo y lead porque Meta no deduplica, "omitido" con
+│                      motivo, modo prueba con el código copiado a la fila, cron que solo despierta
+│                      si hay pendientes—, el payload mínimo sin datos personales, y la tabla de lo
+│                      verificado con la fila que todavía dice ❌ hasta que Meta apruebe).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
