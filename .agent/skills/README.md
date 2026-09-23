@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**174 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**175 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -118,6 +118,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `manychat-instagram-al-crm` | IG → CRM **sin** la API de ManyChat (esa es pull y cuesta): "Solicitud externa", push, Pro estándar. El receptor ya existía — grep + curl antes de reconstruir |
 | `meta-ads-conexion-oficial` | Standard Access alcanza para multi-negocio, pero un tercero no puede autorizar tu app → no hay OAuth. La cuenta se **fija**, nunca se lista |
 | ⭐ `meta-tech-provider-de-cero-a-app-review` | Ser Tech Provider de Meta para que cada cliente conecte SU WhatsApp/IG/Messenger: las 7 puertas en orden, los 4 bloqueos que aparecen recién al conectar el primer número (verificado ≠ registrado; sin App Review no se conecta ni el número propio) y la revisión de la app pantalla por pantalla |
+| ⭐ `eventos-a-meta-desde-crm-whatsapp` | Avisarle a Meta qué lead de un anuncio que abre WhatsApp calificó o compró (Conversions API de mensajería). Con el número en un BSP tu app **no puede ser socio** de la cuenta ("número máximo de socios"): el token lo genera el portafolio del cliente sobre tu app, con aprobación de otro admin. Y `events_received: 1` **no** es "procesado": sin el permiso revisado, Meta acepta y no muestra nada |
 | ⭐ `fb-login-sdk-fedcm-y-callback` | `FB.login` con `config_id` que falla solo en producción: FedCM tira tu configuración ("la app necesita al menos un permiso compatible") y el SDK rechaza un callback `async`. Se diagnostica leyendo la URL de la ventana |
 | ⭐ `whatsapp-coexistencia-embedded-signup` | Conectar el número que el negocio sigue usando en el celular y traer 6 meses de chats sin que el pasado dispare avisos, "no leídos", realtime ni ventanas de 24 h falsas |
 | ⭐ `webhook-meta-multicanal` | Recibir WhatsApp, Instagram y Messenger directo de Meta con una sola URL: traductores puros por sobre → eventos normalizados → un procesador |
