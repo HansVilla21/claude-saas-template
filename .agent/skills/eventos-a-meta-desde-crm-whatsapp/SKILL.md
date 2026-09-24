@@ -5,7 +5,7 @@
 - Un cliente pauta **anuncios que abren WhatsApp** (Click-to-WhatsApp) y pregunta si el CRM puede **avisarle a Meta qué lead calificó o compró**, "como el píxel".
 - Vas a conectar la **Conversions API for Business Messaging** (`action_source: business_messaging`) desde un CRM propio.
 - El número del cliente está en un **BSP** (YCloud, Twilio, 360dialog…) y tu app necesita llegar a su cuenta de WhatsApp.
-- Meta te responde `events_received: 1` y **el evento no aparece** en el Administrador de eventos.
+- Meta te responde `events_received: 1` y **el evento no aparece** en el Administrador de eventos (mirá el Resumen, no "Probar eventos": paso 7).
 
 ## Por qué existe esta skill
 
@@ -20,6 +20,8 @@ Capturada el 2026-09-23 conectando el CRM multi-tenant de Momentum para un clien
 | Crear el conjunto de datos y mandar un evento de prueba | Meta respondió `events_received: 1` cuatro veces… y **ninguno apareció** en "Probar eventos" |
 
 La última fila es la trampa cara: la respuesta 200 no prueba que Meta procesó el evento. Con el permiso `whatsapp_business_manage_events` sin revisar, Meta acepta el envío y no lo muestra. Hubo que enviar la revisión de la app aunque la guía dice que ese permiso "se debería aprobar automáticamente" para apps con `whatsapp_business_messaging` avanzado.
+
+**Cómo terminó (misma noche):** Meta aprobó el permiso el mismo día. Los 4 eventos aparecieron, pero **en el Resumen del conjunto de datos, no en "Probar eventos"**, que siguió vacío incluso con la página abierta. Y aparecieron ahí **a pesar de llevar `test_event_code`**: en este producto el código de prueba no los aísla (ver paso 7).
 
 > La idea central: **el problema no es el payload, es quién tiene acceso a la cuenta de WhatsApp.** Si el número vive en un BSP, tu app no puede ser socio: el token lo genera el portafolio del cliente, sobre tu app, y queda en tu base cifrado por negocio.
 
@@ -69,7 +71,7 @@ Si tu app **puede** ser socio de la cuenta de WhatsApp (el cliente la conectó p
 - **Un trigger sobre `leads`** (`after insert or update of stage_id`) que solo ANOTA en una cola cuando la etapa **cambia** (`new.stage_id is distinct from old.stage_id`: hay pantallas y bots que reescriben la misma etapa). Nada de red dentro del trigger: una falla de Meta no puede frenar el cambio de etapa de una persona. `exception when others → raise warning; return new`.
 - **Un evento de cada tipo por lead**, con índice único: Meta **no deduplica** en este producto.
 - Lo que no se puede mandar queda **'omitido' con motivo** (`sin_clic_de_anuncio`, `sin_token`, `sin_conjunto_de_datos`, `vencido`), no desaparece: "de 30 clientes se mandaron 25" solo se entiende si se ve por qué no salieron 5.
-- **Modo prueba** con `test_event_code`, y el código **se copia a la fila** al anotarla: si alguien prende el modo real con pruebas en cola, esas salen igual como prueba. La unicidad incluye `prueba`, para que las pruebas no le quiten el lugar al evento real.
+- **Modo prueba** con `test_event_code`, y el código **se copia a la fila** al anotarla: si alguien prende el modo real con pruebas en cola, esas salen igual como prueba. La unicidad incluye `prueba`, para que las pruebas no le quiten el lugar al evento real. ⚠️ Medido después: los eventos con código de prueba **igual figuran en el Resumen** del conjunto de datos. "Prueba" no es un sandbox: nunca mandes `Purchase` en prueba con un monto provisorio.
 - **Un cron cada minuto** (`pg_cron` + `pg_net`, URL y secreto en Vault) que llama a la ruta **solo si hay pendientes**. La ruta toma un lote con `for update skip locked`, suma el intento ANTES de mandar, reintenta red/429/5xx con espera creciente hasta 5 veces y deja 'fallido' cualquier otro 4xx (reintentarlo da el mismo error).
 
 ### 6. El payload mínimo
@@ -95,9 +97,10 @@ Si tu app **puede** ser socio de la cuenta de WhatsApp (el cliente la conectó p
 
 `events_received: 1` es "recibí el request", no "lo procesé". Lo que cuenta:
 
-1. **Administrador de eventos → el conjunto de datos → Probar eventos → canal Mensajes → WhatsApp.** La página tiene que estar **abierta cuando llega** el evento: mandalo con la pestaña ya abierta.
-2. Si no aparece: descartá lo barato primero (el `ctwa_clid` es reciente y de un anuncio; el conjunto de datos está vinculado a la cuenta: `GET /{WABA_ID}/dataset` lo devuelve; la pestaña "Acciones" solo tiene sugerencias). Lo que queda es el **permiso sin revisar**.
-3. Recién con el evento visible en "Probar eventos", el negocio pasa de prueba a encendido.
+1. **Administrador de eventos → el conjunto de datos → Resumen**, tabla de eventos: el evento con integración **"API de conversiones"**, estado **Activo**, el total y la "última recepción". Tarda **hasta 30 minutos**. Ese es el lugar que funcionó.
+2. **"Probar eventos" (canal Mensajes → WhatsApp) no sirvió**: siguió vacío con el permiso aprobado y la página abierta, mientras el Resumen ya mostraba los mismos eventos. No bloquees la salida esperando esa pantalla.
+3. Si tampoco aparece en el Resumen: descartá lo barato primero (el `ctwa_clid` es reciente y de un anuncio; el conjunto de datos está vinculado a la cuenta: `GET /{WABA_ID}/dataset` lo devuelve; la pestaña "Acciones" solo tiene sugerencias). Lo que queda es el **permiso sin revisar**.
+4. Como el código de prueba no aísla (ver paso 5), el negocio pasa a **encendido directo, con las reglas ya confirmadas por el cliente** (qué etapa es compra, precio, moneda). Un "probemos en prueba con el monto provisorio" manda ventas falsas.
 
 ### 8. La revisión de Meta para `whatsapp_business_manage_events`
 
@@ -107,6 +110,15 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 - **Descripción de uso** y **un video**. El video que se envió: la pantalla de configuración del negocio → obtener el conjunto de datos → etapas → modo prueba → "Mandar un evento de prueba" → el aviso de que Meta lo recibió. **No** mostrar la página de "Probar eventos" vacía: le haría creer al revisor que no funciona.
 - En "Instrucciones para revisores": que es **servidor a servidor** y que la pantalla de configuración la opera el equipo, no el usuario de prueba.
 - **"Renewal"**: Meta pide re-certificar los permisos que ya tenías aprobados (una casilla por permiso).
+- Resultado: **aprobado el mismo día**. El token que ya existía traía el scope (se generó con el permiso marcado antes de la revisión): no hubo que regenerarlo. Confirmalo con `debug_token` antes de pedirle nada al cliente.
+
+### 9. Activar en producción sin que salga nada por accidente
+
+1. **Primero el secreto, después el merge.** Cargá el secreto del cron en el hosting (en Vercel, `sensitive`, solo production) **antes** de mergear: el deploy del merge ya lo toma y no hace falta republicar.
+2. En el Vault, la URL de la ruta y **el mismo** secreto. Generalo una vez en un script que escriba los dos lados y compare **huellas** (sha256 recortado), nunca el valor.
+3. Verificá los tres caminos: sin clave → 401, clave equivocada → 401, clave del Vault → 200. Un **503** significa que el hosting no tiene la variable.
+4. El cron solo llama si hay pendientes, así que **con la cola vacía nunca vas a ver el camino real funcionando**. Probalo a mano: el mismo `net.http_post` que hace la función, con la URL y el secreto del Vault, y leé `net._http_response`.
+5. Los negocios cuyas reglas el cliente no confirmó quedan en **apagado** (conservando reglas y token): apagado = el trigger no anota nada, así que al prender no sale ninguna cola vieja.
 
 ## Gotchas
 
@@ -125,17 +137,22 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 | Token del portafolio del cliente sobre la app del proveedor, alcanzando su cuenta de WhatsApp | ✅ medido |
 | Crear el conjunto de datos por API | ✅ medido |
 | Meta acepta el evento de prueba (`events_received: 1`) | ✅ medido |
-| **El evento aparece en "Probar eventos"** | ❌ **no, con el permiso sin revisar**. Revisión enviada el 2026-09-23 |
+| Revisión de `whatsapp_business_manage_events` | ✅ aprobada el mismo día; el token existente ya traía el scope |
+| **Meta procesa el evento** | ✅ visto en el **Resumen** del conjunto de datos ("API de conversiones", Activo) |
+| El evento aparece en "Probar eventos" | ❌ nunca, ni con el permiso aprobado ni con la página abierta |
+| El `test_event_code` aísla los eventos de prueba | ❌ no: los de prueba figuran en el Resumen |
 | Trigger, cola, unicidad, modo prueba, token por negocio | ✅ 20/20 contra la base viva en transacción con rollback, con controles negativos |
+| Ruta en producción + secreto en hosting y Vault | ✅ 401 sin clave / 200 con la del Vault / 200 por `pg_net` desde la base |
+| Un evento real (un lead que cambia de etapa) llegando al Resumen | ⏳ pendiente: el negocio quedó apagado hasta que el cliente confirme reglas |
 
-**Actualizar esta tabla cuando Meta apruebe** y el evento aparezca (o no) en "Probar eventos".
+**Actualizar la última fila** con el primer caso real.
 
 ## Output esperado
 
 - El cliente sabe, antes de construir, qué leads se pueden reportar y por qué evento se puede optimizar.
 - Token por negocio en Vault, revisado contra Meta al guardarlo.
 - Una pantalla por negocio: token, cuenta de WhatsApp, conjunto de datos, etapa → evento, estado (apagado / prueba / encendido), evento de prueba, y el registro de lo mandado con motivos.
-- El evento visto en "Probar eventos" antes de encender.
+- Un evento de prueba visto en el **Resumen** del conjunto de datos, y el negocio encendido recién con las reglas confirmadas por el cliente.
 
 ## Ejemplo
 
