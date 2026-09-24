@@ -53,21 +53,28 @@ esconde un lead sin atender).
      `encodeURIComponent` (trae `=`).
    - **Meta directo:** `POST /{phone_number_id}/messages` con
      `{ messaging_product: 'whatsapp', status: 'read', message_id: wamid }`.
-4. **Llamalo donde alguien atiende:**
+4. **Llamalo cuando alguien CONTESTA, no cuando abre el chat:**
    - **El bot contesta** → en paralelo con el envío (`Promise.all`), así no
      demora la respuesta y si falla la respuesta sale igual. El lead ve el azul
      junto con la respuesta.
-   - **Una persona abre el chat en el CRM** → en la misma acción que baja el
-     contador de sin leer, con `after()` (no demora la UI).
+   - **Una persona contesta desde el CRM** (texto, adjunto, audio, plantilla) →
+     en la acción de envío, **solo si la entrega salió**, con `after()` para no
+     demorar el composer. Reaccionar con un emoji también cuenta: el lead lo ve.
    - **Alguien lo abre en el celular** → lo marca WhatsApp solo.
+   ⚠️ **Por qué no al abrir el chat en el CRM** (se probó y se cambió el mismo
+   día): **no existe "marcar como no leído"** ni en la Cloud API de Meta ni en
+   YCloud — el leído es de una sola vía, y el "no leído" de la app es manual y
+   local. Si abrir marcara, el "marcar como no leída" del CRM quedaría
+   desmentido en el celular para siempre, y el lead vería el azul de alguien que
+   solo miró. Marcando al contestar, el lead nunca ve azul sin respuesta y el
+   celular conserva el contador hasta que alguien responda. De yapa, el
+   master/soporte que entra a mirar el negocio de un cliente no le borra nada.
 5. **Quién NO marca:**
    - El **aviso automático de fuera de horario**: nadie atendió; a la mañana el
      chat tiene que seguir apareciendo como nuevo en el celular.
-   - El **master/soporte** que entra a revisar el negocio de un cliente (sin
-     membresía activa) y el rol de **solo lectura**. Sin este gate, cada chat que
-     abrís para dar soporte le borra el "sin leer" del celular al cliente.
-     Resolvé el rol leyendo la membresía en el servidor, no del parámetro que
-     manda el navegador (en el caso real el inbox llamaba la acción sin `slug`).
+   - Los **seguimientos automáticos** (salen por el cron, no por la acción de
+     envío de una persona).
+   - Abrir, mirar o marcar "no leída" en el CRM.
 
 ### Parte 2 — Contestar desde el celular quita el "sin leer" del CRM
 
@@ -151,11 +158,12 @@ esconde un lead sin atender).
     webhook es una Edge Function de Supabase sin entrada en `config.toml`:
     `--no-verify-jwt` o el BSP recibe 401.
 14. **Prueba con un teléfono real (la que decide):** escribile al número del
-    negocio desde otro teléfono y comprobá los tres casos: con el bot activo, el
-    azul llega junto con la respuesta; con la conversación en manos de una
-    persona, queda gris y con contador en el celular hasta abrirla en el CRM;
-    contestando desde el celular, el circulito del CRM se va solo. Las dos
-    versiones fallidas de la regla aparecieron ACÁ, no en las pruebas.
+    negocio desde otro teléfono y comprobá los casos: con el bot activo, el azul
+    llega junto con la respuesta; con la conversación en manos de una persona,
+    queda gris y con contador en el celular aunque se abra en el CRM, y se pone
+    azul al contestar desde el CRM; contestando desde el celular, el circulito
+    del CRM se va solo. Las dos versiones fallidas de la regla del eco y el
+    "no leída" que no volvía aparecieron ACÁ, no en las pruebas.
 
 ## Notificaciones que no llegan (la pregunta que viene después)
 
@@ -170,10 +178,10 @@ celular que el mensaje ya se había visto.
 ## Output esperado
 
 - El webhook sin `markAsRead` al entrar (versión nueva, con la nota de por qué).
-- `leido-en-whatsapp.ts` (efecto) + `leido.ts` (puro: quién puede marcar y el
-  pedido por proveedor) con pruebas.
-- Llamadas en el turno del bot (en paralelo al envío) y en la acción de "abrir
-  chat" (con gate de membresía).
+- `leido-en-whatsapp.ts` (efecto) + `leido.ts` (puro: el pedido por proveedor)
+  con pruebas.
+- Llamadas en el turno del bot (en paralelo al envío), en la acción de envío de
+  una persona (si la entrega salió) y en la de reaccionar. Ninguna al abrir.
 - Migración con el trigger del eco + prueba contra la base viva + la simulación
   de 30 días en el PR.
 - Fila en el backlog con los números y la prueba del teléfono real.
@@ -188,13 +196,15 @@ solo, no queda la burbujita de nuevos."*
 1. Causa: el webhook marcaba como leído cada entrante (heredado de n8n). Con
    coexistencia ese "leído" llega a la app del negocio. No es una opción de
    WhatsApp.
-2. Arreglo: el webhook deja de marcar; marca el CRM cuando el bot contesta o
-   cuando alguien del equipo abre el chat. El CRM sigue igual.
+2. Arreglo: el webhook deja de marcar; marca el CRM cuando alguien contesta (el
+   bot, o una persona desde el CRM). El contador del CRM sigue igual.
 3. Aparte, y avisado de entrada: abrir el chat en el celular no quita el
    circulito del CRM (WhatsApp no lo informa); contestar desde el celular sí,
    con la regla del paso 8.
 4. Prueba del founder con su teléfono: ✅ queda sin leer en la app · ❌ respuesta
-   corta repetida → corte de 40 · ❌ respuesta al instante → rápido Y largo · ✅.
+   corta repetida → corte de 40 · ❌ respuesta al instante → rápido Y largo ·
+   ❌ "marcar no leída" en el CRM no volvía a no leído en el celular (no existe
+   en la API) → leído al contestar, no al abrir · ✅.
 
 Relacionadas: `webhook-contar-event-types-antes-de-arreglar`,
 `clasificar-por-lista-no-por-fallback`, `probar-migracion-contra-base-viva-con-rollback`,

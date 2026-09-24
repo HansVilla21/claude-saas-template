@@ -1598,10 +1598,11 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      abren solos en el celular" y el lead ve azul sin respuesta. No era WhatsApp:
 │                      el webhook marcaba como leído CADA entrante —heredado de n8n "para que el lead
 │                      vea el azul"— y con coexistencia ese leído llega a la app del negocio. Leído
-│                      es una afirmación: se marca cuando alguien ATIENDE —el bot al contestar, en
-│                      paralelo al envío; una persona al abrir el chat en el CRM, con gate de
-│                      membresía para que el soporte no le borre el "sin leer" al cliente—, nunca al
-│                      llegar ni con el aviso de fuera de horario. YCloud acepta el wamid en
+│                      es una afirmación: se marca cuando alguien CONTESTA —el bot, en paralelo al
+│                      envío; una persona desde el CRM, si la entrega salió—, nunca al llegar, al
+│                      abrir el chat ni con el aviso de fuera de horario: NO existe "marcar como no
+│                      leído" en la API (Meta ni YCloud), así que marcar al abrir deja el "no leída"
+│                      del CRM desmentido en el celular para siempre. YCloud acepta el wamid en
 │                      markAsRead. El otro sentido: WhatsApp NO avisa cuando alguien abre un chat en
 │                      el celular (5 tipos de evento, ninguno es "leyó"); solo llega el eco de lo que
 │                      se contesta, y el eco es IDÉNTICO sea persona, saludo automático o difusión.
