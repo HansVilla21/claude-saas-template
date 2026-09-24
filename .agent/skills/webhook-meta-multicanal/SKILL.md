@@ -262,3 +262,46 @@ revisión— en `whatsapp-coexistencia-embedded-signup`.
   desde la raíz del repo, con `SUPABASE_ACCESS_TOKEN` en el entorno. Sube solo los
   archivos que importa el `index.ts` (las pruebas quedan afuera) y se confirma con
   el `GET` de salud, que devuelve la versión.
+
+---
+
+## Apéndice 2026-09-24 — Suscribir la página, y el nombre de quien escribe
+
+Al conectar Instagram y Messenger de verdad (no solo recibir) aparecieron dos
+cosas que no están en la doc de forma obvia:
+
+**1. Los campos del webhook NO se llaman igual en cada objeto.** Verificado en el
+panel de Meta:
+
+| | Instagram | Page (Messenger) |
+|---|---|---|
+| Mensajes | `messages` | `messages` |
+| Reenvío desde anuncio | `messaging_referral` | `messaging_referral**s**` |
+| Visto | `messaging_seen` | **no existe** |
+
+La suscripción por API (`POST /{page-id}/subscribed_apps?subscribed_fields=…`)
+falla **entera** si mandás un campo que ese objeto no tiene, así que la lista se
+arma por canal y no se comparte. Y la suscripción de la página cubre también los
+mensajes de Instagram: viajan por ella.
+
+**2. El nombre de la persona no viene en el evento.** En estos canales solo llega
+un id con alcance de página (PSID / IGSID), así que los contactos nacen con
+relleno. Se pide aparte, con el **token de la página**:
+
+- Instagram: `GET /{IGSID}?fields=name,username`
+- Messenger: `GET /{PSID}?fields=first_name,last_name`
+
+⚠️ **Pedir los campos de uno en el otro hace fallar la llamada.** Y hay un
+techo que no se arregla con código: en Messenger, el perfil exige
+`pages_messaging` con **acceso avanzado**. Sin la revisión aprobada, Meta
+contesta `(#3) Application does not have the capability to make this API call`
+—medido el 2026-09-24— mientras que Instagram sí devuelve el nombre. Dos errores
+distintos que conviene saber leer:
+
+| Respuesta de Meta | Qué significa de verdad |
+|---|---|
+| `Object with ID '…' does not exist, cannot be loaded due to missing permissions` | Estás usando el token de **otra página**: ese id solo existe dentro de la página que recibió el mensaje |
+| `(#3) Application does not have the capability…` | Página correcta, **permiso sin acceso avanzado** |
+
+Por eso el pedido del perfil degrada a `null` y el contacto entra igual: el
+nombre se completa solo la próxima vez que esa persona escriba.

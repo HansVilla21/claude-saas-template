@@ -6,6 +6,22 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-24 — Instagram y Messenger en producción, y la conexión que agarró de más
+
+**Contexto:** se construyó el frente social completo del CRM: conectar la página del negocio, recibir y responder por Instagram y Messenger, y el nombre de quien escribe. Cuatro entregas a producción el mismo día (PRs #322 a #325 de `momentum-ai-crm`, migración `0114`, `meta-webhook` 1.4.0), probadas con mensajes reales por los dos canales.
+
+**Decisiones:**
+
+1. **El negocio elige QUÉ cuenta conectar; no se conectan todas.** La primera versión conectaba todas las páginas que Meta devolviera: con la cuenta del founder —que administra las de varios clientes— quedaron 16 canales de cuatro clientes dentro de la agencia de pruebas, suscritos al webhook. Se revirtió el mismo día (0 mensajes habían entrado) y el flujo pasó a dos pasos: listar sin credenciales, conectar solo la elegida, y verificarla contra Meta. Skill nueva: `elegir-la-cuenta-no-conectar-todas`.
+2. **El token de página va al almacén cifrado, con llave por agencia Y página** (`0114`), nunca a la columna de configuración que leen owner y master.
+3. **Se usa el modo por defecto del login de Meta (token), no el de `code`.** En esa variante el canje exige repetir una dirección de retorno que arma el propio SDK. El registro insertado de WhatsApp sigue con `code`: son variantes distintas de la misma app.
+4. **La revisión de Meta se hace en dos tandas: mensajes primero, comentarios después.** Meta exige un video por permiso mostrando el flujo funcionando, así que no se puede "dejar aprobado" lo que todavía no existe. La tanda 2 (comentarios y comment-to-DM, lo que hace ManyChat con los CTA de historias) se construye y recién ahí se manda.
+5. **Lo que el proveedor niega se documenta, no se rodea.** El nombre de quien escribe por Messenger exige `pages_messaging` con acceso avanzado: hasta la aprobación, el contacto entra con el relleno y lo toma cuando vuelva a escribir. En Instagram ya funciona.
+
+**Qué se descartó:** conectar todas las cuentas y que el cliente borre las que no quiera (el daño ya ocurrió); pedir permisos de más "para dejar el terreno listo" (un permiso sin video traba la solicitud entera).
+
+**Pendientes inmediatos:** la revisión de la tanda 1; que el bot atienda lo que entra por Meta; la respuesta de YCloud sobre la solución de socio (`949599191550451`, Pendiente).
+
 ## 2026-09-12 (noche) — Se reabre el socio tecnológico de YCloud; Instagram y Messenger van primero
 
 **Contexto:** con WhatsApp directo verificado, el founder retomó el programa *Tech Partner* de YCloud, que había quedado pendiente mientras no estaba lo de Meta. Victor, del equipo Business de YCloud, contestó por correo la duda que bloqueaba ese carril. Sesión de planificación, sin cambios en producción.

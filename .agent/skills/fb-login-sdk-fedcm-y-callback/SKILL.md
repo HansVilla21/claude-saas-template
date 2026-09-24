@@ -182,3 +182,47 @@ con el navegador del usuario.**
 - Pasar `async (r) => {…}` a `FB.login` porque TypeScript lo acepta.
 - Un `FB.login` sin `try/catch` detrás de un estado de carga: cualquier excepción
   síncrona deja la UI colgada y sin mensaje.
+
+---
+
+## Apéndice 2026-09-24 — La MISMA app, dos variantes de login que se portan distinto
+
+Conectando Instagram y Messenger con una **configuración nueva** (variación
+"General") sobre la app que YA tenía andando el registro insertado de WhatsApp,
+el mismo código copiado falló:
+
+```
+Error validating verification code. Please make sure your redirect_uri is
+identical to the one you used in the OAuth dialog request
+```
+
+**Qué pasa.** El canje del `code` exige mandar la misma dirección de retorno que
+usó la ventana, y en la variación General esa dirección la arma el SDK por
+dentro: no la conocés, así que no la podés repetir. El registro insertado de
+WhatsApp no lo sufre porque no abre un diálogo OAuth clásico. O sea: **el mismo
+`canjearCodigo` que anda en un botón no anda en el otro, y el mensaje de error
+no dice "tu variante es otra"**.
+
+**Salida** (la del SDK, no un truco): usar el **modo por defecto**, que devuelve
+el token en el callback.
+
+```ts
+// En vez de response_type: 'code' + override_default_response_type
+window.FB.login(alResponder, { config_id: configId });
+// → r.authResponse.accessToken  (corto, unas horas)
+```
+
+Y en el servidor, cambiarlo por uno de larga duración antes de usarlo:
+
+```
+GET /oauth/access_token?grant_type=fb_exchange_token
+    &client_id=…&client_secret=…&fb_exchange_token=<el corto>
+```
+
+El token corto pasa por el navegador, que es el mismo trato que hace el SDK en
+su modo normal. Lo que **nunca** pasa por ahí es el token de la página: ese sale
+de `/me/accounts` en el servidor y va derecho al almacén cifrado.
+
+**La regla que queda:** cuando agregues una configuración de login nueva, probá
+el flujo entero **antes** de copiar el canje del botón que ya funciona. Las
+variantes comparten el SDK y el `config_id`, no el comportamiento.
