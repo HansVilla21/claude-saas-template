@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        175 skills de proceso reusables:
+│   └── skills/        176 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1592,6 +1592,26 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      motivo, modo prueba con el código copiado a la fila, cron que solo despierta
 │                      si hay pendientes—, el payload mínimo sin datos personales, y la tabla de lo
 │                      verificado con la fila que todavía dice ❌ hasta que Meta apruebe).
+│                      Tier 49 — El "leído" que nadie leyó (1, capturada 2026-09-24
+│                      con un cliente en coexistencia —el mismo número en la app del celular y en
+│                      la API—): coexistencia-leido-y-sin-leer (⭐ cross-project: "los chats se
+│                      abren solos en el celular" y el lead ve azul sin respuesta. No era WhatsApp:
+│                      el webhook marcaba como leído CADA entrante —heredado de n8n "para que el lead
+│                      vea el azul"— y con coexistencia ese leído llega a la app del negocio. Leído
+│                      es una afirmación: se marca cuando alguien ATIENDE —el bot al contestar, en
+│                      paralelo al envío; una persona al abrir el chat en el CRM, con gate de
+│                      membresía para que el soporte no le borre el "sin leer" al cliente—, nunca al
+│                      llegar ni con el aviso de fuera de horario. YCloud acepta el wamid en
+│                      markAsRead. El otro sentido: WhatsApp NO avisa cuando alguien abre un chat en
+│                      el celular (5 tipos de evento, ninguno es "leyó"); solo llega el eco de lo que
+│                      se contesta, y el eco es IDÉNTICO sea persona, saludo automático o difusión.
+│                      Se decide por comportamiento, medido en 30 días ANTES de escribir la regla:
+│                      descartar lo rápido Y largo (< 10 s y ≥ 40 caracteres), lo de > 24 h y el texto
+│                      largo ya usado → automáticas 0/30, difusiones 0/329. Las dos versiones que el
+│                      teléfono real rompió —"texto repetido" sin largo y "< 10 s" sin largo—
+│                      quedan documentadas. Trigger propio en INSERT y en el UPDATE que reclama el
+│                      eco, prueba con control contra la base viva, y qué revisar cuando "no llegan
+│                      las notificaciones").
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
