@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**175 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**177 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -60,6 +60,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐⭐ `elegir-la-cuenta-no-conectar-todas` | Conectar por OAuth **todas** las cuentas que la persona administra: una autorización dejó 16 canales de cuatro clientes dentro de un solo negocio, suscritos al webhook. Listar → elegir UNA → verificarla contra el proveedor |
 | ⭐ `config-por-tenant-no-literal-en-el-flujo` | La lógica de UN rubro cableada en el flujo compartido. El guard es un contrato, no un flag |
 | `catalogo-multifuncional-por-preset` | Una base que se adapta a cualquier rubro por configuración; rubro nuevo = preset nuevo sin código |
 | `crm-admin-panel-master-gated` | Panel admin gateado por rol master |
