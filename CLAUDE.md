@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        179 skills de proceso reusables:
+│   └── skills/        180 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1657,6 +1657,26 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      probar una carrera que no se reproduce a mano: test del caso real + control
 │                      negativo + prueba de mutación). **Apéndice** a realtime-canal-muere-en-silencio:
 │                      su snippet no re-sincronizaba en el rejoin ni en la primera carga.
+│                      Tier 52 — La caché que no se comparte (1, capturada 2026-09-25 al
+│                      pasar un bot de WhatsApp a Claude): cache-compartida-entre-usuarios (⭐
+│                      cross-project: la caché de prompts solo acierta si el texto es IDÉNTICO hasta
+│                      la marca, así que un dato del usuario (nombre, etapa, estado) metido antes de
+│                      ella hace que cada usuario tenga su propia caché y entre usuarios dé 0 %, sin
+│                      error. Caso medido: la prueba daba el costo de gpt-4.1 y en producción salió
+│                      2,6× (30 % de caché); el reflejo era "subí la caché a 1 hora", pero otro usuario
+│                      a MENOS de 5 min tenía 0 %: no era la duración. Trae la consulta que lo
+│                      desenmascara (mismo/otro usuario × a cuánto tiempo), el arreglo que no toca el
+│                      texto (el armador devuelve `largoFijo` y el cliente parte el sistema: lo fijo
+│                      con caché de 1 hora, lo del usuario sin marca, la caché automática de 5 min
+│                      para el historial; prueba de que la unión es el original), cómo elegir la
+│                      duración con la distribución real (1 hora = 2× escribir, se paga a la segunda
+│                      lectura), cobrar aparte la escritura de 1 hora o el costo sale subcontado, y
+│                      verificar con DOS usuarios contra la API: el segundo leyó 82 % y costó
+│                      US$0,0126 contra 0,0645. Gotchas: la simulación miente a favor porque manda
+│                      seguidas las llamadas del mismo usuario (92 % contra 30 % real); no reordenar el
+│                      prompt para cachear más sin volver a probar el comportamiento; un número de
+│                      prueba sin país da 0 % en producción porque el placeholder de país arma otra
+│                      entrada; y la hora del cambio mal convertida mezcla turnos del modelo anterior).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
