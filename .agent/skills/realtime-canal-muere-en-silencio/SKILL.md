@@ -134,3 +134,16 @@ Orden que funciona — de abajo hacia arriba, descartando capas con evidencia:
 - [ ] Matando la red y volviendo: el canal rearma **y** la lista se pone al día.
 - [ ] El re-sync usa el mismo query que el server (probado contra la base: mismos conteos y orden).
 - [ ] Verificado contra la fuente de verdad, no "compila".
+
+## Apéndice (2026-09-25): el snippet de (a) no re-sincroniza en el rejoin
+
+El `degraded` del ejemplo es una variable **local al canal**. Cuando el vencimiento del token (el caso que
+esta skill existe para cubrir) se resuelve rearmando el canal con el nonce, el canal NUEVO nace con
+`degraded = false` y su `SUBSCRIBED` no dispara `onResync`: lo que pasó con el canal muerto sigue perdido.
+Y aun con el canal sano, la primera carga tiene un hueco de segundos (medido: 5,4 s) entre la lectura del
+server y el primer `SUBSCRIBED`.
+
+Fix: re-sincronizar en el **primer** `SUBSCRIBED` de cada canal (`if (degraded || !sincronizado)`), y pasar
+cada lectura por un coordinador que re-aplique los eventos que llegaron mientras viajaba. Todo el detalle
+—los 4 huecos, el coordinador, y lo que rompe el arreglo si se hace a medias— en
+`lectura-y-realtime-sin-hueco`.

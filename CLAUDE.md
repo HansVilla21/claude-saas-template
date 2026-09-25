@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        178 skills de proceso reusables:
+│   └── skills/        179 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1632,6 +1632,31 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      backfill estaban en medio de la charla. Más: la atribución no estaba donde
 │                      se creía (un "0 en 1.949" falso), y una Edge Function sin entrada en
 │                      `config.toml` desplegada sin `--no-verify-jwt` corta el webhook a TODOS).
+│                      Tier 51 — El mensaje que cayó entre la foto y el canal (1 nueva + 1
+│                      apéndice, capturada 2026-09-25 de un chat del CRM que no mostraba un
+│                      mensaje que la lista sí): lectura-y-realtime-sin-hueco (⭐ cross-project:
+│                      toda pantalla que arma su estado con una LECTURA más un stream en vivo
+│                      tiene bordes donde un evento se pierde para siempre, sin error y con el
+│                      canal SANO. Medido: la página leyó a las 16:29:11.920, el lead escribió
+│                      116 ms después y el canal tardó ~5,4 s en quedar SUBSCRIBED. La firma que
+│                      despista: la lista lo mostraba y el chat no — lo que se actualiza por
+│                      reemplazo (una fila entera por evento) se cura con el siguiente UPDATE; lo
+│                      que se arma por agregado (una lista de mensajes), nunca. Los 4 huecos:
+│                      primera carga → primer SUBSCRIBED; abrir algo no cargado (el manejador
+│                      descarta el evento mientras viaja la consulta); un re-sync cuya foto pisa
+│                      lo que llegó en vivo; y el rejoin por token vencido, que no re-sincronizaba
+│                      porque el `degraded` vivía en el canal viejo. Arreglo en dos piezas:
+│                      re-sync en el PRIMER SUBSCRIBED de cada canal + un coordinador `conFoto`
+│                      que re-aplica encima de la foto los eventos que llegaron mientras viajaba
+│                      (exige manejadores idempotentes). Y la tabla de lo que lo rompe a medias,
+│                      de una revisión independiente —el primero lo INTRODUCÍA el fix—: algo async
+│                      que recrea con `?? []` el caché que el re-sync soltó (chat vacío sin
+│                      error), la foto que borra los optimistas `tmp-*`, una lectura PARCIAL que
+│                      reemplaza la lista, el `[]` cacheado por una apertura fallida, el salto de
+│                      scroll por un array nuevo idéntico y el doble re-sync por corte. Con cómo
+│                      probar una carrera que no se reproduce a mano: test del caso real + control
+│                      negativo + prueba de mutación). **Apéndice** a realtime-canal-muere-en-silencio:
+│                      su snippet no re-sincronizaba en el rejoin ni en la primera carga.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
