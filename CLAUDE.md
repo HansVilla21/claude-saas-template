@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        177 skills de proceso reusables:
+│   └── skills/        178 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1613,6 +1613,25 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      quedan documentadas. Trigger propio en INSERT y en el UPDATE que reclama el
 │                      eco, prueba con control contra la base viva, y qué revisar cuando "no llegan
 │                      las notificaciones").
+│                      Tier 50 — El lead que escribió y nadie vio (1, capturada 2026-09-24
+│                      con un bot en código y anuncios click-to-WhatsApp): primer-contacto-sin-texto
+│                      (⭐ cross-project: el lead toca el anuncio, le da enviar y queda esperando;
+│                      Meta entrega ese primer mensaje con error 131060 SIN texto NI referral. Bien
+│                      guardado como aviso del sistema, no pide turno: silencio. Medido en 5 negocios
+│                      y 60 días: 61 contactos así, 34 nunca volvieron a escribir, 10 no recibieron
+│                      NADA; y 57 de 59 caían en "Sin atribución", o sea tráfico pago contado como
+│                      orgánico. Arreglo: turno SOLO si es el primer contacto y el aviso se insertó
+│                      ahora; al modelo una línea que dice ser del sistema + prohibirle adivinar,
+│                      pedir que repita o mencionar fallas (o la bienvenida fija); grupo propio
+│                      "Anuncio sin identificar" sin `ad_id`, first-touch, ordenado DETRÁS de los
+│                      anuncios reales porque una mezcla no compite en un ranking; rama propia en
+│                      TODAS las pantallas que leen la atribución; clave compartida entre dos
+│                      runtimes atada por una prueba; backfill reversible con marca. El gotcha
+│                      mayor: 131060 NO significa "anuncio" —también llega desde WhatsApp Web o un
+│                      teléfono vinculado—, solo cuenta si es el PRIMER mensaje: 2 de 76 del
+│                      backfill estaban en medio de la charla. Más: la atribución no estaba donde
+│                      se creía (un "0 en 1.949" falso), y una Edge Function sin entrada en
+│                      `config.toml` desplegada sin `--no-verify-jwt` corta el webhook a TODOS).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
