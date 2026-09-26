@@ -6,6 +6,43 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-25 (noche) — Novedades contada como "¿Querés…?", y un mensaje borrado en WhatsApp sale también de la memoria del bot
+
+**Contexto:** con Novedades ya en producción, el founder pidió cambiarle el enfoque: *"que todo sea para qué me sirve y después lo uso… ¿querés que el bot te organice tus contactos? y si le doy sí me explica… no como 'este tool hace esto'"*. Esa misma noche llegó un pedido de un cliente, vía una llamada del socio comercial: si alguien del negocio le manda a una clienta un mensaje por error y lo borra en WhatsApp Web, el chatbot no debe seguir usándolo como contexto. Las dos piezas quedaron en producción (`momentum-ai-crm` #353 y #355, `ycloud-webhook` 1.12.0).
+
+**Decisiones:**
+
+1. **Cada novedad que se puede usar es una pregunta con sus pasos.**
+   - `uso = { pregunta, pasos }` en el ítem. En pantalla se lee como la pregunta y un botón "Sí, mostrame cómo", que despliega los pasos y lleva a la pantalla.
+   - Los pasos nombran los botones tal como se ven, sacados del código; nunca de memoria.
+   - La prueba del registro lo exige en todo lo nuevo y destacado, así que no depende de acordarse.
+   - El aviso del menú pregunta por UNA cosa que ese rol puede usar: a un agente no se le ofrece algo de Configuración.
+   - La entrada del día se republicó con otro id para que el aviso volviera a salir a todos. Fue una excepción deliberada a "los ids no se tocan".
+2. **Borrar o editar un mensaje se hace solo desde WhatsApp (app o Web); el CRM lo refleja, no lo origina.**
+   - Ni la API de Meta ni la del BSP permiten borrar o editar un mensaje ya enviado. Un botón en el CRM lo escondería en el CRM pero el cliente lo seguiría viendo: se descartó.
+   - Con coexistencia, un mensaje enviado desde el CRM también aparece en el WhatsApp del negocio y se puede borrar ahí.
+3. **Un cambio en `messages` no le llega al bot: su memoria es otra tabla.** Cuando algo se borra o edita, hay que corregir las dos.
+   - El CRM ya marcaba "Mensaje eliminado", pero la memoria del chatbot (`n8n_chat_histories`) seguía igual y el bot lo usaba.
+   - Como la memoria no guarda ids, el mensaje se ubica por su texto dentro de la sesión y el rol, y solo como mensaje entero: un "si" no le come el principio a "sistema".
+4. **El mismo mensaje puede llegar con dos wamid distintos.**
+   - Desde el 11-09, Meta a veces identifica a la persona por su id de usuario y no por el teléfono. Decodificado, el wamid cambia en esa parte, pero la clave del mensaje es la misma.
+   - 18 borrados del negocio se habían perdido así. La comparación se hace por esa clave, siempre dentro de la conversación.
+   - Skill candidata: `wamid-dos-formatos-y-memoria-del-bot`.
+5. **Corrección de datos conservadora:**
+   - los 18 borrados perdidos se marcaron con la hora real del borrado;
+   - 46 mensajes salieron de la memoria;
+   - 6 se dejaron a propósito, porque el mismo texto aparecía más de una vez y no se podía saber cuál era.
+
+**Qué se descartó:**
+- Un botón "borrar" en el CRM: no llega al cliente.
+- Guardar el id del mensaje en cada fila de memoria: son cuatro lugares que escriben la memoria y habría que cambiarlos todos. Con el texto alcanza para el caso real, que es un mensaje borrado a los pocos minutos.
+- Corregir las filas con texto repetido "adivinando" cuál era.
+
+**Pendientes inmediatos:**
+- Verificar con el primer borrado real, ticket MOM-114.
+- El canal directo de Meta (`meta-webhook`, casi sin uso) todavía no corrige la memoria.
+- Hay un compromiso vencido con un cliente por listas de difusión (MOM-62), que quedó en baja prioridad: avisarle.
+
 ## 2026-09-25 — Una ronda de 11 tickets subida de una vez, y "Novedades" como regla del proyecto
 
 **Contexto:** el founder mandó 11 tickets de Jira (del 24-09) y pidió dejarlos listos para aprobarlos a la vuelta. Quedaron 10 PRs (`momentum-ai-crm` #338–#347), cada uno revisado. A la vuelta pidió dos cosas más, para subir todo junto: una sección de **Novedades** (*"siempre agregamos cosas nuevas y nunca avisamos nada"*) y ordenar la ficha del contacto (citas y tareas en pestañas propias, el chatbot en menos espacio). Todo quedó en producción el mismo día (PR #348), seguido de la regla permanente (PR #350).
