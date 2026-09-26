@@ -200,6 +200,40 @@ Por eso el candado es un hook `.githooks/pre-push`, versionado.
   - Al push, el hook pasa por `trae-novedad`.
   - Cada usuario ve la tarjeta una vez, entra y se apaga sin recargar.
 
+## Extensión (2026-09-25 noche): contarlo como "¿Querés hacer X?"
+
+Con Novedades ya en producción, el founder cambió el enfoque: *"que todo sea para
+qué me sirve y después lo uso… ¿querés que el bot te organice tus contactos? y si
+le doy sí me explica… no como 'este tool hace esto'"*. Una lista de cambios dice
+qué hay nuevo; esto le dice a la persona qué puede lograr y cómo hacerlo parada
+frente a la pantalla.
+
+- **Cada ítem que se puede usar lleva `uso = { pregunta, pasos }`:**
+  - `pregunta`: lo que la persona QUIERE ("¿Querés que el chatbot te ordene los
+    contactos solo?"), nunca el nombre de la función ("Nuevo interruptor en
+    Etiquetas"). Va entre ¿ y ?.
+  - `pasos`: de 1 a 4, con los nombres de la pantalla entre «» (se muestran en
+    negrita). **Sacados del código de la pantalla, no de memoria:** un paso que
+    nombra un botón que no existe es peor que no tener pasos. Si un botón es
+    solo un ícono, se describe ("el ícono de calendario de arriba del chat").
+- **En pantalla:** la pregunta, una línea con lo que gana, y "Sí, mostrame cómo",
+  que despliega los pasos y el botón para ir. Los pasos van en el DOM desde el
+  principio (grid `0fr → 1fr`, `inert` cerrado): abrir no hace saltar la página.
+- **Tres secciones:** lo que podés hacer ahora (con imagen), más para probar, y
+  "además, sin que tengas que hacer nada" (arreglos, sin pregunta).
+- **El validador lo exige** en todo lo nuevo y lo destacado, con control negativo
+  por cada regla (pregunta sin ¿, sin pasos, 5 pasos, títulos repetidos).
+- **El aviso del menú pregunta por UNA cosa**, elegida según el rol: a un agente
+  no se le ofrece algo de Configuración. "Sí, mostrame cómo" lleva a
+  `/novedades?ver=<ancla>` con ese ítem abierto. `?ver=` se lee en el servidor
+  para que el HTML ya llegue abierto. El salto al ítem es directo, no suave: se
+  llega a la página, no se mueve dentro de ella.
+- **Lo que es de owner/admin**, para el resto dice "Esto lo configura el dueño o
+  un administrador de la cuenta" en vez del botón.
+- **Republicar para que el aviso vuelva a salir:** fue una excepción deliberada a
+  "los ids no se tocan". La misma entrada con sufijo `-b` reenciende el aviso para
+  todos, incluso para quien vio la versión anterior. Solo con OK del founder.
+
 ## Gotchas
 
 - **Antes de verificar el aviso, reiniciá tu propia marca:** si ya entraste a
