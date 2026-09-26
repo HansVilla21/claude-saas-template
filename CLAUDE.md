@@ -1736,6 +1736,13 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      los NOMBRES de ese momento, no anota un update que no cambia nada, y la RLS
 │                      se calca con un exists sobre el registro padre. Incluye los 8 casos del
 │                      bloque que siempre aborta con control positivo, y avisar que arranca vacío).
+│                      **Extensión (2026-09-26):** subir-archivos-grandes-sin-pasar-por-el-servidor
+│                      suma "La otra mitad": el techo de 4.5 MB de Vercel es también el de la
+│                      RESPUESTA, así que un "Descargar todo" en .zip se arma en el navegador (el
+│                      server solo gatea, arma el índice con una función pura y firma URLs cortas; fflate
+│                      con nivel 0 para lo ya comprimido). Trae los nombres que sirven en Windows
+│                      (prohibidos, punto final, repetidos) y el bit UTF-8 verificado con el
+│                      descompresor propio de Windows, y cómo verificar el zip en la página sin bajarlo.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
