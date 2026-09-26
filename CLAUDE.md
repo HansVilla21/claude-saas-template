@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        182 skills de proceso reusables:
+│   └── skills/        183 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1704,6 +1704,26 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      intervalo). Lo nuevo que pide el founder en el camino sale de la rama de
 │                      salida, no de main. Merge con MERGE COMMIT y no squash: así los 10 PRs
 │                      quedan MERGED solos; y verificar que llegó a main, no que "se mergeó").
+│                      Tier 54 — Lo que el bot sigue leyendo (1 nueva + 1 extensión,
+│                      capturadas 2026-09-25 de MOM-108 y del cambio de enfoque de Novedades):
+│                      wamid-dos-formatos-y-memoria-del-bot (⭐ cross-project: un mensaje
+│                      borrado o editado en WhatsApp que el CRM no encuentra y que el bot sigue
+│                      usando. Desde el CRM NO se puede borrar ni editar —la API de Meta y la
+│                      del BSP no lo permiten; un botón solo lo escondería de tu lado—: se borra
+│                      en la app o en WhatsApp Web y Meta avisa. Dos fallas silenciosas: (1) Meta
+│                      nombra al MISMO mensaje con dos wamid —por teléfono o por id de usuario—
+│                      con la misma clave adentro, así que 18 borrados quedaron en
+│                      target_not_found; se decodifica el base64 y se compara la clave, siempre
+│                      dentro de la conversación. (2) la memoria del bot es OTRA tabla: el CRM
+│                      mostraba "Mensaje eliminado" y el bot lo seguía usando. Se corrige por
+│                      texto, sesión y rol, solo como mensaje ENTERO —un "si" no toca
+│                      "sistema"—, sin repetir en reentregas, y la corrección de datos saltea
+│                      los textos repetidos en vez de adivinar: 46 corregidos, 6 salteados).
+│                      **Extensión:** novedades-dentro-del-producto suma el enfoque "¿Querés
+│                      hacer X?": cada novedad usable es una pregunta desde lo que la persona
+│                      quiere, con pasos que nombran los botones reales y un "Sí, mostrame
+│                      cómo" que los despliega; el validador lo exige y el aviso del menú
+│                      pregunta por UNA cosa que ese rol puede usar.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
