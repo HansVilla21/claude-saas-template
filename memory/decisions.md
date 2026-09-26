@@ -6,6 +6,44 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-26 — Historial de cambios por trigger, grupos de etiquetas solo visuales y un export de entrenamiento que tapa los datos de contacto
+
+**Contexto:** tres pedidos de un cliente del CRM, traídos de una llamada del socio comercial. Se hicieron seguidos y quedaron en producción la misma noche (`momentum-ai-crm` #358 y #359, migraciones 0124 y 0125):
+- ver cómo llegó un contacto a su estado (MOM-112);
+- ordenar las etiquetas en grupos (MOM-111);
+- que los chats con proveedores o familiares no entrenen al bot (MOM-110).
+
+**Decisiones:**
+
+1. **El historial se escribe con triggers en la base, no desde cada pantalla.**
+   - El estado lo cambian seis caminos (ficha, chat, lote, bot, automatizaciones, borrar un estado) y las etiquetas, cuatro. Un trigger `SECURITY DEFINER` sobre la columna y otro sobre la tabla de asignaciones los cubren todos, también los que se agreguen mañana.
+   - **Quién fue:** manda la sesión (el navegador no puede firmar como bot). Sin sesión, vale la procedencia que trae el mismo UPDATE; si no trae, queda "sistema".
+   - **Nunca rompe la escritura:** si anotar falla, el cambio se guarda igual y queda un WARNING.
+   - **Los nombres se guardan como eran en el momento del cambio,** para que se siga leyendo aunque después se renombren.
+   - **Lo que el trigger no puede saber lo firma quien sí sabe:** el lote corre sin sesión y firma él mismo las etiquetas que quita.
+2. **Los grupos de etiquetas son solo visuales.**
+   - Cambiar qué hace una etiqueta sería alcance nuevo.
+   - FK compuesta `(group_id, agency_id)` con `on delete set null (group_id)` (Postgres 15+): borrar un grupo deja sus etiquetas sin grupo y nunca apunta a otro negocio.
+   - **Los selectores traen los grupos en una consulta aparte:** si falla, se ven sin agrupar, nunca vacíos. Un negocio sin grupos no ve nada distinto.
+3. **"No usar para entrenar" es un interruptor por etiqueta, configurable por negocio,** con el mismo patrón que "la puede usar el chatbot". Lo respeta el export con que se entrena un bot, que además:
+   - deja afuera los mensajes borrados;
+   - **tapa correos y teléfonos escritos dentro de los mensajes** (48 en la primera exportación), reconociendo el formato local del teléfono y no "cualquier número largo", porque los precios son justo lo que el análisis necesita.
+4. **Primero las migraciones y después el código, con dos OK del founder:**
+   - las migraciones aditivas se aplican antes, para verificar en pantalla con su sesión;
+   - el código sube después;
+   - lo probado en su cuenta se revierte y se dice que se revirtió.
+
+**Qué se descartó:**
+- Llenar `audit_log`, que ya existía y nadie usaba: una tabla específica con nombres guardados se lee sin interpretar un jsonb.
+- Reconstruir el historial viejo: no hay de dónde. La novedad avisa que se registra desde ahora.
+- Grupos que condicionan comportamiento.
+- Un campo único "la etiqueta de exclusión" por negocio: el interruptor por etiqueta es más flexible.
+
+**Pendientes inmediatos:**
+- Ver con tráfico real las primeras filas del historial firmadas por el bot y por "sistema".
+- El filtro de etiquetas del Resumen todavía no agrupa.
+- Skill candidata: `historial-de-cambios-por-trigger`.
+
 ## 2026-09-25 (noche) — Novedades contada como "¿Querés…?", y un mensaje borrado en WhatsApp sale también de la memoria del bot
 
 **Contexto:** con Novedades ya en producción, el founder pidió cambiarle el enfoque: *"que todo sea para qué me sirve y después lo uso… ¿querés que el bot te organice tus contactos? y si le doy sí me explica… no como 'este tool hace esto'"*. Esa misma noche llegó un pedido de un cliente, vía una llamada del socio comercial: si alguien del negocio le manda a una clienta un mensaje por error y lo borra en WhatsApp Web, el chatbot no debe seguir usándolo como contexto. Las dos piezas quedaron en producción (`momentum-ai-crm` #353 y #355, `ycloud-webhook` 1.12.0).
