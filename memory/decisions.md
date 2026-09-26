@@ -6,6 +6,52 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-25 — Una ronda de 11 tickets subida de una vez, y "Novedades" como regla del proyecto
+
+**Contexto:** el founder mandó 11 tickets de Jira (del 24-09) y pidió dejarlos listos para aprobarlos a la vuelta. Quedaron 10 PRs (`momentum-ai-crm` #338–#347), cada uno revisado. A la vuelta pidió dos cosas más, para subir todo junto: una sección de **Novedades** (*"siempre agregamos cosas nuevas y nunca avisamos nada"*) y ordenar la ficha del contacto (citas y tareas en pestañas propias, el chatbot en menos espacio). Todo quedó en producción el mismo día (PR #348), seguido de la regla permanente (PR #350).
+
+**Decisiones:**
+
+1. **Subir la ronda por una rama de salida, no PR por PR.**
+   - Los 10 PRs más las dos piezas nuevas se juntaron en `release/ronda-2026-09-25`, se probaron como un solo producto y entraron a `main` en un merge.
+   - Merge commit y no squash, para que cada PR quede MERGED solo.
+   - Las migraciones compatibles con el código que corría (0116–0123, y la Edge Function `bot-actions` 0.10.0) se aplicaron ANTES. Así se pudo verificar en pantalla contra la base real.
+   - La que corrige datos que el código viejo seguía escribiendo mal (0115, seguimientos firmados como bot) fue DESPUÉS del deploy: 514 filas.
+   - Skill: `rama-de-salida-varios-prs`.
+2. **Decisiones de producto de la ronda,** todas del founder salvo la 2.3:
+   1. Corregir hacia atrás los seguimientos viejos.
+   2. El interruptor "lo puede usar el chatbot" va en la fila de cada etiqueta y estado, y lo cambia cualquier owner/admin.
+   3. Una etapa reservada al equipo es **barrera**: el bot tampoco salta a las de después. Fue decisión técnica; el founder no la objetó y después apagó él mismo las etapas de equipo de su negocio.
+   4. `{{producto}}` no entra como variable (no existe el dato).
+   5. La plantilla con imagen queda cargada en el mensaje, no se manda sola.
+   6. Cada uno corrige su propia nota durante 15 minutos.
+   7. Los recordatorios de cita van más adelante.
+   8. Todo control de formulario va con el diseño del sistema, enforced por lint.
+3. **Novedades: contenido como código y "visto" por usuario, por id.**
+   - Las entradas viven tipadas en el repo, así el anuncio viaja en el mismo PR que el cambio.
+   - Cada usuario guarda el id de la más nueva que vio, en el servidor. Una entrada nueva reenciende el aviso para todos.
+   - El aviso es una tarjeta clara, sin flecha. El globo oscuro con flecha de la primera versión no pasó la mirada del founder: *"seamos más serios"*.
+   - **Imágenes que son réplicas de la interfaz con datos de ejemplo, nunca capturas:** una captura mostraría contactos reales a todos los clientes.
+   - Skill: `novedades-dentro-del-producto`.
+4. **Regla permanente: todo cambio que el usuario nota se anuncia en Novedades en el MISMO PR,** y no depende de acordarse. Pedido literal del founder: *"no tengo que estar todo recordando"*.
+   - Regla en `AGENTS.md` §9 y en la fila del CRM de este `CLAUDE.md`.
+   - Skill del proyecto `novedades-en-cada-cambio`.
+   - Candado `.githooks/pre-push`: frena el push de una rama que cambia pantallas sin tocar el registro. El escape es declarado (`Sin-Novedad: <motivo>`), nunca silencioso.
+5. **Una pestaña para cada cosa en la ficha.** La primera versión juntó citas y tareas en "Agenda"; el founder pidió que Tareas fuera aparte. Quedaron Agenda (citas, con reagendadas contadas por trigger desde el 25-09) y Tareas, cada una con su número.
+
+**Qué se descartó:**
+- Mergear 10 PRs uno por uno: 10 deploys y ninguna prueba del conjunto.
+- Capturas reales para Novedades: filtran datos de clientes.
+- Guardar el "visto" en el navegador: es por dispositivo y reaparecería.
+- Una tabla de novedades con panel de carga: invita a anunciar "después".
+- Candado en pre-commit: un commit intermedio no tiene por qué traer su anuncio.
+- Una sola pestaña para citas y tareas.
+
+**Pendientes inmediatos:**
+- Mirar con uso real la plantilla con imagen en el chat y el aviso de quién cambió las etiquetas.
+- Pasar los PRs a los tickets de Jira (necesita el OK del founder).
+- Los detalles latentes que anotó la revisión: zona horaria mezclada en la ficha, el modal que aparece tarde y tokens de color que no existen. Están en el backlog del CRM.
+
 ## 2026-09-24 — Instagram y Messenger en producción, y la conexión que agarró de más
 
 **Contexto:** se construyó el frente social completo del CRM: conectar la página del negocio, recibir y responder por Instagram y Messenger, y el nombre de quien escribe. Cuatro entregas a producción el mismo día (PRs #322 a #325 de `momentum-ai-crm`, migración `0114`, `meta-webhook` 1.4.0), probadas con mensajes reales por los dos canales.
