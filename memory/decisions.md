@@ -6,6 +6,46 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-09-26 (madrugada) — Las descargas grandes se arman en el navegador; estados que conviven por categoría; el acceso del equipo con registro y por tiempo
+
+**Contexto:** cierre de la noche en el CRM. Hubo dos pedidos chicos y dos tickets grandes que esperaban una decisión del founder:
+- descargar la puesta en marcha de un cliente para que el socio comercial arme los prompts (`momentum-ai-crm` #362);
+- una X en los avisos flotantes y un switch más discreto (#363);
+- MOM-101 y MOM-109.
+
+**Decisiones:**
+
+1. **Un .zip con archivos del storage se arma en el navegador, no en el server.**
+   - Vercel corta toda **respuesta** de una función en 4.5 MB, igual que el cuerpo de un request. La puesta en marcha más grande ya pesa 53 MB.
+   - El server solo firma las URLs (10 min, al tocar el botón), y el navegador baja cada archivo directo del storage y arma el zip con fflate.
+   - Las fotos, los PDF y los audios se guardan sin recomprimir; el texto sí se comprime.
+   - Un archivo que no baja no frena el zip: se lista al final del documento.
+   - fflate marca los nombres con tilde como UTF-8. Se verificó extrayendo con el descompresor propio de Windows.
+2. **Los avisos flotantes van en un solo componente para los dos scopes**, con la X adentro, a la derecha y de 32 px. La de la librería medía 20 px, colgando de la esquina izquierda: por debajo del piso táctil de 24 px.
+3. **MOM-101: un estado activo POR CATEGORÍA, al mismo tiempo.** Poner "no show" ya no borra que había agendado.
+   - Las categorías las arma cada negocio.
+   - Los estados de hoy quedan en "Sin categoría", así que migrar no mueve a nadie.
+   - Se descartó la lectura de un "umbral" configurable.
+4. **MOM-109: el cliente controla el acceso del equipo Momentum a su cuenta.**
+   - Cada vez que se da o se quita queda registrado, con quién lo hizo.
+   - Se puede quitar todo de un toque o dar el acceso por un tiempo.
+   - Quitarlo corta entrar a la cuenta y leer conversaciones y contactos.
+   - Desde el panel propio se sigue configurando el bot y viendo números agregados, porque sin eso no hay soporte.
+   - **Ese recorte tiene que decirse con todas las letras en la pantalla del cliente:** si descubre después que seguíamos viendo sus números, la función hace más daño que no tenerla.
+
+**Qué se descartó:**
+- Armar el zip en el server: se cae justo con el cliente que más material mandó.
+- Sets de estados fijos (lead, post-agenda, post-cliente) configurados por nosotros.
+- Categorías de estado solo visuales. Serían rápidas, pero no resuelven que un estado pise al anterior.
+
+**Pendientes inmediatos:**
+- MOM-101 y MOM-109 se construyen en sesiones nuevas.
+- **MOM-101:** primero se diseña cómo se ve un contacto con 2 o 3 estados.
+  - Rompe un supuesto de MOM-106: un contacto va a caer en varios disparadores a Meta a la vez, y eso deja de ser un caso raro.
+  - Hay que distinguirlo en pantalla de los grupos de etiquetas, que son solo visuales.
+- **MOM-109:** primero se hace el inventario de cada vía de entrada: la función de master en las policies, la impersonación y las lecturas con admin client.
+- **Skill candidata:** extender `subir-archivos-grandes-sin-pasar-por-el-servidor` con el lado de la descarga.
+
 ## 2026-09-26 — Historial de cambios por trigger, grupos de etiquetas solo visuales y un export de entrenamiento que tapa los datos de contacto
 
 **Contexto:** tres pedidos de un cliente del CRM, traídos de una llamada del socio comercial. Se hicieron seguidos y quedaron en producción la misma noche (`momentum-ai-crm` #358 y #359, migraciones 0124 y 0125):
