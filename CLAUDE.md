@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        184 skills de proceso reusables:
+│   └── skills/        185 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1743,6 +1743,21 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      con nivel 0 para lo ya comprimido). Trae los nombres que sirven en Windows
 │                      (prohibidos, punto final, repetidos) y el bit UTF-8 verificado con el
 │                      descompresor propio de Windows, y cómo verificar el zip en la página sin bajarlo.
+│                      Tier 56 — La ventana que tiene dirección (1, capturada 2026-09-26 del menú
+│                      de cuenta y la Configuración en ventana del CRM): ventana-con-direccion-propia
+│                      (⭐ cross-project: un modal que se abre ENCIMA de donde estás y sigue teniendo URL
+│                      —para no rehacer pantallas que ya son rutas ni romper los enlaces que apuntan a
+│                      ellas—, con rutas paralelas `@modal` + interceptadas `(.)x` que re-exportan las
+│                      páginas reales. Los siete detalles que la doc no dice: `page.tsx` y `[...resto]`
+│                      en null o la ventana queda pegada al navegar; `Link replace` entre secciones y UN
+│                      solo `back()` por ventana (el doble clic volvía dos pasos); en modo página las
+│                      secciones son `<a>` comunes porque un `<Link>` abre la ventana encima de sí misma, y
+│                      la columna va desde `lg:` (en `md:` el contenido quedaba en 282 px); Escape en
+│                      captura con un predicado puro que cede a modales de adentro, desplegables y CAMPOS
+│                      (tiraba lo escrito); la caja sin transform/filter persistente o encierra a los
+│                      `fixed` de adentro; "cambios sin guardar" por contexto + ConfirmDialog; y una
+│                      prueba que exige los dos archivos de cada sección. Trae la verificación en el
+│                      navegador, incluido guardar algo desde adentro y confirmarlo tras recargar).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
