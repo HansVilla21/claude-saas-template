@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        180 skills de proceso reusables:
+│   └── skills/        182 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1677,6 +1677,33 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      prompt para cachear más sin volver a probar el comportamiento; un número de
 │                      prueba sin país da 0 % en producción porque el placeholder de país arma otra
 │                      entrada; y la hora del cambio mal convertida mezcla turnos del modelo anterior).
+│                      Tier 53 — Avisar lo que cambia y subirlo junto (2, capturadas
+│                      2026-09-25 subiendo una ronda de 11 tickets a un CRM en producción):
+│                      novedades-dentro-del-producto (⭐ cross-project: la sección
+│                      "Novedades" con un aviso por usuario, y sobre todo el PROCESO para que
+│                      cada cambio visible llegue ahí en el mismo PR sin que nadie se acuerde.
+│                      Contenido como código tipado (el anuncio viaja con el cambio) con
+│                      validador probado contra el registro real; "visto" por usuario en el
+│                      servidor y POR ID, no por fecha (una entrada nueva, aunque sea del
+│                      mismo día con sufijo -b, reenciende el aviso para todos; sumar a una ya
+│                      publicada no avisa a nadie); una tarjeta clara sin flecha —el globo
+│                      oscuro con flecha no pasó la mirada del founder—; imágenes que son
+│                      RÉPLICAS de la interfaz con datos de ejemplo, nunca capturas, porque una
+│                      captura muestra contactos reales a todos los clientes, con registro
+│                      tipado y container queries; y el candado: un `.githooks/pre-push` que
+│                      frena el push de una rama que cambia pantallas sin tocar el registro,
+│                      con lógica pura probada, escape declarado `Sin-Novedad: <motivo>` y
+│                      prueba de punta a punta con commits sueltos de `git commit-tree`) +
+│                      rama-de-salida-varios-prs (juntar N PRs listos en UNA rama que se prueba
+│                      como producto y entra a main en un solo merge. Lo no-obvio es la base:
+│                      cada migración se clasifica por "¿el código que corre HOY tolera esto?"
+│                      —leyendo el código de producción, no el de la rama—; las compatibles se
+│                      aplican ANTES, así el local y la preview muestran la verdad, y las que
+│                      corrigen datos que el código viejo seguiría escribiendo mal van DESPUÉS
+│                      del deploy (506 medidas a la mañana, 514 aplicadas a la noche: 8 del
+│                      intervalo). Lo nuevo que pide el founder en el camino sale de la rama de
+│                      salida, no de main. Merge con MERGE COMMIT y no squash: así los 10 PRs
+│                      quedan MERGED solos; y verificar que llegó a main, no que "se mergeó").
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
@@ -1888,7 +1915,7 @@ Detalles en `memory/orquestacion.md`.
 
 | Proyecto | Path | Repo GitHub | Descripción |
 |---|---|---|---|
-| **Momentum AI CRM** | `crm-v2/` | `momentum-ai-crm` | CRM SaaS multi-tenant + bot de WhatsApp. **En producción con clientes reales.** Es la fuente de los Tiers 8→24 de skills. |
+| **Momentum AI CRM** | `crm-v2/` | `momentum-ai-crm` | CRM SaaS multi-tenant + bot de WhatsApp. **En producción con clientes reales.** Es la fuente de los Tiers 8→24 de skills. ⚠️ **Regla del founder (2026-09-25): todo cambio que el usuario del CRM note se anuncia en Novedades EN EL MISMO PR** (`src/lib/novedades/entradas.ts`; paso a paso en la skill `crm-v2/.claude/skills/novedades-en-cada-cambio`; candado en `.githooks/pre-push` que frena el push sin novedad; escape `Sin-Novedad: <motivo>`). |
 | Hookly | `proyectos/hookly/` | `hookly` | SaaS análisis viral de reels (Instagram MVP, TikTok V1) |
 
 > Los clientes que corren sobre el CRM (fichas comerciales + prompts) viven en `clients/` — ver `clients/README.md`, que es el registro maestro.
