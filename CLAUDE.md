@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        183 skills de proceso reusables:
+│   └── skills/        184 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1724,6 +1724,18 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      quiere, con pasos que nombran los botones reales y un "Sí, mostrame
 │                      cómo" que los despliega; el validador lo exige y el aviso del menú
 │                      pregunta por UNA cosa que ese rol puede usar.
+│                      Tier 55 — Cómo llegó hasta acá (1, capturada 2026-09-26 del
+│                      historial de Actividad del CRM): historial-de-cambios-por-trigger (⭐
+│                      cross-project: "¿cómo llegó este registro a como está?" cuando el sistema
+│                      solo guarda el último cambio. Lo no-obvio: el estado lo cambiaban 6
+│                      caminos y las etiquetas 4, así que un historial escrito desde cada pantalla
+│                      nace con huecos; va por trigger SECURITY DEFINER. Quién fue: la sesión
+│                      manda y el navegador no firma; sin sesión, solo la procedencia que trae el
+│                      MISMO update; si no, "sistema", y el camino sin sesión que sí sabe quién
+│                      fue corrige su firma después. El trigger nunca rompe la escritura, guarda
+│                      los NOMBRES de ese momento, no anota un update que no cambia nada, y la RLS
+│                      se calca con un exists sobre el registro padre. Incluye los 8 casos del
+│                      bloque que siempre aborta con control positivo, y avisar que arranca vacío).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
