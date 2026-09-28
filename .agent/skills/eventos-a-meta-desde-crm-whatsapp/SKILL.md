@@ -6,6 +6,7 @@
 - Vas a conectar la **Conversions API for Business Messaging** (`action_source: business_messaging`) desde un CRM propio.
 - El número del cliente está en un **BSP** (YCloud, Twilio, 360dialog…) y tu app necesita llegar a su cuenta de WhatsApp.
 - Meta te responde `events_received: 1` y **el evento no aparece** en el Administrador de eventos (mirá el Resumen, no "Probar eventos": paso 7).
+- El cliente quiere **avisarle a Meta que un lead salió malo** ("para que deje de traer gente así"). Eso no existe: paso 1b.
 
 ## Por qué existe esta skill
 
@@ -25,6 +26,8 @@ La última fila es la trampa cara: la respuesta 200 no prueba que Meta procesó 
 
 > La idea central: **el problema no es el payload, es quién tiene acceso a la cuenta de WhatsApp.** Si el número vive en un BSP, tu app no puede ser socio: el token lo genera el portafolio del cliente, sobre tu app, y queda en tu base cifrado por negocio.
 
+**Ampliada el 2026-09-28** con una investigación de la documentación de Meta que salió de otro pedido: *"que Meta sepa qué leads salieron malos"*. Corrigió dos cosas que esta skill afirmaba. Decía que por anuncios de WhatsApp **solo se optimiza por compras**, y también se puede por leads. Decía que los 7 días se cuentan desde el evento, y para que sume al anuncio **se cuentan desde el clic**. Sumó lo que Meta no acepta, que es lo que el cliente pide primero (paso 1b).
+
 ## Proceso
 
 ### 1. Medir antes de prometer
@@ -40,11 +43,37 @@ from leads group by 1 order by 2 desc;
 
 Medido: 83-86 % en los negocios que pautan, 0 % en uno que no recibe anuncios a WhatsApp. Los leads orgánicos y los de **anuncios en Estados de WhatsApp** (Meta omite el `ctwa_clid` ahí) no se pueden reportar.
 
-Y decile al cliente **antes de construir** lo que Meta permite optimizar:
+Y decile al cliente **antes de construir** lo que Meta permite optimizar. Meta lo documenta en la lección *"Optimizar anuncios de mensaje para clientes potenciales"* (facebook.com/business/learn/lessons/optimize-leads), leída el 2026-09-28:
 
-- Para anuncios que abren WhatsApp, **el único objetivo por evento es Compras**, y pide **≥ 10 compras** reportadas. `QualifiedLead` se manda y se ve en reportes, pero no hay forma documentada de optimizar por él.
-- Meta rechaza eventos con `event_time` de **más de 7 días**: no se puede reportar lo que ya pasó. Nada de backfill.
-- Con pocas ventas por mes (medido: 3-6), llegar a 10 compras tarda meses. Esa decisión es del cliente: qué cuenta como compra.
+- **Solo cuentan dos eventos para optimizar:** *"clientes potenciales presentados y compras"*, o sea `LeadSubmitted` y `Purchase`. `QualifiedLead` se manda y se ve en reportes, pero no hay forma documentada de optimizar por él.
+- **Por compras:** 10 compras en 30 días.
+- **Por leads, con la API en la nube:** *"más de 100 eventos de clientes potenciales o de compra en los últimos 90 días"*, unos 34 por mes. El umbral de 10 en 30 días de esa misma página es para quien etiqueta chats en la app WhatsApp Business: no es tu caso. ⚠️ La página pone el requisito de 100 junto al párrafo de públicos similares; es la lectura más probable, no una certeza.
+- **Los 7 días son dos límites distintos:**
+  - La API rechaza un `event_time` de más de 7 días. Nada de backfill.
+  - Para que el evento sume al anuncio, el chat tiene que etiquetarse *"dentro de los 7 días de haber hecho clic en el anuncio"*. Una venta que se cierra a los 20 días del clic Meta la recibe, pero no la cuenta para el anuncio.
+- **Fase de aprendizaje:** unos 50 resultados por semana por conjunto de anuncios. Debajo queda en "aprendizaje limitado": optimiza igual, con menos precisión.
+- **Con pocas ventas no se llega.** Medido: 3 a 6 ventas por mes. En negocios chicos, **el valor inmediato es de medición**: el administrador de anuncios muestra qué anuncio trae leads calificados y ventas. Decíselo así, no le prometas que Meta "va a aprender".
+
+### 1b. "Avisarle a Meta que el lead es malo" no existe
+
+Es lo primero que pide un cliente cuando entiende que el CRM le habla a Meta: *"que sepa cuáles salieron malos, para que deje de traer gente así"*. Meta **no tiene forma de recibirlo**:
+
+- **La lista de eventos es cerrada, y ninguno significa "malo":**
+  - leads y compras: `Purchase`, `LeadSubmitted`, `QualifiedLead`;
+  - carrito y pago: `InitiateCheckout`, `AddToCart`, `ViewContent`, `CartAbandoned`;
+  - pedidos: `OrderCreated`, `OrderShipped`, `OrderDelivered`, `OrderCanceled`, `OrderReturned`;
+  - opiniones: `RatingProvided`, `ReviewProvided`.
+
+  No hay nombres propios documentados ni campo de calidad del lead.
+- **El producto que sí acepta etapas con nombre propio no sirve para WhatsApp.** "Conversion Leads" (Conversions API for CRM, `action_source: system_generated`, `lead_id`) funciona solo con **formularios instantáneos** de Meta. Hasta ahí, Meta le pide al CRM *sacar* del embudo las etapas negativas: el modelo aprende de las positivas.
+- **Cómo se dice "malo" entonces: no mandando nada.** Meta lo recomienda textual para WhatsApp: *"al menos un paso de calificación entre el inicio de la conversación y la etapa de envío de información de clientes potenciales"*, y no registrar cada conversación como lead. En la práctica:
+  - `LeadSubmitted` va atado a una etapa que ya implica calificación, como "agendó" o "pidió precio". Nunca a "Nuevo".
+  - Si lo mandás con cada conversación, le enseñás a Meta a traer más de lo mismo.
+- **No hay vuelta atrás.** Si el disparador es una etiqueta y alguien la quita, no hay nada que mandar para deshacer el evento.
+- **Negocios de salud:**
+  - Meta prohíbe mandar enfermedades, tratamientos, procedimientos o lugares de tratamiento, *"incluso en los nombres de los eventos"*. Con la lista cerrada y sin mandar el nombre de la etapa, "Paciente" nunca llega a Meta: mantené el payload mínimo del paso 6.
+  - El riesgo que no controlás: Meta puede clasificar el conjunto de datos como **"salud y bienestar"** y restringir los eventos de mitad y final del embudo. Esa clasificación no se puede cambiar, y Meta no publica qué eventos restringe ni en qué países (empezó en EE. UU. en 2025).
+  - Al prender una clínica, mirá la categoría del conjunto de datos en el Administrador de eventos y avisale al cliente antes.
 
 ### 2. Revisar que el BSP no esté mandando compras falsas
 
@@ -67,7 +96,8 @@ Si tu app **puede** ser socio de la cuenta de WhatsApp (el cliente la conectó p
 
 ### 5. La arquitectura (lo que no se ve en el payload)
 
-- **Por negocio, qué etapa del embudo manda qué evento** (y el monto de la compra). Tabla de reglas, no literal en el código.
+- **Por negocio, qué etapa del embudo manda qué evento** (y el monto de la compra). Tabla de reglas, no literal en el código. La pantalla configura **qué es bueno**: qué etapa (o etiqueta) es "lead calificado" y cuál es "compra". Lo malo no se configura porque no hay qué mandar (paso 1b).
+- **Guardá la hora del clic**, no solo el `ctwa_clid`. La ventana de 7 días que decide si el evento suma al anuncio empieza en el clic. Si el CRM solo mide desde el cambio de etapa, manda eventos que Meta acepta y no atribuye. La fecha de alta del lead sirve como aproximación, pero falla cuando un contacto viejo vuelve por un anuncio nuevo.
 - **Un trigger sobre `leads`** (`after insert or update of stage_id`) que solo ANOTA en una cola cuando la etapa **cambia** (`new.stage_id is distinct from old.stage_id`: hay pantallas y bots que reescriben la misma etapa). Nada de red dentro del trigger: una falla de Meta no puede frenar el cambio de etapa de una persona. `exception when others → raise warning; return new`.
 - **Un evento de cada tipo por lead**, con índice único: Meta **no deduplica** en este producto.
 - Lo que no se puede mandar queda **'omitido' con motivo** (`sin_clic_de_anuncio`, `sin_token`, `sin_conjunto_de_datos`, `vencido`), no desaparece: "de 30 clientes se mandaron 25" solo se entiende si se ve por qué no salieron 5.
@@ -143,13 +173,15 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 | El `test_event_code` aísla los eventos de prueba | ❌ no: los de prueba figuran en el Resumen |
 | Trigger, cola, unicidad, modo prueba, token por negocio | ✅ 20/20 contra la base viva en transacción con rollback, con controles negativos |
 | Ruta en producción + secreto en hosting y Vault | ✅ 401 sin clave / 200 con la del Vault / 200 por `pg_net` desde la base |
-| Un evento real (un lead que cambia de etapa) llegando al Resumen | ⏳ pendiente: el negocio quedó apagado hasta que el cliente confirme reglas |
+| Un evento real disparado por el trigger (un lead que cambia de etapa) | ✅ 2026-09-25: salió solo, `events_received: 1`, sin modo prueba. Al 2026-09-28: 2 compras enviadas, 0 fallidas, a 1,8 y 2,5 días de que el lead escribió (dentro de los 7 del clic). ⏳ falta confirmarlas en el Resumen |
+| Mandar "este lead es malo" | ❌ no existe (2026-09-28, documentación de Meta): se comunica no mandando nada (paso 1b) |
+| Optimizar por leads en anuncios de WhatsApp | 📄 documentado, no medido: `LeadSubmitted` + `Purchase`, más de 100 en 90 días con la API en la nube |
 
-**Actualizar la última fila** con el primer caso real.
+**Actualizar la fila ⏳** cuando se vea en el Resumen.
 
 ## Output esperado
 
-- El cliente sabe, antes de construir, qué leads se pueden reportar y por qué evento se puede optimizar.
+- El cliente sabe, antes de construir, qué leads se pueden reportar, por qué evento se puede optimizar y con cuánto volumen. También sabe que "lead malo" se comunica no mandándolo.
 - Token por negocio en Vault, revisado contra Meta al guardarlo.
 - Una pantalla por negocio: token, cuenta de WhatsApp, conjunto de datos, etapa → evento, estado (apagado / prueba / encendido), evento de prueba, y el registro de lo mandado con motivos.
 - Un evento de prueba visto en el **Resumen** del conjunto de datos, y el negocio encendido recién con las reglas confirmadas por el cliente.
@@ -158,6 +190,10 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 
 **Input:** *"Un cliente me pregunta si el CRM puede avisarle a Meta qué lead es calificado y cuál compró, eso se hace con el píxel."*
 
-**Output:** Conteo de leads con `ctwa_clid` por negocio (83 %), aclaración de que solo se optimiza por compras con ≥ 10, revisión del panel del BSP (sin cuenta publicitaria conectada), token generado en el portafolio del cliente con la app del proveedor (aprobado por otro admin), conjunto de datos creado por API, reglas "Llamada agendada → QualifiedLead" y "Cliente → Purchase", modo prueba, y revisión del permiso enviada al ver que el evento no aparecía.
+**Output:** Conteo de leads con `ctwa_clid` por negocio (83 %), aclaración de qué se puede optimizar (compras con 10 en 30 días; leads con más de 100 en 90) y de que a un negocio chico hoy le sirve para medir, revisión del panel del BSP (sin cuenta publicitaria conectada), token generado en el portafolio del cliente con la app del proveedor (aprobado por otro admin), conjunto de datos creado por API, reglas "Llamada agendada → QualifiedLead" y "Cliente → Purchase", modo prueba, y revisión del permiso enviada al ver que el evento no aparecía.
+
+**Input 2:** *"Quiero que Meta sepa cuáles leads salieron malos, así deja de traerme gente así."*
+
+**Output 2:** No existe ese evento. Se ata `LeadSubmitted` a una etapa que ya califica (no a "Nuevo") y lo malo simplemente no se manda. Se miden contra los umbrales las ventas y los leads calificados por mes de cada negocio: hoy ninguno llegaba, y el más cercano sumaba unos 60 de los 100 en 90 días. A las clínicas se les avisa de la categoría "salud y bienestar".
 
 Relacionadas: `meta-tech-provider-de-cero-a-app-review` (la primera revisión de la app), `meta-pixel-capi` (CAPI para sitio web, en `.claude/skills/`), `probar-migracion-contra-base-viva-con-rollback`, `verificar-funcionamiento-end-to-end` ("corrió" ≠ "escribió": acá, "recibido" ≠ "procesado").

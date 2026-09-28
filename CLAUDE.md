@@ -1585,13 +1585,20 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      La trampa cara: Meta respondió events_received: 1 cuatro veces y ningún evento
 │                      apareció en "Probar eventos", porque el permiso de eventos seguía sin revisar
 │                      aunque la guía dice que se aprueba solo. Trae el conteo de ctwa_clid por
-│                      negocio antes de prometer, lo que se le dice al cliente (solo se optimiza por
-│                      compras, con ≥ 10, y nada de más de 7 días), el BSP que reporta "compras" por
+│                      negocio antes de prometer, lo que se le dice al cliente (se optimiza por
+│                      compras con 10 en 30 días o por leads con más de 100 en 90, y los 7 días se
+│                      cuentan desde el CLIC), el BSP que reporta "compras" por
 │                      defecto con cualquier conversación de 2 mensajes, la arquitectura —trigger que
 │                      solo anota, un evento por tipo y lead porque Meta no deduplica, "omitido" con
 │                      motivo, modo prueba con el código copiado a la fila, cron que solo despierta
 │                      si hay pendientes—, el payload mínimo sin datos personales, y la tabla de lo
 │                      verificado con la fila que todavía dice ❌ hasta que Meta apruebe).
+│                      **Ampliada 2026-09-28:** "avisarle a Meta que el lead es malo" NO existe
+│                      —lista cerrada de 14 eventos, ninguno negativo; Conversion Leads, el que
+│                      acepta etapas propias, es solo para formularios instantáneos—, así que lo
+│                      malo se comunica NO mandándolo y `LeadSubmitted` va atado a una etapa que
+│                      ya califica, nunca a "Nuevo"; más la categoría "salud y bienestar" que
+│                      Meta puede ponerle al conjunto de datos de una clínica.
 │                      Tier 49 — El "leído" que nadie leyó (1, capturada 2026-09-24
 │                      con un cliente en coexistencia —el mismo número en la app del celular y en
 │                      la API—): coexistencia-leido-y-sin-leer (⭐ cross-project: "los chats se
