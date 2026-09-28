@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        185 skills de proceso reusables:
+│   └── skills/        186 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1758,6 +1758,20 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      `fixed` de adentro; "cambios sin guardar" por contexto + ConfirmDialog; y una
 │                      prueba que exige los dos archivos de cada sección. Trae la verificación en el
 │                      navegador, incluido guardar algo desde adentro y confirmarlo tras recargar).
+│                      Tier 57 — El canal que se comparte sin avisar (1, capturada 2026-09-27
+│                      del ticket "notificaciones duplicadas" del CRM): canal-realtime-compartido-por-topic
+│                      (⭐ cross-project: dos componentes montados A LA VEZ —la campana de escritorio y
+│                      la de celular, una oculta con CSS pero montada— que abren el mismo topic de
+│                      Supabase Realtime comparten UN canal, porque el cliente del navegador es singleton
+│                      y `channel(topic)` devuelve el que ya existe. El segundo `subscribe` es un no-op:
+│                      nunca se entera de una caída. Y cuando el primero se reconecta al vencer el JWT
+│                      (removeChannel + canal nuevo, el patrón de realtime-canal-muere-en-silencio), borra
+│                      el canal compartido y el otro queda sordo hasta F5 — "la campana deja de avisar
+│                      después de un rato". La base no tenía un solo duplicado: el bug era del cliente.
+│                      Arreglo: un solo dueño por topic (un Provider en el ancestro común), una prueba que
+│                      lee el código y exige un único archivo que abra el canal —con control negativo—, y
+│                      verificar insertando un evento real con la pestaña VISIBLE: oculta, el navegador
+│                      frena la hidratación y los clics no llegan a React).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

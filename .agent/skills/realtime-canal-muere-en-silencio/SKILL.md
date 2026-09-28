@@ -147,3 +147,7 @@ Fix: re-sincronizar en el **primer** `SUBSCRIBED` de cada canal (`if (degraded |
 cada lectura por un coordinador que re-aplique los eventos que llegaron mientras viajaba. Todo el detalle
 —los 4 huecos, el coordinador, y lo que rompe el arreglo si se hace a medias— en
 `lectura-y-realtime-sin-hueco`.
+
+## Ojo: la reconexión puede dejar sorda a OTRA instancia (2026-09-27)
+
+Si el mismo topic lo abren dos componentes montados a la vez (la campana de escritorio y la de celular, una oculta con CSS), el cliente les da el MISMO canal: el segundo `subscribe` no registra nada, y cuando el primero hace `removeChannel` para reconectarse, el otro queda escuchando un canal borrado hasta F5. Un solo dueño por topic (un Provider). Ver [[canal-realtime-compartido-por-topic]].
