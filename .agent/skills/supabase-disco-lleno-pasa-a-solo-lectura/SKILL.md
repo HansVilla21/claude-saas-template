@@ -44,6 +44,17 @@ auth  UNHEALTHY
 
 Y el patrón que lo delata desde afuera: si `/auth/v1/health` y `/functions/v1/<algo>` contestan en milisegundos pero cualquier consulta con la clave de servicio da 522 a los ~20 segundos, **lo que está muerto es Postgres**, no el host.
 
+## El correo que te manda a la palanca equivocada
+
+Esa noche llegaron **dos avisos a la vez**, y el más visible no era el que bloqueaba:
+
+- El correo **"Your project is depleting its Disk IO Budget"**. Real, y plausible: explica un 522 perfecto. Con él en la mano el diagnóstico fue "falta IO → subí el compute", y el founder lo subió.
+- El disco al **99,8 %**, que no manda correo propio y es lo que de verdad tenía la base en solo lectura.
+
+El compute ayudó por accidente (su reinicio recicló WAL, ver la tabla de la salida), pero la base no quedó a salvo hasta agrandar el disco. Y el panel ya mostraba desde antes un aviso de **cuota del plan gratis excedida, con fecha de corte**: la señal de que el proyecto ya no cabía en ese plan.
+
+**Orden de diagnóstico, sin saltear:** `/health` → `/config/disk/util` → recién ahí el IO. El disco se mide en una llamada y, si está arriba del 95 %, ninguna cantidad de IO arregla nada.
+
 ## Disco no es base de datos
 
 ```sql
@@ -112,7 +123,7 @@ Los precios de compute (2026-10): Micro ~US$10/mes (87 MB/s de IO), Small ~US$15
 | 07:54 | La base confirma `default_transaction_read_only = off`, `/health` todo en verde, REST 200 en 565 ms, tráfico real escribiendo. |
 
 Dos aprendizajes de esa tabla:
-- **El reinicio de la instancia recicla WAL.** Bajó el disco de 99,8 % a 74,8 % sin borrar un dato. Si te toca esto con el disco bloqueado por la espera de 4 horas, un reinicio puede sacarte del umbral mientras tanto — pero es un respiro, no un arreglo: el WAL vuelve a crecer.
+- **El reinicio de la instancia recicla WAL.** Bajó el disco de 99,8 % a 74,8 % sin borrar un dato. Si te toca esto con el disco bloqueado por la espera de 4 horas, un reinicio puede sacarte del umbral mientras tanto — pero es un respiro, no un arreglo: el WAL vuelve a crecer. Medido: a las 08:30, menos de una hora después, el WAL ya estaba otra vez en 1 GB (65 archivos). Con 2 GB de disco eso devuelve el problema; con 8 GB queda en 18 %.
 - **El panel atrasa.** El aviso de *read-only* siguió arriba varios minutos después de que el bot ya estaba escribiendo. Por eso el paso 5 se verifica en la base y no en el panel.
 
 **Gotchas del disco:**
