@@ -30,7 +30,7 @@ curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   https://api.supabase.com/v1/projects/<ref> | jq .status
 ```
 
-- `ACTIVE_HEALTHY` → el problema es otro, seguí buscando.
+- `ACTIVE_HEALTHY` → no está pausado. **Eso no dice que la base esté sana**: antes de seguir buscando, mirá `/health` (ver el apéndice del final).
 - `INACTIVE` → **es esto**. Dejá de leer logs.
 
 **Antes de tocar nada más, correlo.** Es una llamada; descarta o confirma la
@@ -137,3 +137,37 @@ quedarse con el ping diario. Quedó anotado en el handoff con los dos comandos.
 `deploy-seguro-vercel-preview-prod` (el build fallido es donde suele aparecer) ·
 `debugging-silent-errors` (misma familia: el código de estado miente) ·
 `umbral-compartido-cron-cliente` · `verificar-funcionamiento-end-to-end`.
+
+## Apéndice 2026-10-02 — `ACTIVE_HEALTHY` con la base muerta
+
+El diagnóstico de arriba decía "`ACTIVE_HEALTHY` → el problema es otro, seguí
+buscando". Es cierto para *pausa*, pero se lee como "la base está bien", y no lo
+es: `status` es el **ciclo de vida** del proyecto (activo, pausado,
+restaurando), no su salud.
+
+En un CRM en producción, todavía en plan gratis, el disco de 2 GB se llenó, la
+base pasó a solo lectura y el bot estuvo 11,5 horas sin contestar. Durante todo
+ese tiempo `GET /v1/projects/<ref>` devolvió `ACTIVE_HEALTHY`. La salud real
+estaba en otro endpoint:
+
+```bash
+curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  "https://api.supabase.com/v1/projects/<ref>/health?services=db,rest,auth"
+```
+
+```
+db    UNHEALTHY  Failed to connect to database
+```
+
+**El diagnóstico completo de un proyecto que "no responde" son dos llamadas:**
+
+1. `status` → ¿está pausado? (`INACTIVE` = esta skill).
+2. `/health?services=db,rest,auth` → ¿la base responde? Si `db` está
+   `UNHEALTHY`, mirá el disco con `/config/disk/util`: arriba del 95 % es la
+   skill `supabase-disco-lleno-pasa-a-solo-lectura`.
+
+Los dos modos de caída del plan gratis son opuestos: uno por **no usarse**
+(pausa por inactividad) y otro por **usarse de más** (disco lleno). El
+keep-alive de esta skill arregla el primero y no hace nada por el segundo. Para
+un proyecto con clientes reales, la salida de fondo de los dos es la misma: no
+estar en plan gratis.
