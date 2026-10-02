@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        186 skills de proceso reusables:
+│   └── skills/        187 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1779,6 +1779,34 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      lee el código y exige un único archivo que abra el canal —con control negativo—, y
 │                      verificar insertando un evento real con la pestaña VISIBLE: oculta, el navegador
 │                      frena la hidratación y los clics no llegan a React).
+│                      Tier 58 — El disco que se llenó en silencio (1 nueva + 1 apéndice,
+│                      capturadas 2026-10-02 del primer apagón completo del CRM en producción):
+│                      supabase-disco-lleno-pasa-a-solo-lectura (⭐⭐ cross-project: un proyecto
+│                      que nació en plan gratis tiene un disco de 2 GB, y Supabase pasa la base a
+│                      SOLO LECTURA al 95 %. Medido: 274 MB de datos + 1 GB de WAL + sistema, sin
+│                      margen; una ráfaga de 1.236 eventos de historial de WhatsApp en 55 segundos
+│                      —la sincronización que manda Meta al conectar un número en coexistencia—
+│                      lo llevó al 99,8 % y el bot estuvo 11,5 horas sin contestar, de noche, sin
+│                      una sola alerta. Lo no obvio: (1) `ACTIVE_HEALTHY` es el CICLO DE VIDA del
+│                      proyecto, no su salud —decía eso con la base muerta—; la salud está en
+│                      `/health?services=db,rest,auth`, y desde afuera lo delata auth y functions
+│                      respondiendo en milisegundos mientras toda consulta con la clave da 522 a los
+│                      ~20 s; (2) disco ≠ base: la base era el 13 % del disco y medir tablas dice
+│                      "estamos lejos"; (3) plan, compute y disco son TRES palancas —pasar a Pro no
+│                      agrandó nada, el panel decía "tu plan incluye 8 GB" con el disco en 2 y el
+│                      autoescalado tampoco se disparó—; (4) el reinicio de compute RECICLA WAL
+│                      (99,8 → 74,8 % sin borrar un dato) y es un respiro si el disco está
+│                      bloqueado por la espera de 4 horas; (5) el panel atrasa, se verifica en la
+│                      base. Y lo que más duele: lo entrante durante el solo lectura NO EXISTE en
+│                      tu base, el proveedor reintenta solo ~80 minutos, su API no deja listar lo
+│                      entrante y el log guardó solo el error —24.099 líneas sin un teléfono—, así
+│                      que la única fuente es el celular del negocio. Trae la tabla de la salida
+│                      hora por hora, las dos alertas que lo hubieran cortado en minutos y el
+│                      checklist de proyecto a producción). **Apéndice:**
+│                      supabase-free-se-pausa-y-tumba-el-sitio corrige su línea "`ACTIVE_HEALTHY`
+│                      → el problema es otro": el diagnóstico de un proyecto que no responde son
+│                      dos llamadas, `status` y `/health`, y el plan gratis se cae de dos formas
+│                      opuestas —por no usarse y por usarse de más—.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
