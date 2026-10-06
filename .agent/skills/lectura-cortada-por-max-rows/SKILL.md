@@ -7,6 +7,10 @@
 - Un negocio (tenant) grande muestra **menos** que lo que la base cuenta, y los chicos andan perfecto.
 - Vas a escribir una pantalla que **trae una tabla entera de un tenant al navegador** con supabase-js / PostgREST para filtrarla o contarla en el cliente.
 - Aparecen en los logs errores de **clave duplicada** que nadie puede explicar.
+- *"Lo cambio y en la otra pantalla no aparece"*, o *"a veces sí y a veces no"*.
+- Un embudo o un dashboard muestra **0** (o muy poco) donde debería haber miles, o una lista de "lo de hoy" se quedó **congelada en una fecha vieja**.
+- Vas a pasarle a `.in()` una lista de ids que puede crecer, o una lista que **debería tener filas sale vacía** sin error.
+- Arreglaste el tope y el número "real" dispara algo hacia afuera (un envío masivo, un cobro): ver la sección 8 del segundo caso.
 
 ## Por qué existe esta skill
 
@@ -97,10 +101,98 @@ Antes → después, medido con sesión real y contra la base:
 
 Y una **prueba con control negativo** del helper: una tabla de 1.140 filas llega entera; **una sola consulta sobre la misma tabla se queda en 1.000** (eso es el bug, escrito como prueba); justo 1.000; 2.000 y 2.500; error a mitad; repetidas; freno.
 
+## Segundo caso (2026-10-06): un CRM con 8.022 leads, siete pantallas a la vez
+
+El ticket decía *"lo que cambio en un lead no aparece en el pipeline"*, y la primera hipótesis fue "falta un `revalidatePath`". No: todas las acciones ya revalidaban. Era el mismo tope, pero esta vez **sin tenant chico que lo escondiera**: un solo negocio, con 8.022 leads, y el tope mentía en siete pantallas a la vez sin un solo error:
+
+| Pantalla | Mostraba | La base |
+|---|---|---|
+| Pipeline (kanban) | 1.000 leads **al azar** (ordenaba por `value_k`, y valía 0 en todos) | 8.022 |
+| Dashboard: etapa "nuevo" / cerrados / fuente "Base de Datos" | 493 / 0 / 12 | 6.746 / 2 / 2.525 |
+| Configuración: leads por etapa | ≈ ⅛ de cada etapa | real |
+| "Hoy": eventos de LinkedIn | lo último era de **un mes atrás** (orden asc por fecha) | al día |
+| Embudo de LinkedIn: cargados / aceptadas | 0 / 63 | 3.948 / 471 |
+| Boletín: "Todos con correo" | **999** | 5.204 |
+
+Los nueve puntos que este caso le agrega a la regla:
+
+### 1. `.in()` también tiene tope: el de la URL
+PostgREST va por GET y la lista de `.in()` viaja en la query string. Medido contra la API de Supabase:
+
+| ids (uuid) | URL | resultado |
+|---|---|---|
+| 200 | ~7 KB | ✅ |
+| 493 | ~18 KB | ❌ `TypeError: fetch failed` |
+| 800 | ~29 KB | ❌ 400 Bad Request |
+| 2.000 | ~72 KB | ❌ 414 URI Too Long |
+
+Con `const { data } = await …` sin mirar `error`, **la lista sale vacía** y la pantalla dice "no hay nada". Esta trampa suele aparecer **al arreglar la primera**: traés todos los eventos, juntás sus ids y el `.in()` revienta. ("Hoy" iba a pedir 493 justo después del arreglo.) En tandas:
+
+```ts
+export const IN_CHUNK = 150;
+export function chunks<T>(arr: T[], size = IN_CHUNK): T[][] {
+  const out: T[][] = []; for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size)); return out;
+}
+export async function fetchIn<T>(ids: string[], query: (chunk: string[]) => PromiseLike<{ data: unknown[] | null; error: { message: string } | null }>) {
+  if (ids.length === 0) return [] as T[];
+  const rows: T[] = [];
+  for (const res of await Promise.all(chunks(ids).map(query))) {
+    if (res.error) throw new Error(res.error.message);
+    rows.push(...((res.data ?? []) as T[]));
+  }
+  return rows;
+}
+// fetchIn<Lead>(ids, (chunk) => sb.from("leads").select("id,name").in("id", chunk));
+```
+Para un **conteo** con `.in()`, se cuenta por tanda (`count: "exact", head: true`) y se suman los `count`.
+
+### 2. Decidí con `count`, no con "la página vino corta"
+`leerTodo` corta cuando una página trae menos de `TAMANO_PAGINA`, y por eso exige que esa constante sea el `max_rows` real (ver Gotchas). Si alguien lo baja en el panel a 500, la primera página trae 500, el helper cree que terminó y **vuelve el bug exacto, callado**. Variante robusta: pedí `count: "exact"` **solo en la primera página** y usá el largo REAL de esa página como paso. Las demás páginas pueden ir en paralelo (dedupe por `id`, igual que `leerTodo`):
+
+```ts
+const first = await page(0, 999, /* withCount */ true);
+const step = first.data.length;                      // 1000, o 500 si bajaron max_rows
+for (let from = step; from < first.count; from += step) pending.push(page(from, from + step - 1, false));
+```
+Con joins, pedir `count` en cada página son N `count(*)` tirados.
+
+### 3. El orden decide QUÉ se pierde
+- **Columna con empates** (todos `value_k = 0`): el subconjunto es al azar y cambia entre cargas. De ahí sale el "a veces sí y a veces no".
+- **Asc por fecha:** se queda con los 1.000 más viejos y pierde lo reciente ("Hoy" ciego un mes).
+- **Desc:** pierde lo viejo; los totales y embudos cuentan solo lo último.
+
+Y el `id` de desempate no es opcional: sin él, las páginas se pisan.
+
+### 4. Para contar, `count` y no filas
+`select("id", { count: "exact", head: true })`, una consulta por categoría y en paralelo. No viaja ninguna fila. "Leads por etapa" bajaba los `stage_id` de todos los leads para contarlos en memoria. (El chequeo del servidor antes de borrar una etapa ya usaba `count` y estaba bien; lo que mentía era el número de la pantalla.)
+
+### 5. Paginar multiplica las filas: mirá qué columnas viajan
+- Un `jsonb` entero para usar dos campos → `job_title:qualification->>job_title,company:qualification->>company`. Resultado: **2,7 → 1,8 MB** en 8.023 filas, con 0 diferencias.
+- Si solo un tipo de fila necesita el `payload`, partí la consulta ("todos sin payload" + "esos con payload"). Resultado: **5,6 MB / 3 s → 0,7 MB / 0,7 s**. Antes de cambiarla, comprobá que el resultado sea idéntico (0 diferencias en 493 leads).
+
+### 6. Barré TODAS las lecturas, no solo la del síntoma
+El primer caso dejó "el resto de las lecturas" sin medir. Acá se barrieron, y aparecieron seis pantallas más:
+
+```bash
+grep -rn 'from("' lib app --include=*.ts --include=*.tsx | grep -v '\.eq("id"\|update\|insert\|delete\|maybeSingle\|single()'
+```
+Para cada una, **medí contra la base cuántas filas devuelve hoy** y clasificala: un registro (no aplica), un número (`count head`), filas (paginar) o una lista de ids (`fetchIn`). Las que hoy no llegan al tope pero pueden crecer, blindalas igual: es una línea.
+
+### 7. Verificá contra SQL directo, con la MISMA regla
+Armá una tabla "antes · ahora · base" por cada número de la pantalla. La columna "base" se saca **con SQL directo por `pg`**, sin pasar por PostgREST. Ojo: una regex de validación de correo en SQL (Postgres) **no se comporta igual** que la de JavaScript, y dio diferencias falsas. Bajá las filas crudas y aplicales la misma función del código.
+
+### 8. La service role no pasa por la RLS
+Un envío (o un cron) que lee con service role ve **también lo que la RLS esconde**: la papelera, carteras ajenas. En este caso, **la papelera recibía los boletines**. Esos filtros, a mano (`.is("deleted_at", null)`).
+
+### 9. Si el arreglo cambia algo HACIA AFUERA, no lo arregles en silencio
+Pasar de "999" a 5.204 destinatarios **multiplica por cinco un envío masivo** desde un dominio casi sin historial. Si los rebotes pasan del 4 %, el proveedor puede pausar la cuenta. Eso no es un fix, es una decisión. Lo que se hizo: el número honesto, **una sola lista** para contar y para mandar, y un **tope explícito y configurable** (variable de entorno) que rechaza con el motivo en vez de mandarle a una parte. El resto lo decide el dueño. Mismo criterio para todo lo que dispare correos, mensajes, cobros o webhooks.
+
+**Estilo del error:** `leerTodo` devuelve lo leído + el error ("mejor una lista parcial a la vista"); `fetchAll` tira y la pantalla muestra el error. Los dos son válidos; lo que no vale es el `error` ignorado.
+
 ## Lo que esta skill NO cubre
 
 - **Cuándo dejar de traer todo al navegador.** Filtrar y contar en el cliente asume la lista completa; pasadas unos miles de filas hay que filtrar y contar en el servidor (`count` por consulta, medido). Paginar te compra tiempo, no escala infinito.
-- **El resto de las lecturas del proyecto:** el barrido se hizo sobre las tres pantallas que mostraron el síntoma; quedan otras (una pantalla de agenda diaria, un conteo de uso en configuración, acciones en lote) sin medir cuáles pasan hoy de 1.000.
+- **El resto de las lecturas del primer proyecto:** ahí el barrido se hizo solo sobre las tres pantallas que mostraron el síntoma. El método para barrer todas está en la sección 6 del segundo caso.
 - **La rama del duplicado de punta a punta:** el tiempo real refrescó el chip antes de poder reintentar, así que solo se probó leyendo el código y el `sql_state` de los logs.
 
 ## Ejemplo
@@ -108,3 +200,7 @@ Y una **prueba con control negativo** del helper: una tabla de 1.140 filas llega
 **Input:** *"Trato de agregar una etiqueta desde el sistema y no se guarda."*
 
 **Output:** la etiqueta sí estaba en la base. Un negocio con 1.140 asignaciones perdía las más nuevas por el tope de 1.000 filas. `leerTodo` en las lecturas de contactos, conversaciones y etiquetas de tres pantallas, más el `23505` tratado como éxito. Medido: de 2 a 10 de 10 etiquetas visibles, 1.000 → 1.111 contactos, 1.000 → 1.061 conversaciones.
+
+**Input:** *"Lo que cambio en un lead no aparece en el pipeline."*
+
+**Output:** no era la revalidación. Medir `content-range` dio `0-999/8022`: el tablero ordenaba por una columna en la que valían 0 todos, así que mostraba 1.000 al azar (un lead de prueba aparecía solo al ponerle valor > 0). Se paginó con desempate por `id`, y el barrido encontró seis pantallas más. Una de ellas, al arreglarla, le pedía 493 ids a `.in()`, que falla, así que se pasó a tandas. Tabla "antes · ahora · base" contra SQL directo: 20 de 20 iguales. El boletín pasó de "999" a 5.204, con un tope explícito de 1.000 por envío hasta que el dueño decida.

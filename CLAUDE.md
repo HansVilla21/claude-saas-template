@@ -1546,6 +1546,16 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      `.limit(5000)` y subir `max_rows` NO lo arreglan, que la cuenta demo de 183 filas
 │                      nunca lo va a reproducir, y que un `23505` al asignar es un ÉXITO: revertir el
 │                      chip fue lo que convenció a todos de que "no se guardaba").
+│                      SEGUNDO CASO (2026-10-06, un CRM con 8.022 leads): siete pantallas mintiendo a la
+│                      vez —un pipeline con 1.000 al azar por ordenar por una columna con empates, una
+│                      pantalla de "hoy" ciega un mes por ordenar asc por fecha, un boletín que decía 999
+│                      con 5.204 correos—. Suma: `.in()` también tiene tope (va en la URL: 200 uuids
+│                      pasan, 493 ya fallan, y sin mirar `error` la lista sale VACÍA → `fetchIn` en
+│                      tandas), decidir con `count` y no con "la página vino corta" (si bajan max_rows a
+│                      500 el bug vuelve callado), `count head` para contar, `->>` en vez del jsonb
+│                      entero, barrer TODAS las lecturas, verificar contra SQL directo con la misma
+│                      regla, la service role que no filtra la papelera, y un tope explícito si el
+│                      arreglo cambia algo hacia afuera (un envío ×5) en vez de un fix silencioso.
 │                      Tier 47 — La opción que el modelo elige por el nombre (1, capturada
 │                      2026-09-22 del motivo con que el bot de un CRM pasa conversaciones):
 │                      opciones-del-modelo-con-significado (⭐ cross-project: una lista cerrada
