@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**177 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**187 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -31,6 +31,11 @@ Cómo saber que algo funciona de verdad. Si vas a decir "listo", empezá acá.
 | `handoff-dossier-a-otro-proyecto` | Empaquetar un proyecto para que otro agente lo retome sin la conversación |
 | ⭐ `verificar-frontend-sin-ver` | Pedirle el CSS al server y listar qué clases generó Tailwind **de verdad**, sin sesión ni captura. El JIT deja clases zombi; `min-width:auto` le gana a tu `w-80` |
 | ⭐ `probar-todas-las-ramas-no-solo-la-feliz` | Una prueba verde sobre una rama es evidencia sobre **esa** rama. `frío` con tilde: los leads C y D reventaban con 500 y la primera prueba dio verde |
+| ⭐ `brecha-entre-aceptado-y-guardado` | "Se perdió lo que puse" con todo en 200: entre que el sistema ACEPTA el trabajo (subidas, audio, autoguardado, wizards, importadores) y lo GUARDA hay una brecha. Medido: 21 archivos en el Storage, 11 anotados en la base. Qué revisar antes de dar por terminada una pantalla de varios pasos |
+| `distinguir-detenido-a-proposito-de-roto` | Una tabla de ejecuciones llena de `running` que nunca terminaron no es una tasa de falla. Separar "se detuvo a propósito" (un portón, un gate) de "se rompió" antes de medir cada cuánto falla y de decidir un rediseño |
+| ⭐ `clasificar-por-lista-no-por-fallback` | Una rama "todo lo demás" con efecto hacia afuera (un mensaje, un correo, un cobro) también le responde a lo que el proveedor invente mañana. Clasificar por lista explícita |
+| ⭐ `config-que-deja-el-sistema-mudo` | Un guard escrito para el caso feliz (`desde < hasta`, `min < max`) que una configuración rara no cumple nunca: el sistema no tira error, se calla. Validar la combinación al guardar |
+| `rama-de-salida-varios-prs` | Juntar N PRs listos en UNA rama que se prueba como producto antes de mergear: el orden, los que se tocan entre sí, y construir encima de lo que todavía no está en `main` |
 
 ## 🗄️ Datos, RLS y seguridad de base
 
@@ -55,6 +60,9 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐⭐ `service-role-con-cookies-fuga-de-pii` | `createServerClient` de `@supabase/ssr` **lee cookies y la cookie le gana a la llave**: con sesión la RLS aplica, sin sesión bypasea todo. Un `GET /api/investors` sin login devolvía cédulas y teléfonos reales, con status 200 |
 | ⭐⭐ `revocar-execute-incluye-public` | `revoke execute … from anon, authenticated` **no cierra una función**: nace con EXECUTE para PUBLIC y anon lo hereda. En el CRM, una función devolvía nombre o teléfono de cualquier contacto a un `curl` sin sesión, y la de al lado tenía el revoke incompleto |
 | `borrar-entidad-con-fk-no-action` | El default de Postgres es **bloquear**. El orden de borrado lo dicta la base: se valida con `BEGIN … ROLLBACK` contra datos reales, y los dependientes de segundo nivel van primero |
+| ⭐ `borrar-entidad-deja-sus-archivos` | Borrar un cliente, un usuario o una conversación con adjuntos: las FK con cascade limpian la base, NO el Storage. Antes de decirle que sí a "borrame esta cuenta" |
+| ⭐ `historial-de-cambios-por-trigger` | "¿Quién cambió esto y cómo llegó a este estado?": historial por trigger en una tabla propia, no un `audit_log` genérico que nadie llena. Primero se cuentan todos los caminos que escriben la columna |
+| ⭐ `supabase-disco-lleno-pasa-a-solo-lectura` | El disco de Supabase se llena, la base pasa a solo lectura y el sistema entero se calla: REST da 522 o se cuelga mientras auth y las Edge Functions contestan rápido |
 
 ## 🏢 Multi-tenant y SaaS
 
@@ -71,6 +79,9 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `async-job-pattern` | UI → job → worker → polling + refund de créditos |
 | `key-de-ia-en-configuracion` | La API key del proveedor se pega en Configuración y vive **cifrada en la base**, no en el `.env`. El modelo se pregunta a `/v1/models`, no se hardcodea |
 | `valor-derivado-pendiente-config` | Comisión/valor calculado de una tabla editable, **sin fallback**: si falta la config el hecho entra igual y el valor queda `pendiente_config` + alerta |
+| ⭐ `onboarding-cliente-en-el-producto` | El onboarding del cliente DENTRO del producto, en vez de un Word, un Google Form o mensajes sueltos de WhatsApp, cuando el servicio se configura con información del cliente |
+| ⭐ `novedades-dentro-del-producto` | "La gente no sabe lo que agregamos" / "nadie usa X": novedades dentro del producto, y que nunca se olvide anunciar lo que se sube |
+| ⭐ `portar-bot-n8n-propio-al-crm` | Mover el bot propio de n8n de un cliente (prompts, persona, historial) al bot único del CRM multi-tenant, donde cada tenant aporta su `bot_config` |
 
 ## 🤖 Bot, n8n y LangChain
 
@@ -96,6 +107,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `bot-llm-marker-expand-pattern` | Marcadores del LLM expandidos aguas abajo |
 | `bot-whatsapp-unsupported-fallback` | Recuperar los mensajes `unsupported` del clic de anuncio |
 | `sales-framework-spsp-whatsapp` | SPSP adaptado a WhatsApp |
+| ⭐ `cache-compartida-entre-usuarios` | La caché de prompts solo acierta entre usuarios si lo igual para todos va primero y marcado, y lo de cada uno después. Medir antes de tocar; mover la marca no cambia el texto que lee el modelo |
+| ⭐ `workflow-n8n-activo-sin-recibir` | Un workflow ACTIVO puede no estar recibiendo nada: un bot 3 días mudo, en verde y sin un error. Verificar la entrada, sobre todo al migrar un número, cambiar de proveedor o conectar un tenant |
 
 ## 💬 WhatsApp, webhooks e integraciones
 
@@ -126,6 +139,9 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `estado-antes-que-mensaje` | El aviso del proveedor (entregado, pagado) llega antes que la cosa y el webhook lo descarta: tabla de pendientes + trigger + candado por id, sin deadlock |
 | ⭐ `nombre-de-relleno-visible` | "Lead sin nombre" tratado como nombre: le gana al teléfono en pantalla y sale "Hola Lead," en plantillas. `nombreReal` para hablarle a la persona, `nombreVisible` para mostrarla |
 | `agendamiento-google-calendar` | Calendly propio sobre Google Calendar. Lo que lo mata en silencio: dejar la app en "Testing" — el refresh token vence a los 7 días y la agenda muere un martes |
+| ⭐ `coexistencia-leido-y-sin-leer` | Con coexistencia: "los chats se abren solos" en el celular, no queda la burbujita de nuevos, o el lead ve azul y nadie le contestó. "Leído" en WhatsApp y "sin leer" en el CRM |
+| `primer-contacto-sin-texto` | Leads de anuncios click-to-WhatsApp que llegan como `unsupported` (error `131060`) sin texto y nunca reciben respuesta, y que además inflan el "Sin atribución" de las campañas |
+| ⭐ `wamid-dos-formatos-y-memoria-del-bot` | Borrar o editar un mensaje de WhatsApp: la API no lo permite (el cliente lo sigue viendo), el `revoke`/`edit` da `target_not_found`, y el bot tiene que olvidarlo en su propia memoria |
 
 ## 🎨 UI, UX y frontend
 
@@ -161,6 +177,10 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `construir-landings-cliente` | 3 landings de conversión sobre el material real del cliente: blueprint, autoridad por landing, audio-testimonios, subdominios DNS-only |
 | `boton-llamar-softphone-vs-telefono` | `tel:` en Mac se lo queda FaceTime. Los softphones registran `callto:`, que cae directo sin configurar nada |
 | ⭐ `portar-el-diseno-no-interpretarlo` | Si te pasaron un diseño, el trabajo no es diseñar: es **portar**. Grepear las etiquetas y construir con tu estética cuesta la pantalla entera — y cada superficie del handoff puede traer su propio sistema |
+| ⭐ `aviso-derivado-que-se-apaga-solo` | Cuando piden "notificaciones para estar al tanto": un aviso que se deriva del estado y se apaga solo, en vez de una tabla `notificaciones` con `leido` |
+| `canal-realtime-compartido-por-topic` | Dos componentes montados a la vez (la campana de escritorio y la de celular escondida con CSS) piden el mismo canal de Realtime y uno queda sordo: "las notificaciones no son confiables" sin nada mal en la base |
+| ⭐ `lectura-y-realtime-sin-hueco` | El mensaje que cae entre la lectura inicial y la suscripción al canal: está en la base y en la lista, pero no en el chat abierto hasta recargar. Toda pantalla que arma su estado con lectura + stream en vivo |
+| `ventana-con-direccion-propia` | Un modal que se abre encima de donde estás y sigue teniendo URL (configuración, ficha, perfil, foto): se comparte, se recarga y se enlaza. Cuándo sí, y cuándo alcanza con un diálogo común |
 
 ## 📊 Números, dinero y tiempo
 
