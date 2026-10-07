@@ -7,6 +7,7 @@
 - El número del cliente está en un **BSP** (YCloud, Twilio, 360dialog…) y tu app necesita llegar a su cuenta de WhatsApp.
 - Meta te responde `events_received: 1` y **el evento no aparece** en el Administrador de eventos (mirá el Resumen, no "Probar eventos": paso 7).
 - El cliente quiere **avisarle a Meta que un lead salió malo** ("para que deje de traer gente así"). Eso no existe: paso 1b.
+- Quien maneja los anuncios dice que **en el Administrador de eventos no llega nada**, o pide **"meterle el píxel al CRM"**: paso 10.
 
 ## Por qué existe esta skill
 
@@ -27,6 +28,8 @@ La última fila es la trampa cara: la respuesta 200 no prueba que Meta procesó 
 > La idea central: **el problema no es el payload, es quién tiene acceso a la cuenta de WhatsApp.** Si el número vive en un BSP, tu app no puede ser socio: el token lo genera el portafolio del cliente, sobre tu app, y queda en tu base cifrado por negocio.
 
 **Ampliada el 2026-09-28** con una investigación de la documentación de Meta que salió de otro pedido: *"que Meta sepa qué leads salieron malos"*. Corrigió dos cosas que esta skill afirmaba. Decía que por anuncios de WhatsApp **solo se optimiza por compras**, y también se puede por leads. Decía que los 7 días se cuentan desde el evento, y para que sume al anuncio **se cuentan desde el clic**. Sumó lo que Meta no acepta, que es lo que el cliente pide primero (paso 1b).
+
+**Ampliada el 2026-10-07**, dos semanas después de encender un negocio. El que le maneja los anuncios avisó que *"no estaba recibiendo la información en Meta"* y pidió instalar el píxel en el CRM. Llegaba todo: 26 leads y 2 compras, la misma cantidad que la tabla de envíos del CRM. Él miraba otro conjunto de datos, y el nuestro no estaba conectado a su cuenta publicitaria. Además, la herramienta para consultar Meta por API daba cero en el conjunto correcto (paso 10).
 
 ## Proceso
 
@@ -150,6 +153,26 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 4. El cron solo llama si hay pendientes, así que **con la cola vacía nunca vas a ver el camino real funcionando**. Probalo a mano: el mismo `net.http_post` que hace la función, con la URL y el secreto del Vault, y leé `net._http_response`.
 5. Los negocios cuyas reglas el cliente no confirmó quedan en **apagado** (conservando reglas y token): apagado = el trigger no anota nada, así que al prender no sale ninguna cola vieja.
 
+### 10. Que lo vea quien maneja los anuncios
+
+Que Meta procese el evento no alcanza: el que pauta tiene que verlo y poder elegirlo en sus campañas. Cuando dice "no llega nada", casi nunca es el envío.
+
+1. **Primero, ¿qué conjunto está mirando?** Un portafolio puede tener varios. Además del que creaste sobre la cuenta de WhatsApp (paso 4), suele haber uno de píxel web o de otra cuenta de WhatsApp del mismo cliente. Medido: él miraba «<Negocio> Ads Manager Event Data», atado a OTRA cuenta de WhatsApp y con un solo PageView del navegador. Pedile captura y compará dos datos con los de tu base:
+   - el **identificador** que aparece bajo el nombre del conjunto, contra tu `dataset_id`;
+   - el **«Identificador de la cuenta de WhatsApp Business»** de la columna derecha, contra tu `waba_id`.
+2. **El conjunto que crea tu código no está conectado a ninguna cuenta publicitaria.** Si el Administrador de eventos está filtrado por una cuenta publicitaria (se ve en el selector de arriba a la derecha), lista solo los conjuntos conectados a ella. Por eso el tuyo no le aparece, y tampoco lo puede elegir en un conjunto de anuncios ni usarlo en las columnas de conversiones. El arreglo es del cliente, sin código: en la configuración del negocio, el conjunto de datos → activos conectados → agregar su cuenta publicitaria. ⏳ Esa ruta exacta todavía no se vio hecha.
+3. **Para confirmar que llega, cruzá dos fuentes:**
+   - tu tabla de envíos: cuántos `enviado` por evento, con `respuesta.events_received` = 1;
+   - el **Resumen** del conjunto correcto (paso 7): «Cliente potencial enviado» y «Comprar» con integración «API de conversiones».
+   
+   Tienen que dar el mismo número. Medido: 26 y 2 en los dos lados.
+4. **No verifiques con la API de estadísticas.** Para estos eventos el MCP de Meta Ads (`ads_get_dataset_stats`) da `stats: []` con cualquier agregación, y `server_last_fired_time` da 1969. Pasó mientras el Resumen mostraba 34 eventos. Leer ese cero como "no llega" te manda a buscar un bug que no existe. El Resumen pide la sesión de Meta del humano: en un navegador limpio cae al login.
+5. **"Meté el píxel en el CRM" no corresponde, y hay que decirlo.**
+   - El píxel va en una página web y mide a quien la visita. Un lead de un anuncio que abre WhatsApp no pasa por ninguna web.
+   - El CRM lo abre solo el equipo del negocio. Un píxel ahí mediría a los vendedores y le ensuciaría los datos a Meta.
+   - Para este tipo de anuncio, la señal es la de esta skill: servidor a servidor con el `ctwa_clid`.
+   - Si el negocio además tiene una web con formulario, eso es otra skill (`meta-pixel-capi`) y otro conjunto de datos.
+
 ## Gotchas
 
 - **`business.facebook.com` en un navegador nuevo** (un panel embebido, un perfil limpio): *"Estamos realizando comprobaciones adicionales en este dispositivo nuevo. Vuelve a intentarlo en 15 minutos."* No insistir: repetir desde un dispositivo desconocido es lo que hace desconfiar a Meta. Pasar al navegador de siempre.
@@ -173,11 +196,13 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 | El `test_event_code` aísla los eventos de prueba | ❌ no: los de prueba figuran en el Resumen |
 | Trigger, cola, unicidad, modo prueba, token por negocio | ✅ 20/20 contra la base viva en transacción con rollback, con controles negativos |
 | Ruta en producción + secreto en hosting y Vault | ✅ 401 sin clave / 200 con la del Vault / 200 por `pg_net` desde la base |
-| Un evento real disparado por el trigger (un lead que cambia de etapa) | ✅ 2026-09-25: salió solo, `events_received: 1`, sin modo prueba. Al 2026-09-28: 2 compras enviadas, 0 fallidas, a 1,8 y 2,5 días de que el lead escribió (dentro de los 7 del clic). ⏳ falta confirmarlas en el Resumen |
+| Un evento real disparado por el trigger (un lead que cambia de etapa) | ✅ 2026-09-25: salió solo, `events_received: 1`, sin modo prueba. Al 2026-09-28: 2 compras enviadas, 0 fallidas, a 1,8 y 2,5 días de que el lead escribió (dentro de los 7 del clic). ✅ 2026-10-07: el Resumen muestra 26 «Cliente potencial enviado» y 2 «Comprar», igual que la tabla de envíos |
+| El conjunto le aparece a quien maneja los anuncios | ❌ no, hasta conectarlo a su cuenta publicitaria (paso 10). ⏳ falta verlo conectado |
+| La API de estadísticas del conjunto (MCP de Meta Ads) cuenta estos eventos | ❌ da `stats: []` con el Resumen mostrando 34 |
 | Mandar "este lead es malo" | ❌ no existe (2026-09-28, documentación de Meta): se comunica no mandando nada (paso 1b) |
 | Optimizar por leads en anuncios de WhatsApp | 📄 documentado, no medido: `LeadSubmitted` + `Purchase`, más de 100 en 90 días con la API en la nube |
 
-**Actualizar la fila ⏳** cuando se vea en el Resumen.
+**Actualizar la fila ⏳** cuando el conjunto aparezca conectado en la cuenta publicitaria.
 
 ## Output esperado
 
@@ -195,5 +220,14 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 **Input 2:** *"Quiero que Meta sepa cuáles leads salieron malos, así deja de traerme gente así."*
 
 **Output 2:** No existe ese evento. Se ata `LeadSubmitted` a una etapa que ya califica (no a "Nuevo") y lo malo simplemente no se manda. Se miden contra los umbrales las ventas y los leads calificados por mes de cada negocio: hoy ninguno llegaba, y el más cercano sumaba unos 60 de los 100 en 90 días. A las clínicas se les avisa de la categoría "salud y bienestar".
+
+**Input 3:** *"El de los anuncios dice que en Meta no le llega nada y que falta meterle el píxel al CRM."*
+
+**Output 3:**
+- La tabla de envíos tenía 28 enviados y 0 fallidos, todos con `ctwa_clid` y ninguno de prueba.
+- La captura de él mostraba otro conjunto: otro identificador y otra cuenta de WhatsApp.
+- El Resumen del conjunto correcto daba los mismos 26 y 2.
+- El píxel se descartó explicando por qué.
+- Le quedó un solo paso en Meta: conectar el conjunto a su cuenta publicitaria y elegirlo en sus campañas.
 
 Relacionadas: `meta-tech-provider-de-cero-a-app-review` (la primera revisión de la app), `meta-pixel-capi` (CAPI para sitio web, en `.claude/skills/`), `probar-migracion-contra-base-viva-con-rollback`, `verificar-funcionamiento-end-to-end` ("corrió" ≠ "escribió": acá, "recibido" ≠ "procesado").
