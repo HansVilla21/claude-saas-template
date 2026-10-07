@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        187 skills de proceso reusables:
+│   └── skills/        188 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1817,6 +1817,35 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      → el problema es otro": el diagnóstico de un proyecto que no responde son
 │                      dos llamadas, `status` y `/health`, y el plan gratis se cae de dos formas
 │                      opuestas —por no usarse y por usarse de más—.
+│                      Tier 59 — Lo que entra acá aparece solo allá (1, capturada
+│                      2026-10-07 conectando el CRM al Zoho CRM de un cliente):
+│                      salida-a-crm-externo (⭐ cross-project: el cliente ya trabaja en
+│                      SU CRM y pide que todo lo que entra al tuyo se le pase. Una sola
+│                      dirección —de ida y vuelta son dos fuentes de verdad—, y la
+│                      arquitectura de Eventos a Meta: cola de UNA fila por contacto con
+│                      `clock_timestamp`, cron por minuto, `skip locked`, y cerrar
+│                      COMPARANDO LA MARCA también al dar un envío por perdido, o se lleva
+│                      puesto el cambio nuevo. Lo que costó no fue el código sino la
+│                      cuenta del cliente, y todo se midió contra ella: el enlace
+│                      `tab/Leads/<id>` sin el número de organización cae en el INICIO
+│                      (`EntityInfo.do` lo resuelve; `/org` no se lee con esos alcances);
+│                      un Lead borrado responde 400 `INVALID_DATA` con
+│                      `resource_path_index`, SUELTO y no en `data`, y el código lo
+│                      anotaba como «Falló» en vez de recrearlo; la Fuente de Lead era
+│                      OBLIGATORIA en su diseño y `/settings/fields` no lo marca
+│                      —`/settings/layouts` sí—; y tenían reglas activas al crear (un SMS,
+│                      un aviso al dueño, una fecha de captación), así que los contactos
+│                      que existían ANTES de conectar se mandan con `trigger: []` y los
+│                      nuevos las disparan. Más: una lectura que falla NO es «no hay
+│                      datos» —en el camino de envío daba otro dueño, etiquetas borradas,
+│                      duplicados y una conexión «cortada» con el token sano—; el
+│                      respaldo de propietario solo al CREAR; el dueño sale de la
+│                      conversación y no solo de la ficha (70 de 74 «sin vendedor» lo
+│                      tenían); un dominio del proveedor validado contra lista cerrada,
+│                      porque el patrón abierto aceptaba `accounts.zoho.com.evil.io`;
+│                      elegir entre SUS opciones en vez de agregarle a su CRM; y la
+│                      prueba con un número que nunca escribió, porque un mensaje nuevo
+│                      de un contacto existente no cambia ningún dato y no viaja).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
