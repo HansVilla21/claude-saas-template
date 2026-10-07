@@ -1609,6 +1609,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      malo se comunica NO mandándolo y `LeadSubmitted` va atado a una etapa que
 │                      ya califica, nunca a "Nuevo"; más la categoría "salud y bienestar" que
 │                      Meta puede ponerle al conjunto de datos de una clínica.
+│                      **Ampliada 2026-10-07 (paso 10):** "en Meta no llega nada" era que el
+│                      de los anuncios miraba OTRO conjunto —de otra cuenta de WhatsApp— y el
+│                      nuestro no estaba conectado a su cuenta publicitaria; se cruza tu tabla
+│                      de envíos con el Resumen (26 y 2 en los dos lados) y NO con la API de
+│                      estadísticas, que da `stats: []` para eventos de mensajería; y "meté
+│                      el píxel en el CRM" no corresponde: mediría a los vendedores.
 │                      Tier 49 — El "leído" que nadie leyó (1, capturada 2026-09-24
 │                      con un cliente en coexistencia —el mismo número en la app del celular y en
 │                      la API—): coexistencia-leido-y-sin-leer (⭐ cross-project: "los chats se
