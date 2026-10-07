@@ -6,6 +6,50 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-07 — La salida a un CRM externo (Zoho) va en una sola dirección y no toca lo que el cliente ya tiene; la próxima cita, a la vista en el chat
+
+**Contexto:** del 01 al 07-10 se cerraron en el CRM:
+- el reparto de leads (MOM-124, `momentum-ai-crm` #385);
+- la próxima cita en la conversación (MOM-130, #391);
+- el encabezado del chat según su ancho (#392);
+- la integración con el Zoho CRM del primer cliente que lo usa (MOM-128, #393 a #397).
+
+La última fue prometida en la venta, así que no se cobra.
+
+**Decisiones:**
+
+1. **Zoho en una sola dirección: del CRM al de ellos.**
+   - De ida y vuelta habría dos fuentes de verdad que se desincronizan sin que nadie lo note.
+   - La entrada de un sistema externo es otro ticket (MOM-82).
+2. **Módulo Leads, apenas escriben y después al día.**
+   - Viajan el nombre, el móvil, la fuente, el estado y las etiquetas, estos dos en campos propios de texto, y el enlace al chat.
+   - Un Cliente que ya existe en su Zoho no se toca.
+   - Un Lead borrado allá se vuelve a crear.
+3. **El dueño del Lead es el que atiende la conversación acá**, emparejado por correo con un usuario de Zoho.
+   - El **dueño de respaldo se usa solo al CREAR.**
+   - Al actualizar un Lead que acá nadie atiende, no se manda dueño: un Lead que su equipo ya había asignado no se mueve.
+4. **En el CRM del cliente no se agrega nada:** se elige entre las opciones que ya tienen.
+   - Su Fuente de Lead no tenía «WhatsApp», pero sí una variante propia.
+   - Founder: *«no quiero tocar nada de lo que ellos ya tienen, porque sí puede afectar el trabajo que ellos ya están haciendo»*. Solo se crearon los 3 campos propios.
+5. **Los contactos que existían antes de conectar entran SIN disparar las reglas de Zoho** (`trigger: []`).
+   - Su Zoho tiene, al crear un Lead, un SMS, un aviso al dueño y una fecha de captación.
+   - Los contactos nuevos las siguen disparando, como cualquier Lead que les llega.
+   - Descartado mandarlos con sus reglas: 85 contactos viejos iban a recibir un SMS.
+6. **Sin nombre confirmado, el Lead se llama «perfil de WhatsApp · número».** Pedido del founder para reconocer al contacto; solo al crear.
+7. **La próxima cita se muestra en el chat** (pastilla en el encabezado y bloque en Info), leída una sola vez para la conversación. MOM-74 se había cerrado mostrándola solo en la ficha.
+8. **El encabezado del chat decide su forma por el ancho del CHAT, no de la pantalla.** Con el panel del contacto abierto, el nombre del contacto quedaba en 0 px.
+
+**Resultado medido:**
+- Envío de los existentes: 78 creados y 10 actualizados (7 ya estaban en su Zoho), 0 fallos, 88 de 88.
+- Las reglas no corrieron: la «Fecha de Captación» quedó vacía.
+
+**Skill:** `salida-a-crm-externo` (Tier 59).
+
+**Pendientes:**
+- Que el cliente confirme que ve bien sus Leads.
+- Decidir si el reparto sigue encendido en la cuenta de Momentum.
+- La migración 0141, para que desconectar con un lote en vuelo no marque la conexión como cortada.
+
 ## 2026-09-26 (madrugada) — Las descargas grandes se arman en el navegador; estados que conviven por categoría; el acceso del equipo con registro y por tiempo
 
 **Contexto:** cierre de la noche en el CRM. Hubo dos pedidos chicos y dos tickets grandes que esperaban una decisión del founder:
