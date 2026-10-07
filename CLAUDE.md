@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        188 skills de proceso reusables:
+│   └── skills/        189 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1846,6 +1846,35 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      elegir entre SUS opciones en vez de agregarle a su CRM; y la
 │                      prueba con un número que nunca escribió, porque un mensaje nuevo
 │                      de un contacto existente no cambia ningún dato y no viaja).
+│                      Tier 60 — El dueño no es quien atiende (1 nueva + 1 apéndice,
+│                      capturadas 2026-10-07 del reparto de leads y del encabezado del chat
+│                      de un CRM): reparto-leads-por-porcentaje (⭐ cross-project: repartir
+│                      los leads nuevos entre el equipo en proporciones (60/40,
+│                      30/25/20/15/10) aunque los atienda un bot, y que el pase le avise solo
+│                      al dueño. Tres hallazgos valen más que el algoritmo: el «round robin»
+│                      que ya existía NUNCA había asignado una conversación —escribía
+│                      'system' y un CHECK solo aceptaba bot/human, error tragado como no
+│                      fatal; 0 filas en toda la historia—, así que primero se MIDE el
+│                      mecanismo viejo; «el que tiene menos» da 5/5 con 60/40, la regla es el
+│                      más atrasado respecto de su porcentaje (`asignados / porcentaje`, con
+│                      desempates determinísticos) y ese orden ingenuo es el control
+│                      negativo de la prueba; y con el reparto encendido el BOT QUEDABA MUDO
+│                      —los triggers de prender/apagar el bot leían «tiene dueño» como «lo
+│                      tomó una persona»—: el dueño y quién atiende son dos datos y todo lo
+│                      que deduce uno del otro distingue el dueño puesto por el sistema. Trae
+│                      la creación de la conversación ya con dueño en una función de la base
+│                      (herencia antes que elección, `for update` sobre la config del
+│                      negocio —20 en paralelo → 10/10—, `on conflict` sin sumar al conteo),
+│                      pausar sin tocar porcentajes, guardar pone el conteo en cero, el pase
+│                      que reasigna si el dueño salió del equipo, los leads viejos que no se
+│                      reparten en masa, y la prueba real con un número que nunca escribió
+│                      más el control de uno que sí). **Apéndice:** auditar-responsive-midiendo
+│                      suma el segundo caso del breakpoint equivocado: el encabezado del chat
+│                      decidía su forma por el ancho de la PANTALLA y con el panel del
+│                      contacto abierto el chat medía 338 px a 1280 —0 px para el nombre—;
+│                      el componente decide por el ancho de SU contenedor (`ResizeObserver` en
+│                      `useLayoutEffect`, tres niveles) y se mide con el panel abierto y
+│                      cerrado, porque el ancho de la ventana no es la variable que importa.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
