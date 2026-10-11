@@ -6,6 +6,23 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-11 — Eventos a Meta: conectar el conjunto de datos a la pauta es parte de la puesta en marcha
+
+**Contexto:** el primer negocio con Eventos a Meta llevaba dos semanas encendido, con 26 leads y 2 compras procesados en el Resumen. El que le maneja los anuncios decía que *"no llegaba nada"* y pidió poner el píxel en el CRM. El conjunto de datos que crea el código tenía **0 personas asignadas y 0 activos conectados**. Él no lo veía, porque tener acceso total al portafolio no le daba acceso al conjunto, y no lo podía elegir en sus campañas.
+
+**Decisiones:**
+
+1. **Antes de encender un negocio, el conjunto se asigna a quien pauta y se conecta a su cuenta publicitaria.** Es el paso 4b de la skill `eventos-a-meta-desde-crm-whatsapp`. Founder: *"parte de lo que nos faltó en la implementación es conectar ese conjunto de datos a una pauta real. Si no, no estaba sirviendo de nada"*.
+2. **Nada de píxel en el CRM.** El píxel mide visitas a una web. En el CRM mediría a los vendedores y ensuciaría los datos.
+3. **Sumar el teléfono hasheado a los eventos queda como decisión pendiente** con cada negocio:
+   - **Para qué:** subiría la «calidad de coincidencia» que otra herramienta le muestra al de los anuncios.
+   - **El costo:** cambia la promesa de la pantalla («nada de nombres, teléfonos ni mensajes») y son datos de los clientes del negocio.
+   - **Cuándo decidir:** después de ver la nota real.
+
+**Pendientes inmediatos:**
+- Que el de los anuncios confirme que eligió el conjunto en sus campañas.
+- El segundo negocio que lo pidió es una clínica: hay que avisarle de la categoría «salud y bienestar».
+
 ## 2026-10-07 — La salida a un CRM externo (Zoho) va en una sola dirección y no toca lo que el cliente ya tiene; la próxima cita, a la vista en el chat
 
 **Contexto:** del 01 al 07-10 se cerraron en el CRM:

@@ -31,6 +31,8 @@ La última fila es la trampa cara: la respuesta 200 no prueba que Meta procesó 
 
 **Ampliada el 2026-10-07**, dos semanas después de encender un negocio. El que le maneja los anuncios avisó que *"no estaba recibiendo la información en Meta"* y pidió instalar el píxel en el CRM. Llegaba todo: 26 leads y 2 compras, la misma cantidad que la tabla de envíos del CRM. Él miraba otro conjunto de datos, y el nuestro no estaba conectado a su cuenta publicitaria. Además, la herramienta para consultar Meta por API daba cero en el conjunto correcto (paso 10).
 
+**Corregida el 2026-10-11.** Lo de arriba no era un problema para diagnosticar: faltaba un paso del proceso. El conjunto que crea el código nace sin nadie asignado y sin conectar a ninguna pauta, así que asignarlo y conectarlo pasa a ser el **paso 4b, obligatorio antes de encender**.
+
 ## Proceso
 
 ### 1. Medir antes de prometer
@@ -97,6 +99,28 @@ Si tu app **puede** ser socio de la cuenta de WhatsApp (el cliente la conectó p
 
 `POST /{WABA_ID}/dataset` con `{"dataset_name": "..."}` lo crea; si la cuenta ya tiene uno, devuelve el mismo. La guía dice que `GET` lo lee y la referencia del endpoint dice que no: se prueban los dos, GET primero (devolvió `{"data": []}` cuando no había). **No confundir** con el conjunto de datos del píxel del sitio web que el cliente ya tenga: el de WhatsApp es otro.
 
+### 4b. Asignar el conjunto y conectarlo a la pauta (OBLIGATORIO, antes de encender)
+
+El conjunto que crea tu código nace **con 0 personas asignadas y 0 activos conectados**. Meta va a recibir y procesar los eventos igual, y nadie los va a poder usar. Quien maneja los anuncios no ve el conjunto ni puede elegirlo en sus campañas. Por eso no es un paso de diagnóstico: sin esto, la integración no sirve para nada.
+
+Medido: un negocio estuvo dos semanas encendido con 26 leads y 2 compras en el Resumen, y el de los anuncios decía que *"no llegaba nada"*. Founder: *"si no, no estaba sirviendo de nada, y eso es algo muy importante del proceso"*.
+
+Lo hace un administrador del portafolio del cliente, en la configuración del negocio (verificado 2026-10-11):
+
+1. Entrá a `business.facebook.com/settings/?business_id=<ID del portafolio>`. Redirige a la configuración nueva.
+2. Andá a **Orígenes de datos › Conjuntos de datos y píxeles** y elegí tu conjunto. Arriba tiene que decir «El conjunto de datos está recibiendo eventos».
+3. Pestaña **Personas** › **«Asignar personas»**: la persona que maneja los anuncios, con acceso total.
+   ⚠️ Tener «Acceso total · Todo» en el portafolio **NO alcanza**: igual figuraba sin acceso al conjunto. Hay que asignarlo en el conjunto.
+4. Pestaña **Activos conectados** › **«Conectar activos»**: la **cuenta publicitaria donde corren las campañas de WhatsApp**.
+   - Si no aparece, la cuenta está en otro portafolio. Hay que compartir el conjunto desde **Socios** con el portafolio que la tiene.
+5. Del lado de quien pauta, en el Administrador de anuncios:
+   - elegir este conjunto como origen de eventos en los conjuntos de anuncios;
+   - agregar las columnas de clientes potenciales y compras.
+   
+   Eso ya lo maneja él. Decíselo, para que no espere que aparezca solo.
+
+Preguntá **antes de construir** quién maneja los anuncios y en qué cuenta publicitaria. Es el mismo dato que hace falta para el paso 3 de esta lista.
+
 ### 5. La arquitectura (lo que no se ve en el payload)
 
 - **Por negocio, qué etapa del embudo manda qué evento** (y el monto de la compra). Tabla de reglas, no literal en el código. La pantalla configura **qué es bueno**: qué etapa (o etiqueta) es "lead calificado" y cuál es "compra". Lo malo no se configura porque no hay qué mandar (paso 1b).
@@ -152,6 +176,7 @@ Aunque la guía dice que se aprueba solo si la app ya tiene `whatsapp_business_m
 3. Verificá los tres caminos: sin clave → 401, clave equivocada → 401, clave del Vault → 200. Un **503** significa que el hosting no tiene la variable.
 4. El cron solo llama si hay pendientes, así que **con la cola vacía nunca vas a ver el camino real funcionando**. Probalo a mano: el mismo `net.http_post` que hace la función, con la URL y el secreto del Vault, y leé `net._http_response`.
 5. Los negocios cuyas reglas el cliente no confirmó quedan en **apagado** (conservando reglas y token): apagado = el trigger no anota nada, así que al prender no sale ninguna cola vieja.
+6. **Antes de encender un negocio, el paso 4b hecho.** El conjunto tiene que estar asignado a quien pauta y conectado a su cuenta publicitaria. Encender sin eso manda eventos que Meta procesa y nadie usa.
 
 ### 10. Que lo vea quien maneja los anuncios
 
@@ -160,7 +185,7 @@ Que Meta procese el evento no alcanza: el que pauta tiene que verlo y poder eleg
 1. **Primero, ¿qué conjunto está mirando?** Un portafolio puede tener varios. Además del que creaste sobre la cuenta de WhatsApp (paso 4), suele haber uno de píxel web o de otra cuenta de WhatsApp del mismo cliente. Medido: él miraba «<Negocio> Ads Manager Event Data», atado a OTRA cuenta de WhatsApp y con un solo PageView del navegador. Pedile captura y compará dos datos con los de tu base:
    - el **identificador** que aparece bajo el nombre del conjunto, contra tu `dataset_id`;
    - el **«Identificador de la cuenta de WhatsApp Business»** de la columna derecha, contra tu `waba_id`.
-2. **El conjunto que crea tu código no está conectado a ninguna cuenta publicitaria.** Si el Administrador de eventos está filtrado por una cuenta publicitaria (se ve en el selector de arriba a la derecha), lista solo los conjuntos conectados a ella. Por eso el tuyo no le aparece, y tampoco lo puede elegir en un conjunto de anuncios ni usarlo en las columnas de conversiones. El arreglo es del cliente, sin código: en la configuración del negocio, el conjunto de datos → activos conectados → agregar su cuenta publicitaria. ⏳ Esa ruta exacta todavía no se vio hecha.
+2. **El conjunto que crea tu código no está conectado a ninguna cuenta publicitaria.** Si el Administrador de eventos está filtrado por una cuenta publicitaria (se ve en el selector de arriba a la derecha), lista solo los conjuntos conectados a ella. Por eso el tuyo no le aparece, y tampoco lo puede elegir en un conjunto de anuncios ni usarlo en las columnas de conversiones. El arreglo es del cliente, sin código, y es el paso 4b: asignarle el conjunto y conectarlo a su cuenta publicitaria. Ruta verificada el 2026-10-11. Si llegaste acá con un negocio ya encendido, es que el 4b se saltó.
 3. **Para confirmar que llega, cruzá dos fuentes:**
    - tu tabla de envíos: cuántos `enviado` por evento, con `respuesta.events_received` = 1;
    - el **Resumen** del conjunto correcto (paso 7): «Cliente potencial enviado» y «Comprar» con integración «API de conversiones».
@@ -172,6 +197,14 @@ Que Meta procese el evento no alcanza: el que pauta tiene que verlo y poder eleg
    - El CRM lo abre solo el equipo del negocio. Un píxel ahí mediría a los vendedores y le ensuciaría los datos a Meta.
    - Para este tipo de anuncio, la señal es la de esta skill: servidor a servidor con el `ctwa_clid`.
    - Si el negocio además tiene una web con formulario, eso es otra skill (`meta-pixel-capi`) y otro conjunto de datos.
+6. **"En otro cliente veo el rate que Meta le da a lo que mandamos"** (con GoHighLevel u otra herramienta). Es la **calidad de coincidencia de eventos**, una nota de 1 a 10 por evento que sube con cuántos datos de la persona viajan.
+   - **Esas herramientas** mandan teléfono y correo hasheados.
+   - **Esta skill** manda solo el `ctwa_clid`, que es la llave más exacta para anuncios de WhatsApp porque ata el evento al clic puntual. Pero es una sola, así que la nota puede salir baja con la atribución bien.
+   - **Para subirla,** se suma `ph` (teléfono normalizado y SHA-256) a `user_data`. Algunos proveedores lo documentan para mensajería; la página de Meta solo muestra los dos campos de siempre. 📄 No medido.
+   - **Es una decisión, no un arreglo:**
+     - cambia lo que la pantalla le promete al negocio («nada de nombres, teléfonos ni mensajes»);
+     - es un dato de los clientes del negocio que viaja a Meta, así que el negocio tiene que aprobarlo. En una clínica, con más cuidado: ver 1b.
+     - Decidila después de que quien pauta vea la nota real del conjunto, no antes.
 
 ## Gotchas
 
@@ -197,12 +230,13 @@ Que Meta procese el evento no alcanza: el que pauta tiene que verlo y poder eleg
 | Trigger, cola, unicidad, modo prueba, token por negocio | ✅ 20/20 contra la base viva en transacción con rollback, con controles negativos |
 | Ruta en producción + secreto en hosting y Vault | ✅ 401 sin clave / 200 con la del Vault / 200 por `pg_net` desde la base |
 | Un evento real disparado por el trigger (un lead que cambia de etapa) | ✅ 2026-09-25: salió solo, `events_received: 1`, sin modo prueba. Al 2026-09-28: 2 compras enviadas, 0 fallidas, a 1,8 y 2,5 días de que el lead escribió (dentro de los 7 del clic). ✅ 2026-10-07: el Resumen muestra 26 «Cliente potencial enviado» y 2 «Comprar», igual que la tabla de envíos |
-| El conjunto le aparece a quien maneja los anuncios | ❌ no, hasta conectarlo a su cuenta publicitaria (paso 10). ⏳ falta verlo conectado |
+| El conjunto creado por API viene asignado o conectado a algo | ❌ no: 0 personas y 0 activos conectados (visto 2026-10-11) |
+| Asignar a quien pauta y conectar la cuenta publicitaria (paso 4b) | ✅ 2026-10-11, hecho por un admin del portafolio con la ruta del 4b. ⏳ Falta que quien pauta confirme que lo elige en sus campañas |
 | La API de estadísticas del conjunto (MCP de Meta Ads) cuenta estos eventos | ❌ da `stats: []` con el Resumen mostrando 34 |
 | Mandar "este lead es malo" | ❌ no existe (2026-09-28, documentación de Meta): se comunica no mandando nada (paso 1b) |
 | Optimizar por leads en anuncios de WhatsApp | 📄 documentado, no medido: `LeadSubmitted` + `Purchase`, más de 100 en 90 días con la API en la nube |
 
-**Actualizar la fila ⏳** cuando el conjunto aparezca conectado en la cuenta publicitaria.
+**Actualizar la fila ⏳** cuando quien pauta confirme que eligió el conjunto en una campaña.
 
 ## Output esperado
 
@@ -210,6 +244,7 @@ Que Meta procese el evento no alcanza: el que pauta tiene que verlo y poder eleg
 - Token por negocio en Vault, revisado contra Meta al guardarlo.
 - Una pantalla por negocio: token, cuenta de WhatsApp, conjunto de datos, etapa → evento, estado (apagado / prueba / encendido), evento de prueba, y el registro de lo mandado con motivos.
 - Un evento de prueba visto en el **Resumen** del conjunto de datos, y el negocio encendido recién con las reglas confirmadas por el cliente.
+- **El conjunto asignado a quien maneja los anuncios y conectado a su cuenta publicitaria** (paso 4b). Él sabe que tiene que elegirlo en sus campañas.
 
 ## Ejemplo
 
