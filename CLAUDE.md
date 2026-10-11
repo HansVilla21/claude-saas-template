@@ -1615,6 +1615,14 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      de envíos con el Resumen (26 y 2 en los dos lados) y NO con la API de
 │                      estadísticas, que da `stats: []` para eventos de mensajería; y "meté
 │                      el píxel en el CRM" no corresponde: mediría a los vendedores.
+│                      **Corregida 2026-10-11 (paso 4b OBLIGATORIO):** el conjunto que
+│                      crea el código nace con 0 personas y 0 activos conectados —Meta
+│                      procesa los eventos y nadie los usa—; antes de encender se le
+│                      asigna a quien pauta (el "Acceso total" al portafolio NO alcanza)
+│                      y se conecta a su cuenta publicitaria, con la ruta verificada en
+│                      la configuración del negocio. Más la "calidad de coincidencia"
+│                      que piden comparar con GoHighLevel: subirla con el teléfono
+│                      hasheado es una decisión de privacidad, no un arreglo.
 │                      Tier 49 — El "leído" que nadie leyó (1, capturada 2026-09-24
 │                      con un cliente en coexistencia —el mismo número en la app del celular y en
 │                      la API—): coexistencia-leido-y-sin-leer (⭐ cross-project: "los chats se
