@@ -91,13 +91,25 @@ Si tu app **puede** ser socio de la cuenta de WhatsApp (el cliente la conectó p
 1. **Portafolio del cliente → Configuración → Cuentas → Apps → Agregar → "Solicitar acceso a un identificador de la app"** → el App ID de tu app.
    ⚠️ **NO "Conectar un identificador de la app"**: esa es para apps que administrás vos, y puede mover tu app a su portafolio.
 2. **Usuarios → Usuarios del sistema → Agregar**, rol **Empleado**. Asignarle tu app (administrar) y **la cuenta de WhatsApp correcta** (mirá el *Identificador*: un portafolio puede tener varias con el mismo nombre). Los permisos parciales de la cuenta son de plantillas, números y mensajes; ninguno cubre eventos → **acceso total**. Lo que tu app puede hacer lo limitan los scopes del token.
+   - **El nombre:** Meta rechaza algunos con *«Elegiste un nombre de usuario del sistema no válido»*, sin decir por qué. Pasó con «Momentum CRM» y con «Eventos Momentum»; «Momentum» a secas pasó. Probá uno corto.
+   - **En la ventana «Asignar activos»** se eligen los dos en una sola pasada. Primero «Apps» › tu app con «Administrar app». Después, **sin tocar todavía el botón**, «Cuentas de WhatsApp» › la cuenta › «Acceso total». El botón azul recién se habilita con un permiso elegido.
+   - **Si no podés ver el identificador ahí,** elegí por nombre: el paso 5 te dice si era otra cuenta, porque el token no la alcanza.
 3. **Generar token** → tu app → caducidad **Nunca** (uno que vence deja de mandar eventos en silencio) → **solo** `whatsapp_business_management` y `whatsapp_business_manage_events`.
 4. **Otro administrador del portafolio aprueba** la solicitud (*"Aprobación necesaria… otro administrador debe aprobar"*). La solicitud **vence en 7 días**. Pasale el enlace directo: `business.facebook.com/settings/requests?business_id=<ID>` → "Requieren revisión". Al aprobar **no se muestra el token**: hay que volver a "Generar token", y ahí aparece **una sola vez**.
 5. El token lo pega el humano en **una pantalla de tu sistema** (password, write-only), nunca en el chat. Va a un secreto por negocio (Vault), con funciones `SECURITY DEFINER` y `EXECUTE` solo para `service_role`. Antes de guardarlo, revisalo contra Meta: `debug_token` (válido, scopes, `expires_at`) y un `GET /{waba_id}?fields=id` (alcanza la cuenta).
+   - **Pegar el token no deja guardada la conexión.** La cuenta de WhatsApp y el conjunto se guardan aparte, con el paso 4. Medido: el humano dijo «listo, ya lo guardé» con el token en Vault y la fila de configuración sin crear. Mirá la base antes de seguir.
+   - **Para verificarlo vos sin verlo:** un script que lea el token con la función del Vault y llame solo con GET, imprimiendo estados y no el token. Hacé tres llamadas:
+     - `debug_token`, que tiene que dar `type: SYSTEM_USER`, `expires_at: 0` y los dos scopes;
+     - `GET /{waba_id}?fields=id,name`, que confirma que alcanza la cuenta y te dice su nombre;
+     - `GET /{waba_id}/dataset`, que muestra si ya tiene un conjunto.
 
 ### 4. El conjunto de datos
 
 `POST /{WABA_ID}/dataset` con `{"dataset_name": "..."}` lo crea; si la cuenta ya tiene uno, devuelve el mismo. La guía dice que `GET` lo lee y la referencia del endpoint dice que no: se prueban los dos, GET primero (devolvió `{"data": []}` cuando no había). **No confundir** con el conjunto de datos del píxel del sitio web que el cliente ya tenga: el de WhatsApp es otro.
+
+**La cuenta de WhatsApp puede traer uno ya creado.** En el segundo cliente, `GET /{WABA_ID}/dataset` devolvió uno creado dos semanas antes, llamado «unknown Event Data», que nadie había creado a propósito. **Se usa ese:** es el que Meta ata a la cuenta, y crear otro no reemplaza al vinculado. El nombre feo no importa; lo que hay que cuidar es elegirlo bien en el paso 4b. En el portafolio también aparecía «WhatsApp Marketing Message Event Sharing», que es de los mensajes de marketing: no es el tuyo.
+
+**Que el conjunto diga «No se recibió ningún evento» también resuelve el paso 2.** Si el BSP mandara sus propias «compras», irían a este mismo conjunto, porque la cuenta tiene uno solo.
 
 ### 4b. Asignar el conjunto y conectarlo a la pauta (OBLIGATORIO, antes de encender)
 
@@ -120,6 +132,15 @@ Lo hace un administrador del portafolio del cliente, en la configuración del ne
    Eso ya lo maneja él. Decíselo, para que no espere que aparezca solo.
 
 Preguntá **antes de construir** quién maneja los anuncios y en qué cuenta publicitaria. Es el mismo dato que hace falta para el paso 3 de esta lista.
+
+**Si nadie sabe** («eso no sé, y tampoco me importa», dijo el founder en el segundo cliente), **la cuenta publicitaria se saca de los datos:**
+- los leads de anuncio traen `ad_id` en la atribución;
+- se pregunta en qué cuenta están esos anuncios, con el MCP de Meta Ads (`ads_get_ad_entities` con `object_ids`) o con la API de anuncios;
+- si alguna cuenta no se puede consultar, se elige por descarte entre las del portafolio.
+
+Sin persona a quien asignar, se conecta la cuenta publicitaria igual. La persona se asigna cuando alguien diga que no lo ve.
+
+**Las reglas y el encendido los puede hacer el equipo del cliente** desde su propia pantalla de configuración, si tu producto la tiene. La conexión (token, cuenta y conjunto) es del proveedor; qué estado es «lead calificado» y cuánto vale una compra lo sabe el negocio. Mandales los pasos y el aviso de que el contacto del anuncio tiene que llegar al estado elegido.
 
 ### 5. La arquitectura (lo que no se ve en el payload)
 
@@ -232,6 +253,7 @@ Que Meta procese el evento no alcanza: el que pauta tiene que verlo y poder eleg
 | Un evento real disparado por el trigger (un lead que cambia de etapa) | ✅ 2026-09-25: salió solo, `events_received: 1`, sin modo prueba. Al 2026-09-28: 2 compras enviadas, 0 fallidas, a 1,8 y 2,5 días de que el lead escribió (dentro de los 7 del clic). ✅ 2026-10-07: el Resumen muestra 26 «Cliente potencial enviado» y 2 «Comprar», igual que la tabla de envíos |
 | El conjunto creado por API viene asignado o conectado a algo | ❌ no: 0 personas y 0 activos conectados (visto 2026-10-11) |
 | Asignar a quien pauta y conectar la cuenta publicitaria (paso 4b) | ✅ 2026-10-11, hecho por un admin del portafolio con la ruta del 4b. ⏳ Falta que quien pauta confirme que lo elige en sus campañas |
+| Pasos 3, 4 y 4b con un segundo cliente, de cero (2026-10-13) | ✅ Solicitar la app (aprobada sola, porque el proveedor la administra), usuario del sistema, token aprobado por otro admin y verificado por GET, conjunto que ya tenía la cuenta y conexión a la cuenta publicitaria sacada de los `ad_id`. ⏳ Encendido a cargo del equipo del cliente |
 | La API de estadísticas del conjunto (MCP de Meta Ads) cuenta estos eventos | ❌ da `stats: []` con el Resumen mostrando 34 |
 | Mandar "este lead es malo" | ❌ no existe (2026-09-28, documentación de Meta): se comunica no mandando nada (paso 1b) |
 | Optimizar por leads en anuncios de WhatsApp | 📄 documentado, no medido: `LeadSubmitted` + `Purchase`, más de 100 en 90 días con la API en la nube |

@@ -6,6 +6,21 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-13 — Eventos a Meta en el segundo negocio: la conexión es nuestra, las reglas son del cliente
+
+**Contexto:** un segundo negocio, una clínica, pidió lo mismo que el primero. Se conectó de cero en dos días, guiando al founder pantalla por pantalla.
+
+**Decisiones:**
+
+1. **La conexión la hace el proveedor y las reglas y el encendido los hace el equipo del cliente**, desde su configuración. Founder: *«que lo haga el equipo»*. El negocio es quien sabe qué estado significa «agendó» y cuánto vale un paciente.
+2. **No se averigua quién maneja los anuncios ni quién administra el portafolio.** Founder: *«tampoco lo necesitamos saber. Simplemente ocupamos de hacer el trabajo»*.
+   - La cuenta publicitaria salió de los `ad_id` de los leads, por descarte.
+   - La aprobación del token la pide Meta sola al otro administrador.
+
+**Pendientes inmediatos:**
+- Revisar los primeros avisos cuando el equipo del cliente lo encienda.
+- Solo 1 de 39 citas agendadas vino de un anuncio: si no mueven a esos contactos, a Meta le llega poco.
+
 ## 2026-10-11 — Eventos a Meta: conectar el conjunto de datos a la pauta es parte de la puesta en marcha
 
 **Contexto:** el primer negocio con Eventos a Meta llevaba dos semanas encendido, con 26 leads y 2 compras procesados en el Resumen. El que le maneja los anuncios decía que *"no llegaba nada"* y pidió poner el píxel en el CRM. El conjunto de datos que crea el código tenía **0 personas asignadas y 0 activos conectados**. Él no lo veía, porque tener acceso total al portafolio no le daba acceso al conjunto, y no lo podía elegir en sus campañas.

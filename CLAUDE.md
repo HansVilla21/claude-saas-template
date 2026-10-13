@@ -1623,6 +1623,14 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      la configuración del negocio. Más la "calidad de coincidencia"
 │                      que piden comparar con GoHighLevel: subirla con el teléfono
 │                      hasheado es una decisión de privacidad, no un arreglo.
+│                      **Ampliada 2026-10-13 (segundo cliente, de cero):** Meta
+│                      rechaza algunos nombres de usuario del sistema sin decir
+│                      por qué; pegar el token NO guarda la conexión; la cuenta
+│                      de WhatsApp puede traer ya un conjunto ("unknown Event
+│                      Data") y se usa ese; si dice "sin eventos", el BSP no
+│                      manda compras propias; la cuenta publicitaria se saca de
+│                      los `ad_id` de los leads; y las reglas las puede poner el
+│                      equipo del cliente.
 │                      Tier 49 — El "leído" que nadie leyó (1, capturada 2026-09-24
 │                      con un cliente en coexistencia —el mismo número en la app del celular y en
 │                      la API—): coexistencia-leido-y-sin-leer (⭐ cross-project: "los chats se
