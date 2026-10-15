@@ -6,6 +6,60 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-15 — El prompt del bot se edita afuera y la base lo protege (MOM-78)
+
+**Contexto:** cada cambio al prompt de un cliente pasaba de Pietro a Hans por WhatsApp, y Hans lo aplicaba con scripts. Pietro pidió poder bajar el archivo, editarlo con su IA y volver a subirlo. Los clientes no tienen que poder tocarlo.
+
+**Decisión:**
+- **«Descargar» y «Subir nuevo»** en Master → cliente → Bot, para el principal y las objeciones. Solo master; soporte de solo lectura baja pero no sube.
+- **El archivo lleva una cabecera de una línea** con el negocio, la pieza y el md5 de la versión desde la que se bajó. El archivo de otro negocio no se sube, y si alguien subió otra cosa en el medio, no se pisa.
+- **Guarda una función de la base** (`guardar_prompt_del_bot`, 0145): bloquea la fila, compara, archiva lo anterior en `bot_prompt_versions` y escribe sin tocar las demás llaves. El historial, con «Volver a esta», es además el primer respaldo de los prompts vivos.
+- **Un candado en la base** (0142): un dueño o admin con su sesión no puede cambiar el prompt.
+- **El skill para editar** (`editar-prompt-momentum`) se baja del mismo panel.
+
+**Razón:** es la solución barata que pidió el usuario, y cada riesgo real (cliente equivocado, pisar otra edición, perder la versión buena, que un cliente lo toque) queda cubierto por la base y no por la buena voluntad.
+
+**Qué se descartó:**
+- Un editor de prompts dentro del producto: más caro, y Pietro ya edita con Claude.
+- Comparar contra lo que muestra la pantalla: puede llevar horas abierta.
+- Que los clientes editen su prompt. Hans: "si los otros clientes se ponen a tocar, se caga el chatbot".
+
+**Pendientes inmediatos:** el primer uso real de Pietro. La 0144 de la otra sesión (#408) espera el OK.
+
+## 2026-10-15 — El filtro por fecha de la bandeja cuenta dos fechas (MOM-131)
+
+**Contexto:** el ticket pedía definir antes de construir "¿fecha de qué?": último mensaje, primer contacto o última respuesta del equipo. Pedía además combinarlo con estado y etiqueta, que la bandeja no tenía.
+
+**Decisión:**
+- **Dos fechas en el mismo control:** «Último mensaje», por defecto, porque es el orden de la lista y la hora de cada tarjeta. Y «Cuándo entró», con la misma fecha que Contactos (`leads.created_at`) para que las dos pantallas cuenten igual.
+- **Estado y Etiquetas se sumaron a la bandeja.**
+- **Fecha, estado y etiqueta recortan el universo,** así que los chips cuentan sobre lo que queda.
+- **Los filtros viven arriba de la lista y en el link,** para que sobrevivan a abrir un chat en el celular y a recargar.
+
+**Razón:** las dos primeras fechas responden preguntas distintas ("¿qué se movió hoy?" y "¿qué entró esta semana?"), y las dos ya están en la base.
+
+**Qué se descartó:** «Última respuesta del equipo». No se guarda en ningún lado: los mensajes del bot y las plantillas también cuentan como enviados, y habría que empezar a registrarla.
+
+**Pendientes inmediatos:** ninguno. Se sabe que «Archivadas» trae solo las últimas 50.
+
+## 2026-10-15 — El detalle del precio es texto aparte; el precio sigue siendo número
+
+**Contexto:** Hans pidió poder escribir "+ 13% IVA" o "puede variar según cotización" junto al precio, sin pasar el precio a texto.
+
+**Decisión:**
+- **Una columna base,** `catalog_items.price_note` (opcional, hasta 120 caracteres).
+- **El bot la recibe por los tres caminos del catálogo,** y la regla de mencionarla vive en el motor, no en el texto del módulo.
+- **El acortador no deja perder un porcentaje ni un IVA.**
+
+**Razón:**
+- El precio numérico ordena y filtra por presupuesto.
+- La búsqueda de productos arma su salida con llaves explícitas, así que una llave en `attributes` no le llegaría.
+- Cada negocio puede reemplazar el texto de su módulo, así que una regla escrita ahí se perdería.
+
+**Qué se descartó:** pasar el precio a texto y guardar el detalle dentro de `attributes`.
+
+**Pendientes inmediatos:** ninguno.
+
 ## 2026-10-15 — Catálogo de productos: la búsqueda en la base, el resumen en el prompt
 
 **Contexto:** el founder pidió un catálogo "específicamente para productos". Los dos modos que había tienen techo: la lista en el prompt corta en 30 y la búsqueda en memoria en 200. No se sabe cuántos productos tiene cada tienda.
