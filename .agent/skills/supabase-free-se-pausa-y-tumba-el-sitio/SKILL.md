@@ -172,11 +172,12 @@ keep-alive de esta skill arregla el primero y no hace nada por el segundo. Para
 un proyecto con clientes reales, la salida de fondo de los dos es la misma: no
 estar en plan gratis.
 
-## Apéndice 2026-10-13 — Vercel Hobby también apaga todo, y no avisa
+## Apéndice 2026-10-13 — Vercel también apaga todo si el cobro falla, y no avisa
 
-El mismo modo de falla del lado de la app. Un CRM con clientes reales vivía en
-el plan **Hobby** de Vercel. Al pasarse de un límite de uso, Vercel pausó el
-proyecto entero, dominio propio incluido, durante 1 h 20:
+El mismo modo de falla del lado de la app. Un CRM con clientes reales estaba
+en **Pro**, pero la tarjeta registrada no tenía fondos. Cada intento de cobro
+fallaba y Vercel apagó el proyecto entero, dominio propio incluido: 1 h 20 la
+primera vez, y otra vez casi todas las noches durante tres días:
 
 ```bash
 curl -sI https://<tu-dominio>/login | head -1   # HTTP/1.1 402 Payment Required
@@ -184,12 +185,23 @@ curl -s https://<tu-dominio>/login              # "Payment required … DEPLOYME
 ```
 
 - **Cómo reconocerlo:** un **402** con `DEPLOYMENT_DISABLED` no es un error
-  del código, es la cuenta. Si la API de facturación responde "Plan not found",
-  el equipo está en Hobby. Los previews dan "This deployment is temporarily
+  del código, es la cuenta. Los previews dan "This deployment is temporarily
   paused".
-- **El arreglo:** pasar el equipo a **Pro**, que lo reactiva al instante. Lo
-  hace el dueño de la cuenta, porque es un pago. Además, Hobby no permite uso
-  comercial: un producto con clientes que pagan no debería estar ahí.
+- **Qué dice la cuenta:** `vercel api /v2/teams/<team_id>` devuelve
+  `billing.status`. `overdue` significa que un cobro falló; `active`, que está
+  al día. Los correos de `failed-payments@vercel.com` dicen cuándo es el
+  próximo intento.
+- **El primer diagnóstico fue falso, y vale anotarlo:** se leyó "Plan not
+  found" en la API de cobros como "el equipo está en Hobby". Ese mismo error
+  sale en **Pro con la factura vencida**. Leé `billing.status` y
+  `billing.planChangedAt`, no el error de otro endpoint.
+- **«Reactivar» no paga la factura.** Devuelve el servicio en el momento, la
+  factura sigue impaga y el ciclo vuelve con el próximo intento de cobro. Por
+  eso parecía que se caía "solo, casi todas las noches".
+- **El arreglo:** cambiar el método de pago y **pagar la factura pendiente**. Lo
+  hace el dueño de la cuenta, porque es un pago. Después se confirma por API
+  que `billing.status` pasó a `active`. Y Hobby tampoco es salida: no permite
+  uso comercial.
 - **Qué se rompe y qué no** depende de dónde corre cada pieza:
   - **El webhook** vivía en Supabase y siguió guardando cada mensaje: no se
     perdió nada.
@@ -203,6 +215,8 @@ curl -s https://<tu-dominio>/login              # "Payment required … DEPLOYME
   de arriba.
 - **La lección para producción:**
   - **Ningún componente con clientes reales en plan gratis,** ni la base ni la
-    app.
+    app. **Y un plan pago con el cobro fallando es lo mismo que uno gratis:**
+    la tarjeta de los servicios de producción se revisa como parte de la
+    infraestructura.
   - **Un chequeo externo** que pida `/login` cada pocos minutos y alerte con
     402 o 5xx.

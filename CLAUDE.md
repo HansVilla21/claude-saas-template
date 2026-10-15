@@ -668,11 +668,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        restore ~4 min sin pérdida de datos, y keep-alive con
 │                        cron de Vercel. Gotchas: los crons se identifican por
 │                        PATH —dos con la misma ruta es UNO— y solo corren en
-│                        producción). **Apéndice 2026-10-13:** Vercel Hobby
-│                        también apaga todo —402 `DEPLOYMENT_DISABLED`, dominio
-│                        propio incluido— y nadie se entera: Pro, chequeo
-│                        externo de `/login` y rescate a mano de lo que quedó
-│                        fuera de la ventana del cron.
+│                        producción). **Apéndice 2026-10-13:** Vercel también
+│                        apaga todo —402 `DEPLOYMENT_DISABLED`, dominio propio
+│                        incluido— si el cobro de Pro falla, y «Reactivar» no
+│                        paga la factura: leer `billing.status` por API,
+│                        chequeo externo de `/login` y rescate a mano de lo
+│                        que quedó fuera de la ventana del cron.
 │                      · completitud-de-contenido-en-el-panel (que el cliente
 │                        no técnico SÍ termine de llenar 230 fichas: completitud
 │                        como función pura, badge que dice QUÉ falta, filtro de

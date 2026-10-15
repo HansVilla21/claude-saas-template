@@ -28,10 +28,11 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 
 ## 2026-10-15 — Ningún componente con clientes reales en plan gratis
 
-**Contexto:** el 13-10, Vercel Hobby pausó la app entera 1 h 20 (402 `DEPLOYMENT_DISABLED`). El bot calló y nadie se enteró. Dos semanas antes, el disco lleno del plan gratis de la base había hecho lo mismo durante 11,5 h.
+**Contexto:** el 13-10, Vercel apagó la app entera 1 h 20 (402 `DEPLOYMENT_DISABLED`), y se repitió las noches siguientes. Primero se creyó que era Hobby; el 15-10 se vio que el equipo ya era Pro y que el cobro fallaba porque la tarjeta no tenía fondos. El bot calló y nadie se enteró. Dos semanas antes, el disco lleno del plan gratis de la base había hecho lo mismo durante 11,5 h.
 
 **Decisión:**
 - **App y base en planes pagos:** Vercel Pro y Supabase Pro.
+- **Y al día:** un cobro fallido apaga igual que un plan gratis. «Reactivar» no paga la factura; hay que cambiar la tarjeta y pagarla.
 - **Las caídas de infraestructura se detectan con un chequeo externo,** no de casualidad.
 
 **Razón:** los dos planes gratis se caen solos y sin avisar. Además, Hobby no permite uso comercial.
