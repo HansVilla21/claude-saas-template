@@ -279,6 +279,13 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      scope=global + agency_modules is_member_of); `agency_id` lo pone
 │                      el flow nunca el LLM; confirmar enums/uniques del schema antes;
 │                      solo `available`+`is_published`+no borrado se muestra al lead).
+│                      **Apéndice 2026-10-13:** un TERCER camino para rubros sin tope
+│                      (productos): búsqueda en Postgres con RPC (tsvector `spanish` +
+│                      `unaccent` IMMUTABLE + trigramas, niveles todas → alguna →
+│                      parecido → categoría sola, cada relajación avisada al modelo),
+│                      el RESUMEN en el prompt en vez de la lista, una herramienta por
+│                      módulo enrutada por nombre, panel paginado en el servidor y las
+│                      4 fallas que solo mostró el motor real.
 │                      Tier 19 — Método de trabajo (3, capturadas 2026-08-11 de la
 │                      sesión de etiquetas + drill-down del CRM):
 │                      verificar-base-del-pr-antes-de-mergear (⭐ cross-project:
@@ -661,7 +668,11 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        restore ~4 min sin pérdida de datos, y keep-alive con
 │                        cron de Vercel. Gotchas: los crons se identifican por
 │                        PATH —dos con la misma ruta es UNO— y solo corren en
-│                        producción).
+│                        producción). **Apéndice 2026-10-13:** Vercel Hobby
+│                        también apaga todo —402 `DEPLOYMENT_DISABLED`, dominio
+│                        propio incluido— y nadie se entera: Pro, chequeo
+│                        externo de `/login` y rescate a mano de lo que quedó
+│                        fuera de la ventana del cron.
 │                      · completitud-de-contenido-en-el-panel (que el cliente
 │                        no técnico SÍ termine de llenar 230 fichas: completitud
 │                        como función pura, badge que dice QUÉ falta, filtro de

@@ -171,3 +171,38 @@ Los dos modos de caída del plan gratis son opuestos: uno por **no usarse**
 keep-alive de esta skill arregla el primero y no hace nada por el segundo. Para
 un proyecto con clientes reales, la salida de fondo de los dos es la misma: no
 estar en plan gratis.
+
+## Apéndice 2026-10-13 — Vercel Hobby también apaga todo, y no avisa
+
+El mismo modo de falla del lado de la app. Un CRM con clientes reales vivía en
+el plan **Hobby** de Vercel. Al pasarse de un límite de uso, Vercel pausó el
+proyecto entero, dominio propio incluido, durante 1 h 20:
+
+```bash
+curl -sI https://<tu-dominio>/login | head -1   # HTTP/1.1 402 Payment Required
+curl -s https://<tu-dominio>/login              # "Payment required … DEPLOYMENT_DISABLED"
+```
+
+- **Cómo reconocerlo:** un **402** con `DEPLOYMENT_DISABLED` no es un error
+  del código, es la cuenta. Si la API de facturación responde "Plan not found",
+  el equipo está en Hobby. Los previews dan "This deployment is temporarily
+  paused".
+- **El arreglo:** pasar el equipo a **Pro**, que lo reactiva al instante. Lo
+  hace el dueño de la cuenta, porque es un pago. Además, Hobby no permite uso
+  comercial: un producto con clientes que pagan no debería estar ahí.
+- **Qué se rompe y qué no** depende de dónde corre cada pieza:
+  - **El webhook** vivía en Supabase y siguió guardando cada mensaje: no se
+    perdió nada.
+  - **El motor del bot** corre en Vercel: no contestó nada en todo ese tiempo.
+  - **El rescate automático** solo miraba los últimos 15 minutos. Al volver, los
+    mensajes más viejos hubo que redespacharlos a mano, por el mismo camino del
+    cron. Antes, confirmar que no tuvieran turno abierto, para no duplicar.
+    Si el lead ya había vuelto a escribir, el turno viejo queda `superseded`.
+- **Se notó de casualidad,** al abrir un preview. Es la segunda caída de
+  infraestructura en dos semanas que nadie detecta: la otra fue el disco lleno
+  de arriba.
+- **La lección para producción:**
+  - **Ningún componente con clientes reales en plan gratis,** ni la base ni la
+    app.
+  - **Un chequeo externo** que pida `/login` cada pocos minutos y alerte con
+    402 o 5xx.

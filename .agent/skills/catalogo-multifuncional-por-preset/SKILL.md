@@ -135,3 +135,110 @@ calza desde la lista. Verificado contra la base (exacto→CR-2031, inline→4 se
 `habilitar-rls-tabla-expuesta` (prender RLS sin romper el backend) ·
 `probar-migracion-contra-base-viva-con-rollback` · `rls-write-bloqueada-por-policy-desalineada`
 (writes user-bound que fallan silencioso) · `whatsapp-image-delivery-ycloud` (formato de la foto al lead).
+
+## Apéndice 2026-10-13 — Un rubro sin tope (productos)
+
+Los dos modos de arriba tienen techo. `inline` mete la lista entera en el
+prompt (tope 30) y `search` filtra en memoria lo que trae (techo 200). Una
+tienda puede tener 20 productos o 5.000, y no se sabe de antemano. Para ese
+rubro se agregó un tercer camino, que se elige con `tool_config.tool_slug`:
+la **búsqueda vive en Postgres** y **el prompt no crece con el catálogo**.
+Quedó en producción, con 5.000 productos de un solo negocio medidos en
+~75-107 ms.
+
+**En el prompt va el resumen, no la lista.** Tiene cuántos productos hay, las
+25 categorías y las 20 marcas más numerosas, y "y N más" si se pasan. Con eso
+el modelo sabe qué existe y elige dónde buscar ("algo para el frío" →
+Chaquetas). Dos reglas:
+- **Sin nada visible no hay bloque ni herramienta,** igual que en `inline`.
+- **Un resumen que FALLA no es un resumen vacío.** Ante un error se ofrece la
+  herramienta igual, con una línea que avisa. Si no, un corte de un segundo en
+  la base hace que el bot conteste "no tenemos".
+
+**La búsqueda es una RPC** (`buscar_productos`), SECURITY INVOKER y sin
+`anon`. Se apoya en dos columnas generadas STORED, que sirven a todos los
+rubros:
+- **`search_doc`:** un tsvector `spanish` sobre texto pasado por `unaccent`,
+  con pesos A título, B categoría/marca, C opciones/código y D descripción.
+- **`search_text`:** lo mismo en minúsculas y sin tildes, para los trigramas y
+  para el buscador del panel.
+- **`unaccent` es STABLE** y una columna generada exige IMMUTABLE. La salida es
+  un envoltorio `f_unaccent(text)` IMMUTABLE con el diccionario por nombre
+  completo (`extensions.unaccent('extensions.unaccent'::regdictionary, $1)`).
+
+**El orden de la búsqueda.** Gana el primer paso que encuentra algo, y cada
+relajación se le informa al modelo:
+1. **Código exacto.** Si no está, avisa `codigo`, y si no vino nada más para
+   buscar, devuelve vacío. Antes caía al listado general y el modelo recibía 6
+   productos al azar sin saber que el código no estaba.
+2. **TODAS las palabras.**
+3. **ALGUNA palabra** (aviso `parcial`): "camisa negra" sin negra trae la camisa.
+4. **PARECIDO por trigramas,** `word_similarity` ≥ 0,35 (aviso `parecido`).
+   "ipone" da 0,44 contra "iPhone" y el ruido entre palabras distintas ronda
+   0,17. **Filtrá las palabras vacías** con `to_tsvector('spanish', w) <> ''`:
+   "para" da 1,0 contra "Crema para manos" y le ganaba al iPhone de "ipone
+   para regalo".
+5. **La categoría o la marca solas** (aviso `texto`): "abrigo" en Chaquetas
+   trae chaquetas, no algo de otra categoría.
+6. **Después se relaja:** primero el precio (+20 %), después se suelta la
+   categoría.
+- **El parecido va al final a propósito.** Calcularlo para todas las filas en
+  cada búsqueda la llevaba a 432 ms; como último recurso no cuesta nada.
+- **El prompt dice qué hacer con cada aviso:** con `parcial`, `parecido` o
+  `texto`, "no es exactamente lo que pidió, decilo y ofrecelo como lo más
+  parecido"; con `codigo`, "no digas que lo tenés".
+
+**Sin índice GIN, medido** (`probar-migracion-contra-base-viva-con-rollback`).
+Toda búsqueda va acotada por negocio y módulo, que ya tienen su btree. Con
+5.000 productos el GIN ganaba entre 1 y 20 ms y cada guardado lo pagaría.
+
+**Una herramienta por módulo de búsqueda, enrutadas por nombre.** Un negocio
+con propiedades y productos ofrece las dos. Un nombre desconocido no se
+ejecuta. Si la RPC falla, la herramienta TIRA: el modelo sabe que no buscó, en
+vez de leer "0 resultados" y decir que no hay.
+
+**Lo que solo apareció con el motor real** (turnos sintéticos sin envío; ver
+`probar-camino-produccion-sin-efectos-externos`). Ningún test lo vio:
+- **"talla" estaba en las opciones de casi todo** y, con un solo nivel de
+  palabras, rellenaba los 6 resultados con productos ajenos. Por eso existen
+  los niveles.
+- **El modelo armó un link de foto para un producto que no tenía.** Lo frenó
+  el filtro de URLs permitidas, pero igual va al prompt: "si no trae foto, no
+  mandes imagen ni armes un link".
+- **Escribió los precios con coma** (₡65,000). El formato va en el prompt:
+  "₡65.000".
+- **Después de un código que no estaba, no buscó el siguiente** y contestó "no
+  lo tengo", aunque existía. La regla prohibía afirmar que algo existe sin
+  buscar, no que no lo hay. Ahora dice "cada producto o código nuevo es una
+  búsqueda nueva, aunque lo anterior no haya aparecido", en el prompt **y** en
+  la descripción de la herramienta. En dos conversaciones nuevas buscó cada vez.
+
+**El estado es la única fuente de verdad.** Un stock en 0 o negativo agota el
+producto al guardar: el bot solo ve `available` y no mira el stock en ningún
+otro lado. La SQL igual lo excluye, por si entra por otra vía, con un helper
+que usa **CASE y no AND**: el AND de SQL no garantiza el orden y castear un
+texto que no es número revienta. Volver a "Disponible" un producto con 0 pide
+cargar las unidades.
+
+**El panel, para miles de ítems:**
+- **Pagina en el servidor** de a 60 y busca con ILIKE sobre `search_text`,
+  con `%`, `_` y `\` escapados.
+- **Con un filtro activo, recargá después de cada cambio.** Un ítem que deja de
+  calzar corre la paginación y "Cargar más" se saltea uno.
+- **Si la carga falla,** `try/finally`: si no, el spinner queda para siempre.
+
+**Las fotos de un turno anterior se confirman una por una:** "¿esta URL es foto
+de un ítem visible de este negocio?". Antes se buscaban entre 500 ítems
+cualquiera; en un catálogo grande casi nunca estaban y se descartaban.
+- **Gotcha:** `.contains('media', [{ url }])` arma un arreglo de Postgres
+  (`cs.{…}`) y sobre jsonb revienta con "invalid input syntax for type json".
+  Va como texto: `.contains('media', JSON.stringify([{ url }]))`. Solo
+  apareció al probar contra la base real.
+
+**El preset entra apagado** (`is_active = false`) si el código viejo en
+producción lo malinterpretaría. Acá, con un `mode: search`, habría usado la
+herramienta de propiedades sobre productos. Se prende después del deploy.
+
+**Al escribir SQL o prompts con Python en Windows,** `open(..., 'w')` escribe
+CRLF. El prompt llegó a la base con 17 caracteres de más. Usá
+`newline='\n'` y compará el md5 de la base, la migración y el seed.

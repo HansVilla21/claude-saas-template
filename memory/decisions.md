@@ -6,6 +6,40 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-15 — Catálogo de productos: la búsqueda en la base, el resumen en el prompt
+
+**Contexto:** el founder pidió un catálogo "específicamente para productos". Los dos modos que había tienen techo: la lista en el prompt corta en 30 y la búsqueda en memoria en 200. No se sabe cuántos productos tiene cada tienda.
+
+**Decisión:**
+- **La búsqueda vive en Postgres** (texto completo en español, sin tildes y con errores de tipeo), detrás de una herramienta propia del rubro.
+- **En el prompt va solo el resumen** de lo que vende el negocio.
+- **Tallas y colores van como texto,** no como variantes reales.
+- **El estado es la única fuente de verdad:** un stock en 0 agota al guardar.
+
+**Razón:** el prompt no crece con el catálogo y funciona igual con 20 que con 5.000. Con 5.000 productos medidos: ~100 ms.
+
+**Qué se descartó:**
+- Subir el tope de la lista o un modo automático por tamaño. El founder: "no podemos poner así un límite".
+- Embeddings: el modelo ya ve las categorías, y suman un servicio externo por guardado. Se pueden agregar después detrás de la misma herramienta.
+- Variantes reales con stock por talla.
+- Un índice GIN: medido, ganaba 1–20 ms.
+
+**Pendientes inmediatos:** la fase 2, importar productos desde Excel/CSV.
+
+## 2026-10-15 — Ningún componente con clientes reales en plan gratis
+
+**Contexto:** el 13-10, Vercel Hobby pausó la app entera 1 h 20 (402 `DEPLOYMENT_DISABLED`). El bot calló y nadie se enteró. Dos semanas antes, el disco lleno del plan gratis de la base había hecho lo mismo durante 11,5 h.
+
+**Decisión:**
+- **App y base en planes pagos:** Vercel Pro y Supabase Pro.
+- **Las caídas de infraestructura se detectan con un chequeo externo,** no de casualidad.
+
+**Razón:** los dos planes gratis se caen solos y sin avisar. Además, Hobby no permite uso comercial.
+
+**Pendientes inmediatos:**
+- Un aviso automático si `/login` deja de responder 200.
+- Que el rescate del bot cubra caídas más largas que su ventana de 15 minutos.
+
 ## 2026-10-13 — Eventos a Meta en el segundo negocio: la conexión es nuestra, las reglas son del cliente
 
 **Contexto:** un segundo negocio, una clínica, pidió lo mismo que el primero. Se conectó de cero en dos días, guiando al founder pantalla por pantalla.
