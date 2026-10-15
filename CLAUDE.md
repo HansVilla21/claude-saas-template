@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        189 skills de proceso reusables:
+│   └── skills/        190 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1909,6 +1909,33 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      el componente decide por el ancho de SU contenedor (`ResizeObserver` en
 │                      `useLayoutEffect`, tres niveles) y se mide con el panel abierto y
 │                      cerrado, porque el ancho de la ventana no es la variable que importa.
+│                      Tier 61 — El archivo que sabe de dónde viene (1, capturada
+│                      2026-10-15 de MOM-78, el prompt del bot que el equipo comercial
+│                      baja y sube desde el panel master de un CRM):
+│                      descargar-editar-subir-con-cabecera (⭐ cross-project: alguien NO
+│                      técnico tiene que cambiar un texto largo que vive en la base —un
+│                      prompt, una plantilla, una config— y la solución barata es "lo bajo,
+│                      lo edito con mi IA y lo vuelvo a subir". Todo sale de UNA línea: una
+│                      cabecera-comentario arriba del archivo con el tenant, la pieza y el
+│                      md5 de la versión desde la que se bajó. Con eso el archivo de OTRO
+│                      cliente no se sube (el nombre del archivo se cambia sin querer, la
+│                      cabecera no), y si alguien subió otra cosa mientras tanto no se pisa:
+│                      se compara contra la versión de ORIGEN, no contra la pantalla abierta
+│                      hace horas. Trae: la función de la base que bloquea la fila, compara,
+│                      archiva lo ANTERIOR y escribe con `jsonb_set` sin tocar las demás
+│                      llaves —security definer, solo service_role—, la tabla de versiones
+│                      con RLS y SIN policies a propósito (escrito en la migración, o
+│                      alguien "arregla" el deny-all), la revisión pura en errores y avisos
+│                      que corren el navegador y el servidor —el navegador solo tiene el
+│                      LARGO del vigente—, el md5 de Node igual al `md5()` de Postgres
+│                      verificado, el skill para la IA que edita (la cabecera intacta y
+│                      NUNCA cambiarla para que el panel la acepte) y cómo probarlo: 8 casos
+│                      en el bloque que siempre aborta y en pantalla simulando el archivo con
+│                      `DataTransfer`. Gotchas: con el archivo de otro cliente salían dos
+│                      errores y el segundo confundía —si es el archivo equivocado se dice
+│                      solo eso—; "¿Subir el nuevo objeciones?" por armar el texto con
+│                      `toLowerCase()` en vez de un mapa con su concordancia; y en el celular
+│                      el texto del historial en una columna de 130 px por `flex-1`).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
