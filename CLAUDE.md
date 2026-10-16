@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        190 skills de proceso reusables:
+│   └── skills/        191 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1936,6 +1936,33 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      solo eso—; "¿Subir el nuevo objeciones?" por armar el texto con
 │                      `toLowerCase()` en vez de un mapa con su concordancia; y en el celular
 │                      el texto del historial en una columna de 130 px por `flex-1`).
+│                      Tier 62 — El prompt que llega para pegar (1, capturada 2026-10-15
+│                      de la carga del prompt de una clínica en el motor del bot del CRM):
+│                      cargar-prompt-al-motor (⭐ cross-project: un prompt escrito afuera
+│                      —el equipo comercial, otra IA— llega con "nada más hay que
+│                      implementarlo", y pegarlo tal cual lo rompe aunque esté bien
+│                      escrito, porque el motor le pega bloques alrededor y lee config que
+│                      el autor no ve. Pasó tres veces en el CRM y ninguna dio error: el bot
+│                      contesta, solo que distinto del prompt. Trae la tabla de lo que dice
+│                      el autor contra lo que pasa en el motor —"son las {{HORA_CR}}" en la
+│                      línea 17 cambia cada minuto y cobra el prompt entero en cada
+│                      respuesta (y "al final del prompt" NO alcanza: el catálogo va detrás
+│                      y dentro de la caché); el catálogo que el prompt da por inyectado
+│                      llegaba cortado (30 ítems, 300 caracteres) y faltaban justo los
+│                      servicios que nombra; la revisión final del autor ya no es final y la
+│                      vieja del negocio le gana; el puente que escribe el prompt se vaciaba
+│                      porque el negocio estaba en pase silencioso; "la espera ya está
+│                      configurada" y no existía; las reglas de pase entraban al motor pero
+│                      rompían CADA guardado de la pantalla de Configuración por un tope de
+│                      2000—. Trae el cruce punto por punto y los cambios mínimos con un
+│                      script que prueba cada reemplazo y saca el diff contra el original.
+│                      La simulación va con la config COMPLETA, leyendo las transcripciones
+│                      y no la tabla: de noche decía "en un ratito" en 4 de 6, y con la hora
+│                      y el idioma en la instrucción del pase, en 0 de 6. Se guarda en una
+│                      sola escritura con filtro por `updated_at`, verificada por md5 y sin
+│                      `\r` (`write_text` de Python en Windows pone CRLF). Y se cierra con el
+│                      autor: el prompt es suyo, y si no sabe dónde quedó la hora la vuelve
+│                      a poner arriba).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
