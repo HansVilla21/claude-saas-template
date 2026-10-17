@@ -1938,6 +1938,10 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      el texto del historial en una columna de 130 px por `flex-1`).
 │                      Tier 62 — El prompt que llega para pegar (1, capturada 2026-10-15
 │                      de la carga del prompt de una clínica en el motor del bot del CRM):
+│                      ⚠️ Regla del founder desde 2026-10-17: el TEXTO del autor se
+│                      carga tal cual y sus trampas se le reportan; lo que se ajusta es
+│                      la configuración (Sonnet 5, aviso al pasar). Ver la sección
+│                      "Cuando llega un prompt YA ESCRITO" más abajo.
 │                      cargar-prompt-al-motor (⭐ cross-project: un prompt escrito afuera
 │                      —el equipo comercial, otra IA— llega con "nada más hay que
 │                      implementarlo", y pegarlo tal cual lo rompe aunque esté bien
@@ -2205,6 +2209,28 @@ que responden en los flujos de chatbot. La calidad depende de seguir estas regla
 2. Leer `memory/feedback-prompting.md` — correcciones ganadas en produccion
 3. Consultar los prompts reales en `knowledge/workflows-reference/` como ancla de calidad
    (no inventar patrones — seguir lo que ya funciona)
+
+### Cuando llega un prompt YA ESCRITO para el bot de un cliente (regla del founder, 2026-10-17)
+
+El equipo comercial escribe los prompts de los clientes. Lo que entrega **se carga tal cual**:
+no se mueve, no se recorta y no se reescribe ninguna línea, aunque esta sección diga "cambios
+quirúrgicos" o "límite de 5.000". El proceso completo está en la skill
+`.agent/skills/cargar-prompt-al-motor/`. En corto:
+
+1. **El texto del autor no se toca.** El principal y las reglas de pase van letra por letra
+   (md5 de la base = md5 del archivo). Si traen una trampa (la hora dentro del prompt cuesta
+   ~2,5 veces más por respuesta, o su revisión final queda en el medio), **no se arregla**: va en
+   el mensaje para el autor, que la corrige en su próxima versión.
+2. **La configuración sí es nuestra** y se ajusta para que su texto funcione:
+   `modelo: claude-sonnet-5` + `callar_tras_cierre: true` (**todos los bots van en Sonnet**);
+   `aviso_al_pasar: avisar` si el prompt escribe su propio puente (en silencioso el código lo
+   borra, aunque el LEEME pida apagarlo), con `instruccion_al_pasar` remitiendo a su sección del
+   puente y con la hora; las piezas viejas nuestras que lo contradicen se vacían.
+3. **Se guarda bien:** respaldo, principal por `guardar_prompt_del_bot` (queda en el historial
+   de Master), resto en una escritura con filtro por `updated_at`, md5 y cero `\r`,
+   `bot_enabled` sin tocar. Prenderlo es otro paso, con OK.
+4. **Se reporta corto:** qué quedó cargado, lo único que no siguió el LEEME y por qué, y el
+   mensaje para el autor en un bloque aparte.
 
 ### Skills y agente disponibles
 

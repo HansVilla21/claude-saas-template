@@ -1,5 +1,22 @@
 # Skill: Cargar en el motor un prompt escrito afuera
 
+## ⚠️ Regla vigente (founder, 2026-10-17) — manda sobre lo que diga el resto de esta skill
+
+**El texto que entrega el autor se carga tal cual, letra por letra:** el prompt principal, las reglas de pase y cualquier pieza que él entregue. No se mueve ni se reescribe ninguna línea.
+
+Lo que esta skill antes llamaba "cambiar lo mínimo" ahora se parte en dos:
+
+| Es del autor (no se toca) | Es nuestro (se ajusta para que su texto funcione) |
+|---|---|
+| El prompt principal y las reglas de pase | `modelo: claude-sonnet-5` y `callar_tras_cierre: true`. **Todos los bots van en Sonnet** |
+| Si trae una trampa (la hora dentro del prompt, su revisión final en el medio, un bloque que el motor ya arma), **se le reporta** con el número para que la corrija en su próxima versión | `aviso_al_pasar: avisar` si su prompt escribe el puente: en silencioso el código lo borra, **aunque su LEEME pida apagarlo**. `instruccion_al_pasar` remite a su sección del puente y lleva `{{DIA_SEMANA}}` y `{{HORA_CR}}` |
+| | Las piezas viejas nuestras que contradicen el texto nuevo (`reglas_finales`, `objeciones`, `instruccion_al_pasar`) se vacían o se alinean |
+| | Las llaves que pide su LEEME (temperatura, topes, espera) se ponen si existen en el código; las que no existen se reportan |
+
+**Por qué:** el 2026-10-17 se cargó un prompt del equipo comercial moviendo la línea de la hora y su revisión final a `reglas_finales`, y dejando el modelo viejo. El founder lo revirtió: *"lo que me pasa [el autor], eso es y listo"*. El prompt es del autor y lo va a volver a editar; si lo cambiamos nosotros, la versión que él tiene deja de ser la que corre.
+
+**El costo de cargarlo tal cual, para decírselo al autor:** con `{{HORA_CR}}` dentro del prompt la caché nunca pega. Medido en 7 días de tráfico real con Sonnet 5: US$0,060 por respuesta con la hora adentro, contra US$0,024 sin ella (unas 2,5 veces más). Su propia guía (`editar-prompt-momentum`) ya dice que la fecha y la hora van en "Revisión final".
+
 ## Cuándo usar esta skill
 
 - Llega un prompt hecho por **otra persona o proyecto** (el equipo comercial, otra IA) para el bot de un negocio, con un "ya está todo, nada más hay que implementarlo".
@@ -24,7 +41,7 @@ En el CRM de Momentum se cargó tres veces un prompt del equipo comercial: un co
 | El texto genérico del módulo de servicios | Decía "sugerí el servicio que calce", contra la regla dura "nunca elegís un tratamiento por la persona" |
 | El puente de noche: "dice cuándo, según la hora" | Con la hora solo al final del prompt, de noche decía "en un ratito" en 4 de 6 pases, y a una persona que escribía en inglés la pasó en español. Con la hora y el idioma **en la instrucción del pase**, 6 de 6 |
 
-> La idea central: **un prompt ajeno se carga como un PR, no como un copiar y pegar.** Se cruza contra el sistema vivo, se cambia lo mínimo con un script que lo pruebe, se simula y recién ahí se guarda.
+> La idea central: **un prompt ajeno se carga como un PR, no como un copiar y pegar.** Se cruza contra el sistema vivo, se ajusta la configuración para que el texto funcione, el texto queda tal cual, y lo que el texto tiene mal se le reporta al autor.
 
 ## Proceso
 
@@ -64,16 +81,18 @@ Leer también `reglas_finales` y `reglas_handoff` vivas (texto completo), el tex
 | Topes de la pantalla de Configuración | El texto entra al motor pero rompe cada guardado del negocio | Comparar los largos contra `MAX_*` de `lib/settings/types.ts` y el motor |
 | El largo | Recortar "porque la metodología dice 5.000" | Con Sonnet 5 y caché el largo no es el problema (prompts vivos de 25 a 51 mil). No se corta |
 
-### 3. Cambiar lo mínimo, con un script que lo pruebe
+**Con la regla vigente:** las filas que tocan el TEXTO del autor (bloques del motor dentro del prompt, placeholders, su revisión final) ya no se arreglan. Pasan a ser lo que se le reporta. Las de configuración y de motor (modo de pase, llaves, topes, catálogo, `prompt_override` del módulo) se siguen haciendo.
 
-Nunca a mano, nunca reescribiendo:
+### 3. Separar lo del autor de lo nuestro, con un script
 
-- Un script que lee el original, hace cada reemplazo **comprobando que aparece exactamente una vez**, y verifica el después (por ejemplo, que no quede ningún `{{HORA_CR}}` en el principal).
-- Genera el **diff contra el original**: tiene que mostrar solo los cambios acordados. Ese diff es lo que se le muestra al autor.
+- **El texto del autor entra como vino.** Solo se normaliza lo invisible (BOM, `\r\n` → `\n`, espacios al final). El md5 de lo que se guarda tiene que ser el del archivo normalizado.
+- **Lo nuestro se arma aparte:** `modelo`, `callar_tras_cierre`, `aviso_al_pasar`, `instruccion_al_pasar` (tope 400) y las piezas viejas que se vacían. Cada pieza se compara con su tope (`MAX_*` de `lib/settings/types.ts` y del motor).
 - **Escribir en bytes** (`write_bytes(texto.encode('utf-8'))`). En Windows, `write_text` de Python pone CRLF y el prompt llega a la base con `\r\n`.
-- Las piezas cargadas van a `clients/<cliente>/prompts/motor-<version>-<fecha>/` (local, fuera de git), con los originales al lado.
+- Los originales van a `clients/<cliente>/prompts/motor-<version>-<fecha>/originales/` (local, fuera de git).
 
-### 4. Simular antes de guardar
+### 4. Simular, solo si hace falta
+
+Por defecto **no se simula**: el autor prueba desde su número en modo prueba (paso 7). Se simula si el founder lo pide o si se cambió el motor para que el texto funcione.
 
 - `scripts/simular-conversaciones.ts <negocio> <etiqueta> [personas] --config propuesta.json`. **`--config` reemplaza la config entera**: pasarle la propuesta COMPLETA (lo que había más lo nuevo).
 - Los casos salen de las **reglas de pase del autor**: uno por regla que pasa, más los que NO tienen que pasar, más otro idioma, de usted, y de noche. Si se cambió el motor, uno que pruebe ese cambio (el servicio que antes no llegaba).
@@ -84,13 +103,14 @@ Nunca a mano, nunca reescribiendo:
 ### 5. Guardar en una escritura y verificar contra la base
 
 - Respaldo de la config viva en `crm-v2/backups/` (fuera de git).
-- Una sola escritura con **filtro por `updated_at`**: si alguien cambió la config en el medio (el negocio puede editar 5 llaves desde Configuración), no se escribe nada. Y `select` de vuelta: un PATCH que no matchea responde éxito con 0 filas.
+- El prompt principal por **`guardar_prompt_del_bot`** (service_role, con el md5 del texto anterior): así la versión vieja queda en el historial de Master, con «Volver a esta». Esa función no acepta texto vacío; si hay que vaciar `objeciones`, insertar antes la versión vieja en `bot_prompt_versions` (sin la columna `largo`, que es calculada).
+- El resto en una sola escritura con **filtro por `updated_at`**: si alguien cambió la config en el medio (el negocio puede editar 5 llaves desde Configuración), no se escribe nada. Y `select` de vuelta: un PATCH que no matchea responde éxito con 0 filas.
 - Verificar: md5 de la base = md5 del archivo, **cero `\r`** (`position(chr(13) in bot_config::text) = 0`), las llaves esperadas, `bot_enabled` sin tocar.
 - Uno o dos casos del simulador **sin `--config`**: prueban lo que quedó guardado, no la propuesta.
 
 ### 6. Cerrar el circuito con el autor
 
-- Un mensaje con **lo que se adaptó** y **lo que se vio y no se tocó**: el prompt es suyo y lo va a volver a editar. Si no sabe que la hora vive ahora en la revisión final, la vuelve a poner arriba.
+- Un mensaje corto, en un bloque aparte para que el founder lo reenvíe, con tres cosas: que quedó cargado tal cual; **lo único que no siguió su LEEME y por qué** (casi siempre el aviso al pasar); y **las trampas de su texto** con el número, para que las corrija él en la próxima versión.
 - La trampa nueva va a la fuente, que es el contrato y el skill con el que escribe (`editar-prompt-momentum` en `crm-v2`). Si no, se repite la próxima vez.
 
 ### 7. Prenderlo es otro paso, con OK
@@ -99,17 +119,27 @@ Antes de `settings.bot_enabled = true`:
 
 - **Datos sensibles:** si es salud, la consulta legal.
 - **Quiénes vuelven al bot al prender:** el trigger de reconciliar le devuelve las conversaciones `unassigned` sin dueño humano, y las de `human` no las toca. Contarlas antes, para que el bot no le hable de golpe a gente que estaba con el equipo.
-- **Modo prueba:** `settings.bot_solo_para` con el número de quien prueba, para hablarle por WhatsApp real sin prenderlo para todos.
+- **Modo prueba:** `settings.bot_solo_para` con el número de quien prueba, para hablarle por WhatsApp real sin prenderlo para todos. Su conversación tiene que estar **sin dueño** (`assigned_user_id` nulo, o el que puso el reparto): si alguien del equipo la tiene asignada, el bot se calla igual y la prueba parece rota.
 
 ## Output esperado
 
-- La config del negocio cargada en una escritura, con su respaldo y verificada contra la base (md5, sin `\r`, bot sin tocar).
+- El texto del autor guardado tal cual (md5 de la base = md5 del archivo), con Sonnet 5, su respaldo y la versión anterior en el historial de Master.
 - Si el motor no podía con lo que pide el prompt: un PR con el arreglo y sus pruebas, mergeado antes de dar la carga por buena.
-- La carpeta local con originales, piezas cargadas, el diff y la propuesta.
-- Las transcripciones del simulador y el costo de las pruebas.
+- La carpeta local con los originales.
 - El mensaje para el autor, y la fila en el backlog con lo que falta para prenderlo.
 
-## Ejemplo
+## Ejemplo (2026-10-17, con la regla vigente)
+
+**Input:** "El equipo comercial pidió actualizar el prompt de un consultorio: acá van el prompt, las reglas de pase y su nota. La regla es que lo que pasan ellos se carga y listo."
+
+**Output:**
+- **Cargado tal cual:** principal (25.703 caracteres) y reglas de pase, verificados por md5 contra los archivos. `reglas_finales` y `objeciones` viejas vaciadas, porque contradecían la voz nueva; sus versiones quedaron en el historial.
+- **Config:** Sonnet 5, `callar_tras_cierre`, temperatura y topes como pidió la nota.
+- **Lo único que no siguió la nota:** el aviso al pasar quedó prendido. Apagado, el código borra su puente.
+- **Para el autor:** la línea de la hora está dentro del prompt y cada respuesta cuesta unas 2,5 veces más; que la pase a Revisión final en la próxima versión.
+- **Prueba:** bot apagado para los leads reales; su número en `bot_solo_para` y su conversación sin dueño.
+
+## Ejemplo anterior (2026-10-15, antes de la regla: hoy NO se tocaría el texto)
 
 **Input:**
 "Acá está todo lo que pasó el equipo comercial para la clínica: el prompt, las reglas de pase y un LEEME. Ya no hace falta cortarlo porque usamos otro modelo. Nada más hay que implementarlo."
