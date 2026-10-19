@@ -11,9 +11,11 @@ Lo que esta skill antes llamaba "cambiar lo mínimo" ahora se parte en dos:
 | El prompt principal y las reglas de pase | `modelo: claude-sonnet-5` y `callar_tras_cierre: true`. **Todos los bots van en Sonnet** |
 | Si trae una trampa (la hora dentro del prompt, su revisión final en el medio, un bloque que el motor ya arma), **se le reporta** con el número para que la corrija en su próxima versión | `aviso_al_pasar: avisar` si su prompt escribe el puente: en silencioso el código lo borra, **aunque su LEEME pida apagarlo**. `instruccion_al_pasar` remite a su sección del puente y lleva `{{DIA_SEMANA}}` y `{{HORA_CR}}` |
 | | Las piezas viejas nuestras que contradicen el texto nuevo (`reglas_finales`, `objeciones`, `instruccion_al_pasar`) se vacían o se alinean |
-| | Las llaves que pide su LEEME (temperatura, topes, espera) se ponen si existen en el código; las que no existen se reportan |
+| | **Los topes salen de su TEXTO, no de su LEEME.** Si el texto dice "una burbuja, dos solo si son dos cosas, tres solo con link", `tope_burbujas` es 2, aunque el LEEME diga 3. `largo_maximo_respuesta` no baja de lo que el texto necesita (ver paso 4: el recortador rompe frases). El resto de las llaves del LEEME (temperatura, espera) se ponen si existen en el código; las que no existen se reportan |
 
 **Por qué:** el 2026-10-17 se cargó un prompt del equipo comercial moviendo la línea de la hora y su revisión final a `reglas_finales`, y dejando el modelo viejo. El founder lo revirtió: *"lo que me pasa [el autor], eso es y listo"*. El prompt es del autor y lo va a volver a editar; si lo cambiamos nosotros, la versión que él tiene deja de ser la que corre.
+
+**Cargado no es listo (founder, 2026-10-19).** Después de cada carga se **mide** el estilo del bot contra las reglas del mismo prompt (paso 4), y los números van al founder y al autor **antes** de decir "listo". Sin eso, el autor prueba, ve el bot fallar en lo que su texto prohíbe y concluye que "no se cargó": pasó con la v2.4 de un consultorio, que estaba bien cargada y abría cada reacción con "Uy".
 
 **El costo de cargarlo tal cual, para decírselo al autor:** con `{{HORA_CR}}` dentro del prompt la caché nunca pega. Medido en 7 días de tráfico real con Sonnet 5: US$0,060 por respuesta con la hora adentro, contra US$0,024 sin ella (unas 2,5 veces más). Su propia guía (`editar-prompt-momentum`) ya dice que la fecha y la hora van en "Revisión final".
 
@@ -90,9 +92,28 @@ Leer también `reglas_finales` y `reglas_handoff` vivas (texto completo), el tex
 - **Escribir en bytes** (`write_bytes(texto.encode('utf-8'))`). En Windows, `write_text` de Python pone CRLF y el prompt llega a la base con `\r\n`.
 - Los originales van a `clients/<cliente>/prompts/motor-<version>-<fecha>/originales/` (local, fuera de git).
 
-### 4. Simular, solo si hace falta
+### 4. Medir siempre, después de guardar
 
-Por defecto **no se simula**: el autor prueba desde su número en modo prueba (paso 7). Se simula si el founder lo pide o si se cambió el motor para que el texto funcione.
+**Obligatorio en cada carga.** `crm-v2/scripts/medir-estilo.ts <negocio> --tope-usd 1` corre conversaciones simuladas por el motor real con los casos del negocio (`scripts/medir-estilo/<negocio>.json`) y cuenta, por respuesta:
+- las frases que el prompt prohíbe;
+- más burbujas de las que el texto permite;
+- burbujas largas;
+- dos preguntas en un turno;
+- **las respuestas que acortó el recortador**, que se imprimen completas para leerlas.
+
+Una corrida de 4 conversaciones con Sonnet 5 cuesta ~US$0,40. Si el negocio todavía no tiene su archivo de casos, se arma con sus reglas de pase y las frases que su texto prohíbe.
+
+- **Leer la transcripción, no solo el número.** El 2026-10-19 bajar `largo_maximo_respuesta` a 200 "mejoró" la tabla a la mitad de fallas, pero porque el recortador acortaba el 38 % de las respuestas. Una de esas, en una prueba real del autor, salió sin el comienzo de la frase ("Roberto le vea la rodilla…"). La tabla de frases prohibidas no lo vio.
+- **Si el estilo falla, se prueban perillas nuestras, una por variante,** con los mismos casos, nunca el texto del autor. Medido en el consultorio (7 variantes):
+  - `tope_burbujas` alineado con el texto (2 en vez de 3) eliminó las respuestas de 3 burbujas sin link, y nada más;
+  - subir el razonamiento (`esfuerzo: medium`) no cambió nada;
+  - copiar su revisión final a `reglas_finales` tampoco;
+  - bajar el largo por debajo de lo que el texto necesita compra frases rotas;
+  - **las frases que el texto prohíbe ("uy", "con calma", "le gustaría que") no bajaron con ninguna perilla de configuración:** 13 a 16 fallas en 4 conversaciones con cualquier combinación sin recortador. Eso es del texto, así que se le pasa al autor con los números y las frases exactas, y lo corrige él.
+- **Cuando el autor dice "no se parece a mi versión":** primero confirmar que el bot lee su versión. `bot_turns.tokens_in` sube con el largo del prompt nuevo, y la voz cambia. Recién después medir. Casi nunca es la carga.
+- **Dónde prueba el autor:** en "Probar bot" (mismo sistema que el WhatsApp). Lo que prueba con el prompt suelto en otro chat no transfiere, porque no tiene el tope, el recortador ni el bloque de decisiones.
+
+Para simular conversaciones enteras sin contar estilo (pases, otro idioma, de noche), sigue existiendo el simulador:
 
 - `scripts/simular-conversaciones.ts <negocio> <etiqueta> [personas] --config propuesta.json`. **`--config` reemplaza la config entera**: pasarle la propuesta COMPLETA (lo que había más lo nuevo).
 - Los casos salen de las **reglas de pase del autor**: uno por regla que pasa, más los que NO tienen que pasar, más otro idioma, de usted, y de noche. Si se cambió el motor, uno que pruebe ese cambio (el servicio que antes no llegaba).
@@ -126,7 +147,8 @@ Antes de `settings.bot_enabled = true`:
 - El texto del autor guardado tal cual (md5 de la base = md5 del archivo), con Sonnet 5, su respaldo y la versión anterior en el historial de Master.
 - Si el motor no podía con lo que pide el prompt: un PR con el arreglo y sus pruebas, mergeado antes de dar la carga por buena.
 - La carpeta local con los originales.
-- El mensaje para el autor, y la fila en el backlog con lo que falta para prenderlo.
+- **El resultado de `medir-estilo`** (números + las respuestas recortadas), corrido después de guardar.
+- El mensaje para el autor, con esos números, y la fila en el backlog con lo que falta para prenderlo.
 
 ## Ejemplo (2026-10-17, con la regla vigente)
 
