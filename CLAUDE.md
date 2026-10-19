@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        192 skills de proceso reusables:
+│   └── skills/        193 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1996,6 +1996,38 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      historial en `created_at − ms` del análisis, las expectativas se
 │                      escriben contra la regla y no contra lo que hizo el original, los
 │                      audios sin transcripción invalidan el caso, y ~US$0,30 por corrida).
+│                      Tier 64 — El que se cae sin hacer ruido (1, capturada 2026-10-19
+│                      de MOM-126, el aviso de número de WhatsApp desconectado del CRM):
+│                      vigilar-proveedor-que-no-avisa (⭐ cross-project: cuando una
+│                      pieza de la que dependés —el número en un BSP, un token OAuth,
+│                      una cuenta— se puede caer y el proveedor NO manda ningún evento,
+│                      hay que ir a preguntar; y lo difícil no es preguntar, es no avisar
+│                      de más, porque un "tu WhatsApp se cayó" falso quema la confianza
+│                      más rápido que la caída. Casos: Jacó ~20 días y Roberto ~15 h sin
+│                      WhatsApp, YCloud sin un solo evento, y al prender la revisión
+│                      apareció un tercero (Level CR) con 18 días caído que nadie
+│                      conocía. Máquina de estados pura: 2 fallas seguidas para declarar
+│                      la caída, un aviso por caída y otro por vuelta (el «volvió» solo si
+│                      antes salió el «se cayó»), el PRIMER chequeo no avisa —una caída
+│                      vieja la decide una persona—, 30 min de gracia tras conectar
+│                      porque PENDING no es caída (con `conectado_at`, no `updated_at`,
+│                      que cualquier edición mueve), sin respuesta del proveedor no se
+│                      cambia nada y una lista vacía no se cree. El aviso se reclama con
+│                      un UPDATE condicional sobre `avisado_at` que el upsert del estado
+│                      no toca, así el cron y la revisión inmediata no avisan dos veces.
+│                      El secreto del cron se genera DENTRO de la migración en el Vault y
+│                      la ruta lo lee por RPC: cero variables que copiar. Se avisa por un
+│                      camino que no sea el caído (WhatsApp desde el número de la
+│                      plataforma, campana, franja para TODO el equipo y una pantalla con
+│                      los pasos), cada intento registrado. El error del envío
+│                      («has not been registered») revisa ese tenant en el momento, y
+│                      reconectar también. La pausa a mano vive donde reconectar la
+│                      borra sola. Gotcha que casi se escapa: una caída de prueba
+│                      tocando la base a mano hace que el primer cron real mande un
+│                      «volvió» verdadero; se prueba con dependencias inyectadas y se
+│                      limpia. Más: "desde" miente en el primer chequeo —«lo
+│                      detectamos»—, el valor nuevo de un enum va solo en su migración,
+│                      y el preview puede no tener las variables de producción).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
@@ -2005,7 +2037,10 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      rate-limit-en-memoria-no-existe-en-serverless ·
 │                      service-role-con-cookies-fuga-de-pii (el cliente "admin" que filtra
 │                      datos sin login) · supabase-storage-borra-en-silencio (y el índice
-│                      único parcial que rompe a mitad).
+│                      único parcial que rompe a mitad) · elegir-la-cuenta-no-conectar-todas
+│                      (2026-09-24; detectada fuera del índice el 2026-10-19 con el
+│                      mismo grep: conectar por OAuth TODAS las cuentas que la persona
+│                      administra metió 16 canales de cuatro clientes en un negocio).
 │                      Tier 34 — Lo que el cliente nunca llenó (3 nuevas + 1
 │                      extensión, capturadas 2026-08-28 construyendo y probando
 │                      EN PRODUCCIÓN el onboarding del CRM):
