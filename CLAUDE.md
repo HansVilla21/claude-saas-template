@@ -2254,12 +2254,19 @@ quirúrgicos" o "límite de 5.000". El proceso completo está en la skill
    `modelo: claude-sonnet-5` + `callar_tras_cierre: true` (**todos los bots van en Sonnet**);
    `aviso_al_pasar: avisar` si el prompt escribe su propio puente (en silencioso el código lo
    borra, aunque el LEEME pida apagarlo), con `instruccion_al_pasar` remitiendo a su sección del
-   puente y con la hora; las piezas viejas nuestras que lo contradicen se vacían.
+   puente y con la hora; las piezas viejas nuestras que lo contradicen se vacían. **Los topes
+   salen del TEXTO, no del LEEME:** si el texto dice 1 o 2 burbujas, `tope_burbujas` es 2; el
+   largo no baja de lo que el texto necesita, porque el recortador del sistema rompe frases.
 3. **Se guarda bien:** respaldo, principal por `guardar_prompt_del_bot` (queda en el historial
    de Master), resto en una escritura con filtro por `updated_at`, md5 y cero `\r`,
    `bot_enabled` sin tocar. Prenderlo es otro paso, con OK.
-4. **Se reporta corto:** qué quedó cargado, lo único que no siguió el LEEME y por qué, y el
-   mensaje para el autor en un bloque aparte.
+4. **Cargado no es listo: se mide** (2026-10-19). Después de guardar, `crm-v2/scripts/medir-estilo.ts
+   <negocio>` cuenta las fallas contra las reglas del mismo prompt (~US$0,40), y se lee la
+   transcripción. Si el estilo falla, se prueban perillas de configuración, nunca su texto. Lo
+   que ninguna perilla arregla, como las frases que el texto prohíbe y el bot igual usa, va al
+   autor con los números.
+5. **Se reporta corto:** qué quedó cargado, lo único que no siguió el LEEME y por qué, los
+   números de la medición y el mensaje para el autor en un bloque aparte.
 
 ### Skills y agente disponibles
 
