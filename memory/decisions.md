@@ -6,6 +6,24 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-19 — Un revisor aparte frena los cambios de estado que se adelantan (MOM-133)
+
+**Contexto:** el analista (gpt-4.1) mueve el estado de cada contacto según la descripción que escribe el negocio. Del 12 al 17-10, 10 de 10 pases automáticos a «Llamada agendada» fueron antes de tiempo: la descripción pedía "confirmó día y hora y ya se le envió el link", y el modelo movía con un "sí". El analista además solo veía los mensajes del lead, así que "ya se le envió el link" no se podía cumplir con evidencia.
+
+**Decisión:**
+- **El analista ve los mensajes de los dos lados** para decidir el estado. Los datos y la calificación siguen saliendo solo del lead.
+- **Un revisor aparte** (segunda llamada, temperatura 0, `{revision, falta}`) busca qué parte de la descripción falta. Solo corre cuando el analista quiere mover y la etapa tiene descripción (~175 por semana, menos de US$1). Si falla o responde roto, no se mueve.
+- **Las citas del analista se verifican por código**: cada una tiene que estar dentro de un solo mensaje de la conversación.
+- **Banco de replay** con casos reales (`crm-v2/scripts/replay-analista-etapas.ts`) antes de tocar el analista otra vez.
+
+**Razón:** medido con el modelo real, código viejo 27 de 54; con el revisor 26 de 26 y los 10 prematuros frenados en 20 de 20 corridas. Un estado adelantado le dice al equipo que algo pasó cuando no pasó; uno atrasado se corrige en el próximo mensaje.
+
+**Qué se descartó:**
+- Más instrucciones al mismo modelo ("cuando dudes, no muevas", partir la descripción en condiciones y citar cada una): reescribía las condiciones para que le cerraran y se olvidaba de la del link. 41 y después 47 de 54, con regresiones en cada retoque.
+- La evidencia antes de la decisión en el schema: la dejaba vacía y elegía igual.
+
+Skill: `.agent/skills/revisor-adversarial-para-decisiones-de-ia` (Tier 63).
+
 ## 2026-10-15 — El prompt del bot se edita afuera y la base lo protege (MOM-78)
 
 **Contexto:** cada cambio al prompt de un cliente pasaba de Pietro a Hans por WhatsApp, y Hans lo aplicaba con scripts. Pietro pidió poder bajar el archivo, editarlo con su IA y volver a subirlo. Los clientes no tienen que poder tocarlo.

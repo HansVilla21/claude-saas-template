@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        191 skills de proceso reusables:
+│   └── skills/        192 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -1967,6 +1967,35 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      `\r` (`write_text` de Python en Windows pone CRLF). Y se cierra con el
 │                      autor: el prompt es suyo, y si no sabe dónde quedó la hora la vuelve
 │                      a poner arriba).
+│                      Tier 63 — El que decide no se revisa solo (1, capturada 2026-10-19
+│                      de MOM-133, el analista que mueve el estado de los contactos de un
+│                      CRM leyendo la descripción que escribe cada negocio):
+│                      revisor-adversarial-para-decisiones-de-ia (⭐ cross-project:
+│                      cuando un LLM decide con criterios escritos por un humano —estados,
+│                      calificaciones, clasificaciones que disparan acciones— la
+│                      verificación barata y robusta es un SEGUNDO pase con otro encargo,
+│                      "¿qué falta?", y no más instrucciones de autocontrol al mismo pase.
+│                      Caso: 10 de 10 pases automáticos a «Llamada agendada» antes de
+│                      tiempo; la descripción pedía "confirmó día y hora y ya se le envió
+│                      el link" y el modelo movía con un "sí" o un "a las 9am?", aunque el
+│                      prompt decía "cuando dudes, no muevas". Causa de fondo: el analista
+│                      solo veía los mensajes del LEAD y media descripción hablaba de lo
+│                      que hizo el NEGOCIO, así que el estado no se podía cumplir con
+│                      evidencia. Lo que NO sirvió, medido con el modelo real: pedirle al
+│                      mismo modelo que partiera la descripción y citara cada condición
+│                      —las reescribía para que le cerraran, se comía la del link, pegaba
+│                      dos mensajes en una cita—, la evidencia antes de la decisión en el
+│                      schema —la dejó vacía y eligió igual— y una regla sobre condiciones
+│                      negativas que rompió la detección del link. Lo que sí: un revisor
+│                      aparte (temperatura 0, `revision` antes de `falta`) que solo corre
+│                      cuando hay que mover y la etapa tiene descripción —~175 por semana,
+│                      menos de US$1—, y si falla no se mueve; más citas verificadas por
+│                      código dentro de UN SOLO mensaje y no del texto corrido. Medido con
+│                      un banco de replay de casos reales: viejo 27/54, autocontrol 41→47
+│                      con regresiones, revisor 26/26. Gotchas del banco: cortar el
+│                      historial en `created_at − ms` del análisis, las expectativas se
+│                      escriben contra la regla y no contra lo que hizo el original, los
+│                      audios sin transcripción invalidan el caso, y ~US$0,30 por corrida).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
