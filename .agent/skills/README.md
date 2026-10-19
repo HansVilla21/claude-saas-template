@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**192 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**193 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -82,6 +82,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `onboarding-cliente-en-el-producto` | El onboarding del cliente DENTRO del producto, en vez de un Word, un Google Form o mensajes sueltos de WhatsApp, cuando el servicio se configura con información del cliente |
 | ⭐ `novedades-dentro-del-producto` | "La gente no sabe lo que agregamos" / "nadie usa X": novedades dentro del producto, y que nunca se olvide anunciar lo que se sube |
 | ⭐ `portar-bot-n8n-propio-al-crm` | Mover el bot propio de n8n de un cliente (prompts, persona, historial) al bot único del CRM multi-tenant, donde cada tenant aporta su `bot_config` |
+| ⭐ `reparto-leads-por-porcentaje` | Repartir los leads nuevos entre el equipo en proporciones (60/40) aunque los atienda un bot. El «round robin» que ya existía nunca asignó una conversación (un CHECK rechazaba el valor y el error se tragaba), «el que tiene menos» con 60/40 da 5/5, y guardar el dueño en la fila que el bot lee **lo dejaba mudo** |
+| ⭐ `descargar-editar-subir-con-cabecera` | Alguien no técnico cambia un texto largo que vive en la base (un prompt, una plantilla) bajándolo, editándolo con su IA y subiéndolo. El archivo dice adentro de qué tenant y de qué versión salió: el de otro cliente no se sube y no se pisa lo que alguien subió en el medio |
 
 ## 🤖 Bot, n8n y LangChain
 
@@ -110,6 +112,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `sales-framework-spsp-whatsapp` | SPSP adaptado a WhatsApp |
 | ⭐ `cache-compartida-entre-usuarios` | La caché de prompts solo acierta entre usuarios si lo igual para todos va primero y marcado, y lo de cada uno después. Medir antes de tocar; mover la marca no cambia el texto que lee el modelo |
 | ⭐ `workflow-n8n-activo-sin-recibir` | Un workflow ACTIVO puede no estar recibiendo nada: un bot 3 días mudo, en verde y sin un error. Verificar la entrada, sobre todo al migrar un número, cambiar de proveedor o conectar un tenant |
+| `cargar-prompt-al-motor` | Cargar en el motor un prompt escrito afuera. Regla del founder (2026-10-17): el texto del autor va **tal cual** y sus trampas se le reportan; lo nuestro es la config (Sonnet 5, aviso al pasar, topes sacados de su texto). Cargado no es listo: se mide el estilo contra sus reglas antes de decir "listo" |
 
 ## 💬 WhatsApp, webhooks e integraciones
 
@@ -122,6 +125,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `conexion-whatsapp-ycloud-supabase-n8n` | Montar la conexión completa en un proyecto/cliente nuevo |
 | `ycloud-webhook-to-supabase` | La ingesta que persiste |
 | `whatsapp-proactivo-a-staff` | Avisar al equipo por plantilla aprobada cuando pasa un evento en la DB |
+| ⭐ `vigilar-proveedor-que-no-avisa` | El número (o la cuenta, o el token) se cae en el proveedor y **no llega ningún evento**: Jacó ~20 días y Roberto ~15 h sin WhatsApp, y al prender la revisión apareció un tercero con 18 días. Revisión periódica con máquina de estados que no avisa de más (2 fallas seguidas, primer chequeo callado, gracia tras conectar, no saber ≠ caído), un aviso por caída y otro por vuelta reclamado de forma atómica, secreto del cron generado en el Vault y franja para todo el equipo |
 | `whatsapp-image-delivery-ycloud` | Formato de imagen que Meta acepta (JPG/PNG — WebP se rechaza en silencio) |
 | `nota-de-voz-real-whatsapp` | Nota de voz con la ondita, no adjunto |
 | `outbound-delivery-server-action` | Envío saliente confiable desde el CRM |
@@ -131,6 +135,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `prospai-webhook-crm` | LinkedIn → CRM: los 16 eventos, el payload de prueba con placeholders literales que hace fallar el test, guardar crudo antes de validar |
 | `fathom-transcripciones-al-crm` | El body **crudo** antes de parsear (re-serializar rompe la firma); el webhook-id es la clave de idempotencia; 🔴 `ON DELETE CASCADE` en la tabla de eventos borra el historial |
 | `manychat-instagram-al-crm` | IG → CRM **sin** la API de ManyChat (esa es pull y cuesta): "Solicitud externa", push, Pro estándar. El receptor ya existía — grep + curl antes de reconstruir |
+| ⭐ `salida-a-crm-externo` | Lo que entra a tu CRM aparece solo en el CRM del cliente (Zoho, HubSpot), en una dirección y sin romper sus automatizaciones. Lo caro solo aparece contra su cuenta viva: el enlace que abre el inicio en vez del registro, el Lead borrado que da un 400 suelto y no un 404 |
 | `meta-ads-conexion-oficial` | Standard Access alcanza para multi-negocio, pero un tercero no puede autorizar tu app → no hay OAuth. La cuenta se **fija**, nunca se lista |
 | ⭐ `meta-tech-provider-de-cero-a-app-review` | Ser Tech Provider de Meta para que cada cliente conecte SU WhatsApp/IG/Messenger: las 7 puertas en orden, los 4 bloqueos que aparecen recién al conectar el primer número (verificado ≠ registrado; sin App Review no se conecta ni el número propio) y la revisión de la app pantalla por pantalla |
 | ⭐ `eventos-a-meta-desde-crm-whatsapp` | Avisarle a Meta qué lead de un anuncio que abre WhatsApp calificó o compró (Conversions API de mensajería). Con el número en un BSP tu app **no puede ser socio** de la cuenta ("número máximo de socios"): el token lo genera el portafolio del cliente sobre tu app, con aprobación de otro admin. Y `events_received: 1` **no** es "procesado": sin el permiso revisado, Meta acepta y no muestra nada |

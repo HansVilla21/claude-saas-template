@@ -6,6 +6,26 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-19 — El CRM vigila que cada número de WhatsApp siga conectado (MOM-126)
+
+**Contexto:** el número de un negocio vive en YCloud y se puede caer sin que nadie lo toque. Pasó con Jacó (01-09, ~20 días sin WhatsApp) y con Roberto (29-09, ~15 h de mensajes perdidos), y YCloud no mandó ningún evento. Se notó las dos veces porque alguien vio que faltaban mensajes.
+
+**Decisión:**
+- **Revisión cada 15 minutos** (pg_cron → `/api/cron/canales`) contra `GET /v2/whatsapp/phoneNumbers`. El error de envío «has not been registered» revisa ese negocio en el momento.
+- **Máquina de estados que no avisa de más:** 2 fallas seguidas, un aviso por caída y otro por vuelta, el primer chequeo no avisa, 30 min de gracia tras conectar. Si YCloud no responde, no cambia nada.
+- **Avisos por un camino que no es el caído:** campana al dueño y admins, WhatsApp por plantilla desde el número de Momentum (dueño + super_admin) y una franja roja para todo el equipo.
+- **El secreto del cron se genera dentro del Vault** en la migración: no hay variable de Vercel.
+- **Level CR en pausa a mano** (`revisar_salud: false`) por decisión de Hans: llevaba 18 días caído y él habla con ellos. La pausa se borra sola al reconectar.
+
+**Razón:** dos caídas silenciosas con clientes sin respuesta. Un aviso falso al cliente cuesta más que la caída, por eso cada regla está para callarse cuando no hay certeza.
+
+**Qué se descartó:**
+- Esperar un webhook del proveedor: no existe para este caso.
+- Avisar en el primer chequeo: al prender la revisión habría mandado un WhatsApp automático a Level CR por una caída de hace 18 días.
+- La señal de "N horas sin mensajes" y los canales directos con Meta: quedan para después.
+
+Skill: `.agent/skills/vigilar-proveedor-que-no-avisa` (Tier 64).
+
 ## 2026-10-19 — Un revisor aparte frena los cambios de estado que se adelantan (MOM-133)
 
 **Contexto:** el analista (gpt-4.1) mueve el estado de cada contacto según la descripción que escribe el negocio. Del 12 al 17-10, 10 de 10 pases automáticos a «Llamada agendada» fueron antes de tiempo: la descripción pedía "confirmó día y hora y ya se le envió el link", y el modelo movía con un "sí". El analista además solo veía los mensajes del lead, así que "ya se le envió el link" no se podía cumplir con evidencia.
