@@ -117,12 +117,16 @@ Donde el sistema registra un envío fallido: si el error es el de la pieza caíd
 
 En la acción de conectar, después de guardar: correr la revisión de ese tenant y revalidar el layout. La franja se va y sale el «volvió» sin esperar al cron. Si el proveedor todavía lo tiene `PENDING`, la gracia lo cubre.
 
+⚠️ **Antes de ofrecerle al cliente el botón de reconectar, mirá QUIÉN conectó ese número.** El mismo día que salió la alerta se cayó El Canal, y al reconectarlo apareció esto: el número se había conectado desde la **consola del BSP** (YCloud), así que en Meta quedó registrado bajo la app del BSP. En la ventana de Meta del BSP salía «Registrado»; en la nuestra, **«No cumple los requisitos — este número no se puede compartir con esta app»**, y lo mismo con Roberto, Jacó y Givi. Meta solo deja que vuelva a tomar un número registrado la app que lo registró. El botón del producto sirve solo para los números que conectó tu propia app (en el CRM, `provider_config.origen = 'ycloud_tp'`; hoy uno solo). Para los demás, el cartel y el aviso dicen «escribinos y lo reconectamos», y el equipo lo hace desde la consola del BSP. Pasarlos a tu app es otro trámite: la migración de números entre socios de Meta.
+
 ### 9. Lo que se saltea, y cómo se sale de ahí
 
 - **El demo** (número inventado): `provider_config.is_demo`.
 - **Una pausa a mano** para un tenant que el founder quiere manejar en persona: `provider_config.revisar_salud = false`. Se elige un lugar que **se borre solo al reconectar** (en el CRM, conectar reemplaza el `provider_config` entero). Una pausa que hay que acordarse de sacar es un tenant sin vigilar para siempre.
 
 ## Gotchas
+
+- **El primer aviso real llegó el mismo día.** El Canal se cayó a las ~19:50 (la cuenta dejó de estar vinculada en YCloud: `WHATSAPP_BUSINESS_ACCOUNT_UNAVAILABLE`), la revisión de las 20:00 la marcó sospechosa, la de las 20:15 la declaró caída y avisó, y al reconectar a las ~20:30 salió el «volvió». Unos 40 minutos en vez de las 15 horas de Roberto. Y el aviso mandaba a un botón que no le servía (paso 8): **probá el camino de arreglo con un tenant REAL, no con la cuenta de prueba**, que justo era la única conectada por tu app.
 
 - **Una prueba de caída tocando la base a mano es una bomba.** Si ponés una fila en `desconectado` con `avisado_at` y la dejás, el primer cron real la ve conectada y manda un «volvió» verdadero a clientes y al founder. Se prueba con la función de revisión y dependencias falsas (lista del proveedor sin ese número, envío que solo anota), y se borran los avisos al terminar.
 - **"Desde" miente en el primer chequeo.** Si la entidad ya estaba caída cuando se revisó por primera vez, la caída empezó antes. En la pantalla: "Lo detectamos el 19 oct, 10:22", no "Desde el 19 oct".
