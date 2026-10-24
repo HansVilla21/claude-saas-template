@@ -6,6 +6,30 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-21 — El tope de gasto de Anthropic sube a USD 150 tras dejar a todos los bots sin contestar
+
+**Contexto:** desde las 09:28 CR, cada turno de todos los bots falló con «You have reached your specified API usage limits». La cuenta tenía un límite de gasto mensual de USD 50 y ya iba en USD 50,01. Durante ~2 horas, 7 contactos (6 de Givi, Douglas de Momentum y uno de Di Garda) pasaron al equipo con «falla técnica». El límite lo comparten los bots de producción y los scripts de prueba (medir-estilo, simuladores, replay).
+
+**Decisión:**
+- **Hans subió el límite a USD 150/mes.** Está en la consola clásica: Configuración de la organización › Facturación › Límites de gasto. En la navegación nueva no aparece dentro de Configuración, y «Límites de frecuencia» son otra cosa (los límites por minuto).
+- **Quedan abiertas dos recomendaciones:**
+  - el aviso por correo en USD 100 (hoy está en USD 5, que no sirve);
+  - una llave de API aparte para las pruebas, con su propio tope, para que una tanda de pruebas no deje sin presupuesto a los clientes.
+
+**Razón:** octubre ya llevaba ~US$56 de bot en producción, más las pruebas. Con el ritmo de clientes nuevos, USD 50 alcanza para menos de un mes. Un bot que no contesta cuesta leads; el tope existe para que un error no gaste sin límite, no para frenar el uso normal.
+
+**Qué se descartó:** pasar los bots a GPT-4.1 mientras tanto. Los prompts de Pietro se midieron con Claude, y subir el límite tomaba 2 minutos.
+
+## 2026-10-19 — El botón de reconectar el WhatsApp, solo para los números que conectó nuestra app
+
+**Contexto:** al reconectar a El Canal (el primer aviso real de MOM-126), su número salía «No cumple los requisitos — este número no se puede compartir con esta app» en nuestra ventana de Meta, y «Registrado» en la de YCloud. Meta solo deja que retome un número registrado la app que lo registró. Pasaba igual con Roberto, Jacó y Givi: hoy todos los clientes se conectaron desde la consola de YCloud.
+
+**Decisión:** el botón de Canales sale solo para los números con `provider_config.origen = 'ycloud_tp'` (los que conectó nuestra app). A los demás, el cartel y la campana les dicen «escribinos y lo reconectamos nosotros», y el equipo lo hace desde la consola de YCloud (CRM #429, base 0148).
+
+**Razón:** mandar al cliente a un botón que le va a fallar es peor que no tener botón.
+
+**Qué se descartó:** migrar ya a los clientes actuales a nuestra app con la migración entre socios de Meta. Es posible, pero es un trámite por cliente y una decisión aparte.
+
 ## 2026-10-19 — El CRM vigila que cada número de WhatsApp siga conectado (MOM-126)
 
 **Contexto:** el número de un negocio vive en YCloud y se puede caer sin que nadie lo toque. Pasó con Jacó (01-09, ~20 días sin WhatsApp) y con Roberto (29-09, ~15 h de mensajes perdidos), y YCloud no mandó ningún evento. Se notó las dos veces porque alguien vio que faltaban mensajes.
