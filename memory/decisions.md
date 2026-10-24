@@ -6,6 +6,56 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-24 — La descripción de cada servicio sale tal cual: el modelo elige un marcador, no copia (Di Garda)
+
+**Contexto:** la clínica pidió que, cuando alguien pregunta por un servicio, le llegue la descripción que cargó en el catálogo, "como copy paste". El modelo la resumía, porque el prompt de Pietro dice "la descripción la cuentas con tus palabras". Y aunque la copiara, el motor la cambia: la limpieza le saca los dos puntos, el partidor la corta en burbujas de 220 y el recortador acorta lo que pasa de 660. Las 38 descripciones llegan a 959 caracteres, con viñetas, "Incluye:" y el link de WhatsApp.
+
+**Decisión:**
+- **La llave `bot_config.descripcion_tal_cual`** (CRM #434). Cada servicio de la lista inline trae su marcador `[FICHA:ref]`; el modelo lo pone y el sistema manda la descripción exacta en su propio mensaje, sin limpieza, sin partidor y sin recortador.
+- **La opción A de Hans:** si la persona pregunta en general, el bot nombra las opciones con su precio y manda la descripción de la que elija.
+- **Como mucho 2 por mensaje** y ninguna repetida en la conversación. La memoria guarda el marcador, no el texto.
+- **Prendida en Di Garda el 24-10 a las 17:23 CR,** con respaldo de su config.
+
+**Razón:** la única forma de que el texto llegue igual es que no lo escriba el modelo. Medido con el motor real (5 corridas, US$1,34): 10 de 10 descripciones idénticas al catálogo.
+
+**Qué se descartó:**
+- pedirle al modelo que la copie, porque el motor la cambia igual;
+- la opción B: ante una pregunta general, mandar de una todas las descripciones que sirven;
+- tocar la línea de Pietro, porque el texto del autor se carga tal cual.
+
+**Pendientes inmediatos:** avisarle a Pietro que saque esa línea, y probarlo en Probar bot. Productos y propiedades todavía no tienen fichas.
+
+## 2026-10-24 — Los reportes de la clínica en Probar bot: casi todo va a Pietro y dos cosas se arreglan en el motor (Di Garda)
+
+**Contexto:** la clínica dejó 9 reportes. Los 2 de septiembre ya estaban arreglados, y los 7 de Probar bot son del 20-10.
+
+**Decisión:**
+- **Casi todo es contenido del prompt o del catálogo.** Queda en revisión en Master con su nota, para Pietro y la clínica.
+- **Dos eran del motor** y salieron en CRM #433, con el OK de Hans:
+  - una línea que el negocio ya mandó idéntica en la conversación no se vuelve a mandar, en todos los bots;
+  - `bot_config.punto_final` (opción A): el sistema pone el punto antes del emoji del final. Prendido en Di Garda.
+
+**Razón:** pedirlo en el prompt no alcanzaba en ninguno de los dos casos. El saludo doble pasó aunque el prompt dice "no saludas dos veces", y el modelo casi nunca escribe el punto final porque termina las burbujas con un emoji.
+
+**Qué se descartó:** reescribir el prompt de Pietro para arreglar lo que es de su texto.
+
+**Pendientes inmediatos:** aclarar con la clínica qué es "las conversaciones se quedan abiertas en el WhatsApp".
+
+## 2026-10-23 — El prompt de Di Garda se recarga tal cual y se mide antes de decir "listo"
+
+**Contexto:** el 15-10, la v2.3 de Pietro se había cargado con tres cambios nuestros: la hora y su revisión final pasaron a `reglas_finales`. El 17-10 el founder fijó que el texto del autor va tal cual.
+
+**Decisión:**
+- El principal es el archivo de Pietro letra por letra (md5 `0cf0fb12…`), y nuestras `reglas_finales` salen. Lo demás de la config sigue igual.
+- Medido con `medir-estilo` (CRM #432): 8 respuestas, 2 limpias, pase 3/4, US$0,31.
+- Las reglas de pase que la clínica editó el 20-10 no se revirtieron.
+
+**Razón:** el prompt es de Pietro y lo va a volver a editar. Si lo cambiamos nosotros, la versión que él tiene deja de ser la que corre.
+
+**Qué se descartó:** dejar la hora fuera del prompt. Con la hora adentro cada respuesta cuesta unas 2,5 veces más, y eso se le avisa a Pietro.
+
+**Pendientes inmediatos:** pasarle a Pietro los números, el costo de la hora y el choque con las reglas de pase editadas.
+
 ## 2026-10-21 — El tope de gasto de Anthropic sube a USD 150 tras dejar a todos los bots sin contestar
 
 **Contexto:** desde las 09:28 CR, cada turno de todos los bots falló con «You have reached your specified API usage limits». La cuenta tenía un límite de gasto mensual de USD 50 y ya iba en USD 50,01. Durante ~2 horas, 7 contactos (6 de Givi, Douglas de Momentum y uno de Di Garda) pasaron al equipo con «falla técnica». El límite lo comparten los bots de producción y los scripts de prueba (medir-estilo, simuladores, replay).
@@ -67,6 +117,24 @@ Skill: `.agent/skills/vigilar-proveedor-que-no-avisa` (Tier 64).
 - La evidencia antes de la decisión en el schema: la dejaba vacía y elegía igual.
 
 Skill: `.agent/skills/revisor-adversarial-para-decisiones-de-ia` (Tier 63).
+
+## 2026-10-15 — Di Garda: el prompt v2.3 entra al motor, el catálogo inline llega entero y los ¿ ¡ son por negocio
+
+**Contexto:** Pietro entregó la v2.3 con un "nada más hay que implementarlo". El motor no podía con tres cosas:
+- el catálogo inline se cortaba en 30 ítems y 300 caracteres por descripción (Di Garda tiene 38, y 36 pasan de 300);
+- el código borraba los ¿ ¡ en todos los bots;
+- la pantalla de Configuración tenía un tope de 2.000 para las reglas de pase, y las de Pietro miden 2.885.
+
+**Decisión:**
+- **CRM #416:** el catálogo inline entero (100 ítems, 4.000 caracteres), la unidad del precio como en el panel, y `bot_config.signos_de_apertura` (opción A de Hans: Di Garda conserva los ¿ ¡).
+- **CRM #417:** el tope de las reglas de pase en Configuración sube a 4.000.
+- **El bot queda apagado** hasta el OK de Hans.
+
+**Razón:** el prompt da por hecho que el catálogo está completo y que el bot escribe como el equipo.
+
+**Qué se descartó:** recortar el prompt. Con Sonnet 5 el largo no es un problema.
+
+**Pendientes inmediatos:** la consulta de la Ley 8968 antes de prenderlo.
 
 ## 2026-10-15 — El prompt del bot se edita afuera y la base lo protege (MOM-78)
 
