@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        193 skills de proceso reusables:
+│   └── skills/        194 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2028,6 +2028,30 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      limpia. Más: "desde" miente en el primer chequeo —«lo
 │                      detectamos»—, el valor nuevo de un enum va solo en su migración,
 │                      y el preview puede no tener las variables de producción).
+│                      Tier 65 — El texto que no se copia, se elige (1, capturada
+│                      2026-10-24 de la descripción tal cual de una clínica en el bot
+│                      del CRM):
+│                      texto-literal-por-marcador (⭐ cross-project: cuando un negocio
+│                      pide que el bot mande SU texto tal cual —la descripción de un
+│                      servicio, "como copy paste"—, pedirle al modelo que lo copie no
+│                      alcanza: lo resume porque el prompt del autor dice "con tus
+│                      palabras", y aunque lo copie, la limpieza de cada burbuja le saca
+│                      los dos puntos, el partidor lo corta en burbujas de 220 y el
+│                      recortador acorta lo que pasa de 660. El modelo ELIGE: pone
+│                      `[FICHA:ref]` (8 caracteres del id, alargados si chocan) y el
+│                      código pega el texto exacto en su propio mensaje, sin limpieza ni
+│                      partidor y sin contar para el tope. Las que no salen —de otro
+│                      negocio, de más, repetidas— se sacan ANTES de la memoria, que
+│                      guarda el marcador y no el texto: así el modelo ve qué mandó y no
+│                      aprende a pegar a mano. Nunca deja el mensaje vacío, y lo de más
+│                      de 4096 se corta entre párrafos. Lo que enseñó medir con el modelo
+│                      real (5 corridas, US$1,34): con la nota sola, la pregunta por el
+│                      precio de una VARIANTE dentro del texto se contaba con palabras; el
+│                      recordatorio al final lo arregló, pero sin repetir la excepción de
+│                      la pregunta general mandó una ficha antes de que la persona
+│                      eligiera. Una regla final sin sus excepciones las anula. La
+│                      medición no aplica las reglas de estilo a las fichas y verifica
+│                      que cada una llegó igual al catálogo: 10 de 10).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

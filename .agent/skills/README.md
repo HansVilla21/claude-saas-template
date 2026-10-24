@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**193 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**194 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -113,6 +113,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `cache-compartida-entre-usuarios` | La caché de prompts solo acierta entre usuarios si lo igual para todos va primero y marcado, y lo de cada uno después. Medir antes de tocar; mover la marca no cambia el texto que lee el modelo |
 | ⭐ `workflow-n8n-activo-sin-recibir` | Un workflow ACTIVO puede no estar recibiendo nada: un bot 3 días mudo, en verde y sin un error. Verificar la entrada, sobre todo al migrar un número, cambiar de proveedor o conectar un tenant |
 | `cargar-prompt-al-motor` | Cargar en el motor un prompt escrito afuera. Regla del founder (2026-10-17): el texto del autor va **tal cual** y sus trampas se le reportan; lo nuestro es la config (Sonnet 5, aviso al pasar, topes sacados de su texto). Cargado no es listo: se mide el estilo contra sus reglas antes de decir "listo" |
+| ⭐ `texto-literal-por-marcador` | El negocio quiere que el bot mande **su** texto tal cual ("como copy paste") y el modelo lo resume, y aunque lo copie la limpieza, el partidor y el recortador lo cambian. El modelo **elige** un marcador `[FICHA:ref]` y el código pega el texto exacto en su propio mensaje; la memoria guarda el marcador. Medido: un recordatorio al final sin las excepciones de la nota las anula |
 
 ## 💬 WhatsApp, webhooks e integraciones
 
