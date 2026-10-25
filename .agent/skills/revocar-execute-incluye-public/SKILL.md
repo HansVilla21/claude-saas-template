@@ -205,3 +205,38 @@ prueba con `curl`.
 - **Poner un chequeo de `auth.uid()` y dejar PUBLIC abierto** "porque ya
   chequea": un chequeo mal escrito o un `security definer` que olvida
   `search_path` vuelve a abrirla. Las dos capas.
+
+## Segundo caso: un RPC que escribe, y dos hallazgos falsos (CRM de Josué, 2026-10-25)
+
+Las dos versiones del RPC de «completar los datos vacíos» del importador eran
+`security definer` con `grant execute … to authenticated`, y **anon también las
+ejecutaba**. Con la clave pública, que viaja en el JavaScript del sitio,
+cualquiera podía escribir correos y teléfonos en leads de cualquier cartera, por
+fuera de la RLS. Estuvieron abiertas dos meses. Las encontró una revisión de
+código, no una prueba. Ya están cerradas y después se borraron.
+
+- **Preferí `security invoker` antes que chequear adentro quién llama.** El
+  definer era comodidad («lo llama el importador, que ya está autenticado»). La
+  policy de UPDATE ya permitía exactamente eso, así que con invoker decide la RLS
+  y no hay nada que replicar. Además: `revoke … from public, anon`,
+  `grant … to authenticated` y `search_path = ''`.
+- **Probalo con rollback, como cada rol:**
+  - anon → permission denied;
+  - un rol limitado sobre un registro ajeno → 0 filas;
+  - el admin → 1.
+
+  Si no hay datos para el escenario, armalo dentro de la transacción. Ojo con
+  las «colas abiertas» de la RLS (registros sin asignar que cualquiera del
+  equipo puede trabajar): un registro de prueba sin asignar deja pasar al rol
+  limitado y parece un hueco que no es.
+- **Aplicalo ya si solo QUITA un acceso** que nadie usa legítimamente, aunque
+  el resto del cambio espere al deploy. Antes, confirmá que lo que está en
+  producción sigue andando.
+- **Verificá cada hallazgo contra la base viva, no contra las migraciones.**
+  - En la misma revisión, «la tabla de notas la puede leer cualquiera» era
+    falso: una migración posterior había cambiado la policy, y `pg_policies` lo
+    dijo en un minuto.
+  - En la revisión siguiente, «v1 y v2 siguen siendo security definer» también
+    era falso: `prosecdef = false` desde el arreglo.
+
+  Las migraciones son la historia; `pg_proc` y `pg_policies`, el estado.
