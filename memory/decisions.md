@@ -6,6 +6,58 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-24 — Los avisos de que algo se rompió van solo a Hans y Pietro, y el sistema se vigila desde dos lados
+
+**Contexto:** en octubre el CRM se cayó tres veces sin que nadie se enterara: el disco lleno (02-10, 11,5 h), Vercel apagado por un cobro (13-10, 1 h 20) y el tope de Anthropic (21-10, 2 h). El aviso de número caído (MOM-126) le llegaba también al dueño del negocio.
+
+**Decisión:**
+- **Los avisos internos van SOLO a los super_admin (Hans y Pietro), nunca al cliente.** Hans: «para nadie más, no hay que avisar al cliente de nada». Ya no hay campana para el negocio, la franja y el cartel de Canales solo los ve un master, y Novedades del 19-10 se reescribió (CRM #438).
+- **Dos vigilantes en dominios de falla distintos:**
+  - un Edge Function en Supabase (cron cada 5 min) mira el CRM, los turnos del bot, el respaldo y el saldo de YCloud;
+  - un cron de Vercel mira la base con una escritura de prueba (0151).
+- **Plantilla genérica `alerta_crm`** para todos los avisos internos. Mientras Meta la revisa, el aviso de número caído usa las plantillas viejas de respaldo.
+- **El estado se ve donde Hans llega al iniciar sesión,** «Todas las cuentas» (CRM #441), además del panorama de `/master`.
+
+**Razón:** lo que avisa no puede vivir dentro de lo que se cae. Skill `vigilancia-cruzada-dos-testigos` (Tier 66).
+
+**Qué se descartó:**
+- avisarle al dueño del negocio;
+- un solo vigilante, porque cae con la pieza que vigila;
+- deduplicar el aviso de base caída guardando estado (no hay dónde): se usan ventanas fijas de 30 minutos.
+
+**Pendientes inmediatos:** que Meta apruebe `alerta_crm` (la recategorizó a MARKETING).
+
+## 2026-10-24 — Si Claude falla, contesta gpt-4.1 (MOM-125)
+
+**Contexto:** el 21-10 el tope de gasto de Anthropic dejó a todos los bots en «falla técnica» 2 h.
+
+**Decisión:** respaldo de OpenAI, decidido por Hans («que sea uno de OpenAI, el más indicado»): **gpt-4.1**, el modelo de todos los bots hasta el 17-10, con estos mismos prompts y el mismo esquema (CRM #439).
+- **Qué lo dispara:** cualquier falla tras el reintento, salvo que el modelo elija no contestar.
+- **Cuánto dura:** se queda en el respaldo el resto del turno.
+- **También cubre:** los seguimientos redactados por el bot.
+
+**Razón:** un reintento no arregla un tope ni una clave revocada; otro proveedor sí. El vigilante avisa con una sola respuesta en respaldo, para que el respaldo no tape la caída.
+
+**Qué se descartó:**
+- los GPT-6, que no tienen precio cargado y piden `reasoning_effort: none` para usar herramientas;
+- volver al primario a mitad del turno.
+
+## 2026-10-24 — El historial de WhatsApp se importa, y los chats viejos de Di Garda se rescataron
+
+**Contexto:** 34.896 eventos de historial de coexistencia se descartaban desde el 23-09 (CRM #386). Al importarlos, 4 triggers trataban un mensaje viejo como uno de ahora: pasaban el chat a una persona, encolaban a Zoho y mandaban eventos a Meta.
+
+**Decisión:**
+- **Importar con la marca `app.importando_historial` en todos los triggers** (0152). La carrera de dos mensajes de la misma persona se arregló en la 0154.
+- **Rescate de lo guardado de Di Garda,** con OK de Hans: 17.509 mensajes y 549 contactos, sin avisos, sin Meta, y ningún chat pasó a una persona.
+- **Un chat viejo que vuelve a escribir lo atiende quien corresponda hoy:** el bot si está prendido, la persona asignada si no. Hans: «como está ahora, funciona».
+- **La base se limpia sola cada día:** eventos crudos de más de 30 días (90 si tienen error) y registro de los crons de más de 7 días (0153 y 0155). Hans: «solucionalo».
+
+**Razón:** la regla de Hans es que un chat viejo no actúe como un mensaje de ahora.
+
+**Qué se descartó:**
+- el script viejo de importación (#402, cerrado): creaba contactos fuera de la marca;
+- nacer «sin asignar» siempre, porque dejaba mudo al bot para ese contacto.
+
 ## 2026-10-24 — La descripción de cada servicio sale tal cual: el modelo elige un marcador, no copia (Di Garda)
 
 **Contexto:** la clínica pidió que, cuando alguien pregunta por un servicio, le llegue la descripción que cargó en el catálogo, "como copy paste". El modelo la resumía, porque el prompt de Pietro dice "la descripción la cuentas con tus palabras". Y aunque la copiara, el motor la cambia: la limpieza le saca los dos puntos, el partidor la corta en burbujas de 220 y el recortador acorta lo que pasa de 660. Las 38 descripciones llegan a 959 caracteres, con viñetas, "Incluye:" y el link de WhatsApp.
