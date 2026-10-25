@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        196 skills de proceso reusables:
+│   └── skills/        199 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2119,6 +2119,32 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      llevó un chat a 4.841 de una vez y se abría en junio. Desc +
 │                      techo + reverse, no `leerTodo`. Regla: antes de importar,
 │                      revisá las lecturas por entidad que asumen «pocas filas».
+│                      Tier 69 — La ronda del 15/10 del CRM de Josué (3 nuevas + 3
+│                      extensiones, capturadas 2026-10-24/25, JRM-78 a JRM-84):
+│                      paginar-lista-en-servidor (⭐ la continuación del tope de
+│                      1000: la lista mandaba 4,2 MB por visita y el kanban pintaba
+│                      111.074 elementos; medir peso, lectura y pintado por
+│                      separado, vista SQL con security_invoker, UNA
+│                      implementación de filtrar/ordenar, trampas de PostgREST y
+│                      medir CON la RLS) + pantalla-se-actualiza-sola (el cliente
+│                      recargaba «constantemente»: router.refresh() al volver a la
+│                      pestaña y cada minuto con freno por inactividad, solo en
+│                      pantallas auditadas; la alternativa barata a realtime) +
+│                      historial-importaciones-deshacer (deshacer CUALQUIER
+│                      importación, también lo que «completar» rellenó: el lote se
+│                      registra antes de escribir y no se le cree al navegador,
+│                      «completar» devuelve lo que cambió con un CTE `antes … for
+│                      update`, y `reverted_at` para no vaciar lo que puso OTRO
+│                      lote al deshacer dos veces). Extensiones:
+│                      revocar-execute-incluye-public (2º caso: un RPC que ESCRIBE,
+│                      invoker en vez de definer, rollback por rol y dos hallazgos
+│                      falsos de revisión), boton-llamar-softphone-vs-telefono (2º
+│                      caso: elegir Zoiper/WhatsApp/Zoom; `wa.me` sin código de país
+│                      no abría para el 60 % de la base; en Windows `callto:` se
+│                      asigna a mano) y refrescar-vista-server-tras-mutacion-cliente
+│                      (matiz: router.refresh() sí lee lo último; para cambios de
+│                      otros, realtime o refresco acotado). Y se ubicó en el índice
+│                      comisiones-por-quincena-y-pagos-fijos, que había quedado fuera.
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
