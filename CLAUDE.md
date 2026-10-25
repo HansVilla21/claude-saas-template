@@ -2105,6 +2105,20 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      setting local a la transacción para probar «el 29 de
 │                      octubre» cualquier día, y la lista de pruebas con su control
 │                      negativo).
+│                      Tier 68 — Lo que no entra en la URL (1 extensión, capturada
+│                      2026-10-24 del bloque de arreglos del CRM):
+│                      lectura-cortada-por-max-rows suma el TERCER CASO (⭐
+│                      cross-project). `.in()` también va en la URL en una ESCRITURA:
+│                      «Seleccionar todo» + etiquetar con más de ~350 contactos
+│                      fallaba entera —medido: 350 uuid pasan, 400 «fetch failed»,
+│                      1.000 «Bad Request»—; se arregla con `enTandas` (200, EN ORDEN,
+│                      corta en la primera falla y devuelve lo aplicado) y una prueba
+│                      que exige tanda ≤ 350. Y un hilo se lee desde lo ÚLTIMO: el chat
+│                      pedía los mensajes ascendentes sin techo y mostraba los 1.000
+│                      más viejos; nadie lo vio hasta que una importación de historial
+│                      llevó un chat a 4.841 de una vez y se abría en junio. Desc +
+│                      techo + reverse, no `leerTodo`. Regla: antes de importar,
+│                      revisá las lecturas por entidad que asumen «pocas filas».
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
