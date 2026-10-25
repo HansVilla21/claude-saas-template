@@ -11,6 +11,8 @@
 - Un embudo o un dashboard muestra **0** (o muy poco) donde debería haber miles, o una lista de "lo de hoy" se quedó **congelada en una fecha vieja**.
 - Vas a pasarle a `.in()` una lista de ids que puede crecer, o una lista que **debería tener filas sale vacía** sin error.
 - Arreglaste el tope y el número "real" dispara algo hacia afuera (un envío masivo, un cobro): ver la sección 8 del segundo caso.
+- Una **acción en lote** ("Seleccionar todo" + etiquetar / cambiar estado / asignar) falla entera con muchos elegidos y anda con pocos: ver el tercer caso.
+- Un **chat o un hilo se abre en mensajes viejos** y no muestra lo de hoy, o vas a **importar historia** (chats viejos, un CSV grande) que puede llevar una sola entidad a miles de filas: ver el tercer caso.
 
 ## Por qué existe esta skill
 
@@ -189,10 +191,77 @@ Pasar de "999" a 5.204 destinatarios **multiplica por cinco un envío masivo** d
 
 **Estilo del error:** `leerTodo` devuelve lo leído + el error ("mejor una lista parcial a la vista"); `fetchAll` tira y la pantalla muestra el error. Los dos son válidos; lo que no vale es el `error` ignorado.
 
+## Tercer caso (2026-10-24): la acción en lote que fallaba entera y el chat que se abría en junio
+
+En el mismo CRM del primer caso, un mes después, se revisaron cuatro lecturas anotadas como "pueden cortar en 1.000". Dos ya tenían techo (la nota estaba vieja), una sí cortaba (el "en N contactos" de Etiquetas sumaba **919 usos de 2.126** en el negocio grande), y aparecieron dos fallos peores que no estaban en la lista.
+
+### 1. `.in()` en una ESCRITURA tumba la acción entera
+Las acciones en lote aceptaban hasta 1.000 ids, y "Seleccionar todo" los junta sin tope. `update(...).in('id', ids)` y `delete().in(...)` también llevan la lista en la URL. Medido con supabase-js desde el servidor, contra el proyecto real:
+
+| uuid en `.in()` | resultado |
+|---|---|
+| 300 / 350 | ✅ |
+| 400 / 450 / 500 | ❌ `TypeError: fetch failed` |
+| 1.000 | ❌ `Bad Request` |
+
+(El segundo caso midió 200 ✅ / 493 ❌; el umbral real cae entre 350 y 400, unos 16 KB de URL.) Con más de ~350 contactos elegidos la acción **no aplicaba nada** y la barra decía "No se pudo completar la acción". Un negocio con 1.664 contactos lo pisaba con un clic.
+
+Arreglo: tandas de 200 **en orden, no en paralelo**. En una escritura importa cortar en la primera falla y devolver lo ya aplicado junto con el error, para que "N cambiados" salga de la base y no de la lista pedida (ver `acciones-en-lote-seguras`):
+
+```ts
+export const TANDA_IN = 200; // medido: 350 pasan, 400 no
+
+export async function enTandas<T>(
+  ids: readonly string[],
+  consulta: (tanda: string[]) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
+) {
+  const data: T[] = [];
+  for (let i = 0; i < ids.length; i += TANDA_IN) {
+    const { data: filas, error } = await consulta(ids.slice(i, i + TANDA_IN));
+    if (error) return { data, error };
+    if (filas) data.push(...filas);
+  }
+  return { data, error: null };
+}
+// const { data, error } = await enTandas(toWrite, (t) =>
+//   admin.from('leads').update(x).eq('agency_id', id).in('id', t).select('id'));
+```
+
+- **Una prueba exige `TANDA_IN <= 350`** (el límite medido): nadie la sube "por rendimiento" sin ver que rompe.
+- **El tope del lote es otra cosa.** Se quedó en 1.000 como cortafuegos de producto. Lo que cambió es el mensaje al pasarlo: "Son 2 428: se pueden cambiar hasta 1 000 a la vez", en vez de un código interno entre paréntesis.
+- **Barrido:** `grep -n "\.in('"` sobre todas las acciones en lote dio 21 consultas en 5 archivos, y todas pasaron a tandas. Se dejan las que ya reciben listas cortas por diseño (una importación ya partida en tandas).
+
+### 2. Un hilo se lee desde lo ÚLTIMO, con techo
+El inbox al abrir un chat y la ficha del contacto pedían `order('created_at', { ascending: true })` sin techo. Con más de 1.000 mensajes se veían **los 1.000 más viejos**. Nadie lo había visto porque "un chat nunca pasa de mil"... hasta que una **importación de historial** (los chats viejos de WhatsApp al conectar el número) llevó un chat a **4.841 mensajes de una vez**. Se abría en junio, sin la nota de voz de ese mismo día. Lo encontró la verificación de OTRA cosa: la UI nueva "no aparecía" porque estaba más allá del corte.
+
+Acá `leerTodo` es la respuesta equivocada: un hilo de 5.000 mensajes no se pinta entero. Lo correcto es pedir los últimos N y darlos vuelta:
+
+```ts
+export const TOPE_MENSAJES_DEL_CHAT = 1000;
+export const ultimosPrimeroAlFinal = <T>(filas: readonly T[] | null | undefined): T[] => [...(filas ?? [])].reverse();
+
+const { data } = await sb.from('messages').select(COLS).eq('conversation_id', id)
+  .order('created_at', { ascending: false }).limit(TOPE_MENSAJES_DEL_CHAT);
+const mensajes = ultimosPrimeroAlFinal(data);
+```
+
+Lo que queda más atrás del techo es una función nueva ("ver anteriores"), no un bug.
+
+**La regla nueva:** una importación masiva mueve los techos de golpe. Antes de importar, buscá las lecturas **por entidad** (`eq('conversation_id', …)`, `eq('lead_id', …)`) que asumen pocas filas por entidad, y después medí la entidad más grande:
+```sql
+select conversation_id, count(*) from messages group by 1 order by 2 desc limit 5;
+```
+
+### 3. Cómo se verificó
+- **`.in()`:** un script que importa los módulos REALES del repo (`node --experimental-strip-types` + el resolvedor del alias `@/`) contra el proyecto. 1.000 ids directo dan `Bad Request`; con `enTandas`, ok. Los 1.664 contactos del negocio grande, releídos por id en tandas, dan 1.664.
+- **Conteo:** lógica vieja · nueva · SQL directo = 919 · 2.126 · 2.126, y las 5 etiquetas más usadas coinciden una por una.
+- **Hilo:** en el preview, con sesión real y a 375 px, el chat de 4.841 mensajes termina en el mensaje de hoy.
+
 ## Lo que esta skill NO cubre
 
 - **Cuándo dejar de traer todo al navegador.** Filtrar y contar en el cliente asume la lista completa; pasadas unos miles de filas hay que filtrar y contar en el servidor (`count` por consulta, medido). Paginar te compra tiempo, no escala infinito.
 - **El resto de las lecturas del primer proyecto:** ahí el barrido se hizo solo sobre las tres pantallas que mostraron el síntoma. El método para barrer todas está en la sección 6 del segundo caso.
+- **"Ver anteriores" en un hilo** con más mensajes que el techo (tercer caso): es una función, no un arreglo.
 - **La rama del duplicado de punta a punta:** el tiempo real refrescó el chip antes de poder reintentar, así que solo se probó leyendo el código y el `sql_state` de los logs.
 
 ## Ejemplo
@@ -204,3 +273,7 @@ Pasar de "999" a 5.204 destinatarios **multiplica por cinco un envío masivo** d
 **Input:** *"Lo que cambio en un lead no aparece en el pipeline."*
 
 **Output:** no era la revalidación. Medir `content-range` dio `0-999/8022`: el tablero ordenaba por una columna en la que valían 0 todos, así que mostraba 1.000 al azar (un lead de prueba aparecía solo al ponerle valor > 0). Se paginó con desempate por `id`, y el barrido encontró seis pantallas más. Una de ellas, al arreglarla, le pedía 493 ids a `.in()`, que falla, así que se pasó a tandas. Tabla "antes · ahora · base" contra SQL directo: 20 de 20 iguales. El boletín pasó de "999" a 5.204, con un tope explícito de 1.000 por envío hasta que el dueño decida.
+
+**Input:** *"Revisá las pantallas que pueden cortar en 1.000."*
+
+**Output:** de las cuatro anotadas, dos ya estaban bien y una contaba de menos (919 de 2.126), arreglada con `leerTodo`. Midiendo apareció lo peor: con más de ~350 elegidos, toda acción en lote fallaba entera por el largo de la URL (`enTandas`, 21 consultas). Y al verificar otra cosa, un chat de 4.841 mensajes (historial importado) se abría en junio: el hilo pasó a pedir los últimos 1.000 y darlos vuelta.
