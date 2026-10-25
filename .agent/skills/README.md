@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**194 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**195 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -63,6 +63,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `borrar-entidad-deja-sus-archivos` | Borrar un cliente, un usuario o una conversación con adjuntos: las FK con cascade limpian la base, NO el Storage. Antes de decirle que sí a "borrame esta cuenta" |
 | ⭐ `historial-de-cambios-por-trigger` | "¿Quién cambió esto y cómo llegó a este estado?": historial por trigger en una tabla propia, no un `audit_log` genérico que nadie llena. Primero se cuentan todos los caminos que escriben la columna |
 | ⭐ `supabase-disco-lleno-pasa-a-solo-lectura` | El disco de Supabase se llena, la base pasa a solo lectura y el sistema entero se calla: REST da 522 o se cuelga mientras auth y las Edge Functions contestan rápido |
+| ⭐ `vigilancia-cruzada-dos-testigos` | El sistema se cae y **nadie se entera** porque lo que tenía que avisar vive adentro de lo caído (pg_cron no corre con la base en solo lectura; el cron de Vercel no corre con Vercel apagado). Dos testigos en lados opuestos que se miran entre sí, prueba de **escritura**, aviso reclamado una vez, deduplicar sin estado cuando el estado es lo caído, y un aviso para cuando el respaldo tapa la caída |
 
 ## 🏢 Multi-tenant y SaaS
 

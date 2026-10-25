@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        194 skills de proceso reusables:
+│   └── skills/        195 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2052,6 +2052,28 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      eligiera. Una regla final sin sus excepciones las anula. La
 │                      medición no aplica las reglas de estilo a las fichas y verifica
 │                      que cada una llegó igual al catálogo: 10 de 10).
+│                      Tier 66 — Quién vigila al vigilante (1, capturada 2026-10-24
+│                      del vigilante del sistema del CRM):
+│                      vigilancia-cruzada-dos-testigos (⭐ cross-project: en octubre
+│                      el sistema se cayó tres veces y ninguna avisó —disco lleno con la
+│                      base en solo lectura 11,5 h, Vercel apagado por un cobro 1 h 20,
+│                      tope de gasto de Anthropic 2 h— porque lo que tenía que avisar
+│                      vivía adentro de lo que se cayó: pg_cron ESCRIBE para correr, y
+│                      el cron de Vercel vive en Vercel. Un vigilante no puede vivir en
+│                      el dominio de falla que vigila: dos testigos en lados opuestos
+│                      que se miran entre sí —un Edge Function despertado por pg_cron
+│                      mira la app, el bot y el saldo del proveedor; un cron de Vercel
+│                      mira la base con una ESCRITURA de prueba, porque en solo lectura
+│                      las lecturas siguen andando—. Lo no-obvio: deduplicar SIN estado
+│                      cuando el estado es lo caído (ventanas fijas de reloj: a lo sumo
+│                      2 avisos por hora, el primero en menos de 30 min), inferir la
+│                      vuelta de un hueco en el latido sin confundir el hueco de Vercel
+│                      con el de la base, avisar con UNA respuesta en respaldo porque el
+│                      modelo de respaldo tapa la caída del principal, generar el
+│                      secreto del cron dentro del Vault, desplegar la función ANTES de
+│                      la migración que arranca el cron, y no escribir de memoria el
+│                      identificador del proyecto: la primera versión lo traía
+│                      inventado y el cron habría llamado a la nada sin un error).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
