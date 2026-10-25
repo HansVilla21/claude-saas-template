@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        195 skills de proceso reusables:
+│   └── skills/        196 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2074,6 +2074,37 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      la migración que arranca el cron, y no escribir de memoria el
 │                      identificador del proyecto: la primera versión lo traía
 │                      inventado y el cron habría llamado a la nada sin un error).
+│                      Tier 67 — La factura que no se mueve (1, capturada 2026-10-24
+│                      del sistema de operación de una clínica):
+│                      comisiones-por-quincena-y-pagos-fijos (⭐ cross-project: el
+│                      cliente paga comisiones el 15 y el 28 con factura, y cada
+│                      pago se comisiona en la quincena en que ENTRÓ. El calendario
+│                      es un dato que el cliente edita en Finanzas, no código: día
+│                      de pago y de corte, corte mayor que pago ⇒ mes siguiente, el
+│                      31 cae en el último día. UNA función decide la factura de
+│                      una fecha y un trigger GUARDA el resultado en la comisión
+│                      —si la pantalla recalcula con el calendario de hoy, reescribe
+│                      facturas ya pagadas—. Lo que llega tarde salta a la próxima
+│                      factura abierta y nunca cambia el total de una ya subida; el
+│                      grupo sigue cerrado aunque algo pase a revisión (mirar
+│                      `estado_previo`), y se recalcula también al cambiar de
+│                      persona y al aprobarse tarde. Pagos fijos de la empresa
+│                      (egreso) o de una persona (fila `tipo='fijo'` que se factura
+│                      con sus comisiones; el sueldo en planilla es de la empresa,
+│                      o se cuenta dos veces), con días o «en cada fecha de pago»,
+│                      meses, «desde» y modo. Lo caro fueron los cuatro bugs que
+│                      dos revisiones encontraron antes de publicar y ninguna prueba
+│                      feliz veía: un índice por MES heredado que anotaba solo el
+│                      15 de un fijo «15 y 30»; un barrido que miraba 60 días atrás
+│                      con la configuración de HOY —se arregla con un avance por
+│                      fijo, nada hacia atrás—; «en cada fecha de pago» contado por
+│                      fecha y no por período, que al pasar del 28 al 30 el día 29
+│                      dejaba DOS bases en la factura del 30, o ninguno al revés; y
+│                      editar un fijo que no corregía la línea ya vencida sin pagar.
+│                      Trae `referencia.sql` generalizado, «hoy» inyectable con un
+│                      setting local a la transacción para probar «el 29 de
+│                      octubre» cualquier día, y la lista de pruebas con su control
+│                      negativo).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
