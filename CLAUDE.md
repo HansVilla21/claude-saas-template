@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        199 skills de proceso reusables:
+│   └── skills/        200 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2145,6 +2145,17 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      (matiz: router.refresh() sí lee lo último; para cambios de
 │                      otros, realtime o refresco acotado). Y se ubicó en el índice
 │                      comisiones-por-quincena-y-pagos-fijos, que había quedado fuera.
+│                      Tier 70 — Cómo salió la cita (1, capturada 2026-10-25 del
+│                      CRM de Josué): resultado-de-cita-y-asistencia (⭐ las citas
+│                      pasadas no se veían en ninguna pantalla y el "Ya lo hice"
+│                      escribía en el lead y no en la cita. 🔴 Un trigger viejo
+│                      convertía CUALQUIER actividad en "último contacto = ahora":
+│                      marcar "No asistió" habría dejado 49 leads "contactados
+│                      hoy". "Sin marcar" se deriva; marcar es UNA transacción que
+│                      no pisa lo que marcó otro, deshace con el contacto previo y
+│                      hace upsert de la actividad; asistencia = realizadas ÷
+│                      (realizadas + no asistió), "sin datos" y no 0 %; el no-show
+│                      PROPONE reagendar; el mes en la zona del negocio).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
