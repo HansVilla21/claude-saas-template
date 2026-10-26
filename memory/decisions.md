@@ -6,6 +6,31 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-25 — Agenda propia tipo Calendly, construida en el CRM: la agenda primero y el bot al final
+
+**Contexto:** Hans quiere una agenda «igual o mejor que Calendly», propia del CRM. Junta MOM-26 (Google Calendar), MOM-135 (espacios con cupo) y MOM-67 (recordatorios). Pidió diseñarla con REA OS, que tiene una ingeniería inversa de Calendly (`REA OS/sistemas/calendly/`, consulta `20261025-193837-440e`).
+
+**Decisión:**
+- **Se construye adentro del CRM,** montada sobre `appointments`. Hay un solo motor de horarios para la página y para el bot, y el cupo va desde el primer día (una fila por persona; el cupo es un conteo).
+- **Orden (Hans):** «primero quiero tener la funcionalidad del calendario conectado a Google Calendar, con el link… ya cuando tengamos todo eso funcionando bien, trabajamos la conexión con el chatbot». Fases: 1 servicios, horarios y motor · 2 página pública · 3 Google Calendar · 4 recordatorios · 5 el bot usa la agenda.
+- **El bot reserva solo,** con un interruptor por negocio para pedir aprobación.
+- **La página** va en el dominio del CRM, con WhatsApp obligatorio.
+- **La confirmación** sale por WhatsApp (plantilla) y por correo con invitación de calendario.
+- **Reagendar** mueve la misma cita, para que la 0123 la siga contando.
+- **En la v1 no van:** el cobro, una regla de cancelación por defecto ni el reparto entre asesores.
+
+**Razón:** lo que nos diferencia es que el bot reserve dentro de WhatsApp, sin link, pegado a la ficha del contacto. Ningún producto lo trae, y más de la mitad ya existía: citas, agenda, el botón de agendar, el motor de seguimientos y el Google Calendar del CRM de Josué.
+
+**Qué se descartó:**
+- **Instalar cal.com:** cerró su código en abril de 2026, y para instalarlo en un servidor propio hay que contratar Enterprise. Su Platform cerró a clientes nuevos en diciembre de 2025.
+- **Cal.diy** (lo que quedó abierto, con licencia MIT): es para uso personal y no maneja varios negocios. Su motor se puede copiar si conviene.
+- **Conectar el bot primero:** Hans quiere la agenda probada sola antes.
+
+**Pendientes inmediatos:**
+- La fase 1 arranca el martes 27 (había límite semanal de Claude al 94 %).
+- Hay que definir el negocio de prueba.
+- Las plantillas de recordatorio se le piden a Meta con tiempo.
+
 ## 2026-10-24 — Los avisos de que algo se rompió van solo a Hans y Pietro, y el sistema se vigila desde dos lados
 
 **Contexto:** en octubre el CRM se cayó tres veces sin que nadie se enterara: el disco lleno (02-10, 11,5 h), Vercel apagado por un cobro (13-10, 1 h 20) y el tope de Anthropic (21-10, 2 h). El aviso de número caído (MOM-126) le llegaba también al dueño del negocio.
