@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        151 skills de proceso reusables:
+│   └── skills/        201 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -279,6 +279,13 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      scope=global + agency_modules is_member_of); `agency_id` lo pone
 │                      el flow nunca el LLM; confirmar enums/uniques del schema antes;
 │                      solo `available`+`is_published`+no borrado se muestra al lead).
+│                      **Apéndice 2026-10-13:** un TERCER camino para rubros sin tope
+│                      (productos): búsqueda en Postgres con RPC (tsvector `spanish` +
+│                      `unaccent` IMMUTABLE + trigramas, niveles todas → alguna →
+│                      parecido → categoría sola, cada relajación avisada al modelo),
+│                      el RESUMEN en el prompt en vez de la lista, una herramienta por
+│                      módulo enrutada por nombre, panel paginado en el servidor y las
+│                      4 fallas que solo mostró el motor real.
 │                      Tier 19 — Método de trabajo (3, capturadas 2026-08-11 de la
 │                      sesión de etiquetas + drill-down del CRM):
 │                      verificar-base-del-pr-antes-de-mergear (⭐ cross-project:
@@ -661,7 +668,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        restore ~4 min sin pérdida de datos, y keep-alive con
 │                        cron de Vercel. Gotchas: los crons se identifican por
 │                        PATH —dos con la misma ruta es UNO— y solo corren en
-│                        producción).
+│                        producción). **Apéndice 2026-10-13:** Vercel también
+│                        apaga todo —402 `DEPLOYMENT_DISABLED`, dominio propio
+│                        incluido— si el cobro de Pro falla, y «Reactivar» no
+│                        paga la factura: leer `billing.status` por API,
+│                        chequeo externo de `/login` y rescate a mano de lo
+│                        que quedó fuera de la ventana del cron.
 │                      · completitud-de-contenido-en-el-panel (que el cliente
 │                        no técnico SÍ termine de llenar 230 fichas: completitud
 │                        como función pura, badge que dice QUÉ falta, filtro de
@@ -786,10 +798,16 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      queda en un solo disco: espejo privado con rama
 │                      `respaldo-full-<fecha>`, y el trade-off de los `.env` en
 │                      texto plano decidido explícito, con git-crypt como
-│                      alternativa) + git-footguns-de-sesion (los 3 que borran
-│                      trabajo sin dar error: untrackear un dir con ediciones
-│                      sin commitear, dos sesiones sobre la misma rama con
-│                      `git add -A`, y el Credential Manager multicuenta) +
+│                      alternativa) + git-footguns-de-sesion (los 4 que borran
+│                      o pisan trabajo sin dar error: untrackear un dir con
+│                      ediciones sin commitear, dos sesiones sobre la misma
+│                      rama con `git add -A`, el Credential Manager
+│                      multicuenta, y el paso que falla sin frenar a los
+│                      siguientes: el `git worktree add` murió por rutas
+│                      largas y el `git commit` corrió en el checkout con
+│                      trabajo ajeno. En la terminal de Claude Code `set -e`
+│                      no frena; el arreglo es commitear con la plomería de
+│                      git sin tocar el checkout. Sumado 2026-09-10) +
 │                      verificar-ui-detras-de-auth-en-local (quitar la ruta de
 │                      `PROTECTED_PREFIXES` en local y REVERTIR — el revert es
 │                      parte del cambio; Google GIS no corre en un preview de
@@ -1081,6 +1099,1081 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      salida fallback muerta no rescata un caso, te SUSCRIBE a
 │                      todos los valores desconocidos de ese campo, y qué hay que
 │                      pagar en el mismo commit para que no vuelva.
+│                      Tier 34 — El bot que se mudó de casa (2, capturadas
+│                      2026-09-02 pasando a Leo (Level CR) de su workflow propio
+│                      de n8n al CRM): portar-bot-n8n-propio-al-crm (⭐ mover el
+│                      bot que un cliente YA tenía andando a la plataforma
+│                      multi-tenant. Lo primero: los prompts NO se le piden al
+│                      cliente, se sacan del JSON del workflow por API —salen
+│                      exactos, medido: 50.310 chars el principal—. Y el paso
+│                      que falló las TRES veces que se hizo (Roberto → `ROBERTO`,
+│                      Jacó → `PRINCIPAL`, Level → `LEO_PRINCIPAL` ×22): el
+│                      prompt del cliente emite el nombre de SU bot como destino
+│                      y el CRM solo entiende 3 valores, con DOS formas distintas
+│                      de morir —el guard lo descarta y rutea con el clasificador
+│                      de Momentum (tu fisioterapeuta clasificando por "aceptó la
+│                      DEMO"), o si forzás el paso el Switch descarta el turno y
+│                      el bot queda MUDO, porque el BACKUP solo dispara cuando el
+│                      campo NO EXISTE, no cuando trae basura—. El fix es un sed
+│                      global y se PRUEBA neutralizando la palabra en los dos
+│                      lados: el diff tiene que salir vacío. Más: el TIPO de cada
+│                      router_field se lee EN el prompt y no se adivina —el de
+│                      Level dice "entero de COLONES (no string)" y declararlo
+│                      string lo hacía llegar entrecomillado—; las tools son
+│                      nodos del grafo y NO viajan con el prompt; `bot_enabled`
+│                      es COALESCE(...,true) así que una agency con settings
+│                      vacío tiene el bot ARMADO desde que le conectás el número;
+│                      el playground EXIGE bot_enabled=true, así que el orden
+│                      seguro es cargar→prender→probar→apagar; y la verificación
+│                      NO es que el bot conteste bien —eso solo prueba el
+│                      principal— sino `router_source: tenant` en los datos de la
+│                      ejecución) + workflow-n8n-activo-sin-recibir (⭐
+│                      cross-project: un workflow ACTIVO puede no estar
+│                      recibiendo nada, y no falla —no hay ejecución, no hay
+│                      error, no hay log—. Medido: un bot 3 días mudo, en verde,
+│                      porque su webhook escuchaba un path que ya no estaba
+│                      registrado en el proveedor. "Activo" es una propiedad del
+│                      workflow: dice que n8n lo ejecutaría SI le llegara algo,
+│                      no que algo le llegue. Se detecta contando ejecuciones y
+│                      mirando `mode` —"webhook" es que te hablaron, "trigger" es
+│                      que te despertaste solo— y cruzando el path contra los
+│                      endpoints del proveedor. Trae el hermano del bug:
+│                      "success" ≠ "envió" —dos workflows en success todo el día
+│                      con 0 mensajes despachados, porque `onError:
+│                      continueRegularOutput`, que es lo CORRECTO en producción,
+│                      convierte el error en un ítem silencioso—, el alcance por
+│                      CUENTA de los webhooks de YCloud (agregar un número lo
+│                      engancha solo a todos los consumidores que ya estaban), y
+│                      el gotcha que te hace confirmar el bug equivocado: un
+│                      `limit=200` fuera de rango devuelve 0 items en vez de un
+│                      error).
+│                      Tier 35 — Lo aceptado que todavía no está guardado (1,
+│                      capturada 2026-09-07 del formulario de puesta en marcha de
+│                      Di Garda): brecha-entre-aceptado-y-guardado (⭐
+│                      cross-project: entre que el sistema ACEPTA el trabajo de
+│                      alguien —los bytes ya están en el Storage, las teclas ya
+│                      están en el estado— y que lo REGISTRA hay una ventana, y
+│                      todo lo que muere ahí se pierde SIN UN SOLO ERROR: la
+│                      subida devolvió 200, el guardado devolvió 200, no hay línea
+│                      roja en ningún log. Medido: **21 archivos en el Storage, 11
+│                      anotados en la base**; en el log de esa tanda, once tickets
+│                      firmados, once subidas completas y UN solo guardado —tres
+│                      minutos después, subidas de a una, nueve y nueve—. Lo no
+│                      obvio: (1) la detección es CONTAR huérfanos con un left
+│                      join entre el almacén y el índice, no leer logs; (2) el
+│                      REINTENTO del usuario ensucia la evidencia —quien no ve su
+│                      archivo lo vuelve a subir—, así que hay que separar la
+│                      pérdida real comparando por HASH (eTag/MD5) y no por tamaño
+│                      ni fecha: de los 10 huérfanos, 9 tenían gemelo idéntico y
+│                      **1 era pérdida de verdad**, o sea que sin el hash le
+│                      decías al cliente "perdimos 10"; (3) el arreglo es registrar
+│                      cada pieza APENAS llega y escribir la colección con un
+│                      updater sobre el estado vivo, nunca con un valor absoluto
+│                      calculado antes del `await` —25 segundos de subidas con la
+│                      lista vieja en la mano; el mismo patrón al QUITAR resucita
+│                      elementos—; (4) el autoguardado con debounce tiene que
+│                      GUARDAR cuando la pantalla se va (`visibilitychange` +
+│                      `pagehide` + desmontaje) en vez de cancelar el timer,
+│                      porque en móvil iOS CONGELA los timers al bloquear el
+│                      teléfono; y (5) un guardado en vuelo por vez, o el que
+│                      salió primero llega último y pisa lo nuevo con lo viejo.
+│                      ⛔ **El gotcha que ahorra el arreglo equivocado: un botón
+│                      de Guardar NO arregla esto** —lo perdido nunca llegó al
+│                      estado que ese botón guardaría— y el guardado solo-manual
+│                      es PEOR que el automático, porque pierde la sesión entera
+│                      en vez de un segundo; el botón resuelve la CEGUERA (que
+│                      "hay cambios sin guardar" se dibujaba igual que "no hay
+│                      nada"), no la pérdida, y hacen falta los dos. Trae la
+│                      reproducción determinística sin dependencias con su control
+│                      negativo —si el código viejo no falla en tu prueba, el
+│                      verde es falso—, y el aviso de no deducirle el nombre
+│                      original a un huérfano: ese nombre vivía en el índice, que
+│                      es justo lo que se perdió).
+│                      Tier 36 — Una URL para tres canales (1, capturada
+│                      2026-09-10 al construir la recepción directa con Meta en
+│                      el CRM): webhook-meta-multicanal (⭐ cross-project: recibir
+│                      WhatsApp Cloud API, Instagram y Messenger sin proveedor en
+│                      el medio. Una app de Meta tiene UNA URL para los tres, con
+│                      el mismo sobre, la misma firma y el mismo alta: traductores
+│                      puros por sobre → eventos normalizados → un solo
+│                      procesador. Lo no obvio, todo medido o casi pasado: el bot
+│                      que antes tenía su propio webhook del proveedor queda SORDO
+│                      (y si la conversación nace `bot`, nadie se entera); el id
+│                      de usuario del proveedor es opaco y buscar por él al migrar
+│                      duplica todos los contactos —la identidad es el teléfono—;
+│                      3 de 7 clientes guardaban el número sin `+` y conectar por
+│                      Meta los dejaba con dos líneas activas y sin poder enviar;
+│                      la media de WhatsApp es un id cuyo link vence a los 5
+│                      minutos y pide token; varios adjuntos bajo un solo `mid`;
+│                      los ecos de tu propia app; borrado y edición que caían en
+│                      el fallback como burbuja falsa —ya resuelto en el webhook
+│                      viejo y perdido al portar, lo encontró la revisión y no las
+│                      pruebas—; estados fuera de orden que exigen un UPDATE
+│                      atómico; un CHECK que tiraba el valor nuevo en silencio;
+│                      con los nombres de usuario de WhatsApp Meta puede no
+│                      mandar el teléfono —solo el BSUID— y exigir `from`
+│                      descarta esos mensajes en silencio; y 200 vs 500
+│                      clasificando por SQLSTATE, porque siempre 200
+│                      pierde mensajes y siempre 500 hace un bucle).
+│                      Tier 37 — Las puertas de Meta que el panel no avisa (3
+│                      nuevas + 1 apéndice, capturadas 2026-09-11 del camino
+│                      completo del CRM hacia Meta, de la primera verificación
+│                      a la revisión de la app):
+│                      meta-tech-provider-de-cero-a-app-review (⭐ cross-project:
+│                      que cada cliente conecte SU WhatsApp/IG/Messenger desde
+│                      tu producto. Siete puertas en orden y CUATRO bloqueos que
+│                      aparecen recién al conectar el primer número, cada uno
+│                      escondido detrás del anterior: FedCM tirando el
+│                      config_id, el callback async, "X no puede registrar
+│                      clientes" —proveedor VERIFICADO pero NO REGISTRADO: falta
+│                      el asistente "Independent Tech Provider"— y el #2655111:
+│                      sin App Review aprobada no se conecta NINGÚN número, ni
+│                      el propio. Lo falso que se creyó: que un BSP te ahorra la
+│                      revisión. Trae el círculo "para aprobar hay que mandar un
+│                      mensaje y para mandarlo hay que estar aprobado" y cómo lo
+│                      rompe el número de prueba de Meta; la revisión pantalla
+│                      por pantalla —limpiar permisos ajenos, un video por
+│                      permiso, la llamada de prueba que crear la plantilla en
+│                      WhatsApp Manager NO cuenta y sí el Graph API Explorer,
+│                      textos en inglés, tratamiento de datos, cuenta de revisor
+│                      que tiene que VER el botón—; y el costo de despublicar la
+│                      app como diagnóstico: hasta 10 días de renovación) +
+│                      fb-login-sdk-fedcm-y-callback (⭐ el SDK de Facebook adopta
+│                      FedCM solo si Meta lo marca para tu app, y entonces
+│                      resuelve `FB.login` como un OAuth común con
+│                      `scope=openid`: tu config no llega y Meta dice que la app
+│                      "necesita al menos un permiso compatible". Se ve en diez
+│                      segundos en la URL de la ventana —`dialog_source=fedcm`—
+│                      y se arregla con `fedCM: false`. Detrás venía la segunda:
+│                      el SDK valida el callback con `{}.toString` y rechaza una
+│                      función async, TypeScript no lo ve y el botón queda en
+│                      "Conectando…". Ninguna de las dos existe en localhost) +
+│                      whatsapp-coexistencia-embedded-signup (conectar el número
+│                      que el negocio sigue usando en el celular y traer 6 meses
+│                      de chats. Nunca registrar un número que está en la app;
+│                      pedir la sincronización —una vez, 24 h— solo después de
+│                      suscribir la WABA; importar por una RPC que prende una
+│                      marca local a la transacción para que el pasado no
+│                      dispare avisos, "no leídos" ni realtime; y NO llenar las
+│                      columnas de la ventana de 24 h con mensajes viejos. Con
+│                      los payloads literales de Meta, el SQL y los seis
+│                      hallazgos de la revisión).
+│                      **Apéndice:** webhook-meta-multicanal suma los cuatro
+│                      campos de la coexistencia (`history`,
+│                      `smb_app_state_sync`, `smb_message_echoes` —viene
+│                      apagado en el panel— y `account_update`, que se anota y
+│                      nunca desactiva).
+│                      Tier 38 — Lo que el primer número real destapó (2 nuevas +
+│                      extensiones, capturadas 2026-09-12 conectando por
+│                      coexistencia el primer WhatsApp real del CRM, con la
+│                      revisión de Meta aprobada en menos de un día):
+│                      nombre-de-relleno-visible (⭐ cross-project: el texto que
+│                      el sistema pone cuando NO sabe cómo se llama alguien
+│                      —"Lead sin nombre"— se trataba como un nombre en diez
+│                      lugares. En pantalla le ganaba al teléfono, que era lo
+│                      único que identificaba a la persona; en una plantilla
+│                      salía "Hola Lead," hacia el cliente; y la IA de los
+│                      seguimientos lo recibía como el nombre del cliente. El
+│                      fallback de siempre `display_name || full_name || phone`
+│                      no lo arregla porque el relleno no es vacío. Trae las dos
+│                      funciones —`nombreReal` para dirigirse a la persona,
+│                      `nombreVisible` para mostrar, con el teléfono antes que
+│                      el relleno—, cuándo usar cada una, el grep que encuentra
+│                      los lugares y cómo completar el nombre cuando llega sin
+│                      pisar uno cargado a mano) +
+│                      estado-antes-que-mensaje (⭐ cross-project: un aviso del
+│                      proveedor sobre algo —entregado, pagado, firmado— que
+│                      llega antes que la cosa. El webhook buscaba el mensaje, no
+│                      estaba y descartaba el aviso con un motivo prolijo; el
+│                      mensaje quedaba "enviado" para siempre. Medido: 36 ms de
+│                      diferencia, y la prueba en vivo del arreglo repitió la
+│                      carrera al primer intento. Por qué no se pide reintento
+│                      al proveedor, y el patrón: tabla de pendientes + función
+│                      "aplicar o guardar" + trigger AFTER INSERT y AFTER UPDATE
+│                      SOLO si cambia el id, candado `pg_advisory_xact_lock` por
+│                      id en los dos lados —y por qué eso no hace deadlock salvo
+│                      que el UPDATE reescriba el mismo id—, SECURITY DEFINER,
+│                      limpieza a los 2 días y el control negativo de borrar el
+│                      trigger dentro del bloque que aborta).
+│                      **Extensiones:** whatsapp-coexistencia-embedded-signup
+│                      suma `prueba-real.md` —el flujo de Meta pantalla por
+│                      pantalla, el #3441003 genérico que era el QR sin
+│                      escanear, la agenda que NO llega al conectar sino cuando
+│                      cambia un contacto, el mensaje oficial de Meta que se
+│                      importaba como contacto basura, el historial sin
+│                      nombres, y probar en una cuenta nueva con el número
+│                      vacío porque conectar en una cuenta viva apaga su línea—;
+│                      meta-tech-provider-de-cero-a-app-review anota que la
+│                      revisión se aprobó en menos de un día pese al aviso de 20
+│                      y que publicar no pidió renovación; y
+│                      webhook-meta-multicanal suma el despliegue de la función
+│                      por CLI con `--use-api`.
+│                      Tier 39 — El permiso que nadie revocó (1 nueva + 3
+│                      extensiones, capturadas 2026-09-12 persiguiendo el
+│                      "Lead sin nombre" fuera de las pantallas del CRM):
+│                      revocar-execute-incluye-public (⭐⭐ cross-project: en
+│                      Postgres toda función nace con EXECUTE para PUBLIC, así
+│                      que `revoke execute … from anon, authenticated` NO la
+│                      cierra —anon lo hereda— y la migración se lee prolija
+│                      igual. Con tablas el mismo reflejo sí funciona, por eso
+│                      engaña. Salió reemplazando una función que ponía el
+│                      relleno en las notificaciones: era SECURITY DEFINER y
+│                      devolvía nombre o teléfono de cualquier contacto por id,
+│                      sin sesión; la de al lado tenía el revoke incompleto.
+│                      Las dos se cerraron y el `curl` anónimo pasó a 401, pero
+│                      casi nunca es una sola: la auditoría destapó 18 más —una
+│                      devolvía todas las cuentas de clientes— y se cerraron el
+│                      mismo día, 33 → 15 ejecutables por anon, sin romper el
+│                      cron ni los seguimientos. Trae la query con
+│                      `has_function_privilege` —que resuelve la herencia; leer
+│                      los grants de las migraciones no—, cómo confirmarlo desde
+│                      afuera SIN llamar a las que escriben, los llamadores
+│                      REALES por rol con `pg_stat_statements` —el grep no ve
+│                      n8n ni con qué rol corre—, la tabla de qué rompe —trigger
+│                      y cron corren como postgres; la app con sesión es la que
+│                      rompe—, los dos caminos para el panel que llama con
+│                      sesión —cliente de servicio después del gate, o chequeo
+│                      adentro— con el orden de deploy: app primero, migración
+│                      después; y por qué los helpers de RLS NO se cierran).
+│                      **Extensiones:** nombre-de-relleno-visible suma los
+│                      cuatro lugares que el grep de `src` no ve —otro webhook
+│                      que solo llenaba `display_name` (16 leads), el asistente
+│                      de IA que le decía al modelo "El contacto se llama Lead
+│                      sin nombre", funciones SQL con `coalesce` que solo saltan
+│                      NULL y la Edge Function del aviso al equipo—, el helper
+│                      SQL `nombre_real_lead` + `telefono_legible` verificado
+│                      contra salidas de `prettyPhone`, por qué en el aviso va
+│                      "Sin nombre" y no el teléfono, y por qué las notificaciones
+│                      viejas no se reescriben; probar-migracion-contra-base-viva-
+│                      con-rollback suma cómo reemplazar una función VIVA sin
+│                      cambiar nada más —copiar de `pg_get_functiondef`, generar
+│                      los `execute $mN$` desde el archivo y probar
+│                      `replace(vieja) = nueva` textualmente, con la columna de
+│                      "forma" que explicó 40 cambios inesperados—; y
+│                      whatsapp-proactivo-a-staff corrige su propio consejo de
+│                      revocar solo a anon/authenticated.
+│                      Tier 40 — Lo que el bot no veía y el equipo no sabía (3,
+│                      capturadas 2026-09-16 de lo construido el 2026-09-15
+│                      llevando a código el feedback de un cliente de
+│                      fisioterapia):
+│                      bot-lee-pdf-del-cliente (⭐ cross-project: el paciente
+│                      manda su resonancia en PDF y el bot contesta sin saber qué
+│                      dice; al profesional le llega el archivo sin una línea de
+│                      qué es. El PDF se RESUME una sola vez al llegar —como una
+│                      foto se describe y un audio se transcribe— y el resumen
+│                      queda como texto en el registro del turno y en la memoria.
+│                      Chat Completions con una parte `file` y `file_data` en
+│                      data URL —el link del proveedor vence a los 7 días y el
+│                      propio está firmado—, `filename` que termine en `.pdf`,
+│                      solo PDF porque eran 9 de 9 en 120 días, el MIME se mira
+│                      ANTES de bajar, tope de 10 MB, 30 s por debajo de la
+│                      espera del lote, y un resumen vacío NO es éxito. El texto
+│                      al modelo PROHÍBE opinar y deja que la regla del negocio
+│                      se aplique sobre el resumen; si la lectura falla, llegó y
+│                      no se inventa, nunca "no pude abrirlo". Trae el generador
+│                      de un estudio INVENTADO en Python puro —objetos y `xref`
+│                      a mano— para probar contra la API real: 2,7 s y USD
+│                      0,0004 por PDF. Gotchas: el TERCER lugar que enumera
+│                      tipos —el filtro de textos guardados del lote— quedó sin
+│                      tocar, y un PDF seguido de un texto llega como "no se pudo
+│                      leer"; un assert de "no contiene 'no se pudo abrir'" falla
+│                      con el código bien porque la instrucción que lo prohíbe
+│                      usa esas palabras; y son datos de salud que van a un
+│                      tercero: avisar antes, Ley 8968) +
+│                      marca-del-pase-en-el-chat (⭐ cross-project: `handoff_*`
+│                      en columnas guarda solo el ÚLTIMO pase. Tabla de eventos
+│                      —handoff / taken / returned_to_bot— llenada por UN
+│                      trigger en `conversations`: pase cuando cambia
+│                      `handoff_at`, tomar y devolver solo con `auth.uid()`
+│                      —apagar el bot en masa no llena cientos de chats—,
+│                      lectura calcada de la de mensajes y escritura revocada;
+│                      respaldo solo del último pase con su hora real (70, 8 con
+│                      resumen). En la UI, una función pura corre el marcador
+│                      DESPUÉS de las burbujas del bot dentro de 2 minutos,
+│                      porque la despedida se escribe después del `handoff_at`.
+│                      Y el segundo pase fallaba mudo: devolver al bot dejaba
+│                      `pending` y el guard contra la doble escalada daba 0
+│                      filas —el cliente leía "dame un chance" y a nadie le
+│                      llegaba nada—. Arreglo en dos capas: un BEFORE que cierra
+│                      el pase al volver al bot, NOMBRADO para correr después
+│                      del que ya existía porque Postgres ordena los triggers
+│                      del mismo evento por nombre, y un guard que ignora el
+│                      pendiente que ya tiene el bot. 3 pases → 3 eventos) +
+│                      escribir-toma-la-conversacion (⭐ cross-project: el
+│                      equipo escribió 423 mensajes en 45 días y el bot les
+│                      contestaba encima. Trigger en `messages` —las tres
+│                      puertas pasan por la base— que pasa la conversación a
+│                      `human` y la asigna si nadie la tenía;
+│                      `sender_kind='agent'` solo NO alcanza porque los
+│                      seguimientos automáticos también son 'agent'; y
+│                      `UPDATE OF` porque el eco del celular corrige la fila
+│                      después. La carrera: el turno espera 45 s y después
+│                      piensa, así que los portones se miran otra vez después
+│                      de la espera y después del modelo; si ya es de una
+│                      persona, el turno se suelta como `skipped` con motivo y
+│                      guarda lo que dijo el cliente. Y lo que escribe el equipo
+│                      entra a la memoria del bot con la misma llave de sesión
+│                      —audios transcritos en `after()`, fotos y documentos
+│                      como "[Foto]"—, para que al devolverla siga el hilo).
+│                      Tier 41 — El número que llegó antes que el sistema (1,
+│                      capturada 2026-09-16 conectando el WhatsApp de una
+│                      clínica de estética):
+│                      conectar-numero-que-ya-recibe (⭐ cross-project: el
+│                      cliente conecta su número en el proveedor ANTES de que el
+│                      CRM lo conozca, y en dos horas 218 eventos se descartan
+│                      con `unknown_agency_for_phone` sin un solo error
+│                      visible. El orden seguro: medir lo perdido sin leer
+│                      contenido, verificar el número contra la API del
+│                      proveedor, elegir el motor A PROPÓSITO —si un proceso lee
+│                      cada mensaje con un modelo aunque el bot esté apagado, un
+│                      negocio sin entrenar no va ahí—, y apagar el bot y cargar
+│                      el canal en UNA escritura, porque cargar el canal
+│                      ENCIENDE el bot: la ausencia de `bot_enabled` cuenta como
+│                      prendido en los dos motores. La recuperación va por el
+│                      webhook REAL, firmado como el proveedor, de a uno y por
+│                      orden de llegada, respetando el límite por contacto; y
+│                      después cada mensaje recupera su hora real
+│                      (`created_at = sent_at`) y se recalculan los campos
+│                      derivados de la conversación, porque la bandeja ordena
+│                      por la hora del guardado. Gotchas: probar con UN evento
+│                      no prueba el lote —el primero fue justo el que creó un
+│                      lead con el número del propio negocio, y los 14
+│                      siguientes chocaron—, así que se clasifica el lote antes
+│                      y se mira el log a los 20; un eco con `to` igual al
+│                      negocio nunca crea un lead; el borrado lógico no saca la
+│                      conversación de la bandeja; y el historial anterior a la
+│                      conexión no existe).
+│                      Tier 42 — Lo que la pantalla mostraba y la base no (1,
+│                      capturada 2026-09-18 de la bandeja de mensajes del CRM):
+│                      no-decidir-dentro-del-updater (⭐ cross-project: abrir
+│                      un chat lo mostraba leído y la base seguía con el no
+│                      leído, que volvía al recargar; y "marcar como no leída"
+│                      parecía no andar. Era UN bug: la decisión de guardar era
+│                      una bandera que se prendía ADENTRO del updater de
+│                      `setState`, y React solo corre el updater en el momento
+│                      si no hay otra actualización pendiente —en el clic había
+│                      una, `setSeleccionado` justo antes—, así que la bandera
+│                      seguía en false y el guardado no salía nunca. Estaba desde
+│                      el primer commit y lo tapaba un cambio de URL por el
+│                      router que volvía a montar la pantalla; al pasar a
+│                      `history.replaceState` quedó expuesto. El cambio que lo
+│                      destapa no toca la función rota. Trae cómo medirlo con
+│                      tres registros —si "después del set: false" sale antes
+│                      que "updater corre", es esto—, las tres formas de sacar
+│                      la decisión del updater —que decida el servidor, el valor
+│                      en la mano o un `useEffect`—, el grep para encontrar el
+│                      patrón copiado y la verificación del ciclo contra la base
+│                      con el control negativo. Gotchas: los clics automáticos
+│                      que caen mientras el menú se ubica dan falsos negativos,
+│                      y restaurar datos de prueba con el chat abierto los
+│                      vuelve a pisar).
+│                      Tier 43 — El chat que escribe como WhatsApp (1, capturada
+│                      2026-09-18 del selector de emojis de la bandeja de un CRM):
+│                      selector-de-emojis-tipo-whatsapp (⭐ cross-project: un
+│                      picker con buscador, categorías, tono de piel y recientes
+│                      se COMPRA hecho —`emoji-picker-element`, cargado con
+│                      `import()` solo al abrir y con datos propios en /public,
+│                      sin CDN— y el trabajo real está en cuatro bordes que ningún
+│                      tutorial cuenta, todos medidos: el buscador NO ignora
+│                      tildes ("corazón" 31 resultados, "corazon" 4; se arregla
+│                      agregando las palabras sin tilde a los datos, que son
+│                      tuyos: 4 → 26); en Windows Chromium las banderas no
+│                      existen (🇨🇷 sale "CR") y el picker no las oculta —
+│                      polyfill que descarga 77 KB solo donde hace falta, el
+│                      nombre de la fuente en el `font-family` del body (arregla
+│                      también las burbujas), y el crédito CC-BY de Twemoji—;
+│                      al sumar el botón el campo quedó en 71px a 375px, y
+│                      TAMBIÉN a 1280px con el panel de contacto abierto porque
+│                      el "compacto" se decidía por la ventana y no por la
+│                      columna (container query `@lg:contents`: bajo 32rem los
+│                      botones van en su propia fila); y en celular enfocar el
+│                      campo sube el teclado encima del panel. Trae la función
+│                      pura que inserta en el cursor —se lee el textarea, no el
+│                      estado; 🇨🇷 y 👨‍👩‍👧 entran enteros—, el `onPick` por ref
+│                      (el listener se crea una vez y guarda un cierre viejo), la
+│                      verificación en navegador y en el build de producción, y
+│                      los gotchas de la prueba: las teclas del automatizador no
+│                      mueven el cursor, el indicador de desarrollo de Next tapa
+│                      el botón de la esquina, el 404 de `database.js` es solo de
+│                      desarrollo y el proxy de auth redirige los `.json` de
+│                      /public sin sesión).
+│                      Tier 44 — Escribir un carácter y que el chat responda (1, capturada
+│                      2026-09-18 de los menús `/` y `:` del composer de un CRM):
+│                      menu-de-comandos-en-composer (⭐ cross-project: escribir `/` abre las
+│                      plantillas y `:feliz` busca el emoji. Parece un `onChange` y una lista y
+│                      casi todo lo difícil está en los bordes, descubiertos uno por uno en el
+│                      navegador: se disparaba con `1/2`, la hora `10:30` y las caritas `:)`;
+│                      Enter enviaba el mensaje en vez de elegir; el menú se abría solo cuando una
+│                      plantilla o la IA cambiaba el texto por otro camino; y la vista grande
+│                      abierta desde un popover cerraba el popover con Escape. Trae el diseño con
+│                      su porqué —menú EN EL FLUJO y no flotante, detección como función pura que
+│                      mira solo antes del cursor y exige que el carácter EMPIECE la palabra,
+│                      cursor guardado junto al texto al que pertenece para que solo abra lo que
+│                      se ESCRIBE—, el teclado (con resultados Enter elige y no envía, sin
+│                      resultados no intercepta nada, el IME nunca), cómo colgar DOS menús del
+│                      mismo textarea, el menú de emojis (misma base que el panel, orden por
+│                      relevancia del nombre con el más corto primero, descartar lo que el
+│                      sistema no dibuja —un emoji compuesto salía como dos y tapaba el texto—) y
+│                      por qué la lista de plantillas mostraba todo el cuerpo: `line-clamp-2` y
+│                      `block` en el mismo elemento, `block` gana y nunca recorta. Gotchas de la
+│                      prueba: `Enter` sí y `Return` no, las flechas simuladas no mueven el
+│                      cursor, probar con Tab si el chat puede enviar de verdad, y un cambio de
+│                      código recarga la página y pierde el chat).
+│                      Tier 45 — Lo que la persona edita y el sistema reescribe · lo que el filtro
+│                      no cuenta (2, capturadas 2026-09-18 de las mejoras de contactos de un CRM):
+│                      editar-dato-que-el-webhook-reescribe (⭐ cross-project: agregar "editar
+│                      contacto" a un sistema donde una integración también escribe los datos. El
+│                      webhook reescribía el nombre del perfil en CADA mensaje y la pantalla le daba
+│                      precedencia, así que editar el nombre se guardaba bien y volvía a verse el
+│                      viejo en el siguiente mensaje, sin un error: un bug DIFERIDO que la prueba de
+│                      30 segundos no ve. Cada campo tiene un dueño: dos columnas para el nombre
+│                      (negocio vs proveedor) y el resolver único le da precedencia a la del
+│                      negocio —medido antes de invertirla: 13 de 1.769—, el teléfono con id del
+│                      proveedor enlazado queda de solo lectura con el motivo escrito, y el resto se
+│                      edita libre. El modal no es optimista (`.select()` + contar), manda solo lo
+│                      que cambió y refresca con la fila que devolvió el UPDATE. Un cumpleaños es un
+│                      `date`, no un instante: aritmética sin `new Date(iso)`) +
+│                      contadores-que-siguen-los-filtros (⭐ tarjetas y chips con un número junto a
+│                      una barra de filtros: el número tiene que ser EXACTAMENTE las filas que
+│                      aparecen al tocarlo. Contar sobre el universo deja la tarjeta en 143 con la
+│                      búsqueda mostrando 1; contar sobre TODO también está mal, porque elegir
+│                      "Calificados" pondría "Sin asignar" en 0. La regla es un conteo por facetas:
+│                      todos los filtros MENOS el que la tarjeta misma controla, con la MISMA función
+│                      de filtrado que la tabla —no reimplementar el criterio—. Trae la prueba de
+│                      propiedad sobre combinaciones de filtros y su control negativo).
+│                      Tier 46 — La lectura que dice "éxito" con menos filas (1, capturada 2026-09-21
+│                      de las etiquetas que "no se guardaban" en un CRM):
+│                      lectura-cortada-por-max-rows (⭐ cross-project: PostgREST devuelve como
+│                      máximo 1.000 filas por consulta y CORTA SIN ERROR. Un usuario reportó "trato de
+│                      agregar una etiqueta y no se guarda": sí se guardaba, pero el negocio tenía 1.140
+│                      asignaciones y las más NUEVAS —el corte cae atrás en el orden físico— nunca
+│                      llegaban a la pantalla; al recargar desaparecían y al reintentar la base rechazaba
+│                      el duplicado. El mismo tope escondía 111 contactos y 61 conversaciones, solo en
+│                      el único tenant sobre 1.000. Es `detectar-escritura-filtrada-rls` del lado de la
+│                      lectura. Trae el diagnóstico en orden —los logs de "clave duplicada", el conteo
+│                      por tenant y una prueba en la pantalla real CON control positivo, porque el
+│                      primer método dio falso negativo también en las filas viejas—, el helper
+│                      `leerTodo` (páginas con `.range()`, orden TOTAL con `id` de desempate, dedupe,
+│                      freno de 50 páginas; un tenant chico sigue costando un solo viaje), por qué
+│                      `.limit(5000)` y subir `max_rows` NO lo arreglan, que la cuenta demo de 183 filas
+│                      nunca lo va a reproducir, y que un `23505` al asignar es un ÉXITO: revertir el
+│                      chip fue lo que convenció a todos de que "no se guardaba").
+│                      SEGUNDO CASO (2026-10-06, un CRM con 8.022 leads): siete pantallas mintiendo a la
+│                      vez —un pipeline con 1.000 al azar por ordenar por una columna con empates, una
+│                      pantalla de "hoy" ciega un mes por ordenar asc por fecha, un boletín que decía 999
+│                      con 5.204 correos—. Suma: `.in()` también tiene tope (va en la URL: 200 uuids
+│                      pasan, 493 ya fallan, y sin mirar `error` la lista sale VACÍA → `fetchIn` en
+│                      tandas), decidir con `count` y no con "la página vino corta" (si bajan max_rows a
+│                      500 el bug vuelve callado), `count head` para contar, `->>` en vez del jsonb
+│                      entero, barrer TODAS las lecturas, verificar contra SQL directo con la misma
+│                      regla, la service role que no filtra la papelera, y un tope explícito si el
+│                      arreglo cambia algo hacia afuera (un envío ×5) en vez de un fix silencioso.
+│                      Tier 47 — La opción que el modelo elige por el nombre (1, capturada
+│                      2026-09-22 del motivo con que el bot de un CRM pasa conversaciones):
+│                      opciones-del-modelo-con-significado (⭐ cross-project: una lista cerrada
+│                      que devuelve el modelo y LEE UNA PERSONA —motivo del pase, categoría,
+│                      intención— es parte de la interfaz, no un detalle del esquema. El bot pasaba
+│                      bien las conversaciones y reportaba mal por qué: un estudio médico que una
+│                      regla del negocio manda al profesional salía "El bot se atascó" (17 veces),
+│                      una alarma médica "Lead calificado", un caso VIP "Lo pidió el cliente" sin
+│                      que nadie lo pidiera, y la campanita decía "Motivo: scheduling" en 258
+│                      avisos. Tres causas APILADAS: faltaba la opción "lo manda una regla del
+│                      negocio", nunca se le explicó al modelo qué significa cada una —elegía por el
+│                      nombre—, y los clientes habían dejado el parche escrito en su propio prompt
+│                      ("estudio → no_se_como_seguir"), que el modelo obedece por encima de
+│                      cualquier explicación genérica. Solo el código: 9/15; con la config de los
+│                      clientes: 18/18. Trae: medir la opción elegida contra el texto libre que la
+│                      acompaña, buscar el valor viejo en la config de cada tenant y cambiar solo
+│                      las líneas que lo usan como parche, explicar QUÉ etiqueta y no CUÁNDO actuar
+│                      —describir la última opción como "si no sabés cómo seguir" reintroducía un
+│                      disparador que hacía pasar al bot en el 2º mensaje—, los 5 consumidores de
+│                      la lista con su orden de despliegue (base → validador de otro servicio →
+│                      productor → config; al revés, el validador rechaza el pase y el lead queda
+│                      sin nadie, sin error), la prueba que lee la lista del validador de su
+│                      código en vez de una copia a mano, y el script con el modelo real con
+│                      controles que NO tienen que cambiar, primero con la config en memoria).
+│                      Tier 48 — El evento que Meta recibió y no procesó (1, capturada
+│                      2026-09-23 conectando un CRM de WhatsApp a la Conversions API de Meta):
+│                      eventos-a-meta-desde-crm-whatsapp (⭐ cross-project: el cliente pregunta si el
+│                      CRM puede avisarle a Meta qué lead calificó o compró "como el píxel". El
+│                      payload salió en una tarde; lo que costó fue el ACCESO, y cada bloqueo apareció
+│                      recién al sacar el anterior: con el número en un BSP, tu app no puede ser socio
+│                      de la cuenta de WhatsApp —"número máximo de socios asignados", el BSP ocupa el
+│                      lugar—; el portafolio del proveedor, por ser "nuevo", no puede compartir su app
+│                      por semanas; lo que funcionó fue que el portafolio del CLIENTE pida acceso a la
+│                      app ("Solicitar", NUNCA "Conectar", que la movería), un usuario del sistema con
+│                      acceso total a la cuenta y un token sin vencimiento que otro administrador
+│                      tiene que aprobar —y que al aprobar no se muestra: hay que generarlo de nuevo—.
+│                      La trampa cara: Meta respondió events_received: 1 cuatro veces y ningún evento
+│                      apareció en "Probar eventos", porque el permiso de eventos seguía sin revisar
+│                      aunque la guía dice que se aprueba solo. Trae el conteo de ctwa_clid por
+│                      negocio antes de prometer, lo que se le dice al cliente (se optimiza por
+│                      compras con 10 en 30 días o por leads con más de 100 en 90, y los 7 días se
+│                      cuentan desde el CLIC), el BSP que reporta "compras" por
+│                      defecto con cualquier conversación de 2 mensajes, la arquitectura —trigger que
+│                      solo anota, un evento por tipo y lead porque Meta no deduplica, "omitido" con
+│                      motivo, modo prueba con el código copiado a la fila, cron que solo despierta
+│                      si hay pendientes—, el payload mínimo sin datos personales, y la tabla de lo
+│                      verificado con la fila que todavía dice ❌ hasta que Meta apruebe).
+│                      **Ampliada 2026-09-28:** "avisarle a Meta que el lead es malo" NO existe
+│                      —lista cerrada de 14 eventos, ninguno negativo; Conversion Leads, el que
+│                      acepta etapas propias, es solo para formularios instantáneos—, así que lo
+│                      malo se comunica NO mandándolo y `LeadSubmitted` va atado a una etapa que
+│                      ya califica, nunca a "Nuevo"; más la categoría "salud y bienestar" que
+│                      Meta puede ponerle al conjunto de datos de una clínica.
+│                      **Ampliada 2026-10-07 (paso 10):** "en Meta no llega nada" era que el
+│                      de los anuncios miraba OTRO conjunto —de otra cuenta de WhatsApp— y el
+│                      nuestro no estaba conectado a su cuenta publicitaria; se cruza tu tabla
+│                      de envíos con el Resumen (26 y 2 en los dos lados) y NO con la API de
+│                      estadísticas, que da `stats: []` para eventos de mensajería; y "meté
+│                      el píxel en el CRM" no corresponde: mediría a los vendedores.
+│                      **Corregida 2026-10-11 (paso 4b OBLIGATORIO):** el conjunto que
+│                      crea el código nace con 0 personas y 0 activos conectados —Meta
+│                      procesa los eventos y nadie los usa—; antes de encender se le
+│                      asigna a quien pauta (el "Acceso total" al portafolio NO alcanza)
+│                      y se conecta a su cuenta publicitaria, con la ruta verificada en
+│                      la configuración del negocio. Más la "calidad de coincidencia"
+│                      que piden comparar con GoHighLevel: subirla con el teléfono
+│                      hasheado es una decisión de privacidad, no un arreglo.
+│                      **Ampliada 2026-10-13 (segundo cliente, de cero):** Meta
+│                      rechaza algunos nombres de usuario del sistema sin decir
+│                      por qué; pegar el token NO guarda la conexión; la cuenta
+│                      de WhatsApp puede traer ya un conjunto ("unknown Event
+│                      Data") y se usa ese; si dice "sin eventos", el BSP no
+│                      manda compras propias; la cuenta publicitaria se saca de
+│                      los `ad_id` de los leads; y las reglas las puede poner el
+│                      equipo del cliente.
+│                      Tier 49 — El "leído" que nadie leyó (1, capturada 2026-09-24
+│                      con un cliente en coexistencia —el mismo número en la app del celular y en
+│                      la API—): coexistencia-leido-y-sin-leer (⭐ cross-project: "los chats se
+│                      abren solos en el celular" y el lead ve azul sin respuesta. No era WhatsApp:
+│                      el webhook marcaba como leído CADA entrante —heredado de n8n "para que el lead
+│                      vea el azul"— y con coexistencia ese leído llega a la app del negocio. Leído
+│                      es una afirmación: se marca cuando alguien CONTESTA —el bot, en paralelo al
+│                      envío; una persona desde el CRM, si la entrega salió—, nunca al llegar, al
+│                      abrir el chat ni con el aviso de fuera de horario: NO existe "marcar como no
+│                      leído" en la API (Meta ni YCloud), así que marcar al abrir deja el "no leída"
+│                      del CRM desmentido en el celular para siempre. YCloud acepta el wamid en
+│                      markAsRead. El otro sentido: WhatsApp NO avisa cuando alguien abre un chat en
+│                      el celular (5 tipos de evento, ninguno es "leyó"); solo llega el eco de lo que
+│                      se contesta, y el eco es IDÉNTICO sea persona, saludo automático o difusión.
+│                      Se decide por comportamiento, medido en 30 días ANTES de escribir la regla:
+│                      descartar lo rápido Y largo (< 10 s y ≥ 40 caracteres), lo de > 24 h y el texto
+│                      largo ya usado → automáticas 0/30, difusiones 0/329. Las dos versiones que el
+│                      teléfono real rompió —"texto repetido" sin largo y "< 10 s" sin largo—
+│                      quedan documentadas. Trigger propio en INSERT y en el UPDATE que reclama el
+│                      eco, prueba con control contra la base viva, y qué revisar cuando "no llegan
+│                      las notificaciones").
+│                      Tier 50 — El lead que escribió y nadie vio (1, capturada 2026-09-24
+│                      con un bot en código y anuncios click-to-WhatsApp): primer-contacto-sin-texto
+│                      (⭐ cross-project: el lead toca el anuncio, le da enviar y queda esperando;
+│                      Meta entrega ese primer mensaje con error 131060 SIN texto NI referral. Bien
+│                      guardado como aviso del sistema, no pide turno: silencio. Medido en 5 negocios
+│                      y 60 días: 61 contactos así, 34 nunca volvieron a escribir, 10 no recibieron
+│                      NADA; y 57 de 59 caían en "Sin atribución", o sea tráfico pago contado como
+│                      orgánico. Arreglo: turno SOLO si es el primer contacto y el aviso se insertó
+│                      ahora; al modelo una línea que dice ser del sistema + prohibirle adivinar,
+│                      pedir que repita o mencionar fallas (o la bienvenida fija); grupo propio
+│                      "Anuncio sin identificar" sin `ad_id`, first-touch, ordenado DETRÁS de los
+│                      anuncios reales porque una mezcla no compite en un ranking; rama propia en
+│                      TODAS las pantallas que leen la atribución; clave compartida entre dos
+│                      runtimes atada por una prueba; backfill reversible con marca. El gotcha
+│                      mayor: 131060 NO significa "anuncio" —también llega desde WhatsApp Web o un
+│                      teléfono vinculado—, solo cuenta si es el PRIMER mensaje: 2 de 76 del
+│                      backfill estaban en medio de la charla. Más: la atribución no estaba donde
+│                      se creía (un "0 en 1.949" falso), y una Edge Function sin entrada en
+│                      `config.toml` desplegada sin `--no-verify-jwt` corta el webhook a TODOS).
+│                      Tier 51 — El mensaje que cayó entre la foto y el canal (1 nueva + 1
+│                      apéndice, capturada 2026-09-25 de un chat del CRM que no mostraba un
+│                      mensaje que la lista sí): lectura-y-realtime-sin-hueco (⭐ cross-project:
+│                      toda pantalla que arma su estado con una LECTURA más un stream en vivo
+│                      tiene bordes donde un evento se pierde para siempre, sin error y con el
+│                      canal SANO. Medido: la página leyó a las 16:29:11.920, el lead escribió
+│                      116 ms después y el canal tardó ~5,4 s en quedar SUBSCRIBED. La firma que
+│                      despista: la lista lo mostraba y el chat no — lo que se actualiza por
+│                      reemplazo (una fila entera por evento) se cura con el siguiente UPDATE; lo
+│                      que se arma por agregado (una lista de mensajes), nunca. Los 4 huecos:
+│                      primera carga → primer SUBSCRIBED; abrir algo no cargado (el manejador
+│                      descarta el evento mientras viaja la consulta); un re-sync cuya foto pisa
+│                      lo que llegó en vivo; y el rejoin por token vencido, que no re-sincronizaba
+│                      porque el `degraded` vivía en el canal viejo. Arreglo en dos piezas:
+│                      re-sync en el PRIMER SUBSCRIBED de cada canal + un coordinador `conFoto`
+│                      que re-aplica encima de la foto los eventos que llegaron mientras viajaba
+│                      (exige manejadores idempotentes). Y la tabla de lo que lo rompe a medias,
+│                      de una revisión independiente —el primero lo INTRODUCÍA el fix—: algo async
+│                      que recrea con `?? []` el caché que el re-sync soltó (chat vacío sin
+│                      error), la foto que borra los optimistas `tmp-*`, una lectura PARCIAL que
+│                      reemplaza la lista, el `[]` cacheado por una apertura fallida, el salto de
+│                      scroll por un array nuevo idéntico y el doble re-sync por corte. Con cómo
+│                      probar una carrera que no se reproduce a mano: test del caso real + control
+│                      negativo + prueba de mutación). **Apéndice** a realtime-canal-muere-en-silencio:
+│                      su snippet no re-sincronizaba en el rejoin ni en la primera carga.
+│                      Tier 52 — La caché que no se comparte (1, capturada 2026-09-25 al
+│                      pasar un bot de WhatsApp a Claude): cache-compartida-entre-usuarios (⭐
+│                      cross-project: la caché de prompts solo acierta si el texto es IDÉNTICO hasta
+│                      la marca, así que un dato del usuario (nombre, etapa, estado) metido antes de
+│                      ella hace que cada usuario tenga su propia caché y entre usuarios dé 0 %, sin
+│                      error. Caso medido: la prueba daba el costo de gpt-4.1 y en producción salió
+│                      2,6× (30 % de caché); el reflejo era "subí la caché a 1 hora", pero otro usuario
+│                      a MENOS de 5 min tenía 0 %: no era la duración. Trae la consulta que lo
+│                      desenmascara (mismo/otro usuario × a cuánto tiempo), el arreglo que no toca el
+│                      texto (el armador devuelve `largoFijo` y el cliente parte el sistema: lo fijo
+│                      con caché de 1 hora, lo del usuario sin marca, la caché automática de 5 min
+│                      para el historial; prueba de que la unión es el original), cómo elegir la
+│                      duración con la distribución real (1 hora = 2× escribir, se paga a la segunda
+│                      lectura), cobrar aparte la escritura de 1 hora o el costo sale subcontado, y
+│                      verificar con DOS usuarios contra la API: el segundo leyó 82 % y costó
+│                      US$0,0126 contra 0,0645. Gotchas: la simulación miente a favor porque manda
+│                      seguidas las llamadas del mismo usuario (92 % contra 30 % real); no reordenar el
+│                      prompt para cachear más sin volver a probar el comportamiento; un número de
+│                      prueba sin país da 0 % en producción porque el placeholder de país arma otra
+│                      entrada; y la hora del cambio mal convertida mezcla turnos del modelo anterior).
+│                      Tier 53 — Avisar lo que cambia y subirlo junto (2, capturadas
+│                      2026-09-25 subiendo una ronda de 11 tickets a un CRM en producción):
+│                      novedades-dentro-del-producto (⭐ cross-project: la sección
+│                      "Novedades" con un aviso por usuario, y sobre todo el PROCESO para que
+│                      cada cambio visible llegue ahí en el mismo PR sin que nadie se acuerde.
+│                      Contenido como código tipado (el anuncio viaja con el cambio) con
+│                      validador probado contra el registro real; "visto" por usuario en el
+│                      servidor y POR ID, no por fecha (una entrada nueva, aunque sea del
+│                      mismo día con sufijo -b, reenciende el aviso para todos; sumar a una ya
+│                      publicada no avisa a nadie); una tarjeta clara sin flecha —el globo
+│                      oscuro con flecha no pasó la mirada del founder—; imágenes que son
+│                      RÉPLICAS de la interfaz con datos de ejemplo, nunca capturas, porque una
+│                      captura muestra contactos reales a todos los clientes, con registro
+│                      tipado y container queries; y el candado: un `.githooks/pre-push` que
+│                      frena el push de una rama que cambia pantallas sin tocar el registro,
+│                      con lógica pura probada, escape declarado `Sin-Novedad: <motivo>` y
+│                      prueba de punta a punta con commits sueltos de `git commit-tree`) +
+│                      rama-de-salida-varios-prs (juntar N PRs listos en UNA rama que se prueba
+│                      como producto y entra a main en un solo merge. Lo no-obvio es la base:
+│                      cada migración se clasifica por "¿el código que corre HOY tolera esto?"
+│                      —leyendo el código de producción, no el de la rama—; las compatibles se
+│                      aplican ANTES, así el local y la preview muestran la verdad, y las que
+│                      corrigen datos que el código viejo seguiría escribiendo mal van DESPUÉS
+│                      del deploy (506 medidas a la mañana, 514 aplicadas a la noche: 8 del
+│                      intervalo). Lo nuevo que pide el founder en el camino sale de la rama de
+│                      salida, no de main. Merge con MERGE COMMIT y no squash: así los 10 PRs
+│                      quedan MERGED solos; y verificar que llegó a main, no que "se mergeó").
+│                      Tier 54 — Lo que el bot sigue leyendo (1 nueva + 1 extensión,
+│                      capturadas 2026-09-25 de MOM-108 y del cambio de enfoque de Novedades):
+│                      wamid-dos-formatos-y-memoria-del-bot (⭐ cross-project: un mensaje
+│                      borrado o editado en WhatsApp que el CRM no encuentra y que el bot sigue
+│                      usando. Desde el CRM NO se puede borrar ni editar —la API de Meta y la
+│                      del BSP no lo permiten; un botón solo lo escondería de tu lado—: se borra
+│                      en la app o en WhatsApp Web y Meta avisa. Dos fallas silenciosas: (1) Meta
+│                      nombra al MISMO mensaje con dos wamid —por teléfono o por id de usuario—
+│                      con la misma clave adentro, así que 18 borrados quedaron en
+│                      target_not_found; se decodifica el base64 y se compara la clave, siempre
+│                      dentro de la conversación. (2) la memoria del bot es OTRA tabla: el CRM
+│                      mostraba "Mensaje eliminado" y el bot lo seguía usando. Se corrige por
+│                      texto, sesión y rol, solo como mensaje ENTERO —un "si" no toca
+│                      "sistema"—, sin repetir en reentregas, y la corrección de datos saltea
+│                      los textos repetidos en vez de adivinar: 46 corregidos, 6 salteados).
+│                      **Extensión:** novedades-dentro-del-producto suma el enfoque "¿Querés
+│                      hacer X?": cada novedad usable es una pregunta desde lo que la persona
+│                      quiere, con pasos que nombran los botones reales y un "Sí, mostrame
+│                      cómo" que los despliega; el validador lo exige y el aviso del menú
+│                      pregunta por UNA cosa que ese rol puede usar.
+│                      Tier 55 — Cómo llegó hasta acá (1, capturada 2026-09-26 del
+│                      historial de Actividad del CRM): historial-de-cambios-por-trigger (⭐
+│                      cross-project: "¿cómo llegó este registro a como está?" cuando el sistema
+│                      solo guarda el último cambio. Lo no-obvio: el estado lo cambiaban 6
+│                      caminos y las etiquetas 4, así que un historial escrito desde cada pantalla
+│                      nace con huecos; va por trigger SECURITY DEFINER. Quién fue: la sesión
+│                      manda y el navegador no firma; sin sesión, solo la procedencia que trae el
+│                      MISMO update; si no, "sistema", y el camino sin sesión que sí sabe quién
+│                      fue corrige su firma después. El trigger nunca rompe la escritura, guarda
+│                      los NOMBRES de ese momento, no anota un update que no cambia nada, y la RLS
+│                      se calca con un exists sobre el registro padre. Incluye los 8 casos del
+│                      bloque que siempre aborta con control positivo, y avisar que arranca vacío).
+│                      **Extensión (2026-09-26):** subir-archivos-grandes-sin-pasar-por-el-servidor
+│                      suma "La otra mitad": el techo de 4.5 MB de Vercel es también el de la
+│                      RESPUESTA, así que un "Descargar todo" en .zip se arma en el navegador (el
+│                      server solo gatea, arma el índice con una función pura y firma URLs cortas; fflate
+│                      con nivel 0 para lo ya comprimido). Trae los nombres que sirven en Windows
+│                      (prohibidos, punto final, repetidos) y el bit UTF-8 verificado con el
+│                      descompresor propio de Windows, y cómo verificar el zip en la página sin bajarlo.
+│                      Tier 56 — La ventana que tiene dirección (1, capturada 2026-09-26 del menú
+│                      de cuenta y la Configuración en ventana del CRM): ventana-con-direccion-propia
+│                      (⭐ cross-project: un modal que se abre ENCIMA de donde estás y sigue teniendo URL
+│                      —para no rehacer pantallas que ya son rutas ni romper los enlaces que apuntan a
+│                      ellas—, con rutas paralelas `@modal` + interceptadas `(.)x` que re-exportan las
+│                      páginas reales. Los siete detalles que la doc no dice: `page.tsx` y `[...resto]`
+│                      en null o la ventana queda pegada al navegar; `Link replace` entre secciones y UN
+│                      solo `back()` por ventana (el doble clic volvía dos pasos); en modo página las
+│                      secciones son `<a>` comunes porque un `<Link>` abre la ventana encima de sí misma, y
+│                      la columna va desde `lg:` (en `md:` el contenido quedaba en 282 px); Escape en
+│                      captura con un predicado puro que cede a modales de adentro, desplegables y CAMPOS
+│                      (tiraba lo escrito); la caja sin transform/filter persistente o encierra a los
+│                      `fixed` de adentro; "cambios sin guardar" por contexto + ConfirmDialog; y una
+│                      prueba que exige los dos archivos de cada sección. Trae la verificación en el
+│                      navegador, incluido guardar algo desde adentro y confirmarlo tras recargar).
+│                      Tier 57 — El canal que se comparte sin avisar (1, capturada 2026-09-27
+│                      del ticket "notificaciones duplicadas" del CRM): canal-realtime-compartido-por-topic
+│                      (⭐ cross-project: dos componentes montados A LA VEZ —la campana de escritorio y
+│                      la de celular, una oculta con CSS pero montada— que abren el mismo topic de
+│                      Supabase Realtime comparten UN canal, porque el cliente del navegador es singleton
+│                      y `channel(topic)` devuelve el que ya existe. El segundo `subscribe` es un no-op:
+│                      nunca se entera de una caída. Y cuando el primero se reconecta al vencer el JWT
+│                      (removeChannel + canal nuevo, el patrón de realtime-canal-muere-en-silencio), borra
+│                      el canal compartido y el otro queda sordo hasta F5 — "la campana deja de avisar
+│                      después de un rato". La base no tenía un solo duplicado: el bug era del cliente.
+│                      Arreglo: un solo dueño por topic (un Provider en el ancestro común), una prueba que
+│                      lee el código y exige un único archivo que abra el canal —con control negativo—, y
+│                      verificar insertando un evento real con la pestaña VISIBLE: oculta, el navegador
+│                      frena la hidratación y los clics no llegan a React).
+│                      Tier 58 — El disco que se llenó en silencio (1 nueva + 1 apéndice,
+│                      capturadas 2026-10-02 del primer apagón completo del CRM en producción):
+│                      supabase-disco-lleno-pasa-a-solo-lectura (⭐⭐ cross-project: un proyecto
+│                      que nació en plan gratis tiene un disco de 2 GB, y Supabase pasa la base a
+│                      SOLO LECTURA al 95 %. Medido: 274 MB de datos + 1 GB de WAL + sistema, sin
+│                      margen; una ráfaga de 1.236 eventos de historial de WhatsApp en 55 segundos
+│                      —la sincronización que manda Meta al conectar un número en coexistencia—
+│                      lo llevó al 99,8 % y el bot estuvo 11,5 horas sin contestar, de noche, sin
+│                      una sola alerta. Lo no obvio: (1) `ACTIVE_HEALTHY` es el CICLO DE VIDA del
+│                      proyecto, no su salud —decía eso con la base muerta—; la salud está en
+│                      `/health?services=db,rest,auth`, y desde afuera lo delata auth y functions
+│                      respondiendo en milisegundos mientras toda consulta con la clave da 522 a los
+│                      ~20 s; (2) disco ≠ base: la base era el 13 % del disco y medir tablas dice
+│                      "estamos lejos"; (3) plan, compute y disco son TRES palancas —pasar a Pro no
+│                      agrandó nada, el panel decía "tu plan incluye 8 GB" con el disco en 2 y el
+│                      autoescalado tampoco se disparó—; (4) el reinicio de compute RECICLA WAL
+│                      (99,8 → 74,8 % sin borrar un dato) y es un respiro si el disco está
+│                      bloqueado por la espera de 4 horas; (5) el panel atrasa, se verifica en la
+│                      base. Y lo que más duele: lo entrante durante el solo lectura NO EXISTE en
+│                      tu base, el proveedor reintenta solo ~80 minutos, su API no deja listar lo
+│                      entrante y el log guardó solo el error —24.099 líneas sin un teléfono—, así
+│                      que la única fuente es el celular del negocio. Trae la tabla de la salida
+│                      hora por hora, las dos alertas que lo hubieran cortado en minutos y el
+│                      checklist de proyecto a producción). **Apéndice:**
+│                      supabase-free-se-pausa-y-tumba-el-sitio corrige su línea "`ACTIVE_HEALTHY`
+│                      → el problema es otro": el diagnóstico de un proyecto que no responde son
+│                      dos llamadas, `status` y `/health`, y el plan gratis se cae de dos formas
+│                      opuestas —por no usarse y por usarse de más—.
+│                      Tier 59 — Lo que entra acá aparece solo allá (1, capturada
+│                      2026-10-07 conectando el CRM al Zoho CRM de un cliente):
+│                      salida-a-crm-externo (⭐ cross-project: el cliente ya trabaja en
+│                      SU CRM y pide que todo lo que entra al tuyo se le pase. Una sola
+│                      dirección —de ida y vuelta son dos fuentes de verdad—, y la
+│                      arquitectura de Eventos a Meta: cola de UNA fila por contacto con
+│                      `clock_timestamp`, cron por minuto, `skip locked`, y cerrar
+│                      COMPARANDO LA MARCA también al dar un envío por perdido, o se lleva
+│                      puesto el cambio nuevo. Lo que costó no fue el código sino la
+│                      cuenta del cliente, y todo se midió contra ella: el enlace
+│                      `tab/Leads/<id>` sin el número de organización cae en el INICIO
+│                      (`EntityInfo.do` lo resuelve; `/org` no se lee con esos alcances);
+│                      un Lead borrado responde 400 `INVALID_DATA` con
+│                      `resource_path_index`, SUELTO y no en `data`, y el código lo
+│                      anotaba como «Falló» en vez de recrearlo; la Fuente de Lead era
+│                      OBLIGATORIA en su diseño y `/settings/fields` no lo marca
+│                      —`/settings/layouts` sí—; y tenían reglas activas al crear (un SMS,
+│                      un aviso al dueño, una fecha de captación), así que los contactos
+│                      que existían ANTES de conectar se mandan con `trigger: []` y los
+│                      nuevos las disparan. Más: una lectura que falla NO es «no hay
+│                      datos» —en el camino de envío daba otro dueño, etiquetas borradas,
+│                      duplicados y una conexión «cortada» con el token sano—; el
+│                      respaldo de propietario solo al CREAR; el dueño sale de la
+│                      conversación y no solo de la ficha (70 de 74 «sin vendedor» lo
+│                      tenían); un dominio del proveedor validado contra lista cerrada,
+│                      porque el patrón abierto aceptaba `accounts.zoho.com.evil.io`;
+│                      elegir entre SUS opciones en vez de agregarle a su CRM; y la
+│                      prueba con un número que nunca escribió, porque un mensaje nuevo
+│                      de un contacto existente no cambia ningún dato y no viaja).
+│                      Tier 60 — El dueño no es quien atiende (1 nueva + 1 apéndice,
+│                      capturadas 2026-10-07 del reparto de leads y del encabezado del chat
+│                      de un CRM): reparto-leads-por-porcentaje (⭐ cross-project: repartir
+│                      los leads nuevos entre el equipo en proporciones (60/40,
+│                      30/25/20/15/10) aunque los atienda un bot, y que el pase le avise solo
+│                      al dueño. Tres hallazgos valen más que el algoritmo: el «round robin»
+│                      que ya existía NUNCA había asignado una conversación —escribía
+│                      'system' y un CHECK solo aceptaba bot/human, error tragado como no
+│                      fatal; 0 filas en toda la historia—, así que primero se MIDE el
+│                      mecanismo viejo; «el que tiene menos» da 5/5 con 60/40, la regla es el
+│                      más atrasado respecto de su porcentaje (`asignados / porcentaje`, con
+│                      desempates determinísticos) y ese orden ingenuo es el control
+│                      negativo de la prueba; y con el reparto encendido el BOT QUEDABA MUDO
+│                      —los triggers de prender/apagar el bot leían «tiene dueño» como «lo
+│                      tomó una persona»—: el dueño y quién atiende son dos datos y todo lo
+│                      que deduce uno del otro distingue el dueño puesto por el sistema. Trae
+│                      la creación de la conversación ya con dueño en una función de la base
+│                      (herencia antes que elección, `for update` sobre la config del
+│                      negocio —20 en paralelo → 10/10—, `on conflict` sin sumar al conteo),
+│                      pausar sin tocar porcentajes, guardar pone el conteo en cero, el pase
+│                      que reasigna si el dueño salió del equipo, los leads viejos que no se
+│                      reparten en masa, y la prueba real con un número que nunca escribió
+│                      más el control de uno que sí). **Apéndice:** auditar-responsive-midiendo
+│                      suma el segundo caso del breakpoint equivocado: el encabezado del chat
+│                      decidía su forma por el ancho de la PANTALLA y con el panel del
+│                      contacto abierto el chat medía 338 px a 1280 —0 px para el nombre—;
+│                      el componente decide por el ancho de SU contenedor (`ResizeObserver` en
+│                      `useLayoutEffect`, tres niveles) y se mide con el panel abierto y
+│                      cerrado, porque el ancho de la ventana no es la variable que importa.
+│                      Tier 61 — El archivo que sabe de dónde viene (1, capturada
+│                      2026-10-15 de MOM-78, el prompt del bot que el equipo comercial
+│                      baja y sube desde el panel master de un CRM):
+│                      descargar-editar-subir-con-cabecera (⭐ cross-project: alguien NO
+│                      técnico tiene que cambiar un texto largo que vive en la base —un
+│                      prompt, una plantilla, una config— y la solución barata es "lo bajo,
+│                      lo edito con mi IA y lo vuelvo a subir". Todo sale de UNA línea: una
+│                      cabecera-comentario arriba del archivo con el tenant, la pieza y el
+│                      md5 de la versión desde la que se bajó. Con eso el archivo de OTRO
+│                      cliente no se sube (el nombre del archivo se cambia sin querer, la
+│                      cabecera no), y si alguien subió otra cosa mientras tanto no se pisa:
+│                      se compara contra la versión de ORIGEN, no contra la pantalla abierta
+│                      hace horas. Trae: la función de la base que bloquea la fila, compara,
+│                      archiva lo ANTERIOR y escribe con `jsonb_set` sin tocar las demás
+│                      llaves —security definer, solo service_role—, la tabla de versiones
+│                      con RLS y SIN policies a propósito (escrito en la migración, o
+│                      alguien "arregla" el deny-all), la revisión pura en errores y avisos
+│                      que corren el navegador y el servidor —el navegador solo tiene el
+│                      LARGO del vigente—, el md5 de Node igual al `md5()` de Postgres
+│                      verificado, el skill para la IA que edita (la cabecera intacta y
+│                      NUNCA cambiarla para que el panel la acepte) y cómo probarlo: 8 casos
+│                      en el bloque que siempre aborta y en pantalla simulando el archivo con
+│                      `DataTransfer`. Gotchas: con el archivo de otro cliente salían dos
+│                      errores y el segundo confundía —si es el archivo equivocado se dice
+│                      solo eso—; "¿Subir el nuevo objeciones?" por armar el texto con
+│                      `toLowerCase()` en vez de un mapa con su concordancia; y en el celular
+│                      el texto del historial en una columna de 130 px por `flex-1`).
+│                      Tier 62 — El prompt que llega para pegar (1, capturada 2026-10-15
+│                      de la carga del prompt de una clínica en el motor del bot del CRM):
+│                      ⚠️ Regla del founder desde 2026-10-17: el TEXTO del autor se
+│                      carga tal cual y sus trampas se le reportan; lo que se ajusta es
+│                      la configuración (Sonnet 5, aviso al pasar). Ver la sección
+│                      "Cuando llega un prompt YA ESCRITO" más abajo.
+│                      cargar-prompt-al-motor (⭐ cross-project: un prompt escrito afuera
+│                      —el equipo comercial, otra IA— llega con "nada más hay que
+│                      implementarlo", y pegarlo tal cual lo rompe aunque esté bien
+│                      escrito, porque el motor le pega bloques alrededor y lee config que
+│                      el autor no ve. Pasó tres veces en el CRM y ninguna dio error: el bot
+│                      contesta, solo que distinto del prompt. Trae la tabla de lo que dice
+│                      el autor contra lo que pasa en el motor —"son las {{HORA_CR}}" en la
+│                      línea 17 cambia cada minuto y cobra el prompt entero en cada
+│                      respuesta (y "al final del prompt" NO alcanza: el catálogo va detrás
+│                      y dentro de la caché); el catálogo que el prompt da por inyectado
+│                      llegaba cortado (30 ítems, 300 caracteres) y faltaban justo los
+│                      servicios que nombra; la revisión final del autor ya no es final y la
+│                      vieja del negocio le gana; el puente que escribe el prompt se vaciaba
+│                      porque el negocio estaba en pase silencioso; "la espera ya está
+│                      configurada" y no existía; las reglas de pase entraban al motor pero
+│                      rompían CADA guardado de la pantalla de Configuración por un tope de
+│                      2000—. Trae el cruce punto por punto y los cambios mínimos con un
+│                      script que prueba cada reemplazo y saca el diff contra el original.
+│                      La simulación va con la config COMPLETA, leyendo las transcripciones
+│                      y no la tabla: de noche decía "en un ratito" en 4 de 6, y con la hora
+│                      y el idioma en la instrucción del pase, en 0 de 6. Se guarda en una
+│                      sola escritura con filtro por `updated_at`, verificada por md5 y sin
+│                      `\r` (`write_text` de Python en Windows pone CRLF). Y se cierra con el
+│                      autor: el prompt es suyo, y si no sabe dónde quedó la hora la vuelve
+│                      a poner arriba).
+│                      Tier 63 — El que decide no se revisa solo (1, capturada 2026-10-19
+│                      de MOM-133, el analista que mueve el estado de los contactos de un
+│                      CRM leyendo la descripción que escribe cada negocio):
+│                      revisor-adversarial-para-decisiones-de-ia (⭐ cross-project:
+│                      cuando un LLM decide con criterios escritos por un humano —estados,
+│                      calificaciones, clasificaciones que disparan acciones— la
+│                      verificación barata y robusta es un SEGUNDO pase con otro encargo,
+│                      "¿qué falta?", y no más instrucciones de autocontrol al mismo pase.
+│                      Caso: 10 de 10 pases automáticos a «Llamada agendada» antes de
+│                      tiempo; la descripción pedía "confirmó día y hora y ya se le envió
+│                      el link" y el modelo movía con un "sí" o un "a las 9am?", aunque el
+│                      prompt decía "cuando dudes, no muevas". Causa de fondo: el analista
+│                      solo veía los mensajes del LEAD y media descripción hablaba de lo
+│                      que hizo el NEGOCIO, así que el estado no se podía cumplir con
+│                      evidencia. Lo que NO sirvió, medido con el modelo real: pedirle al
+│                      mismo modelo que partiera la descripción y citara cada condición
+│                      —las reescribía para que le cerraran, se comía la del link, pegaba
+│                      dos mensajes en una cita—, la evidencia antes de la decisión en el
+│                      schema —la dejó vacía y eligió igual— y una regla sobre condiciones
+│                      negativas que rompió la detección del link. Lo que sí: un revisor
+│                      aparte (temperatura 0, `revision` antes de `falta`) que solo corre
+│                      cuando hay que mover y la etapa tiene descripción —~175 por semana,
+│                      menos de US$1—, y si falla no se mueve; más citas verificadas por
+│                      código dentro de UN SOLO mensaje y no del texto corrido. Medido con
+│                      un banco de replay de casos reales: viejo 27/54, autocontrol 41→47
+│                      con regresiones, revisor 26/26. Gotchas del banco: cortar el
+│                      historial en `created_at − ms` del análisis, las expectativas se
+│                      escriben contra la regla y no contra lo que hizo el original, los
+│                      audios sin transcripción invalidan el caso, y ~US$0,30 por corrida).
+│                      Tier 64 — El que se cae sin hacer ruido (1, capturada 2026-10-19
+│                      de MOM-126, el aviso de número de WhatsApp desconectado del CRM):
+│                      vigilar-proveedor-que-no-avisa (⭐ cross-project: cuando una
+│                      pieza de la que dependés —el número en un BSP, un token OAuth,
+│                      una cuenta— se puede caer y el proveedor NO manda ningún evento,
+│                      hay que ir a preguntar; y lo difícil no es preguntar, es no avisar
+│                      de más, porque un "tu WhatsApp se cayó" falso quema la confianza
+│                      más rápido que la caída. Casos: Jacó ~20 días y Roberto ~15 h sin
+│                      WhatsApp, YCloud sin un solo evento, y al prender la revisión
+│                      apareció un tercero (Level CR) con 18 días caído que nadie
+│                      conocía. Máquina de estados pura: 2 fallas seguidas para declarar
+│                      la caída, un aviso por caída y otro por vuelta (el «volvió» solo si
+│                      antes salió el «se cayó»), el PRIMER chequeo no avisa —una caída
+│                      vieja la decide una persona—, 30 min de gracia tras conectar
+│                      porque PENDING no es caída (con `conectado_at`, no `updated_at`,
+│                      que cualquier edición mueve), sin respuesta del proveedor no se
+│                      cambia nada y una lista vacía no se cree. El aviso se reclama con
+│                      un UPDATE condicional sobre `avisado_at` que el upsert del estado
+│                      no toca, así el cron y la revisión inmediata no avisan dos veces.
+│                      El secreto del cron se genera DENTRO de la migración en el Vault y
+│                      la ruta lo lee por RPC: cero variables que copiar. Se avisa por un
+│                      camino que no sea el caído (WhatsApp desde el número de la
+│                      plataforma, campana, franja para TODO el equipo y una pantalla con
+│                      los pasos), cada intento registrado. El error del envío
+│                      («has not been registered») revisa ese tenant en el momento, y
+│                      reconectar también. La pausa a mano vive donde reconectar la
+│                      borra sola. Gotcha que casi se escapa: una caída de prueba
+│                      tocando la base a mano hace que el primer cron real mande un
+│                      «volvió» verdadero; se prueba con dependencias inyectadas y se
+│                      limpia. Más: "desde" miente en el primer chequeo —«lo
+│                      detectamos»—, el valor nuevo de un enum va solo en su migración,
+│                      y el preview puede no tener las variables de producción).
+│                      Tier 65 — El texto que no se copia, se elige (1, capturada
+│                      2026-10-24 de la descripción tal cual de una clínica en el bot
+│                      del CRM):
+│                      texto-literal-por-marcador (⭐ cross-project: cuando un negocio
+│                      pide que el bot mande SU texto tal cual —la descripción de un
+│                      servicio, "como copy paste"—, pedirle al modelo que lo copie no
+│                      alcanza: lo resume porque el prompt del autor dice "con tus
+│                      palabras", y aunque lo copie, la limpieza de cada burbuja le saca
+│                      los dos puntos, el partidor lo corta en burbujas de 220 y el
+│                      recortador acorta lo que pasa de 660. El modelo ELIGE: pone
+│                      `[FICHA:ref]` (8 caracteres del id, alargados si chocan) y el
+│                      código pega el texto exacto en su propio mensaje, sin limpieza ni
+│                      partidor y sin contar para el tope. Las que no salen —de otro
+│                      negocio, de más, repetidas— se sacan ANTES de la memoria, que
+│                      guarda el marcador y no el texto: así el modelo ve qué mandó y no
+│                      aprende a pegar a mano. Nunca deja el mensaje vacío, y lo de más
+│                      de 4096 se corta entre párrafos. Lo que enseñó medir con el modelo
+│                      real (5 corridas, US$1,34): con la nota sola, la pregunta por el
+│                      precio de una VARIANTE dentro del texto se contaba con palabras; el
+│                      recordatorio al final lo arregló, pero sin repetir la excepción de
+│                      la pregunta general mandó una ficha antes de que la persona
+│                      eligiera. Una regla final sin sus excepciones las anula. La
+│                      medición no aplica las reglas de estilo a las fichas y verifica
+│                      que cada una llegó igual al catálogo: 10 de 10).
+│                      Tier 66 — Quién vigila al vigilante (1, capturada 2026-10-24
+│                      del vigilante del sistema del CRM):
+│                      vigilancia-cruzada-dos-testigos (⭐ cross-project: en octubre
+│                      el sistema se cayó tres veces y ninguna avisó —disco lleno con la
+│                      base en solo lectura 11,5 h, Vercel apagado por un cobro 1 h 20,
+│                      tope de gasto de Anthropic 2 h— porque lo que tenía que avisar
+│                      vivía adentro de lo que se cayó: pg_cron ESCRIBE para correr, y
+│                      el cron de Vercel vive en Vercel. Un vigilante no puede vivir en
+│                      el dominio de falla que vigila: dos testigos en lados opuestos
+│                      que se miran entre sí —un Edge Function despertado por pg_cron
+│                      mira la app, el bot y el saldo del proveedor; un cron de Vercel
+│                      mira la base con una ESCRITURA de prueba, porque en solo lectura
+│                      las lecturas siguen andando—. Lo no-obvio: deduplicar SIN estado
+│                      cuando el estado es lo caído (ventanas fijas de reloj: a lo sumo
+│                      2 avisos por hora, el primero en menos de 30 min), inferir la
+│                      vuelta de un hueco en el latido sin confundir el hueco de Vercel
+│                      con el de la base, avisar con UNA respuesta en respaldo porque el
+│                      modelo de respaldo tapa la caída del principal, generar el
+│                      secreto del cron dentro del Vault, desplegar la función ANTES de
+│                      la migración que arranca el cron, y no escribir de memoria el
+│                      identificador del proyecto: la primera versión lo traía
+│                      inventado y el cron habría llamado a la nada sin un error).
+│                      Tier 67 — La factura que no se mueve (1, capturada 2026-10-24
+│                      del sistema de operación de una clínica):
+│                      comisiones-por-quincena-y-pagos-fijos (⭐ cross-project: el
+│                      cliente paga comisiones el 15 y el 28 con factura, y cada
+│                      pago se comisiona en la quincena en que ENTRÓ. El calendario
+│                      es un dato que el cliente edita en Finanzas, no código: día
+│                      de pago y de corte, corte mayor que pago ⇒ mes siguiente, el
+│                      31 cae en el último día. UNA función decide la factura de
+│                      una fecha y un trigger GUARDA el resultado en la comisión
+│                      —si la pantalla recalcula con el calendario de hoy, reescribe
+│                      facturas ya pagadas—. Lo que llega tarde salta a la próxima
+│                      factura abierta y nunca cambia el total de una ya subida; el
+│                      grupo sigue cerrado aunque algo pase a revisión (mirar
+│                      `estado_previo`), y se recalcula también al cambiar de
+│                      persona y al aprobarse tarde. Pagos fijos de la empresa
+│                      (egreso) o de una persona (fila `tipo='fijo'` que se factura
+│                      con sus comisiones; el sueldo en planilla es de la empresa,
+│                      o se cuenta dos veces), con días o «en cada fecha de pago»,
+│                      meses, «desde» y modo. Lo caro fueron los cuatro bugs que
+│                      dos revisiones encontraron antes de publicar y ninguna prueba
+│                      feliz veía: un índice por MES heredado que anotaba solo el
+│                      15 de un fijo «15 y 30»; un barrido que miraba 60 días atrás
+│                      con la configuración de HOY —se arregla con un avance por
+│                      fijo, nada hacia atrás—; «en cada fecha de pago» contado por
+│                      fecha y no por período, que al pasar del 28 al 30 el día 29
+│                      dejaba DOS bases en la factura del 30, o ninguno al revés; y
+│                      editar un fijo que no corregía la línea ya vencida sin pagar.
+│                      Trae `referencia.sql` generalizado, «hoy» inyectable con un
+│                      setting local a la transacción para probar «el 29 de
+│                      octubre» cualquier día, y la lista de pruebas con su control
+│                      negativo).
+│                      Tier 68 — Lo que no entra en la URL (1 extensión, capturada
+│                      2026-10-24 del bloque de arreglos del CRM):
+│                      lectura-cortada-por-max-rows suma el TERCER CASO (⭐
+│                      cross-project). `.in()` también va en la URL en una ESCRITURA:
+│                      «Seleccionar todo» + etiquetar con más de ~350 contactos
+│                      fallaba entera —medido: 350 uuid pasan, 400 «fetch failed»,
+│                      1.000 «Bad Request»—; se arregla con `enTandas` (200, EN ORDEN,
+│                      corta en la primera falla y devuelve lo aplicado) y una prueba
+│                      que exige tanda ≤ 350. Y un hilo se lee desde lo ÚLTIMO: el chat
+│                      pedía los mensajes ascendentes sin techo y mostraba los 1.000
+│                      más viejos; nadie lo vio hasta que una importación de historial
+│                      llevó un chat a 4.841 de una vez y se abría en junio. Desc +
+│                      techo + reverse, no `leerTodo`. Regla: antes de importar,
+│                      revisá las lecturas por entidad que asumen «pocas filas».
+│                      Tier 69 — La ronda del 15/10 del CRM de Josué (3 nuevas + 3
+│                      extensiones, capturadas 2026-10-24/25, JRM-78 a JRM-84):
+│                      paginar-lista-en-servidor (⭐ la continuación del tope de
+│                      1000: la lista mandaba 4,2 MB por visita y el kanban pintaba
+│                      111.074 elementos; medir peso, lectura y pintado por
+│                      separado, vista SQL con security_invoker, UNA
+│                      implementación de filtrar/ordenar, trampas de PostgREST y
+│                      medir CON la RLS) + pantalla-se-actualiza-sola (el cliente
+│                      recargaba «constantemente»: router.refresh() al volver a la
+│                      pestaña y cada minuto con freno por inactividad, solo en
+│                      pantallas auditadas; la alternativa barata a realtime) +
+│                      historial-importaciones-deshacer (deshacer CUALQUIER
+│                      importación, también lo que «completar» rellenó: el lote se
+│                      registra antes de escribir y no se le cree al navegador,
+│                      «completar» devuelve lo que cambió con un CTE `antes … for
+│                      update`, y `reverted_at` para no vaciar lo que puso OTRO
+│                      lote al deshacer dos veces). Extensiones:
+│                      revocar-execute-incluye-public (2º caso: un RPC que ESCRIBE,
+│                      invoker en vez de definer, rollback por rol y dos hallazgos
+│                      falsos de revisión), boton-llamar-softphone-vs-telefono (2º
+│                      caso: elegir Zoiper/WhatsApp/Zoom; `wa.me` sin código de país
+│                      no abría para el 60 % de la base; en Windows `callto:` se
+│                      asigna a mano) y refrescar-vista-server-tras-mutacion-cliente
+│                      (matiz: router.refresh() sí lee lo último; para cambios de
+│                      otros, realtime o refresco acotado). Y se ubicó en el índice
+│                      comisiones-por-quincena-y-pagos-fijos, que había quedado fuera.
+│                      Tier 70 — Cómo salió la cita (1, capturada 2026-10-25 del
+│                      CRM de Josué): resultado-de-cita-y-asistencia (⭐ las citas
+│                      pasadas no se veían en ninguna pantalla y el "Ya lo hice"
+│                      escribía en el lead y no en la cita. 🔴 Un trigger viejo
+│                      convertía CUALQUIER actividad en "último contacto = ahora":
+│                      marcar "No asistió" habría dejado 49 leads "contactados
+│                      hoy". "Sin marcar" se deriva; marcar es UNA transacción que
+│                      no pisa lo que marcó otro, deshace con el contacto previo y
+│                      hace upsert de la actividad; asistencia = realizadas ÷
+│                      (realizadas + no asistió), "sin datos" y no 0 %; el no-show
+│                      PROPONE reagendar; el mes en la zona del negocio).
+│                      Tier 71 — La agenda que ofrece lo que de verdad está libre (1,
+│                      capturada 2026-10-27 de la fase 1 de la agenda propia del CRM):
+│                      motor-de-horarios-libres (⭐ cross-project: el motor tipo
+│                      Calendly como función PURA que usan la página, el bot y la
+│                      vista previa —listar y validar con la MISMA función, el error
+│                      abierto de Cal.diy (#29729)—. Rangos con precedencia día
+│                      especial > feriado > semana, franjas pegadas que cruzan la
+│                      medianoche, días propios del servicio CRUZADOS con los de quien
+│                      atiende, márgenes que agrandan lo ocupado y no el borde del
+│                      horario, grilla alineada a la hora en punto en la zona del
+│                      NEGOCIO, cupos que comparten el inicio y ocupan los que se le
+│                      pisan, límite diario como bloque ocupado, ventana medida por el
+│                      inicio y ±2 días de colchón para la zona del cliente. Feriados
+│                      de Costa Rica en código (fijos + Pascua) y no en una tabla que
+│                      hay que recargar cada diciembre. Base con FK compuestas por
+│                      agency_id y `on delete set null (columna)`. Trae el motor, las
+│                      52 pruebas (los casos que REA OS midió en Calendly) y el
+│                      esquema en `assets/`, listos para copiar).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
@@ -1090,7 +2183,99 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      rate-limit-en-memoria-no-existe-en-serverless ·
 │                      service-role-con-cookies-fuga-de-pii (el cliente "admin" que filtra
 │                      datos sin login) · supabase-storage-borra-en-silencio (y el índice
-│                      único parcial que rompe a mitad).
+│                      único parcial que rompe a mitad) · elegir-la-cuenta-no-conectar-todas
+│                      (2026-09-24; detectada fuera del índice el 2026-10-19 con el
+│                      mismo grep: conectar por OAuth TODAS las cuentas que la persona
+│                      administra metió 16 canales de cuatro clientes en un negocio).
+│                      Tier 34 — Lo que el cliente nunca llenó (3 nuevas + 1
+│                      extensión, capturadas 2026-08-28 construyendo y probando
+│                      EN PRODUCCIÓN el onboarding del CRM):
+│                      onboarding-cliente-en-el-producto (⭐ cross-project:
+│                      mover el cuestionario que le pedís al cliente DESDE un
+│                      Word mandado al grupo de WhatsApp HACIA adentro del
+│                      producto. El síntoma que confirma que aplica: las
+│                      carpetas de onboarding de tus clientes están VACÍAS —3
+│                      de 3 en este proyecto— y el material que terminó
+│                      cambiando el bot llegó meses después y suelto. Trae: el
+│                      corte de 32 preguntas a 8 bloques por la regla "una
+│                      pregunta que no tiene destino en el sistema sobra", las
+│                      4 que nadie contesta si no se preguntan —precios y si el
+│                      bot puede decirlos, qué NUNCA puede prometer, quién
+│                      sigue cuando el bot corta CON su teléfono, y qué pasa
+│                      DESPUÉS de que el cliente dice que sí—, una sola forma
+│                      de respuesta para todo tipo de pregunta, y por qué
+│                      SALTAR cuenta como contestar. Lo no obvio: el grabador
+│                      del chat NO se reusa —exige Ogg/Opus porque lo pide Meta
+│                      y por eso no se ofrece en iPhone, justo el cliente que
+│                      más va a contestar por audio—; el aterrizaje necesita un
+│                      `opened_at` propio porque "pendiente" significa "no
+│                      contestó", no "no lo vio", y va en la base y no en el
+│                      navegador o el que arrancó en el celular vuelve a ser
+│                      recién llegado en la laptop; y la regla que decide a
+│                      quién se le pide es SIN FILA = no se le muestra nada, sin
+│                      backfill, para que los clientes viejos no vean un
+│                      recordatorio de algo que nadie les pidió. Más los 4 bugs
+│                      que salen sí o sí —los 4 aparecieron PROBANDO, ninguno
+│                      compilando—: el cliente que YA tenía cuenta se queda sin
+│                      ningún aviso porque el mensaje cuelga de "fijó la
+│                      contraseña" y ese evento NO OCURRE; borrar deja los
+│                      archivos; la fecha del cliente pisada por quien la mira;
+│                      y guardar bloques que nadie tocó) +
+│                      borrar-entidad-deja-sus-archivos (⭐ cross-project: las
+│                      FK cascadean, el almacenamiento NO tiene FK. El DELETE
+│                      limpia toda la base en un movimiento y se siente
+│                      completo, pero los audios, las capturas y el logo del
+│                      cliente quedan para siempre —y no es basura acumulada,
+│                      es material privado de alguien a quien le dijiste que
+│                      borraste su cuenta—. No se detecta porque la
+│                      verificación natural es contar filas y da TODO EN CERO:
+│                      medido borrando el cliente de prueba, base impecable y
+│                      768 KB vivos en la carpeta de una agencia que ya no
+│                      existía. Trae el recorrido de 2 niveles —en un
+│                      almacenamiento de objetos las carpetas son prefijos y se
+│                      distinguen por si traen id—, por qué va ANTES del DELETE
+│                      —después no tenés de dónde sacar el id—, por qué es
+│                      best-effort con conteo devuelto —un tercer nivel de
+│                      carpetas no lo alcanza y el número es lo único que lo
+│                      delata—, y el paso que casi nadie hace: probar el
+│                      recorrido SIN borrar) +
+│                      aviso-derivado-que-se-apaga-solo (⭐ cross-project:
+│                      cuando piden "notificaciones para estar al tanto", NO
+│                      crear una tabla con una columna `leido`: derivar el aviso
+│                      de la señal que YA dice si el asunto está atendido. Con
+│                      tabla propia, el estado del trabajo y el de la
+│                      notificación son dos verdades que hay que sincronizar, y
+│                      el día que alguien resuelva algo sin tocar su
+│                      notificación la campana muestra trabajo ya hecho. El
+│                      costo asumido: no hay historial. Lo no obvio y caro: el
+│                      TRIGGER GENÉRICO de `updated_at` rompe la regla, porque
+│                      esa fecha significa "el cliente tocó esto" y el trigger
+│                      se dispara también con el sello de "yo lo miré" —o sea
+│                      que mirar las respuestas quedaba registrado como si el
+│                      cliente acabara de escribir—: cuando DOS ACTORES
+│                      escriben la misma fila, `updated_at` automático deja de
+│                      significar algo. Más: sellar "ya lo vi" donde de verdad
+│                      se miró —una ficha que renderiza todas las pestañas lo
+│                      apagaría sin que nadie lea—, y ponerlo donde la persona
+│                      YA entra, textual del founder: "al panel admin casi no
+│                      entro").
+│                      **Extensión:** verificar-funcionamiento-end-to-end suma
+│                      **cuando el que miente es TU CHEQUEO** — tres casos del
+│                      mismo día, los tres con el código bien y la verificación
+│                      mal: una función que devuelve FILAS dentro del `select`
+│                      hace desaparecer la fila entera (reporté que no existía y
+│                      existía); `now()` está CONGELADO dentro de una
+│                      transacción, así que un test de ORDEN temporal no puede
+│                      dar verdadero jamás; y —el peligroso, falso POSITIVO—
+│                      medir una UI que nunca se hidrató: 8 bloques "sin
+│                      desbordes" cuando en realidad los clics no hacían nada y
+│                      se estaba midiendo solo el bloque ya abierto, con el
+│                      delator de que los 8 daban resultados IDÉNTICOS y el
+│                      control de abrir el login del propio proyecto para ver
+│                      que tampoco reaccionaba. La regla: antes de creerle a una
+│                      verificación, preguntá qué tendría que pasar para que
+│                      FALLE — y hacé esa pregunta también cuando el resultado
+│                      es el que esperabas.
 │                      Las leen los agentes vía Read tool.
 ├── memory/
 │   ├── orquestacion.md       Patrón de routing en lenguaje natural
@@ -1203,7 +2388,7 @@ Detalles en `memory/orquestacion.md`.
 
 | Proyecto | Path | Repo GitHub | Descripción |
 |---|---|---|---|
-| **Momentum AI CRM** | `crm-v2/` | `momentum-ai-crm` | CRM SaaS multi-tenant + bot de WhatsApp. **En producción con clientes reales.** Es la fuente de los Tiers 8→24 de skills. |
+| **Momentum AI CRM** | `crm-v2/` | `momentum-ai-crm` | CRM SaaS multi-tenant + bot de WhatsApp. **En producción con clientes reales.** Es la fuente de los Tiers 8→24 de skills. ⚠️ **Regla del founder (2026-09-25): todo cambio que el usuario del CRM note se anuncia en Novedades EN EL MISMO PR** (`src/lib/novedades/entradas.ts`; paso a paso en la skill `crm-v2/.claude/skills/novedades-en-cada-cambio`; candado en `.githooks/pre-push` que frena el push sin novedad; escape `Sin-Novedad: <motivo>`). |
 | Hookly | `proyectos/hookly/` | `hookly` | SaaS análisis viral de reels (Instagram MVP, TikTok V1) |
 
 > Los clientes que corren sobre el CRM (fichas comerciales + prompts) viven en `clients/` — ver `clients/README.md`, que es el registro maestro.
@@ -1234,6 +2419,35 @@ que responden en los flujos de chatbot. La calidad depende de seguir estas regla
 2. Leer `memory/feedback-prompting.md` — correcciones ganadas en produccion
 3. Consultar los prompts reales en `knowledge/workflows-reference/` como ancla de calidad
    (no inventar patrones — seguir lo que ya funciona)
+
+### Cuando llega un prompt YA ESCRITO para el bot de un cliente (regla del founder, 2026-10-17)
+
+El equipo comercial escribe los prompts de los clientes. Lo que entrega **se carga tal cual**:
+no se mueve, no se recorta y no se reescribe ninguna línea, aunque esta sección diga "cambios
+quirúrgicos" o "límite de 5.000". El proceso completo está en la skill
+`.agent/skills/cargar-prompt-al-motor/`. En corto:
+
+1. **El texto del autor no se toca.** El principal y las reglas de pase van letra por letra
+   (md5 de la base = md5 del archivo). Si traen una trampa (la hora dentro del prompt cuesta
+   ~2,5 veces más por respuesta, o su revisión final queda en el medio), **no se arregla**: va en
+   el mensaje para el autor, que la corrige en su próxima versión.
+2. **La configuración sí es nuestra** y se ajusta para que su texto funcione:
+   `modelo: claude-sonnet-5` + `callar_tras_cierre: true` (**todos los bots van en Sonnet**);
+   `aviso_al_pasar: avisar` si el prompt escribe su propio puente (en silencioso el código lo
+   borra, aunque el LEEME pida apagarlo), con `instruccion_al_pasar` remitiendo a su sección del
+   puente y con la hora; las piezas viejas nuestras que lo contradicen se vacían. **Los topes
+   salen del TEXTO, no del LEEME:** si el texto dice 1 o 2 burbujas, `tope_burbujas` es 2; el
+   largo no baja de lo que el texto necesita, porque el recortador del sistema rompe frases.
+3. **Se guarda bien:** respaldo, principal por `guardar_prompt_del_bot` (queda en el historial
+   de Master), resto en una escritura con filtro por `updated_at`, md5 y cero `\r`,
+   `bot_enabled` sin tocar. Prenderlo es otro paso, con OK.
+4. **Cargado no es listo: se mide** (2026-10-19). Después de guardar, `crm-v2/scripts/medir-estilo.ts
+   <negocio>` cuenta las fallas contra las reglas del mismo prompt (~US$0,40), y se lee la
+   transcripción. Si el estilo falla, se prueban perillas de configuración, nunca su texto. Lo
+   que ninguna perilla arregla, como las frases que el texto prohíbe y el bot igual usa, va al
+   autor con los números.
+5. **Se reporta corto:** qué quedó cargado, lo único que no siguió el LEEME y por qué, los
+   números de la medición y el mensaje para el autor en un bloque aparte.
 
 ### Skills y agente disponibles
 

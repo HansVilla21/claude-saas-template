@@ -159,6 +159,73 @@ DESPUES owner + conv ajena:     1 filas (esperado 1)   ← sin regresión
 
 Seis mediciones, la policy vieja y la nueva en el mismo bloque, y prod verificada intacta después. Recién ahí se aplicó.
 
+---
+
+## 🧬 Reemplazar una función VIVA sin cambiar nada más (2026-09-12)
+
+*Capturada en el CRM de Momentum con la migración `0095`: una función de cron de
+~110 líneas donde había que cambiar **tres expresiones** y nada más.*
+
+El riesgo de `create or replace` sobre una función larga no es lo que cambiás. Es
+lo que **cambiás sin darte cuenta**: una condición que otra migración ya había
+agregado y tu copia no trae, o un espacio que rompe un `like`. Tres reglas:
+
+**1. Copiá el cuerpo de la definición VIVA, no del último `.sql` que la tocó.**
+
+```sql
+select pg_get_functiondef('public.mi_funcion()'::regprocedure);
+```
+
+**2. Probá la migración EXACTA, generada desde el archivo, no reescrita a mano.**
+Un `DO` no puede contener `create function … $$ … $$` suelto, pero sí
+`execute $m0$…$m0$` por sentencia. Se generan con un script que parte el `.sql`
+respetando los `$tag$` y los comentarios. El script va en un archivo y no en la
+terminal, porque las comillas se rompen:
+
+```js
+// separar sentencias: ';' solo cuenta fuera de $tag$ y fuera de '--'
+let cur = "", tag = null, stmts = [];
+for (let i = 0; i < src.length; ) {
+  if (!tag && src.startsWith("--", i)) { i = src.indexOf("\n", i) + 1 || src.length; continue; }
+  const m = src.slice(i).match(/^\$[A-Za-z_]*\$/);
+  if (m) { tag = !tag ? m[0] : (m[0] === tag ? null : tag); cur += m[0]; i += m[0].length; continue; }
+  if (!tag && src[i] === ";") { if (cur.trim()) stmts.push(cur.trim()); cur = ""; i++; continue; }
+  cur += src[i++];
+}
+const cuerpo = stmts.map((s, k) => `  execute $m${k}$${s}$m${k}$;`).join("\n");
+```
+
+**3. Probá que SOLO cambió lo que querías, textualmente.** Adentro del bloque:
+
+```sql
+  v_vieja := pg_get_functiondef('public.mi_funcion()'::regprocedure);
+  create temp table _antes on commit drop as select id, public.mi_label(id) as viejo from public.leads;
+
+  -- … los execute $mN$ generados …
+
+  v_esperada := replace(replace(v_vieja, '<expr vieja 1>', '<expr nueva 1>'), '<expr vieja 2>', '<expr nueva 2>');
+  v_igual    := (v_esperada = pg_get_functiondef('public.mi_funcion()'::regprocedure));
+
+  -- salida fila por fila: ¿cambió algo que NO era el objetivo?
+  select count(*) filter (where n.nuevo is distinct from a.viejo and a.viejo not in (<objetivo>))
+    into v_tocados_de_mas
+    from _antes a cross join lateral (select public.mi_label(a.id) as nuevo) n;
+
+  perform public.mi_funcion();   -- compila y corre como el cron
+  raise exception 'REPORTE igual=% tocados_de_mas=% …', v_igual, v_tocados_de_mas;
+```
+
+Medido en la `0095`: `def_igual=t`; 22 etiquetas objetivo cambiaron y **0 nombres
+reales**; en los títulos cambiaron 62, y el reporte **explicó** los 40 que no
+eran objetivo con su forma, sin datos personales: `(con espacios)->(texto)`, o
+sea, nombres con espacios de más que ahora salen recortados. Sin esa columna de
+forma, "40 tocados de más" hubiera parado el deploy o, peor, se hubiera ignorado.
+
+Sumale los permisos antes y después (`has_function_privilege`), porque
+`create or replace` conserva el ACL y es el momento de mirarlo (skill
+`revocar-execute-incluye-public`). Y, como siempre, el paso 4: después del
+bloque, confirmar que la función viva sigue siendo la vieja.
+
 ## Output esperado
 
 - El SQL de la migración **verificado contra el esquema real** antes de que nadie lo aplique.

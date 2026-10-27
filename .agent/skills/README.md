@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**147 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**201 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -31,6 +31,11 @@ Cómo saber que algo funciona de verdad. Si vas a decir "listo", empezá acá.
 | `handoff-dossier-a-otro-proyecto` | Empaquetar un proyecto para que otro agente lo retome sin la conversación |
 | ⭐ `verificar-frontend-sin-ver` | Pedirle el CSS al server y listar qué clases generó Tailwind **de verdad**, sin sesión ni captura. El JIT deja clases zombi; `min-width:auto` le gana a tu `w-80` |
 | ⭐ `probar-todas-las-ramas-no-solo-la-feliz` | Una prueba verde sobre una rama es evidencia sobre **esa** rama. `frío` con tilde: los leads C y D reventaban con 500 y la primera prueba dio verde |
+| ⭐ `brecha-entre-aceptado-y-guardado` | "Se perdió lo que puse" con todo en 200: entre que el sistema ACEPTA el trabajo (subidas, audio, autoguardado, wizards, importadores) y lo GUARDA hay una brecha. Medido: 21 archivos en el Storage, 11 anotados en la base. Qué revisar antes de dar por terminada una pantalla de varios pasos |
+| `distinguir-detenido-a-proposito-de-roto` | Una tabla de ejecuciones llena de `running` que nunca terminaron no es una tasa de falla. Separar "se detuvo a propósito" (un portón, un gate) de "se rompió" antes de medir cada cuánto falla y de decidir un rediseño |
+| ⭐ `clasificar-por-lista-no-por-fallback` | Una rama "todo lo demás" con efecto hacia afuera (un mensaje, un correo, un cobro) también le responde a lo que el proveedor invente mañana. Clasificar por lista explícita |
+| ⭐ `config-que-deja-el-sistema-mudo` | Un guard escrito para el caso feliz (`desde < hasta`, `min < max`) que una configuración rara no cumple nunca: el sistema no tira error, se calla. Validar la combinación al guardar |
+| `rama-de-salida-varios-prs` | Juntar N PRs listos en UNA rama que se prueba como producto antes de mergear: el orden, los que se tocan entre sí, y construir encima de lo que todavía no está en `main` |
 
 ## 🗄️ Datos, RLS y seguridad de base
 
@@ -51,14 +56,22 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `datos-reales-vs-seed-demo` | Cuando llega el dato real: **borrar** los agregados sembrados, cazar los fallbacks tipo `?? 47`, blindar `db:seed` |
 | `rol-aislado-cartera-rls` | Rol que ve solo su cartera. El bug a cazar es la "cola abierta" que expone las carteras privadas — excluirlas del SELECT **y** del UPDATE |
 | `importacion-con-lote-deshacible` | `import_batch_id`: deshacer por `created_at` se lleva lo que entró por el formulario y los webhooks en la misma ventana |
+| `historial-importaciones-deshacer` | El paso siguiente: historial de todas las importaciones y deshacer **cualquiera**, incluido lo que «completar» rellenó en contactos existentes. El lote se registra antes de escribir y no se le cree al navegador; «completar» devuelve lo que cambió DE VERDAD (CTE `antes … for update`, sin `RETURNING OLD` en Postgres ≤17); `reverted_at` para no revertir dos veces —si no, vacía lo que puso OTRO lote—; lotes huérfanos hasta el deploy; aviso fuerte para los viejos |
+| ⭐ `resultado-de-cita-y-asistencia` | Las citas quedan «agendadas» para siempre y no se sabe cuántos llegan. 🔴 Un trigger viejo convertía CUALQUIER actividad en «último contacto = ahora»: marcar «No asistió» en 49 citas atrasadas dejaba 49 leads «contactados hoy». «Sin marcar» se deriva; marcar es UNA transacción que no pisa lo que marcó otro, deshace con el contacto previo y hace upsert de la actividad; asistencia = realizadas ÷ (realizadas + no asistió), «sin datos» y no 0 %; el no-show propone reagendar |
 | `supabase-storage-borra-en-silencio` | `storage.remove()` devuelve `error: null, data: []` sin policy de SELECT: subir funciona y borrar no. Más el índice único parcial que se viola **por el camino**, no por el destino |
 | ⭐⭐ `service-role-con-cookies-fuga-de-pii` | `createServerClient` de `@supabase/ssr` **lee cookies y la cookie le gana a la llave**: con sesión la RLS aplica, sin sesión bypasea todo. Un `GET /api/investors` sin login devolvía cédulas y teléfonos reales, con status 200 |
+| ⭐⭐ `revocar-execute-incluye-public` | `revoke execute … from anon, authenticated` **no cierra una función**: nace con EXECUTE para PUBLIC y anon lo hereda. En el CRM, una función devolvía nombre o teléfono de cualquier contacto a un `curl` sin sesión, y la de al lado tenía el revoke incompleto. **2º caso** (2026-10-25): un RPC que ESCRIBE, abierto dos meses; mejor `security invoker` que chequear adentro, prueba con rollback por rol (ojo con las «colas abiertas» de la RLS) y dos hallazgos de revisión falsos, desmentidos con `pg_policies` y `pg_proc` |
 | `borrar-entidad-con-fk-no-action` | El default de Postgres es **bloquear**. El orden de borrado lo dicta la base: se valida con `BEGIN … ROLLBACK` contra datos reales, y los dependientes de segundo nivel van primero |
+| ⭐ `borrar-entidad-deja-sus-archivos` | Borrar un cliente, un usuario o una conversación con adjuntos: las FK con cascade limpian la base, NO el Storage. Antes de decirle que sí a "borrame esta cuenta" |
+| ⭐ `historial-de-cambios-por-trigger` | "¿Quién cambió esto y cómo llegó a este estado?": historial por trigger en una tabla propia, no un `audit_log` genérico que nadie llena. Primero se cuentan todos los caminos que escriben la columna |
+| ⭐ `supabase-disco-lleno-pasa-a-solo-lectura` | El disco de Supabase se llena, la base pasa a solo lectura y el sistema entero se calla: REST da 522 o se cuelga mientras auth y las Edge Functions contestan rápido |
+| ⭐ `vigilancia-cruzada-dos-testigos` | El sistema se cae y **nadie se entera** porque lo que tenía que avisar vive adentro de lo caído (pg_cron no corre con la base en solo lectura; el cron de Vercel no corre con Vercel apagado). Dos testigos en lados opuestos que se miran entre sí, prueba de **escritura**, aviso reclamado una vez, deduplicar sin estado cuando el estado es lo caído, y un aviso para cuando el respaldo tapa la caída |
 
 ## 🏢 Multi-tenant y SaaS
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐⭐ `elegir-la-cuenta-no-conectar-todas` | Conectar por OAuth **todas** las cuentas que la persona administra: una autorización dejó 16 canales de cuatro clientes dentro de un solo negocio, suscritos al webhook. Listar → elegir UNA → verificarla contra el proveedor |
 | ⭐ `config-por-tenant-no-literal-en-el-flujo` | La lógica de UN rubro cableada en el flujo compartido. El guard es un contrato, no un flag |
 | `catalogo-multifuncional-por-preset` | Una base que se adapta a cualquier rubro por configuración; rubro nuevo = preset nuevo sin código |
 | `crm-admin-panel-master-gated` | Panel admin gateado por rol master |
@@ -69,11 +82,18 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `async-job-pattern` | UI → job → worker → polling + refund de créditos |
 | `key-de-ia-en-configuracion` | La API key del proveedor se pega en Configuración y vive **cifrada en la base**, no en el `.env`. El modelo se pregunta a `/v1/models`, no se hardcodea |
 | `valor-derivado-pendiente-config` | Comisión/valor calculado de una tabla editable, **sin fallback**: si falta la config el hecho entra igual y el valor queda `pendiente_config` + alerta |
+| ⭐ `onboarding-cliente-en-el-producto` | El onboarding del cliente DENTRO del producto, en vez de un Word, un Google Form o mensajes sueltos de WhatsApp, cuando el servicio se configura con información del cliente |
+| ⭐ `novedades-dentro-del-producto` | "La gente no sabe lo que agregamos" / "nadie usa X": novedades dentro del producto, y que nunca se olvide anunciar lo que se sube |
+| ⭐ `portar-bot-n8n-propio-al-crm` | Mover el bot propio de n8n de un cliente (prompts, persona, historial) al bot único del CRM multi-tenant, donde cada tenant aporta su `bot_config` |
+| ⭐ `reparto-leads-por-porcentaje` | Repartir los leads nuevos entre el equipo en proporciones (60/40) aunque los atienda un bot. El «round robin» que ya existía nunca asignó una conversación (un CHECK rechazaba el valor y el error se tragaba), «el que tiene menos» con 60/40 da 5/5, y guardar el dueño en la fila que el bot lee **lo dejaba mudo** |
+| ⭐ `descargar-editar-subir-con-cabecera` | Alguien no técnico cambia un texto largo que vive en la base (un prompt, una plantilla) bajándolo, editándolo con su IA y subiéndolo. El archivo dice adentro de qué tenant y de qué versión salió: el de otro cliente no se sube y no se pisa lo que alguien subió en el medio |
 
 ## 🤖 Bot, n8n y LangChain
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐ `opciones-del-modelo-con-significado` | El modelo elige de una lista cerrada que lee una persona (motivo del pase, categoría) **por el nombre**: un estudio médico que manda una regla del negocio salía "El bot se atascó". Tres causas apiladas (falta la opción, nadie explicó qué significa cada una, y el cliente dejó el parche escrito en su propio prompt), cada consumidor de la lista con su orden de despliegue, y la prueba con el modelo real: 9/15 → 18/18 |
+| ⭐ `revisor-adversarial-para-decisiones-de-ia` | Un LLM decide con criterios escritos por una persona (estados, calificaciones) y se adelanta: 10 de 10 pases a «Llamada agendada» antes de tiempo. Más autocontrol al mismo pase no sirvió (reescribía las condiciones para que le cerraran); sí un **revisor aparte que busca qué falta**, que no actúa si falla, más citas verificadas por código en UN mensaje. Banco de replay con casos reales: 27/54 → 26/26 |
 | `n8n-workflow-build-script` | Deploy vía API PUT + verificación por hash SHA-256 contra el n8n vivo |
 | `n8n-workflow-versioning` | Snapshots, tags y procedimiento de rollback |
 | `n8n-code-node-debug-pattern` | Debug de Code nodes |
@@ -86,10 +106,17 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `n8n-pipeline-rapido-vs-pesado` | Separar el camino que responde del que procesa |
 | `bot-multibubble-output-flow` | Responder en burbujas (Formateador → Parser → Split Out → Expand) |
 | `bot-handoff-system-end-to-end` | Handoff bot → humano completo |
+| ⭐ `marca-del-pase-en-el-chat` | `handoff_*` en columnas guarda solo el último pase: tabla de eventos llenada por trigger, el marcador corrido **después** de la despedida del bot, y el segundo pase que daba **0 filas** en silencio porque devolver al bot dejaba el pase `pending` |
+| ⭐ `escribir-toma-la-conversacion` | El equipo escribía y el bot contestaba encima (423 mensajes en 45 días). Trigger en `messages` —`sender_kind='agent'` solo no alcanza: los seguimientos también lo son—, portones otra vez después de esperar y después de pensar, y lo del equipo a la memoria del bot |
+| ⭐ `bot-lee-pdf-del-cliente` | El PDF se **resume una vez al llegar** (data URL, solo PDF, MIME antes de bajar, vacío no es éxito) y el texto al modelo **prohíbe opinar**. Con el generador de un estudio inventado en Python puro y los **tres** lugares que tienen que conocer un tipo nuevo |
 | `bot-anti-loop-detector` | Anti-loop + descalificación |
 | `bot-llm-marker-expand-pattern` | Marcadores del LLM expandidos aguas abajo |
 | `bot-whatsapp-unsupported-fallback` | Recuperar los mensajes `unsupported` del clic de anuncio |
 | `sales-framework-spsp-whatsapp` | SPSP adaptado a WhatsApp |
+| ⭐ `cache-compartida-entre-usuarios` | La caché de prompts solo acierta entre usuarios si lo igual para todos va primero y marcado, y lo de cada uno después. Medir antes de tocar; mover la marca no cambia el texto que lee el modelo |
+| ⭐ `workflow-n8n-activo-sin-recibir` | Un workflow ACTIVO puede no estar recibiendo nada: un bot 3 días mudo, en verde y sin un error. Verificar la entrada, sobre todo al migrar un número, cambiar de proveedor o conectar un tenant |
+| `cargar-prompt-al-motor` | Cargar en el motor un prompt escrito afuera. Regla del founder (2026-10-17): el texto del autor va **tal cual** y sus trampas se le reportan; lo nuestro es la config (Sonnet 5, aviso al pasar, topes sacados de su texto). Cargado no es listo: se mide el estilo contra sus reglas antes de decir "listo" |
+| ⭐ `texto-literal-por-marcador` | El negocio quiere que el bot mande **su** texto tal cual ("como copy paste") y el modelo lo resume, y aunque lo copie la limpieza, el partidor y el recortador lo cambian. El modelo **elige** un marcador `[FICHA:ref]` y el código pega el texto exacto en su propio mensaje; la memoria guarda el marcador. Medido: un recordatorio al final sin las excepciones de la nota las anula |
 
 ## 💬 WhatsApp, webhooks e integraciones
 
@@ -98,9 +125,11 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `bsp-media-expira-archivar-propio` | El CDN del BSP **borra la media a los 7 días** (medido). Se perdieron 54 archivos antes de detectarlo |
 | ⭐ `webhook-fanout-sin-reconciliacion` | El proveedor entrega el mismo evento a dos endpoints y nadie reconcilia si uno falla |
 | `webhook-contar-event-types-antes-de-arreglar` | `group by event_type` **antes** de tocar el webhook. El mismo error se cometió 3 veces en una sesión |
+| ⭐ `conectar-numero-que-ya-recibe` | El número se conectó en el proveedor **antes** que en el CRM y los mensajes se descartaban. Bot apagado y canal en **una** escritura (cargar el canal lo enciende), reproceso firmado por el webhook real y cada mensaje con su **hora real** |
 | `conexion-whatsapp-ycloud-supabase-n8n` | Montar la conexión completa en un proyecto/cliente nuevo |
 | `ycloud-webhook-to-supabase` | La ingesta que persiste |
 | `whatsapp-proactivo-a-staff` | Avisar al equipo por plantilla aprobada cuando pasa un evento en la DB |
+| ⭐ `vigilar-proveedor-que-no-avisa` | El número (o la cuenta, o el token) se cae en el proveedor y **no llega ningún evento**: Jacó ~20 días y Roberto ~15 h sin WhatsApp, y al prender la revisión apareció un tercero con 18 días. Revisión periódica con máquina de estados que no avisa de más (2 fallas seguidas, primer chequeo callado, gracia tras conectar, no saber ≠ caído), un aviso por caída y otro por vuelta reclamado de forma atómica, secreto del cron generado en el Vault y franja para todo el equipo |
 | `whatsapp-image-delivery-ycloud` | Formato de imagen que Meta acepta (JPG/PNG — WebP se rechaza en silencio) |
 | `nota-de-voz-real-whatsapp` | Nota de voz con la ondita, no adjunto |
 | `outbound-delivery-server-action` | Envío saliente confiable desde el CRM |
@@ -110,13 +139,31 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `prospai-webhook-crm` | LinkedIn → CRM: los 16 eventos, el payload de prueba con placeholders literales que hace fallar el test, guardar crudo antes de validar |
 | `fathom-transcripciones-al-crm` | El body **crudo** antes de parsear (re-serializar rompe la firma); el webhook-id es la clave de idempotencia; 🔴 `ON DELETE CASCADE` en la tabla de eventos borra el historial |
 | `manychat-instagram-al-crm` | IG → CRM **sin** la API de ManyChat (esa es pull y cuesta): "Solicitud externa", push, Pro estándar. El receptor ya existía — grep + curl antes de reconstruir |
+| ⭐ `salida-a-crm-externo` | Lo que entra a tu CRM aparece solo en el CRM del cliente (Zoho, HubSpot), en una dirección y sin romper sus automatizaciones. Lo caro solo aparece contra su cuenta viva: el enlace que abre el inicio en vez del registro, el Lead borrado que da un 400 suelto y no un 404 |
 | `meta-ads-conexion-oficial` | Standard Access alcanza para multi-negocio, pero un tercero no puede autorizar tu app → no hay OAuth. La cuenta se **fija**, nunca se lista |
+| ⭐ `meta-tech-provider-de-cero-a-app-review` | Ser Tech Provider de Meta para que cada cliente conecte SU WhatsApp/IG/Messenger: las 7 puertas en orden, los 4 bloqueos que aparecen recién al conectar el primer número (verificado ≠ registrado; sin App Review no se conecta ni el número propio) y la revisión de la app pantalla por pantalla |
+| ⭐ `eventos-a-meta-desde-crm-whatsapp` | Avisarle a Meta qué lead de un anuncio que abre WhatsApp calificó o compró (Conversions API de mensajería). Con el número en un BSP tu app **no puede ser socio** de la cuenta ("número máximo de socios"): el token lo genera el portafolio del cliente sobre tu app, con aprobación de otro admin. Y `events_received: 1` **no** es "procesado": sin el permiso revisado, Meta acepta y no muestra nada |
+| ⭐ `fb-login-sdk-fedcm-y-callback` | `FB.login` con `config_id` que falla solo en producción: FedCM tira tu configuración ("la app necesita al menos un permiso compatible") y el SDK rechaza un callback `async`. Se diagnostica leyendo la URL de la ventana |
+| ⭐ `whatsapp-coexistencia-embedded-signup` | Conectar el número que el negocio sigue usando en el celular y traer 6 meses de chats sin que el pasado dispare avisos, "no leídos", realtime ni ventanas de 24 h falsas |
+| ⭐ `webhook-meta-multicanal` | Recibir WhatsApp, Instagram y Messenger directo de Meta con una sola URL: traductores puros por sobre → eventos normalizados → un procesador |
+| ⭐ `estado-antes-que-mensaje` | El aviso del proveedor (entregado, pagado) llega antes que la cosa y el webhook lo descarta: tabla de pendientes + trigger + candado por id, sin deadlock |
+| ⭐ `nombre-de-relleno-visible` | "Lead sin nombre" tratado como nombre: le gana al teléfono en pantalla y sale "Hola Lead," en plantillas. `nombreReal` para hablarle a la persona, `nombreVisible` para mostrarla |
 | `agendamiento-google-calendar` | Calendly propio sobre Google Calendar. Lo que lo mata en silencio: dejar la app en "Testing" — el refresh token vence a los 7 días y la agenda muere un martes |
+| ⭐ `coexistencia-leido-y-sin-leer` | Con coexistencia: "los chats se abren solos" en el celular, no queda la burbujita de nuevos, o el lead ve azul y nadie le contestó. "Leído" en WhatsApp y "sin leer" en el CRM |
+| `primer-contacto-sin-texto` | Leads de anuncios click-to-WhatsApp que llegan como `unsupported` (error `131060`) sin texto y nunca reciben respuesta, y que además inflan el "Sin atribución" de las campañas |
+| ⭐ `wamid-dos-formatos-y-memoria-del-bot` | Borrar o editar un mensaje de WhatsApp: la API no lo permite (el cliente lo sigue viendo), el `revoke`/`edit` da `target_not_found`, y el bot tiene que olvidarlo en su propia memoria |
 
 ## 🎨 UI, UX y frontend
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐ `editar-dato-que-el-webhook-reescribe` | "Editar contacto" cuando una integración también escribe los datos: el webhook pisaba el nombre en cada mensaje y la edición **volvía atrás sin error**. Un dueño por campo, precedencia en el resolver único (medida antes: 13 de 1.769), teléfono de solo lectura si hay id del proveedor, modal no optimista, y un cumpleaños como `date` |
+| ⭐ `lectura-cortada-por-max-rows` | "Se guardó pero al recargar no está": PostgREST corta en 1.000 filas **sin error** y faltan las más nuevas. Diagnóstico (logs de clave duplicada + conteo por tenant + prueba con control positivo), el helper `leerTodo` paginado con orden total, y por qué `.limit()` y subir `max_rows` no lo arreglan. **2º caso** (8.022 leads, 7 pantallas): `.in()` revienta con ~500 ids (la URL) y sin mirar `error` devuelve vacío → `fetchIn` en tandas; decidir con `count`; el orden decide qué se pierde; `count head`; barrido de todas las lecturas; verificar contra SQL directo; tope explícito si el fix cambia algo hacia afuera. **3er caso** (2026-10-24): `.in()` en una ESCRITURA tumba la acción en lote entera (350 uuid pasan, 400 no) → `enTandas` en orden; un hilo se lee desde lo ÚLTIMO (desc + techo + reverse) — una importación de historial llevó un chat a 4.841 y se abría en junio |
+| ⭐ `paginar-lista-en-servidor` | La continuación del tope de 1000: con la lectura arreglada, la lista mandaba 4,2 MB por visita y su kanban pintaba 111.074 elementos (3,3 s congelada). Primero medir peso, lectura y pintado por separado y topar lo que pinta «todo»; después, vista SQL con `security_invoker` —sin eso le muestra todo a cualquiera—, UNA implementación de filtrar y ordenar reusada en página, contadores, ids, CSV y kanban, las trampas de PostgREST (NULL fuera de `neq` dentro de `or()`, `*` comodín, 416 en una página que ya no existe), la prueba vieja contra nueva en la base real y medir CON la RLS |
+| ⭐ `contadores-que-siguen-los-filtros` | Tarjetas y chips con número junto a una barra de filtros: el número = las filas que aparecen al tocarlo. Conteo por facetas (todos los filtros menos el que la tarjeta controla), con la misma función de filtrado que la tabla y prueba de propiedad |
+| ⭐ `menu-de-comandos-en-composer` | Escribir `/` o `:` y que el chat abra un menú (plantillas, emojis): menú **en el flujo**, detección pura que no se dispara con `1/2`, la hora ni `:)`, cursor atado al texto, Enter que **elige y no envía**, dos menús en un mismo textarea, y por qué la lista de plantillas mostraba todo el cuerpo (`line-clamp` + `block` en el mismo elemento) |
+| ⭐ `selector-de-emojis-tipo-whatsapp` | Selector de emojis "como WhatsApp": se compra hecho (`emoji-picker-element`, carga tardía, datos propios) y el trabajo está en los bordes — el buscador no ignora **tildes** (4 → 26 resultados), las **banderas no existen en Windows** (polyfill de 77 KB solo donde hace falta), el botón aplasta la fila del composer (medir la **columna** con container query, no la ventana) y en celular enfocar sube el teclado encima del panel |
+| ⭐ `no-decidir-dentro-del-updater` | La pantalla lo muestra hecho y la base no se enteró: una bandera prendida **adentro** del updater de `setState` se lee antes de que React lo corra. Medirlo con 3 registros, sacar la decisión afuera y verificar contra la base |
 | ⭐ `auditar-responsive-midiendo` | El desborde no es "algo muy ancho": es algo que **se niega a encogerse**. Las 3 formas, invisibles para tsc y el linter |
 | ⭐ `acciones-en-lote-seguras` | Selección múltiple sin los 3 desastres típicos (actuar sobre lo que no se ve, decir 50 cuando cambiaron 40, ser más permisivo que la app) |
 | ⭐ `reporte-in-app-con-snapshot-efimero` | Reportar un bug cuando lo que hay que reportar es efímero y el servidor no puede reconstruirlo |
@@ -128,6 +175,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `popover-portal-no-absolute` | Popovers SIEMPRE con portal, NUNCA `absolute` (el mismo bug 3+ veces) |
 | `toaster-montado-por-scope` | Toasts que no aparecen y no dan error: falta el `<Toaster>` en ese scope |
 | `refrescar-vista-server-tras-mutacion-cliente` | "Hago algo y tengo que refrescar para verlo" |
+| `pantalla-se-actualiza-sola` | "Tengo que recargar constantemente": lo que cambian OTROS (una reserva por link, la asistente, un webhook) y las pestañas abiertas horas. Primero diagnosticar (no todo «recargar» es dato viejo); `router.refresh()` al volver a la pestaña y cada minuto con freno por inactividad —Vercel Hobby cuenta CPU—; solo en pantallas auditadas, no en el layout; cachés del cliente con refresco silencioso |
 | `realtime-canal-muere-en-silencio` | El canal se cae y la UI queda vieja hasta F5 |
 | `supabase-realtime-broadcast-pattern` | Broadcast Changes (`postgres_changes` está deprecado) |
 | `desktop-notifications-from-realtime` | Notificaciones del SO enganchadas a un realtime por-usuario |
@@ -139,8 +187,12 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `galeria-rapida-thumbnails-url-estable` | El polling que re-firma signed URLs recarga **todas** las imágenes en cada tick. La cura es una URL estable por id, no optimizar el polling |
 | ⭐ `manual-de-ayuda-dentro-del-producto` | El manual vive en `/ayuda` y se **lee de las pantallas reales**, no de memoria. Contenido como dato tipado; el enlace no pasa por el gate del nav |
 | `construir-landings-cliente` | 3 landings de conversión sobre el material real del cliente: blueprint, autoridad por landing, audio-testimonios, subdominios DNS-only |
-| `boton-llamar-softphone-vs-telefono` | `tel:` en Mac se lo queda FaceTime. Los softphones registran `callto:`, que cae directo sin configurar nada |
+| `boton-llamar-softphone-vs-telefono` | `tel:` en Mac se lo queda FaceTime. Los softphones registran `callto:`, que cae directo sin configurar nada. **2º caso** (elegir Zoiper, WhatsApp o Zoom): `wa.me` sin código de país no abre (le pasaba al 60 % de la base), WhatsApp no empieza llamadas por enlace, Zoom solo marca con Zoom Phone, casillas con varios números, el canal recordado sin romper la hidratación, y en Windows `callto:` hay que asignarlo a mano |
 | ⭐ `portar-el-diseno-no-interpretarlo` | Si te pasaron un diseño, el trabajo no es diseñar: es **portar**. Grepear las etiquetas y construir con tu estética cuesta la pantalla entera — y cada superficie del handoff puede traer su propio sistema |
+| ⭐ `aviso-derivado-que-se-apaga-solo` | Cuando piden "notificaciones para estar al tanto": un aviso que se deriva del estado y se apaga solo, en vez de una tabla `notificaciones` con `leido` |
+| `canal-realtime-compartido-por-topic` | Dos componentes montados a la vez (la campana de escritorio y la de celular escondida con CSS) piden el mismo canal de Realtime y uno queda sordo: "las notificaciones no son confiables" sin nada mal en la base |
+| ⭐ `lectura-y-realtime-sin-hueco` | El mensaje que cae entre la lectura inicial y la suscripción al canal: está en la base y en la lista, pero no en el chat abierto hasta recargar. Toda pantalla que arma su estado con lectura + stream en vivo |
+| `ventana-con-direccion-propia` | Un modal que se abre encima de donde estás y sigue teniendo URL (configuración, ficha, perfil, foto): se comparte, se recarga y se enlaza. Cuándo sí, y cuándo alcanza con un diálogo común |
 
 ## 📊 Números, dinero y tiempo
 
@@ -149,6 +201,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `porcentaje-necesita-minimo-muestra` | Una tasa que **ordena** una lista necesita mínimo de muestra. 1 lead / 1 cierre = 100% encabezando la tabla donde se decide el presupuesto |
 | `umbral-compartido-cron-cliente` | El mismo umbral en un cron SQL y un filtro TS, sin que diverjan |
 | `inicio-dia-timezone-fija` | "Hoy" anclado a una TZ fija, no al runtime (bug clásico server-UTC vs negocio-local) |
+| ⭐ `motor-de-horarios-libres` | Agenda propia tipo Calendly: el motor de horarios libres como función **pura** que usan la página, el bot y la vista previa (listar y validar con la misma función, el error abierto de Cal.diy). Día especial > feriado > semana, márgenes que agrandan lo ocupado y no el borde, grilla alineada a la hora en punto en la zona del **negocio**, cupos, límite diario, ventana por el inicio, la zona del cliente con ±2 días. Feriados de CR en código (Pascua). Trae el motor, 52 pruebas y el esquema en `assets/` |
 | `dinero-multimoneda-app-financiera` | Precisión decimal + moneda nativa por cuenta (evita "plata fantasma") |
 | `tipo-de-cambio-real-bccr-hacienda` | FX real de Costa Rica sin API key, con caché y fallback |
 | `creditos-por-imagen-reserva-y-refund` | Cobrar por la unidad que **cuesta**, no por la request: ledger append-only, refund por unidad fallida, y el founder exento por **saldo**, no por código |
@@ -156,6 +209,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `probar-pasarela-de-pago-en-prod` | Validar pagos end-to-end con productos de $1 cuando el sandbox está caído |
 | `feedback-con-recompensa-en-creditos` | Otorgamiento **manual**, para controlar costo y evitar gaming |
 | `watermark-en-display-plan-gating` | Nunca servir el master limpio a un free. Un overlay CSS es decoración, no seguridad |
+| ⭐ `comisiones-por-quincena-y-pagos-fijos` | Comisiones que se pagan en fechas fijas con factura (el 15 y el 28): cada pago se comisiona en la quincena en que ENTRÓ, el calendario es un dato que el cliente edita y no código, UNA función decide la factura de una fecha y un trigger guarda el resultado (recalcular con el calendario de hoy reescribe facturas pagadas), y los pagos fijos que se generan solos |
 
 ## 🔐 Auth y deploy
 

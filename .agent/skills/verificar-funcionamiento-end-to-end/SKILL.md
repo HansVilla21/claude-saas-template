@@ -85,3 +85,65 @@ Nada se reporta como hecho sin haber verificado su efecto real contra la fuente 
 **Output correcto:** "Creé el trigger. Lo verifiqué: inserté un mensaje inbound de prueba → `select * from notifications order by created_at desc limit 1` devuelve la fila correcta con el `user_id` del asignado y el `data.conversation_id` esperado; y `select event,topic from realtime.messages where event='notification'` confirma el broadcast. Quedó probado, no presumido."
 
 Relacionado: `.agent/skills/popover-portal-no-absolute/SKILL.md` (mismo principio: "crearlo bien para que no se repita"), `n8n-workflow-build-script`.
+
+---
+
+## Extensión (2026-08-28): cuando el que miente es TU CHEQUEO
+
+Todo lo de arriba asume que la verificación dice la verdad. Estos tres casos salieron el
+mismo día, verificando el onboarding del CRM, y en los tres **el código estaba bien y el
+chequeo estaba mal**. Dos dieron falso NEGATIVO (asusté al pedo) y uno dio falso POSITIVO
+(el peligroso).
+
+### 1. Una función que devuelve FILAS dentro del `select` hace desaparecer la fila
+
+```sql
+-- MIENTE: con answers = '{}', jsonb_object_keys devuelve CERO filas
+-- y se lleva puesta toda la respuesta → el chequeo dice "no existe".
+select o.status, o.updated_at, jsonb_object_keys(o.answers) as bloques from ...;
+
+-- Bien:
+select o.status, o.updated_at,
+       (select coalesce(array_agg(k),'{}') from jsonb_object_keys(o.answers) k) as bloques
+from ...;
+```
+
+Reporté que la fila no se había creado. Estaba creada. **Delator:** el chequeo devuelve 0
+filas para una condición que sabés que se cumple.
+
+### 2. `now()` está CONGELADO dentro de una transacción
+
+Probando "el aviso vuelve si el cliente edita después de que lo miré", el paso dio `false`
+y parecía un bug de la regla. No lo era: dentro de la misma transacción, el "lo miré" y el
+"lo editó" quedan con **la misma hora**, así que `updated_at > reviewed_at` no puede ser
+verdadero jamás.
+
+Cuando el test involucra **orden temporal**, `now()` no sirve: simulá el instante real
+(fijar la fecha anterior a mano) o usá `clock_timestamp()`.
+
+### 3. Medir una UI que nunca se hidrató (falso POSITIVO)
+
+Medí el responsive de 8 bloques contra el dev server en el panel del navegador: **cero
+desbordes, todo verde**. Era mentira. React nunca se había hidratado ahí (el websocket de
+recarga en caliente no conecta en ese panel), así que mis clics no hacían nada y estaba
+midiendo **solo el bloque que ya venía abierto**.
+
+- **Delator:** los 8 bloques daban resultados **idénticos**, carácter por carácter.
+- **El control que lo confirmó:** abrir la pantalla de login del propio proyecto — tampoco
+  reaccionaba. Si un control conocido tampoco funciona, el problema es el entorno, no tu
+  código.
+- **El arreglo:** medir contra un **build de producción**, sin recarga en caliente.
+- **Y antes de medir interacción, comprobá que la página esté viva:** un clic que no cambia
+  `aria-expanded`, o un elemento sin props de React adjuntas, significa que estás midiendo
+  HTML muerto.
+
+### La regla que resume las tres
+
+**Antes de creerle a una verificación, preguntá: ¿qué tendría que pasar para que este
+chequeo FALLE?** Si no hay respuesta, no está midiendo nada — y esa pregunta hay que
+hacérsela igual cuando el resultado es el que esperabas.
+
+Corolario barato: **inyectá el fallo a propósito una vez.** Un `<div>` de 500px para probar
+que el auditor de desborde lo ve; un preset inválido para probar que la base lo rechaza. Si
+el chequeo no se pone rojo con el error puesto a mano, tampoco se va a poner rojo con el
+error de verdad.
