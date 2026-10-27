@@ -6,6 +6,34 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-27 — Agenda propia: la fase 1 en producción, la agenda manual conectada a los servicios, y cómo será la página
+
+**Contexto:** se construyó la fase 1 de la agenda propia del CRM (#450, 0159): Servicios, Horarios y el motor de horarios libres. Al revisarla, Hans pidió dos cosas más: que «Nueva cita» use los servicios, «que todo esté conectado y funcionando como uno solo», y poder elegir varias personas por servicio (#451, 0160). Después decidió cómo será la fase 2.
+
+**Decisión:**
+- **Hasta que exista la página, todo lo de la agenda propia lo ven solo las cuentas master.** Un dueño que carga servicios esperando reservas que no llegan es peor que no tener nada.
+- **La agenda manual y la de reservas son una sola:**
+  - «Nueva cita» elige el servicio, y la cita lo guarda junto con quién la atiende;
+  - los horarios libres salen del mismo motor;
+  - para el EQUIPO no aplican el aviso mínimo ni la ventana de días, que son reglas para el cliente;
+  - una hora no libre se puede agendar, con aviso, como decidió la 0078.
+- **Varias personas por servicio:** se ofrece el horario si al menos una está libre, y la cita va a la primera libre en el orden elegido. El reparto parejo queda para después.
+- **La fase 2, la página para reservar:**
+  - se prueba primero en **Momentum**;
+  - el **correo es obligatorio**, como en Calendly, porque la invitación de Google Calendar (fase 3) va a ese correo;
+  - la confirmación por WhatsApp se pide ya, con una plantilla **neutra** (sin tú, vos ni usted) para que sirva a cualquier negocio, en categoría utilidad, con el botón «Cambiar o cancelar» que lleva a `/r/cita/<token>`.
+
+**Razón:** Hans quiere una sola agenda. Si la cita manual no sabe de qué servicio es, no cuenta para los cupos ni para el límite del día, y la página ofrecería horarios que el equipo ya ocupó.
+
+**Qué se descartó:**
+- **Bloquear la agenda manual** cuando la hora no está libre.
+- **Hacer el correo opcional:** Hans lo pidió obligatorio, por Google Calendar.
+- **Arrancar la fase 2 en la misma conversación:** estaba al 74 % de su memoria. Se hizo checkpoint y se arranca en una sesión nueva.
+
+**Pendientes inmediatos:**
+- **La plantilla `reserva_confirmada` no se pudo crear.** YCloud responde «Object with ID … does not exist, cannot be loaded due to missing permissions» sobre la WABA de Momentum: leerla funciona y crear plantillas no. Lo resuelve Hans en YCloud o Meta.
+- **La fase 2 se arranca en una sesión nueva,** con el handoff del 27-10 del CRM.
+
 ## 2026-10-25 — Agenda propia tipo Calendly, construida en el CRM: la agenda primero y el bot al final
 
 **Contexto:** Hans quiere una agenda «igual o mejor que Calendly», propia del CRM. Junta MOM-26 (Google Calendar), MOM-135 (espacios con cupo) y MOM-67 (recordatorios). Pidió diseñarla con REA OS, que tiene una ingeniería inversa de Calendly (`REA OS/sistemas/calendly/`, consulta `20261025-193837-440e`).
