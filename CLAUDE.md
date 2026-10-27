@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        201 skills de proceso reusables:
+│   └── skills/        202 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2174,6 +2174,27 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      agency_id y `on delete set null (columna)`. Trae el motor, las
 │                      52 pruebas (los casos que REA OS midió en Calendly) y el
 │                      esquema en `assets/`, listos para copiar).
+│                      Tier 72 — Quién gana la hora (1, capturada 2026-10-27 de la
+│                      fase 2 de la agenda propia del CRM):
+│                      reservar-sin-pisarse-pagina-publica (⭐ cross-project: la
+│                      página para que un cliente reserve solo, sin cuenta, y el
+│                      link para mover o cancelar. El reparto que la hace robusta:
+│                      el MOTOR decide qué se ofrece y vuelve a correr antes de
+│                      reservar; la BASE decide quién gana, con candado por servicio
+│                      y por cada candidato ORDENADO POR ID —dos reservas no se
+│                      traban— y revisando bajo el candado choques, cupo y límite del
+│                      día; lo que no cambia entre las dos no se repite en SQL. Token
+│                      de 32 bytes guardado como sha256, respuestas con su pregunta
+│                      copiada, márgenes congelados, antibot sin cuentas (trampa,
+│                      tiempo mínimo, HMAC de la IP, tope por WhatsApp), contacto
+│                      con y sin `+` sin pisar nada y avisos en `after` anotados en
+│                      la cita. Probada con el bloque que aborta y una carrera real
+│                      de 7 rondas —el ganador tiene que cambiar o no hubo carrera—.
+│                      Los 5 gotchas que solo salieron probando: el CHECK de la
+│                      campana sin el destino nuevo, el contacto que nacía sin
+│                      estado, un alias de tabla igual a una variable %rowtype en
+│                      plpgsql, la llave de Resend que no estaba en Vercel y los
+│                      clics que no llegan con el panel del navegador oculto).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
