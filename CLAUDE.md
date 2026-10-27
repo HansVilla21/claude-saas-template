@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        200 skills de proceso reusables:
+│   └── skills/        201 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2156,6 +2156,24 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      hace upsert de la actividad; asistencia = realizadas ÷
 │                      (realizadas + no asistió), "sin datos" y no 0 %; el no-show
 │                      PROPONE reagendar; el mes en la zona del negocio).
+│                      Tier 71 — La agenda que ofrece lo que de verdad está libre (1,
+│                      capturada 2026-10-27 de la fase 1 de la agenda propia del CRM):
+│                      motor-de-horarios-libres (⭐ cross-project: el motor tipo
+│                      Calendly como función PURA que usan la página, el bot y la
+│                      vista previa —listar y validar con la MISMA función, el error
+│                      abierto de Cal.diy (#29729)—. Rangos con precedencia día
+│                      especial > feriado > semana, franjas pegadas que cruzan la
+│                      medianoche, días propios del servicio CRUZADOS con los de quien
+│                      atiende, márgenes que agrandan lo ocupado y no el borde del
+│                      horario, grilla alineada a la hora en punto en la zona del
+│                      NEGOCIO, cupos que comparten el inicio y ocupan los que se le
+│                      pisan, límite diario como bloque ocupado, ventana medida por el
+│                      inicio y ±2 días de colchón para la zona del cliente. Feriados
+│                      de Costa Rica en código (fijos + Pascua) y no en una tabla que
+│                      hay que recargar cada diciembre. Base con FK compuestas por
+│                      agency_id y `on delete set null (columna)`. Trae el motor, las
+│                      52 pruebas (los casos que REA OS midió en Calendly) y el
+│                      esquema en `assets/`, listos para copiar).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

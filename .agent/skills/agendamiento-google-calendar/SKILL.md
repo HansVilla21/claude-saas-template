@@ -174,3 +174,7 @@ caiga en su Google con el link de Meet."
   estaba desde la primera migración del proyecto y **nunca se había visto porque la
   tabla de citas siempre estuvo vacía**. La primera reserva real fue la primera vez
   que esa función corrió.
+
+## Relacionadas
+
+- `motor-de-horarios-libres` (2026-10-27): el cálculo de qué horarios ofrecer, como función pura con sus pruebas (márgenes, cupos, límite diario, feriados, zona del cliente). Esta skill pone lo que tiene ocupado Google; ese motor lo resta.
