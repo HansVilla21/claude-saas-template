@@ -166,6 +166,7 @@ Al pasar la duración a 1 h, el lunes queda 8, 9, 11… sin guardar nada. Con d�
 
 ## Relacionadas
 
+- `reservar-sin-pisarse-pagina-publica`: la fase 2. La página pública y quién gana la hora: la base vuelve a mirar choques, cupo y límite del día bajo un candado, con las mismas reglas de este motor (si cambia el límite del día acá, cambiarlo también en `reservas_elegir_recurso`).
 - `agendamiento-google-calendar`: la fase 3. Lo ocupado de Google entra al motor como un `Ocupado` más; si freeBusy falla, NO se ofrecen horarios de esa persona.
 - `resultado-de-cita-y-asistencia`: lo que pasa después de la cita.
 - `inicio-dia-timezone-fija`: por qué «hoy» se calcula en la zona del negocio.

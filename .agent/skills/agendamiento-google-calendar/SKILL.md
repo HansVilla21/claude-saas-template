@@ -178,3 +178,4 @@ caiga en su Google con el link de Meet."
 ## Relacionadas
 
 - `motor-de-horarios-libres` (2026-10-27): el cálculo de qué horarios ofrecer, como función pura con sus pruebas (márgenes, cupos, límite diario, feriados, zona del cliente). Esta skill pone lo que tiene ocupado Google; ese motor lo resta.
+- `reservar-sin-pisarse-pagina-publica` (2026-10-27): la página pública, el link para mover o cancelar y la reserva con candado. Al sumar Google, lo ocupado del calendario tiene que entrar también a la revisión bajo candado, o dos reservas pueden caer sobre un evento de Google creado entre la lista y el insert.

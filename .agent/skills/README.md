@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**201 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**202 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -202,6 +202,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | `umbral-compartido-cron-cliente` | El mismo umbral en un cron SQL y un filtro TS, sin que diverjan |
 | `inicio-dia-timezone-fija` | "Hoy" anclado a una TZ fija, no al runtime (bug clásico server-UTC vs negocio-local) |
 | ⭐ `motor-de-horarios-libres` | Agenda propia tipo Calendly: el motor de horarios libres como función **pura** que usan la página, el bot y la vista previa (listar y validar con la misma función, el error abierto de Cal.diy). Día especial > feriado > semana, márgenes que agrandan lo ocupado y no el borde, grilla alineada a la hora en punto en la zona del **negocio**, cupos, límite diario, ventana por el inicio, la zona del cliente con ±2 días. Feriados de CR en código (Pascua). Trae el motor, 52 pruebas y el esquema en `assets/` |
+| ⭐ `reservar-sin-pisarse-pagina-publica` | La página para que un cliente reserve solo y el link para mover o cancelar. El motor ofrece y la **base decide quién gana**: candado por servicio y por candidato (ordenado por id) y revisión de choques, cupo y límite del día bajo el candado. Token como sha256, respuestas con su pregunta copiada, márgenes congelados, antibot sin cuentas, contacto sin pisar, avisos anotados en la cita. Probada con una carrera real de 7 rondas. Trae la migración, las acciones, el formulario y la prueba de carrera en `assets/` |
 | `dinero-multimoneda-app-financiera` | Precisión decimal + moneda nativa por cuenta (evita "plata fantasma") |
 | `tipo-de-cambio-real-bccr-hacienda` | FX real de Costa Rica sin API key, con caché y fallback |
 | `creditos-por-imagen-reserva-y-refund` | Cobrar por la unidad que **cuesta**, no por la request: ledger append-only, refund por unidad fallida, y el founder exento por **saldo**, no por código |
