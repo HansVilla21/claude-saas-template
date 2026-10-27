@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**200 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**201 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -201,6 +201,7 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 | ⭐ `porcentaje-necesita-minimo-muestra` | Una tasa que **ordena** una lista necesita mínimo de muestra. 1 lead / 1 cierre = 100% encabezando la tabla donde se decide el presupuesto |
 | `umbral-compartido-cron-cliente` | El mismo umbral en un cron SQL y un filtro TS, sin que diverjan |
 | `inicio-dia-timezone-fija` | "Hoy" anclado a una TZ fija, no al runtime (bug clásico server-UTC vs negocio-local) |
+| ⭐ `motor-de-horarios-libres` | Agenda propia tipo Calendly: el motor de horarios libres como función **pura** que usan la página, el bot y la vista previa (listar y validar con la misma función, el error abierto de Cal.diy). Día especial > feriado > semana, márgenes que agrandan lo ocupado y no el borde, grilla alineada a la hora en punto en la zona del **negocio**, cupos, límite diario, ventana por el inicio, la zona del cliente con ±2 días. Feriados de CR en código (Pascua). Trae el motor, 52 pruebas y el esquema en `assets/` |
 | `dinero-multimoneda-app-financiera` | Precisión decimal + moneda nativa por cuenta (evita "plata fantasma") |
 | `tipo-de-cambio-real-bccr-hacienda` | FX real de Costa Rica sin API key, con caché y fallback |
 | `creditos-por-imagen-reserva-y-refund` | Cobrar por la unidad que **cuesta**, no por la request: ledger append-only, refund por unidad fallida, y el founder exento por **saldo**, no por código |
