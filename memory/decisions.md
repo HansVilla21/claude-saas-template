@@ -6,6 +6,56 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-28 (tarde) — Agenda propia: formularios, abierta a todos los negocios, citas «Todos juntos», el Meet siempre, y el modelo según la tarea
+
+**Contexto:** el mismo día del reparto y del link por persona salieron cinco cosas más. Cada una tuvo su sesión, su prueba real en Momentum y el OK de Hans:
+- formularios por servicio (#465, 0167, skill Tier 76);
+- abrir la agenda a todos (#468, la privacidad #469 y el enlace del sitio, `momentum-ai` #3);
+- el arreglo del Meet (#472);
+- citas colectivas con invitados (#474, 0169, skill Tier 78);
+- la regla del modelo por tarea (madre #115).
+
+**Decisión:**
+- **Formularios (Hans: «como recomendás»), en el ejemplo de Laura y Momentum:**
+  - **A:** lo que la persona responde reemplaza el dato del contacto. Una respuesta vacía no borra nada.
+  - **B:** si después el bot oye algo nuevo, gana lo último que dijo la persona, y la ficha muestra de dónde salió.
+  - **C:** un campo creado desde el formulario no lo busca el bot. Una casilla lo prende después.
+  - **D:** «Empresa» no es columna fija: es un campo propio del negocio.
+  - Más tipos de campo (número, correo, teléfono, fecha, sí/no, lista, varias opciones).
+- **Abierta a todos:** Hans, con estas palabras: «ya un cliente lo está necesitando… tenemos que activarlo ya para todo el mundo».
+  - Sale de «solo master», con su Novedad.
+  - Los agentes conectan su propio Google desde «Mi perfil».
+  - `reserva_confirmada` y `recordatorio_cita` se pidieron a Meta en 7 negocios; la de Level CR falló porque su WhatsApp está desenlazado.
+- **Verificar la app de Google:** Hans: «pidamos la verificación». Ver la skill `agendamiento-google-calendar/verificacion-de-la-app.md`.
+- **Citas «Todos juntos» (Hans: «como recomendás»), en el ejemplo de la capacitación con Pietro, Hans y Ana con 2 invitados:**
+  - un tercer modo de reparto, que ofrece solo las horas en que están libres todos;
+  - un solo evento de Google, en el primer calendario conectado, con los demás del equipo, la clienta y hasta 10 invitados;
+  - quien no puede se saca, y la cita sigue con el resto (el último no se puede sacar);
+  - los recordatorios van solo a la clienta;
+  - una cita colectiva no cuenta para el «Parejo» de otros servicios;
+  - en «Nueva cita» también se suman invitados;
+  - los invitados no pueden mover ni cancelar.
+- **El Meet sale siempre en un servicio por videollamada,** también en la cita a mano, salvo que el servicio traiga un link fijo. Lo pidió Hans: «Eso debe quedarse activado de una vez al crear el evento». La cita de Jorge, que Hans arregló a mano, no se tocó.
+- **El modelo según la tarea (Hans, regla global y de proyecto):** el 27-10 se fue el 19 % del límite semanal en un día.
+  - Haiku para chequeos y lecturas.
+  - Sonnet para hacer con un plan claro.
+  - Opus con esfuerzo `high` (no `xhigh`) para decidir y para lo que llega a clientes.
+  - La calidad no se negocia.
+
+**Razón:** Hans quiere la agenda igual o mejor que Calendly y un cliente ya la necesitaba. Cada pieza se probó con su Google real antes de abrirla.
+
+**Qué se descartó:**
+- Una columna «Empresa» para todos los negocios.
+- Que el bot llene solo los campos nuevos.
+- Dos eventos de Google por cita colectiva.
+- Avisar a la clienta cuando alguien del equipo se saca de la cita.
+- Dejar la agenda solo para master hasta tener la verificación de Google.
+
+**Pendientes inmediatos:**
+- **La verificación de Google:** Hans graba el video y la envía desde el Centro de verificación.
+- **La plantilla de Level CR:** cuando reconecte su WhatsApp.
+- **La fase 5,** que el bot agende. Hans pidió esperar: «De momento, no arranquemos toda esa parte».
+
 ## 2026-10-28 — Agenda propia: un link por persona, el reparto por servicio y la cita a mano que le avisa al cliente
 
 **Contexto:** Hans probó la agenda en Momentum con dos citas: una a mano, que al cliente no le avisó nada, y una por la página, que fue a Pietro por ser el primero del orden. Pidió tres cambios antes de la fase 5 (PR #463 del CRM, migración 0166; skill: apéndice de `reservar-sin-pisarse-pagina-publica`).

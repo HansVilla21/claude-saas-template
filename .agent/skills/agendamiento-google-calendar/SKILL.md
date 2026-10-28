@@ -199,6 +199,16 @@ hay varios negocios, varias personas por servicio y citas que carga el equipo:
 - **Un preview de Vercel no sirve de URI de redirección:** se conecta desde
   producción o localhost y el permiso sirve igual en el preview.
 
+## Verificar la app con Google
+
+Cuando la conectan clientes, ver `verificacion-de-la-app.md`. Antes de enviarla:
+- la política nombra a Google y trae la frase de Uso Limitado;
+- la página principal enlaza a esa misma política;
+- el dominio está verificado en Search Console (mirá primero quién sirve el DNS);
+- en «Acceso a los datos» quedan solo los permisos que se usan.
+
+Además: la justificación tiene un tope de 1.000 caracteres y en el video se tiene que ver el `client_id`.
+
 ## Relacionadas
 
 - `motor-de-horarios-libres` (2026-10-27): el cálculo de qué horarios ofrecer, como función pura con sus pruebas (márgenes, cupos, límite diario, feriados, zona del cliente). Esta skill pone lo que tiene ocupado Google; ese motor lo resta.
