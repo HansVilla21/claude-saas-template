@@ -167,3 +167,7 @@ Usan los helpers del CRM (`is_member_of`, `is_master`, `notif_emit_to_recipients
 - `setup-correo-auth-saas`: el dominio de Resend con el que salen los correos.
 - `whatsapp-proactivo-a-staff`: la plantilla con botón de URL dinámico (`base fija + sufijo`).
 - `revocar-execute-incluye-public`: por qué el revoke va también a PUBLIC.
+
+## Apéndice: citas que atienden varias personas a la vez
+
+Si el servicio lo da un equipo junto (no «uno u otro»), ver `citas-colectivas-todos-juntos`: modo de reparto `'juntos'`, tabla `cita_equipo`, un solo evento de Google e invitados del cliente.

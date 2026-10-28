@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        206 skills de proceso reusables:
+│   └── skills/        207 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2317,7 +2317,30 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      y `/sw.js` sin caché. "FCM respondió 201" no es "le llegó": la prueba
 │                      que vale es con el sistema cerrado, tocando el aviso. Código real en
 │                      `assets/`).
-│                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
+│                      Tier 78 — Dos personas, una sola cita (1, capturada 2026-10-28 de la
+                      capacitación «Todos juntos» de la agenda propia del CRM, PR #474,
+                      migración 0169): citas-colectivas-todos-juntos (⭐ cross-project: un
+                      servicio que dan varias personas A LA VEZ y una clienta que suma
+                      invitados por correo. Un tercer modo de reparto `'juntos'`: el primero
+                      del equipo sigue en las columnas de siempre y una tabla aparte guarda
+                      SOLO a los demás, así todo lo que ya lee la cita sigue andando y una
+                      cita de una persona no tiene filas nuevas. «Libre» en UNA función
+                      extraída sin cambios —comparada con la vieja en 11.524 medias horas, 0
+                      diferencias—, candados en el mismo orden global, y la carrera probada
+                      con salas: 10 en paralelo → 1. Trampas medidas: el límite del día
+                      contaba la colectiva una vez por persona y la base una; en Google
+                      `extendedProperties.private` no llega a la copia del invitado (hay
+                      que poner `shared` también o el compañero cuenta la cita dos veces); y
+                      la crítica que halló la revisión: si quien tiene el evento sale de la
+                      cita, mudarlo de calendario le manda al cliente «Evento cancelado» con
+                      la cita viva —el evento se queda con quien lo tiene—. Más: pedir el
+                      Meet sobre un evento que ya tiene sala crea otra, la función de la CHECK
+                      de invitados NO se revoca, tope de reservas con invitados por
+                      dispositivo porque cada uno es una invitación desde la cuenta del
+                      equipo, y «Sacar de la cita» guarda solo el equipo. Incluye «Cuándo NO
+                      usar esto»: con un recurso por cita alcanza para el 95 % de los
+                      negocios).
+                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
 │                      (borrar una entidad con FKs `NO ACTION`) ·
