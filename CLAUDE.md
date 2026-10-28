@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        202 skills de proceso reusables:
+│   └── skills/        203 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2200,6 +2200,32 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      estado, un alias de tabla igual a una variable %rowtype en
 │                      plpgsql, la llave de Resend que no estaba en Vercel y los
 │                      clics que no llegan con el panel del navegador oculto).
+│                      Tier 73 — El aviso que no se cuelga de otro motor (1, capturada
+│                      2026-10-27 de la fase 4 de la agenda propia del CRM):
+│                      recordatorios-de-cita-sin-el-motor-de-seguimientos (⭐
+│                      cross-project: avisarle a la persona antes de su cita, 1 día y 3
+│                      horas antes o lo que el negocio elija, cuando el proyecto YA
+│                      tiene un motor de mensajes programados. El plan decía colgarlos
+│                      de `followups` con 3 excepciones; leyendo el barrido VIVO eran
+│                      5, y una invisible: con flujo e inscripción en null,
+│                      `coalesce(null,null) is not distinct from` daba TRUE y un
+│                      recordatorio se cancelaba contra un seguimiento manual del mismo
+│                      contacto. Regla: más de una excepción en el motor viejo = barrido
+│                      propio que se VE igual en la pantalla. La decisión es pura con
+│                      el reloj inyectado (nada antes de las 7:00, la reservada tarde
+│                      no recibe el que ya pasó, más de 2 h de atraso no sale, uno por
+│                      vez); se anota ANTES de mandar con UNIQUE (cita, minutos, hora
+│                      de la cita) y al mandar se relee la cita viva. Un link por
+│                      mensaje: el token solo existe al mandarlo, así que cada
+│                      recordatorio lleva el suyo con la huella en una tabla aparte y
+│                      el de la confirmación sigue andando. Gotchas reales: la fecha
+│                      termina en «a. m.» y la plantilla sigue con «.» —«10:00 a. m..»—,
+│                      se arregla sacándole el punto al parámetro sin pedir otra
+│                      plantilla; un trigger que baja `nombre_confirmado` si cambia el
+│                      nombre sin sesión pide dos updates; Postgres no acepta `{1,512}`
+│                      en una regex. Probada de punta a punta sin esperar horas: cita a
+│                      «ahora + 1 h 7 min» con una regla de 1 hora y la ruta llamada a
+│                      mano con el secreto del Vault).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
