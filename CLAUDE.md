@@ -2252,7 +2252,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      web — decirlo en la primera respuesta. En el código: la
 │                      copia vieja en *.vercel.app se declaraba canónica y
 │                      competía con el dominio propio → 308 por host primero en
-│                      redirects() (escape `\.` en el .mjs; el deploy del proyecto
+│                      redirects() (escape `\\.` en el .mjs; el deploy del proyecto
 │                      viejo queda BLOCKED en Hobby si el commit no es del dueño →
 │                      deploy por API con gitSource). Títulos con lo que se busca
 │                      (tipo + material + ciudad, marca al final, ≤60) y el
