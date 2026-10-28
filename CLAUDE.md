@@ -852,7 +852,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      se dispara por los scopes de CADA REQUEST y no del proyecto;
 │                      el token NO depende del dominio; sin conectar NO se ofrece ni
 │                      un horario, porque una tabla vacía de citas se lee como "todo
-│                      libre"; freeBusy con error TIRA, nunca devuelve []) +
+│                      libre"; freeBusy con error TIRA, nunca devuelve [];
+│                      **apéndice 2026-10-27**: segundo caso, la agenda propia
+│                      multi-negocio del CRM —leer eventos y no freeBusy para no
+│                      contar dos veces las citas propias, conexión por persona,
+│                      sin leer = ocupado todo el rango, trigger + cola + id de
+│                      evento fijo, invitar sin duplicar el .ics—) +
 │                      key-de-ia-en-configuracion (la API key del proveedor se pega
 │                      en Configuración y vive CIFRADA en la base, no en el .env:
 │                      destraba la espera de la cuenta del cliente y deja el

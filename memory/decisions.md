@@ -6,6 +6,36 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-27 (noche) — Agenda propia, fase 3: el Google Calendar de cada persona
+
+**Contexto:** la fase 3 de la agenda propia del CRM (PR #457, migración 0164). Hans creó el proyecto «Momentum AI CRM» en Google Cloud con la cuenta de la empresa, lo publicó en producción y conectó su Google (hans@momentum-lab-ai.com).
+
+**Decisión:**
+- **Hans, 27-10:**
+  - **A:** cuando Google invita al cliente, nuestro correo sigue saliendo, pero sin el archivo de calendario. Con los dos, al cliente le quedarían dos eventos.
+  - **B:** la cita que carga el equipo a mano va al Google de quien atiende y al cliente no le llega nada, como hasta ahora.
+- **Técnicas:**
+  - **Un solo permiso, `calendar.events`.** Se leen los eventos y no se usa freeBusy, para saltear las citas que el propio CRM puso en Google. Si no, mover una cita choca consigo misma y un cupo se llena con la primera reserva.
+  - **La conexión es por persona, no por negocio:** una persona que atiende en dos negocios tiene un solo Google.
+  - **Si no se puede leer el Google de alguien,** esa persona no ofrece horarios.
+  - **Las funciones de reservar con candado (0162) no cambiaron:** el servidor lee Google sin caché justo antes de llamarlas.
+  - **Desconectar no borra los eventos:** borrarlos le mandaría una cancelación al cliente invitado.
+
+**Razón:** la regla de la agenda es que ofrecer una hora ocupada es mucho peor que no ofrecer una libre. Y la invitación de Google no puede duplicar la nuestra.
+
+**Qué se descartó:**
+- freeBusy, que no dice qué evento ocupa.
+- Pasarle a la base los bloques de Google bajo el candado: serían los mismos, leídos en el mismo instante.
+- Un proyecto de Google por cliente: sin verificar, Google no muestra su nombre igual.
+- Conectar desde el preview: su dominio cambia por rama y no puede ser URI de redirección.
+
+**Pendientes inmediatos:**
+- Mergear #457, con el verde de Vercel y el OK de Hans.
+- **Antes de abrirla a otros negocios:**
+  - pedirle a Google la verificación de la app (el permiso es sensible: sin verificar sale el cartel y hay un tope de 100 personas);
+  - dejar que conecte quien atiende sin ser admin.
+- Skill: apéndice en `agendamiento-google-calendar` (`segundo-caso-agenda-multinegocio.md`).
+
 ## 2026-10-27 — Agenda propia: la fase 1 en producción, la agenda manual conectada a los servicios, y cómo será la página
 
 **Contexto:** se construyó la fase 1 de la agenda propia del CRM (#450, 0159): Servicios, Horarios y el motor de horarios libres. Al revisarla, Hans pidió dos cosas más: que «Nueva cita» use los servicios, «que todo esté conectado y funcionando como uno solo», y poder elegir varias personas por servicio (#451, 0160). Después decidió cómo será la fase 2.

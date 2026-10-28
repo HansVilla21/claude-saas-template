@@ -175,7 +175,32 @@ caiga en su Google con el link de Meet."
   tabla de citas siempre estuvo vacía**. La primera reserva real fue la primera vez
   que esa función corrió.
 
+## Apéndice 2026-10-27: segundo caso, agenda propia con varios negocios
+
+Detalle en `segundo-caso-agenda-multinegocio.md`. En corto, lo que cambia cuando
+hay varios negocios, varias personas por servicio y citas que carga el equipo:
+
+- **Leer eventos, no freeBusy:** freeBusy no dice qué evento ocupa, y apenas el
+  sistema escribe sus citas en Google las contaría dos veces (mover una cita choca
+  consigo misma; un cupo se llena con la primera reserva). Se saltean los eventos
+  con la marca del sistema para ESTE negocio; los de otro negocio sí cuentan. Con
+  `calendar.events` alcanza.
+- **La conexión es por persona**, no por negocio.
+- **Si no se pudo leer, esa persona queda ocupada todo el rango.** Un 401 se
+  reintenta renovando; recién `invalid_grant` es "rota".
+- **El último chequeo antes de guardar no toca la función con candado:** basta con
+  leer Google sin caché justo antes y pasarle solo a los que siguen libres.
+- **Trigger + cola + id de evento fijo** (sale de la cita: crear es idempotente) y
+  PATCH en vez de PUT para no perder el Meet. En la reserva, Google va ANTES que el
+  correo.
+- **Se invita** solo a la reserva del cliente hecha después de conectar y sin un
+  `.ics` ya enviado; el correo propio sale sin `.ics`. Desconectar NO borra los
+  eventos (mandaría una cancelación al invitado).
+- **Un preview de Vercel no sirve de URI de redirección:** se conecta desde
+  producción o localhost y el permiso sirve igual en el preview.
+
 ## Relacionadas
 
 - `motor-de-horarios-libres` (2026-10-27): el cálculo de qué horarios ofrecer, como función pura con sus pruebas (márgenes, cupos, límite diario, feriados, zona del cliente). Esta skill pone lo que tiene ocupado Google; ese motor lo resta.
 - `reservar-sin-pisarse-pagina-publica` (2026-10-27): la página pública, el link para mover o cancelar y la reserva con candado. Al sumar Google, lo ocupado del calendario tiene que entrar también a la revisión bajo candado, o dos reservas pueden caer sobre un evento de Google creado entre la lista y el insert.
+- `salida-a-crm-externo`: la cola (una fila por registro, marca con `clock_timestamp`, `skip locked`, cerrar comparando la marca) que se reusó para llevar las citas a Google.
