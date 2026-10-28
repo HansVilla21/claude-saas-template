@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        205 skills de proceso reusables:
+│   └── skills/        206 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2294,6 +2294,29 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      Probada con el bloque que aborta —21 comprobaciones y control negativo— y de
 │                      punta a punta a 375 px, con `google_invitado=false` antes de borrar la cita
 │                      de prueba).
+│                      Tier 77 — El aviso que llega con el sistema cerrado (1, capturada
+│                      2026-10-28 de los avisos push del CRM, PRs #467 y #471, migración
+│                      0168): avisos-push-pwa-sin-app-de-tienda (⭐ cross-project: que el
+│                      celular avise —un cliente escribió, un pase al equipo— con el sistema
+│                      CERRADO y sin publicar una app: manifest + service worker que solo
+│                      dibuja + Web Push con VAPID. Una tabla de dispositivos con RLS de
+│                      lectura propia y alta/baja por server action con el usuario de la
+│                      sesión; un trigger POR SENTENCIA sobre las notificaciones que junta
+│                      los ids con dispositivo y hace UN `net.http_post` con `exception when
+│                      others`, para que el push nunca tumbe la notificación; la ruta
+│                      protegida con un secreto que la migración genera en el Vault; 404/410
+│                      borra la suscripción. Lo que solo mostraron los celulares reales: el
+│                      navegador de Xiaomi se anota y FCM responde 201, pero el aviso nunca
+│                      aparece —con Chrome sí—; en iPhone solo instalado desde Safari en la
+│                      pantalla de inicio, iOS 16.4+, y el permiso con un toque; el filtro de
+│                      «ya lo está mirando» se comía el aviso de prueba —que se pide justo
+│                      con el sistema abierto— y Safari revoca el permiso si no se muestra
+│                      nada; cada suscripción es de la cuenta que inició sesión en ese
+│                      navegador, así que salir la da de baja y otra cuenta la suelta;
+│                      `/sw.js` y el manifest tienen que pasar sin sesión por el middleware,
+│                      y `/sw.js` sin caché. "FCM respondió 201" no es "le llegó": la prueba
+│                      que vale es con el sistema cerrado, tocando el aviso. Código real en
+│                      `assets/`).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
