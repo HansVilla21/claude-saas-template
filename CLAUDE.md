@@ -2244,6 +2244,26 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      para lo viejo— porque backfillear en cualquiera de los dos
 │                      rompía algo. Gotcha: la carrera con Google conectado invita a
 │                      los correos de prueba).
+│                      Tier 75 — Salir en Google (1, capturada 2026-10-28 en
+│                      Mueblería Pérez Luna, todo en producción):
+│                      seo-local-y-search-console (⭐ cross-project: cuando el
+│                      dueño pregunta "¿cómo salimos primeros?", en la búsqueda
+│                      local manda la ficha de Google Maps y las reseñas, no la
+│                      web — decirlo en la primera respuesta. En el código: la
+│                      copia vieja en *.vercel.app se declaraba canónica y
+│                      competía con el dominio propio → 308 por host primero en
+│                      redirects() (escape `\.` en el .mjs; el deploy del proyecto
+│                      viejo queda BLOCKED en Hobby si el commit no es del dueño →
+│                      deploy por API con gitSource). Títulos con lo que se busca
+│                      (tipo + material + ciudad, marca al final, ≤60) y el
+│                      producto con su categoría solo si el nombre no dice qué es
+│                      (singular por palabra: «Recibidores»→«recibidor»). "Un solo
+│                      H1" es por página, no por sitio. Search Console con la
+│                      cuenta del cliente, propiedad de Dominio, TXT NUEVO sin
+│                      tocar el SPF, sitemap con URL completa —«Couldn't fetch»
+│                      es normal al principio—, test en vivo y pedir indexar
+│                      inicio y catálogo. Analytics mide, no posiciona, y usa
+│                      cookies: va con el aviso de privacidad).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
