@@ -135,11 +135,22 @@ Más:
 
 ---
 
+## Apéndice: el link de cada persona, el reparto y la cita a mano que avisa
+
+`link-por-persona-y-reparto.md` (2026-10-28, migración `assets/0166_link_por_persona_reparto_y_aviso.sql`):
+- un link por persona (`/r/<negocio>/<servicio>/<persona>`);
+- el reparto «parejo» calculado DENTRO de la función con candado;
+- al mover, la cita sigue con quien ya la tiene;
+- cómo sumarle un parámetro a una función que ya llama producción sin dejar dos firmas;
+- la cita a mano que le avisa al cliente, con su columna de tres valores;
+- los gotchas de probar con Google conectado.
+
 ## Assets
 
 | Archivo | Qué es |
 |---|---|
 | `assets/0162_reservas_por_la_pagina.sql` | La migración real: columnas, preguntas, intentos, las tres funciones con candado, permisos y limpieza |
+| `assets/0166_link_por_persona_reparto_y_aviso.sql` | El apéndice: slug por persona, el modo de reparto, `requested_resource_id`, `avisar_cliente` y las funciones con el parejo y el preferido |
 | `assets/0163_reserva_campana_y_estado_de_entrada.sql` | El CHECK de la campana con el destino nuevo y el contacto que nace en el estado de entrada |
 | `assets/acciones-reservas.ts` | Las server actions de la página: pedir horarios del mes, reservar, mover y cancelar (antibot, `estaLibre` antes de la base, avisos en `after`) |
 | `assets/formulario.ts` | Validación pura del formulario y del WhatsApp con prefijo de país |
