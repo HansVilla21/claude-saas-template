@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        203 skills de proceso reusables:
+│   └── skills/        205 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2264,6 +2264,36 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      es normal al principio—, test en vivo y pedir indexar
 │                      inicio y catálogo. Analytics mide, no posiciona, y usa
 │                      cookies: va con el aviso de privacidad).
+│                      Tier 76 — El formulario que escribe en el contacto (1, capturada
+│                      2026-10-28 de los formularios por servicio de la agenda propia del CRM,
+│                      PR #465, migración 0167):
+│                      formulario-que-escribe-en-el-contacto (⭐ cross-project: formularios tipo
+│                      Calendly por servicio —texto, párrafo, una opción, lista, varias opciones,
+│                      número, correo, teléfono, fecha, sí o no— cuyas respuestas quedan en el
+│                      contacto, en un campo fijo de la ficha (cumpleaños) o en un campo propio
+│                      del negocio. Lo primero es buscar si ya existen campos por negocio: había
+│                      DOS sistemas, uno heredado y vacío y el que llena el bot con 2.085 valores;
+│                      se usó el que vive, un tercero habría dejado tres verdades. El destino lo
+│                      decide la base y nunca el navegador: la página pública ni lo recibe, el
+│                      servidor arma `answers` con `pregunta_id` + `valor` tipado y un trigger
+│                      AFTER INSERT en la cita lee la pregunta por id dentro del negocio y del
+│                      servicio, con FK compuesta `(field_def_id, agency_id)` que impide apuntar al
+│                      campo de otro negocio. Misma transacción que la reserva, pero cada respuesta
+│                      en su propio bloque con `raise warning`: lo que no encaja se saltea y la
+│                      cita nunca falla por el dato; vacío no borra. El origen del dato lo pone la
+│                      base: el bot hace `upsert on conflict` sin mandar `origen`, así que un
+│                      'reserva' viejo quedaba pegado aunque el bot cambiara el valor; trigger
+│                      BEFORE que fuerza 'bot' salvo la marca `set_config(..., true)` del trigger
+│                      de la reserva, apagada también en el `exception`. Compatibilidad
+│                      pregunta→campo como función pura compartida por editor y servidor —un enum
+│                      solo si TODAS las opciones están en el campo— y el campo nuevo nace con
+│                      `bot_extrae = false` para que crear una pregunta no cambie al bot. Las 4
+│                      decisiones de producto se llevaron con un contacto con nombre y qué ve el
+│                      equipo, no en abstracto. Una fecha es un día: `new Date('1990-03-15')` en
+│                      UTC-6 mostraba el día anterior y rompía la hidratación; se formatea a mano.
+│                      Probada con el bloque que aborta —21 comprobaciones y control negativo— y de
+│                      punta a punta a 375 px, con `google_invitado=false` antes de borrar la cita
+│                      de prueba).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
