@@ -6,6 +6,44 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-27 (noche, tarde) — Agenda propia, fase 4: recordatorios personalizables por negocio, y días especiales en rango
+
+**Contexto:** la fase 4 de la agenda propia del CRM (PR #459, migración 0165; «Hasta» en #460; handoff de la fase 5 en #461; skill Tier 73 en madre #113). Se trabajó con Hans por medio de la sesión «Agenda propia fase 4».
+
+**Decisión:**
+- **Hans, 27-10:**
+  - **Los recordatorios se personalizan por negocio, como los seguimientos:** «al igual que los seguimientos, este tema de los recordatorios debe ser personalizable». Quedó una pestaña «Recordatorios de cita» en Seguimientos, con un interruptor y hasta 3 recordatorios, cada uno con cuánto antes (1 h a 7 días), canal y plantilla.
+  - **Los de fábrica:** 1 día antes por WhatsApp y correo, y 3 h antes solo por WhatsApp.
+  - **Se mandan a todas las citas con WhatsApp,** también las cargadas a mano.
+  - **Una sola plantilla, `recordatorio_cita`,** neutra y con el nombre.
+  - **El nombre que la persona escribe al reservar REEMPLAZA al del contacto,** aunque el equipo le haya puesto otro: «sí es mejor reemplazarlo por el nombre que aparece en la cita». La recomendación era dejar el del equipo, y Hans eligió reemplazarlo. «Nueva cita» exige el nombre si el contacto no tiene uno real. El correo, en cambio, solo se guarda si el contacto no tenía.
+  - **Momentum, prendido** desde las 22:09 CR.
+  - **«Hasta» en los días especiales:** un rango de hasta 31 días de una vez, para cuando alguien viaja. La idea fue de Hans; los días sueltos, cerrados o con otras horas, ya existían.
+- **Técnicas:**
+  - **Los recordatorios NO pasan por el motor de seguimientos.** Ahí tendrían que saltarse 5 reglas: que el contacto contestó, la ventana de 24 h, el horario de 8 a 20, la pausa entre mensajes y la que cancela contra otro seguimiento programado. Van por un barrido propio cada 5 min, que relee la cita viva antes de mandar.
+  - **Nada sale antes de las 7:00 del negocio.** Lo que ya venció no sale.
+  - **Cada recordatorio lleva su propio link** a la misma cita. La base guarda solo la huella, y el link de la confirmación sigue andando.
+  - **El bot ve** en su memoria la confirmación y el recordatorio.
+
+**Razón:** cada excepción en un motor compartido es un lugar donde se rompen los seguimientos de los clientes. Hans prefiere el dato que la persona da al reservar sobre el que cargó el equipo.
+
+**Qué se descartó:**
+- Extender `followups` con excepciones.
+- Recordatorios fijos en 24 h y 3 h.
+- Texto libre por WhatsApp: fuera de la ventana de 24 h, Meta exige plantilla.
+- Guardar el link legible en la base, o reemplazar el de la confirmación.
+- Sacar el nombre de la plantilla: con el nombre obligatorio al agendar, siempre hay uno.
+
+**Pendientes inmediatos:**
+- Que Meta apruebe `recordatorio_cita` (id 1613699746690658) y `reserva_confirmada`. Mientras tanto sale solo el correo.
+- Mirar la primera tanda real, la «Llamada de cierre» con Gerencia Instituto Alfa: los WhatsApp del domingo 1/11 10:00 y del lunes 2/11 7:00, en `recordatorio_envios`.
+- Fase 5, el bot usa la agenda, con el handoff `session-handoff-2026-10-27-agenda-fase-4.md` del CRM.
+- **Antes de abrirla a otros negocios:**
+  - `recordatorio_cita` en la WABA de cada uno;
+  - verificar la app de Google, lo que además hace que se vea el logo en la pantalla de permiso;
+  - que conecte su Google quien atiende sin ser admin;
+  - `SOLO_MASTER = false` y Novedades.
+
 ## 2026-10-27 (noche) — Agenda propia, fase 3: el Google Calendar de cada persona
 
 **Contexto:** la fase 3 de la agenda propia del CRM (PR #457, migración 0164). Hans creó el proyecto «Momentum AI CRM» en Google Cloud con la cuenta de la empresa, lo publicó en producción y conectó su Google (hans@momentum-lab-ai.com).
