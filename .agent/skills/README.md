@@ -259,6 +259,7 @@ La vertical que no es n8n/WhatsApp/CRM: web pública + catálogo + panel para qu
 | `completitud-de-contenido-en-el-panel` | Que un cliente no técnico termine de llenar 230 fichas. La IA redacta prosa, el **humano** pone los hechos |
 | `panel-en-subdominio-por-middleware` | `admin.cliente.com` sirviendo el panel por rewrite, con la sesión refrescada en el mismo middleware |
 | `reporte-de-estado-para-cliente-no-tecnico` | Los **tres** documentos son distintos y mezclarlos cuesta la reunión: resumen, hoja de revisión y reporte de estado |
+| ⭐ `seo-local-y-search-console` | "¿Cómo salimos primeros en Google?": en lo local mandan la **ficha de Maps y las reseñas**, no la web. La copia vieja que se declara canónica (308 por host), títulos con lo que se busca, el mito del "un solo H1" y Search Console por DNS sin tocar el SPF |
 | `supabase-free-se-pausa-y-tumba-el-sitio` | El plan gratis se pausa por **inactividad** — o sea justo en pilotos y demos. Diagnóstico en 30s por API |
 
 ## 🖼️ SaaS con motor de IA generativa
