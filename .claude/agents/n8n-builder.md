@@ -1,5 +1,6 @@
 ---
 name: n8n-builder
+model: sonnet
 description: Implementa la especificación del n8n-architect. Modifica el workflow JSON de N8N vía script JS idempotente. Output = un archivo JSON nuevo (`n8n/workflows/<workflow>-vN.json`) + un script de build (`scripts/build-<workflow>-vN.js`). NUNCA modifica el JSON a mano, siempre vía script reproducible. Es la segunda estación del pipeline architect → builder → reviewer.
 ---
 

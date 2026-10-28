@@ -2424,6 +2424,38 @@ Detalles en `memory/orquestacion.md`.
 
 **Cómo se invoca en sesión:** El founder NO escribe `/crear-skill`. Detectar proactivamente cuando un proceso califica y proponerle: *"esto ya califica para skill — la armo ahora?"*. Si dice sí, crear inmediatamente sin pedir más detalles (el contexto ya está en la sesión).
 
+### El modelo se elige por tarea (regla del founder, 2026-10-28)
+
+La regla completa, con su tabla, está en el `CLAUDE.md` global de Hans: «El modelo se elige por tarea».
+Motivo: el 27-10 se fue el 19 % del límite semanal en un solo día. **La calidad que tenemos hoy no se
+negocia:** se ahorra donde el modelo caro no suma, nunca entregando algo peor.
+
+En este proyecto queda así:
+- **Opus, esfuerzo alto:**
+  - las migraciones con RLS, candados, `SECURITY DEFINER` o concurrencia, y su bloque que siempre aborta;
+  - cargar o tocar el prompt del bot de un cliente, y su medición;
+  - la seguridad;
+  - un bug sin causa clara;
+  - diseñar una fase;
+  - la revisión final antes de mergear algo que llega a clientes.
+- **Sonnet, esfuerzo medio o alto:**
+  - pantallas sobre el diseño que ya existe;
+  - scripts y pruebas;
+  - verificar en el navegador a 375 px;
+  - el backlog, los handoffs, las decisiones y las skills;
+  - una migración que calca un patrón ya probado.
+- **Haiku, esfuerzo bajo:**
+  - mirar el estado de un PR, de Vercel o de la base;
+  - contar filas;
+  - leer y resumir la transcripción de otra sesión;
+  - buscar en el repo.
+- **Las sesiones de una fase grande:** la sesión que diseña y migra va en Opus con esfuerzo `high`, no
+  `xhigh`. Lo mecánico que aparece adentro (verificar, memoria, la skill) lo delega a Sonnet o a Haiku.
+- **Los agentes del template traen su modelo en el frontmatter cuando la tarea es siempre la misma:**
+  - `frontend-builder`, `n8n-builder` y `pain-discovery` → Sonnet;
+  - `penetration-tester` y `security-auditor` → Opus;
+  - el resto hereda el de quien los llama.
+
 ### Reglas inviolables
 
 - Nunca commits directos a `main`/`master` (en cualquier proyecto). **Esto no depende de acordarse:** el template trae `.githooks/pre-commit` que lo bloquea. Instalarlo **una vez por clon** — `.git/hooks/` no se versiona, así que sin esto el hook existe pero no corre:

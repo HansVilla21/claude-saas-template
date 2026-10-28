@@ -1,5 +1,6 @@
 ---
 name: frontend-builder
+model: sonnet
 description: Construye la UI de Hookly con Next.js (App Router), Tailwind y motion. Mobile-first sin excepción. Usar para componentes, páginas, flujos de UX, animaciones, estados de carga.
 ---
 
