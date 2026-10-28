@@ -6,6 +6,38 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-10-28 — Agenda propia: un link por persona, el reparto por servicio y la cita a mano que le avisa al cliente
+
+**Contexto:** Hans probó la agenda en Momentum con dos citas: una a mano, que al cliente no le avisó nada, y una por la página, que fue a Pietro por ser el primero del orden. Pidió tres cambios antes de la fase 5 (PR #463 del CRM, migración 0166; skill: apéndice de `reservar-sin-pisarse-pagina-publica`).
+
+**Decisión:**
+- **Hans, 27 y 28-10:**
+  - **Un link por persona:** «como en Calendly, un link por persona que atiende». Va en `/r/<negocio>/<servicio>/<persona>`, muestra solo sus horarios y la cita le queda a esa persona. El link del servicio sigue andando y reparte.
+  - **El modo de reparto se elige por servicio:**
+    - **«En orden de prioridad»:** el primero libre, como hasta ahora.
+    - **«Parejo»:** a quien va más atrasado.
+  - **Qué cuenta el «Parejo»:** las citas del link del servicio y del bot, de los últimos 30 días, sin las canceladas. No cuentan las del link de cada persona ni las cargadas a mano.
+  - **Momentum queda en prioridad:** «para Momentum, en realidad, la prioridad es Pietro».
+  - **Al mover, la cita sigue con quien la tiene** si está libre. Si se reservó con el link de una persona, solo puede ir con ella.
+  - **La cita a mano le avisa al cliente.** Esto reemplaza la decisión B del 27-10:
+    - hay una casilla «Avisarle al cliente», prendida cuando el contacto tiene correo o WhatsApp;
+    - al cliente le llegan la confirmación, la invitación de Google (o el `.ics`), los cambios y los recordatorios;
+    - con la casilla apagada es una cita interna y no le llega nada.
+- **Técnicas:**
+  - **El reparto se decide dentro de `reservas_elegir_recurso`,** después del candado del servicio, para que dos reservas no lean el mismo conteo.
+  - **`avisar_cliente` tiene tres valores:** true, false y null. Null es una cita a mano de antes y sigue como siempre.
+
+**Razón:** el closer comparte su propio link. Si el reparto contara esas citas, el que consigue sus propias citas recibiría menos. Y una cita a mano también es una cita para el cliente.
+
+**Qué se descartó:**
+- Calcular el reparto en el servidor, porque dos reservas simultáneas eligen a la misma persona.
+- Contar en el «parejo» todas las citas del servicio.
+- Pasar a «Parejo» el servicio de Momentum.
+- Dejar en `true` o en `false` las citas a mano viejas.
+
+**Pendientes inmediatos:**
+- La fase 5, el bot usa la agenda, con el handoff `session-handoff-2026-10-28-agenda-reparto-y-aviso.md` del CRM. El bot reserva con el link del servicio y hereda el reparto.
+
 ## 2026-10-27 (noche, tarde) — Agenda propia, fase 4: recordatorios personalizables por negocio, y días especiales en rango
 
 **Contexto:** la fase 4 de la agenda propia del CRM (PR #459, migración 0165; «Hasta» en #460; handoff de la fase 5 en #461; skill Tier 73 en madre #113). Se trabajó con Hans por medio de la sesión «Agenda propia fase 4».

@@ -2226,6 +2226,24 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      en una regex. Probada de punta a punta sin esperar horas: cita a
 │                      «ahora + 1 h 7 min» con una regla de 1 hora y la ruta llamada a
 │                      mano con el secreto del Vault).
+│                      Tier 74 — A quién le toca la cita (1 extensión, capturada
+│                      2026-10-28 de las mejoras de la agenda propia del CRM):
+│                      reservar-sin-pisarse-pagina-publica suma
+│                      `link-por-persona-y-reparto.md` (⭐ cross-project: un link por
+│                      persona como en Calendly —solo sus horarios, la cita queda
+│                      pedida a ella y al moverla no puede pasar a otro— y el reparto
+│                      «parejo» DENTRO de la función con candado, contando solo lo que
+│                      repartió el sistema en 30 días: si el servidor cuenta, dos
+│                      reservas a la vez eligen a la misma persona; carrera de 10 en
+│                      paralelo → 5/5. Al mover, primero quien ya la tiene: la función
+│                      vieja pasaba la cita al primero libre sin que nadie lo pidiera.
+│                      Sumarle un parámetro a una función que ya llama producción crea
+│                      una SEGUNDA firma y PostgREST no sabe a cuál llamar: drop de la
+│                      vieja + default + revoke en la misma migración. La cita a mano
+│                      que avisa con una columna de tres valores —true, false, null
+│                      para lo viejo— porque backfillear en cualquiera de los dos
+│                      rompía algo. Gotcha: la carrera con Google conectado invita a
+│                      los correos de prueba).
 │                      Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
