@@ -86,3 +86,80 @@ Si faltan, el build puede fallar (ej. `supabaseUrl is required` al prerenderizar
   `RESEND_API_KEY` estaba en `.env` pero faltaba en Vercel → los recibos fallaban silenciosos
   ("falta RESEND_API_KEY" en los logs). Chequear con `GET /v9/projects/{id}/env`.
 - Los cambios de precio (priceIds de la pasarela) también son env vars → redeploy tras cambiarlos.
+
+## Gotcha — la variable quedó en Production y el panel te empuja a redesplegar producción (2026-09-12, CRM de Momentum)
+
+El snapshot en el build (sección anterior) tiene una segunda mitad que es más traicionera, porque
+**la hace el propio panel de Vercel**.
+
+**Lo que pasó.** Se necesitaba una bandera solo para el preview de un PR
+(`BOT_PLAYGROUND_MOTOR=codigo`, para probar un motor nuevo sin tocar a los clientes). El founder la
+cargó en *Settings → Environment Variables*, y al guardar **Vercel ofreció redesplegar**. Aceptó.
+Resultado:
+
+- La variable quedó marcada **solo en Production** (el tilde por defecto del formulario).
+- El redespliegue que ofrece el panel fue **a producción** — el mismo commit de `main` que ya estaba
+  vivo. No rompió nada, pero tampoco sirvió para nada.
+- El **preview** siguió con el build viejo, construido antes de que la variable existiera, y además
+  la variable nunca iba a llegarle porque no estaba en su ambiente.
+- La prueba se hizo en el preview correcto y el código cayó al valor por defecto **sin avisar**.
+
+Dos errores encadenados, y el panel te lleva de la mano a los dos: el tilde por defecto y el botón de
+redesplegar apuntan a producción.
+
+### Cómo diagnosticarlo sin adivinar
+
+El síntoma ("prendí la variable y no cambió nada") tiene **tres causas que se ven idénticas**: la
+variable en otro ambiente, el valor mal escrito, o haber probado en otra URL. Se separan así, en este
+orden:
+
+1. **¿La request cayó en el deploy que creés?** `get_runtime_logs` con `group_by: deploymentId` (o
+   `branch`) sobre la ventana de la prueba. Si el `deploymentId` no es el del preview, se probó en
+   otra URL y lo demás no importa.
+2. **¿Ese deploy es posterior al cambio de la variable?** `get_deployment` sobre el alias de la rama:
+   mirar `createdAt` contra la hora en que se guardó la variable. Si es anterior, falta redesplegar.
+3. **Si las dos dan bien, el código no encontró el valor** → la variable no está en ese ambiente, o
+   está escrita distinto. Acá no se deduce: se mira (ver abajo).
+
+Con esos tres pasos se llegó en minutos a "cayó en el preview correcto, construido después, y aun así
+usó el default" → variable en el ambiente equivocado. El founder confirmó: *"estaba solo en
+Production"*.
+
+### Lo que se cambia en el código para que no vuelva a costar una ronda
+
+- **Loguear el valor crudo de una bandera que NO es secreta**, y qué rama eligió el código:
+  `console.log('[x] motor', { crudo: JSON.stringify(valor ?? null), elegido })`. El `JSON.stringify`
+  hace visibles los espacios al final y distingue `null` (no existe) de `""` (existe vacía). La
+  próxima falla se contesta leyendo un log, no con una conversación. **Nunca con un secreto.**
+- **Normalizar un valor que un humano escribe a mano en un panel:** `trim`, minúsculas y sin tildes.
+  `código` con tilde es lo natural de escribir en español, y un valor fuera del contrato cae al
+  default **en silencio**. Lo que NO se hace es aceptar cualquier cosa: todo lo que no normaliza a un
+  valor conocido sigue cayendo al lado seguro.
+
+### Cómo redesplegar el preview cuando el panel redesplegó otra cosa
+
+Un commit vacío en la rama del PR dispara un preview nuevo desde git, que toma el snapshot de
+variables del momento:
+
+```bash
+git commit --allow-empty -m "chore: redesplegar el preview para que tome <VARIABLE>"
+git push
+```
+
+Y confirmar con `get_deployment` que el alias de la rama apunta al deploy nuevo antes de pedirle a
+nadie que pruebe.
+
+### ⚠️ La trampa que queda armada para el día del merge
+
+Una bandera que quedó en Production **no hace nada hoy**, porque el código que la lee todavía no
+llegó a producción. El día que se mergea el PR, **se prende sola para todos los usuarios**, sin un
+solo deploy "de configuración" que lo delate. Antes de mergear un PR que introduce una bandera, se
+revisa en qué ambientes está tildada — y si era solo para probar, se destilda Production.
+
+### Checklist corto al cargar una variable para un preview
+
+- [ ] Tildar **Preview** (y destildar Production si es solo para probar).
+- [ ] **No aceptar** el "redesplegar" que ofrece el panel si lo que querés es el preview.
+- [ ] Redesplegar el preview desde git (commit vacío) y confirmar el alias con `get_deployment`.
+- [ ] Probar, y confirmar el valor con el log de la bandera, no por cómo "se ve".
+- [ ] Antes de mergear: ¿la bandera sigue marcada en un ambiente donde no debería prenderse?
