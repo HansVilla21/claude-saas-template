@@ -177,3 +177,16 @@ Antes de `settings.bot_enabled = true`:
 - **Config nueva:** pase con aviso, con hora e idioma en la instrucción; Sonnet 5; espera de 60 s; texto propio del módulo de servicios.
 - **Pruebas:** 12 casos simulados. Aparecieron 3 fallas, se arreglaron y se volvieron a correr. Costo total: US$0,61.
 - **Carga:** una escritura verificada por md5. El bot quedó apagado, con los pendientes para prenderlo escritos.
+
+---
+
+## Apéndice 2026-11-02 — Al sacar una regla del prompt cargado, medir también el caso contrario
+
+Un cliente trabaja hasta las 5 y el prompt cortaba «hoy» a las 4. Se sacó el corte, y fuera de horario **empeoró**.
+
+- **Medido:** en pruebas, prometer «hoy» fuera de horario pasó de **3 de 6 a 6 de 6**. El prompt trae dos ejemplos con «hoy mismo le escribe por aquí» y el modelo los copia; sin el corte, nada lo frenaba. En pases reales ya ocurría en **8 de 19**.
+- **Lección:** al sacar una regla, medí contra la versión **anterior** y también en el **caso contrario** (acá, fuera de horario), no solo el caso que pidieron (acá, entre 4 y 5).
+- **Lo que no alcanzó:** sacar «hoy mismo» de los ejemplos (4 de 6 seguían prometiéndolo). Dos redacciones cortas en `instruccion_al_pasar` tampoco (6 de 6 y 3 de 6 prometiendo hoy).
+- **Trampa:** `instruccion_al_pasar` tiene **tope de 400 caracteres** y el motor corta en silencio con `.slice`. Una prueba que arma el texto sin el recorte da verde, y en producción se corta justo lo nuevo (va al final). Probá pasando por **la misma función del motor** que arma la instrucción, no por una copia.
+- **Lo que funcionó:** `reglas_finales` (2.000 caracteres, **lo último que lee el modelo**) con una frase explícita: «Si ahora está fuera de ese horario, no diga hoy ni hoy mismo». Resultado: **6 de 6 bien** fuera de horario y **3 de 3** en horario. Son pocas corridas: se confirma con pases reales.
+- **Antes de culpar al reloj:** el «mensaje de fuera de horario» que reportó el cliente no era el aviso automático ni la hora del servidor: lo escribía el modelo siguiendo el prompt. Calculá la hora con la función real del motor y buscá el texto exacto en los mensajes guardados antes de tocar nada.
