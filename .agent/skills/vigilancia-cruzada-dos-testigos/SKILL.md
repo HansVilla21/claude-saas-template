@@ -138,3 +138,7 @@ Si el bot tiene un modelo de respaldo (en el CRM, gpt-4.1 cuando Claude falla), 
 - `supabase-disco-lleno-pasa-a-solo-lectura`: el incidente del 02-10 y el runbook.
 - `whatsapp-proactivo-a-staff`: plantillas para avisar al equipo por WhatsApp.
 - `probar-migracion-contra-base-viva-con-rollback`: cómo se probó la migración antes de aplicarla.
+
+## Apéndice 2026-11-02 — Dos testigos vigilan lo que se cae entero; lo que se cae por partes necesita otro ojo
+
+Esta skill cubre lo que se cae **entero** (la base, la app, el proveedor principal). Falta el caso de al lado: el camino principal sigue sano y se cae **un proceso secundario** que depende de **otro proveedor** (el analista de mensajes, la transcripción, las fotos, los PDF, el respaldo). Con el bot contestando, ningún testigo ve nada: 848 de 848 análisis fallaron durante 4 días y lo avisaron los clientes. Ahí hace falta mirar **el resultado de cada proceso**, no el del camino principal. Ver `dependencia-secundaria-que-cae-en-silencio`.

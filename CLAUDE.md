@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        207 skills de proceso reusables:
+│   └── skills/        209 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2340,6 +2340,56 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       equipo, y «Sacar de la cita» guarda solo el equipo. Incluye «Cuándo NO
                       usar esto»: con un recurso por cita alcanza para el 95 % de los
                       negocios).
+                      Tier 79 — Lo que se cae por partes (2 nuevas + 2 apéndices, capturadas
+                      2026-11-02 de la caída del proveedor secundario de un CRM con bot de
+                      WhatsApp y del orden de columnas que frenaba al analista):
+                      dependencia-secundaria-que-cae-en-silencio (⭐ cross-project: el bot
+                      conversa con un proveedor, pero el analista de cada mensaje, los
+                      audios, las fotos, los PDF y el respaldo cuelgan de OTRO, y se acabó
+                      su crédito (`429 insufficient_quota`). 848 de 848 análisis fallaron
+                      4 días en 288 conversaciones de 4 negocios y lo avisaron los
+                      clientes: el vigilante miraba los turnos del bot, que seguía
+                      contestando, y el respaldo vivía en la misma cuenta, así que parecía
+                      redundancia y no lo era; además el registro guardaba solo
+                      `modelo_http` y el motivo real estaba en los logs de la plataforma.
+                      Trae el inventario proveedor × proceso, la primera consulta
+                      (`group by` día, estado y error en la tabla del proceso, antes de
+                      tocar prompts), la alerta por proceso —ventana de una hora, 3 o más
+                      fallados que superen a los buenos, «sin datos» es `null` y no cambia
+                      el estado para no mandar un «ya volvió» falso de madrugada—, el
+                      motivo guardado y traducido, y la recuperación: el cursor no avanza
+                      si falla, así que las conversaciones que reciben otro mensaje se
+                      ponen al día solas y las demás quedan viejas para siempre; plan sin
+                      aplicar, 5 de prueba contra el historial y el resto con tope de
+                      gasto y corte tras 3 fallos —279 bien, 0 fallados, US$1,38—, listar
+                      antes qué dispara mover un estado y no correrla antes de arreglar lo
+                      demás, o pisa un contacto marcado a mano) +
+                      orden-visual-que-decide-el-motor (⭐ cross-project: en Configuración
+                      el cliente ordena las columnas arrastrando, el código decía que
+                      `position` era solo orden, y el analista solo mueve a posiciones
+                      mayores con un estado reservado como barrera: tras arrastrar, desde
+                      «Nuevo» solo se llegaba a «Cliente», sin ningún error. Medido: 606
+                      contactos en «Nuevo» y 2 de 210 análisis movían un estado, contra 174
+                      de 882 en un negocio con el orden normal. Se halló comparando la
+                      tasa contra otro negocio y llamando a la función REAL que calcula
+                      las opciones, no sospechando del prompt: el modelo decía «sin
+                      cambio» porque de verdad no tenía opciones. Prueba en memoria con el
+                      orden natural: 9 de 12; corrección con re-análisis que necesitó
+                      `ignorarCursor` y `--solo-estado` para no duplicar notas —405
+                      analizados, 0 fallados, US$1,72, «Nuevo» de 606 a 410—. Un campo
+                      cosmético para el cliente y regla para el motor es un contrato
+                      escondido: se avisa en pantalla con la misma regla del motor, o el
+                      motor deja de depender de eso).
+                      **Apéndices:** cargar-prompt-al-motor suma que al sacar una regla de
+                      un prompt ya cargado se mide contra la versión anterior Y en el caso
+                      contrario —sacar el corte de «hoy» a las 4 empeoró fuera de horario,
+                      de 3 de 6 a 6 de 6 promesas, porque los ejemplos del prompt decían
+                      «hoy mismo»—, la trampa del tope de 400 caracteres de
+                      `instruccion_al_pasar` que el motor corta en silencio con `.slice`, y
+                      que lo que funcionó fue una frase en `reglas_finales`; y
+                      vigilancia-cruzada-dos-testigos aclara que dos testigos vigilan lo
+                      que se cae entero y lo que se cae por partes necesita mirar el
+                      resultado de cada proceso.
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
