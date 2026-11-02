@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        209 skills de proceso reusables:
+│   └── skills/        210 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2390,6 +2390,27 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       vigilancia-cruzada-dos-testigos aclara que dos testigos vigilan lo
                       que se cae entero y lo que se cae por partes necesita mirar el
                       resultado de cada proceso.
+                      Tier 80 — El link que se gasta solo (1 nueva + 1 corrección, capturadas
+                      2026-11-02 de una invitación que nadie pudo usar en un CRM):
+                      link-gastado-por-antivirus (⭐ cross-project: el antivirus de un correo
+                      corporativo abre los links antes que la persona. Medido con Safe Links de
+                      Microsoft 365: la invitación salió, a los 53 s el antivirus la abrió y
+                      canjeó el token, y 4 s después la persona vio «El enlace venció», y tres
+                      veces más. Sin una línea roja. Lo que engaña: `token_hash` + `verifyOtp`
+                      arregla los links entre dispositivos, no esto, porque un GET que canjea
+                      se gasta igual. Y no termina en el link: la cuenta queda confirmada, con
+                      «último acceso» y sin contraseña, así que el botón de reenviar
+                      desaparece, y Supabase rechaza otra invitación porque la cuenta «ya
+                      existe». Trae el diagnóstico en 2 minutos, el GET que redirige y el POST
+                      de un botón que canjea —que se apaga al primer toque, sin auto-submit y
+                      con 303—, la señal correcta de quién puede entrar (sin contraseña ni otro
+                      proveedor, en una función cerrada también a PUBLIC), qué correo reenviarle
+                      a cada uno y cómo probarlo imitando al antivirus con `curl`, con token
+                      inventado en producción y con uno real como control negativo. Dice qué
+                      quedó sin medir: la secuencia con el antivirus de verdad).
+                      **Corrección:** setup-correo-auth-saas daba por resueltos los scanners con
+                      `token_hash` y mandaba canjear en el GET: es lo que causó este caso. Ahora
+                      manda el POST del botón y suma la prueba con `curl`.
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
