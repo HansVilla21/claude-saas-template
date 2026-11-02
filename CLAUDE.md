@@ -1972,6 +1972,15 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      `\r` (`write_text` de Python en Windows pone CRLF). Y se cierra con el
 │                      autor: el prompt es suyo, y si no sabe dónde quedó la hora la vuelve
 │                      a poner arriba).
+│                      **Ampliada 2026-11-02 (la entrega trae catálogo y fotos):** el
+│                      nombre del archivo puede mentir —8 de 11 fotos venían cruzadas y a
+│                      quien pedía un diseño le llegaba otro, sin error—, así que se miran
+│                      antes de subirlas y después se verifica qué foto salió; el bot solo
+│                      ve la primera foto de cada producto; `largo_maximo_respuesta` solo
+│                      baja el límite; el texto genérico del módulo puede contradecir al
+│                      prompt y se resuelve con `prompt_override`; y el pase fuera de
+│                      horario se prueba con el reloj fijado por `--config`, con una regla
+│                      final que cubra abierto, antes de abrir y ya cerrado.
 │                      Tier 63 — El que decide no se revisa solo (1, capturada 2026-10-19
 │                      de MOM-133, el analista que mueve el estado de los contactos de un
 │                      CRM leyendo la descripción que escribe cada negocio):
