@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        210 skills de proceso reusables:
+│   └── skills/        212 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2420,6 +2420,56 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       **Corrección:** setup-correo-auth-saas daba por resueltos los scanners con
                       `token_hash` y mandaba canjear en el GET: es lo que causó este caso. Ahora
                       manda el POST del botón y suma la prueba con `curl`.
+                      Tier 81 — La guía que acompaña sobre la pantalla real (2
+                      nuevas + 1 extensión, capturadas 2026-11-03 de la tanda 2
+                      de la guía interactiva de un sistema de clínica):
+                      guia-interactiva-sobre-pantallas-reales (⭐ cross-project:
+                      un sistema que ACOMPAÑA —marca el botón real y avanza
+                      cuando la persona lo toca— en vez de un manual que nadie
+                      abre. El recorrido es un DATO (tarea, pasos, señal de
+                      "listo") y el motor es puro; tres niveles: acompaña, lleva
+                      —una pregunta, no se anota como hecha— y explica.
+                      Prohibido avanzar porque "algo aparece en pantalla"
+                      —miente con esqueletos de carga—: solo ruta, campo, hecho
+                      o manual. Lo caro no fue el motor sino que un recorrido
+                      MIENTE sin avisar: se renombra un botón y el anillo no se
+                      dibuja; el texto promete "pasa a Llamado" y la fila
+                      desaparece. Trae la batería que lee el código, cada regla
+                      con su control negativo —ancla en su archivo Y en la
+                      pantalla de la ruta siguiendo los imports de la page,
+                      nombres entre « » que existen, roles que ven la pantalla,
+                      hechos que se publican—, la revisión que ninguna prueba
+                      hace (textos que afirman lo que la guía no vio, filtros
+                      que «Siguiente» no aplica, pasos que se traban), dos
+                      pasadas con la segunda SOLO sobre los arreglos, y el
+                      barrido en navegador real con tres scripts: por rol y con
+                      cuenta de PRUEBA, [n, visibles] por ancla —FALTA, OCULTA,
+                      x2— y los gotchas que hacen mentir al informe) +
+                      guia-pasos-dentro-de-ventanas (⭐ casi todas las tareas
+                      que pasan por una ventana se rompían y ninguna prueba lo
+                      veía: el panel quedaba DEBAJO del fondo y tocarlo cerraba
+                      la ventana y borraba lo escrito, un paso `campo` adentro
+                      se trababa si la persona cancelaba —no tiene «Siguiente»—
+                      y el texto mandaba a mirar lo que la ventana tapa. El
+                      patrón: la ventana se explica ANTES de abrirla —el paso
+                      que la abre lleva todo lo de adentro y se cumple con
+                      `alTocar` sobre el BOTÓN, no la tarjeta; el siguiente
+                      describe lo que se ve con la ventana cerrada—. `volverSi`
+                      dice "si el botón que abre esto está en la página, se
+                      cerró": un modal o un editor que carga lo dejan a la
+                      vista y la guía retrocede con la ventana abierta
+                      —regresión real que metió el arreglo de la primera
+                      revisión, confirmada en un navegador y no por opinión—.
+                      Sí valen `campo` y `volverSi` en un formulario que
+                      reemplaza al botón). **Extensión:**
+                      worktree-para-no-pisar-el-checkout suma el apéndice de
+                      repartir trabajo entre varios ayudantes: aflojar las
+                      pruebas compartidas UNA vez antes de repartir, cada
+                      ayudante en archivos propios, y borrar una copia enlazada
+                      sin vaciar el `node_modules` de la principal
+                      —`git worktree remove --force` entra por el enlace—:
+                      primero se quita el enlace, se comprueba, y recién ahí
+                      el remove.
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

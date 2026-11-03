@@ -6,6 +6,7 @@
 - El checkout principal está en una rama que **no es la base** que necesitás (por ejemplo, una rama vieja mientras vos salís de `main`).
 - Necesitás resolver un conflicto de merge o rebasear una rama que el founder tiene checkeada.
 - **Señal de alarma:** a mitad de una tarea, los archivos "vuelven atrás" solos o `HEAD` apunta a otro lado.
+- **Vas a repartir el trabajo entre varios ayudantes** en copias paralelas, o vas a borrar una copia que comparte `node_modules` con la principal → andá directo al **Apéndice (2026-11-03)** del final.
 
 ## Por qué existe esta skill
 
@@ -139,3 +140,52 @@ $ git reflog -3
 > Alguien hizo `git checkout` en este mismo directorio mientras yo trabajaba — el reflog lo muestra. Si tenés el repo abierto en otra terminal, era eso.
 >
 > **No se perdió nada:** mi commit `8368a15` y la rama siguen intactos. **No voy a cambiar de rama** para no arrancarte el árbol de trabajo: sigo en un worktree aparte y puedo pushear y abrir el PR sin tocar tu checkout.
+
+---
+
+## Apéndice (2026-11-03): repartir el trabajo entre varios ayudantes a la vez
+
+Capturado del reparto de la tanda 2 de la guía de un sistema (Next.js + Supabase, Windows): **6 ayudantes, uno por frente, cada uno en su copia**, y después unir. Lo de arriba cubre cuando *el founder* pisa tu checkout; esto cubre cuando **vos** repartís trabajo en paralelo. El primer reparto (2 nov) dejó un `node_modules` vaciado y tres ayudantes pisándose las mismas pruebas; el segundo (3 nov) chocó mucho menos aplicando lo de abajo, aunque igual hubo que aflojar dos pruebas más al unir.
+
+### Antes de repartir
+
+1. **Una copia por ayudante, con su rama**: `git worktree add -b feat/<frente> <ruta> origin/main`. Ponela **hermana** de la principal si el proyecto busca archivos relativos a la raíz (por ejemplo el `.env.local` en `../../../`): desde una copia *dentro* del repo esa ruta no llega.
+2. **Cada ayudante escribe archivos propios.** El catálogo, partido por categoría; cada flujo, en su `flujo-<nombre>.ts`. El archivo "índice" que todos importan lo toca **solo quien coordina**. Es lo que evita los conflictos al unir.
+3. ⚠️ **Aflojá las pruebas compartidas UNA vez, antes de repartir.** Si una prueba fija una lista, un conteo o `RECORRIDOS[0]` ("las tareas sin pasos son estas"), va a fallar en cada rama por el trabajo de las otras, y los tres ayudantes tocan el mismo archivo de pruebas. Pasala a buscar por id, admití el nuevo máximo (un flujo, hasta 8 pasos) y, si necesitás "una tarea sin pasos", usá una **inventada**: las del catálogo van ganando pasos.
+4. **Migraciones en orden estricto.** Si los ayudantes escriben migraciones, numeralas vos antes de repartir: el aplicador rechaza una pendiente anterior a la última aplicada.
+5. **Modelo por tarea**: uno barato para lo mecánico con patrón claro; uno fuerte para la revisión final, **aparte** y sin tu conclusión.
+
+### Las dependencias de una copia
+
+- **Sin dependencias nuevas:** un *junction* de su `node_modules` al de la principal.
+  ```powershell
+  New-Item -ItemType Junction -Path "<copia>\node_modules" -Target "<principal>\node_modules"
+  ```
+  Ojo con la diferencia: en el CRM un **symlink** no alcanzó (errores fantasma de `tsc`, ver arriba); acá un **junction** sí, y `tsc`, el linter y `node --test` andan. No está probado que la causa sea *junction vs symlink* (son proyectos distintos), así que **verificalo antes de repartir**: `tsc` en la copia tiene que dar lo mismo que en la principal.
+- **No corras `pnpm` en una copia enlazada**: quiere reinstalar todo. Llamá directo a `node_modules/.bin/<herramienta>`, y en Next corré `next typegen` antes de `tsc`.
+- **Una copia que suma una dependencia** necesita instalación real (`pnpm install --frozen-lockfile`) y `pnpm add <paquete>@<versión exacta>` **antes** de mandar al ayudante.
+- Un `pnpm install` puede quedar esperando **una pregunta invisible** (10 minutos, sin salida): con `CI=true` terminó en 0,1 s.
+
+### ⛔ Borrar una copia enlazada: primero el enlace
+
+`git worktree remove --force` **entra por el enlace** y vacía el `node_modules` de la principal. Pasó el 2 nov: un `rmdir` previo falló por la ruta y el comando siguiente corrió igual.
+
+```powershell
+$enlace = "D:\ruta\absoluta\de-la-copia\node_modules"
+[System.IO.Directory]::Delete($enlace)                                  # quita el ENLACE, no lo que apunta
+if (Test-Path $enlace) { throw "el enlace sigue ahí" }                  # frená si no se fue
+(Get-ChildItem "D:\ruta\de-la-principal\node_modules" -Force | Measure-Object).Count   # tiene que seguir con contenido
+git worktree remove --force "D:\ruta\de-la-copia"
+```
+
+Ruta **absoluta** siempre. Si ya pasó: `CI=true pnpm install --frozen-lockfile` en la principal repara el `node_modules`.
+
+**La raíz del bug no es git, es la cadena:** un paso destructivo no puede depender de que el anterior *haya salido bien por casualidad*. En PowerShell `;` no frena; usá `-ErrorAction Stop` o `if ($?)`. Misma familia que `git-footguns-de-sesion` (en la terminal de Claude Code `set -e` tampoco frena).
+
+### Unir y revisar
+
+- **Unir de a una rama** y correr toda la suite tras cada unión. Un fallo en una prueba que "fija algo" es la señal de que faltó aflojarla (punto 3).
+- **Dos revisiones, y la segunda es SOLO sobre los arreglos de la primera.** Un arreglo es código nuevo: en este reparto, el ayudante que aplicó la primera revisión metió una **regresión** que la segunda encontró (ver `guia-pasos-dentro-de-ventanas`).
+- **Si dos revisores se contradicen, se prueba en el mundo real**, no se vota.
+- Las pruebas **contra la base** de dos copias a la vez chocan por espera de candado: volvé a correr la que falló, **sola**.
+- **Cerrá limpio:** borrá las copias (arriba), las ramas locales ya unidas, y comprobá que la principal quedó en su rama y con sus dependencias.
