@@ -9,7 +9,7 @@ Lo que esta skill antes llamaba "cambiar lo mínimo" ahora se parte en dos:
 | Es del autor (no se toca) | Es nuestro (se ajusta para que su texto funcione) |
 |---|---|
 | El prompt principal y las reglas de pase | `modelo: claude-sonnet-5` y `callar_tras_cierre: true`. **Todos los bots van en Sonnet** |
-| Si trae una trampa (la hora dentro del prompt, su revisión final en el medio, un bloque que el motor ya arma), **se le reporta** con el número para que la corrija en su próxima versión | `aviso_al_pasar: avisar` si su prompt escribe el puente: en silencioso el código lo borra, **aunque su LEEME pida apagarlo**. `instruccion_al_pasar` remite a su sección del puente y lleva `{{DIA_SEMANA}}` y `{{HORA_CR}}` |
+| Si trae una trampa (la hora dentro del prompt, su revisión final en el medio, un bloque que el motor ya arma), **se le reporta** con el número para que la corrija en su próxima versión | `aviso_al_pasar: avisar` si su prompt escribe el puente: en silencioso el código lo borra, **aunque su LEEME pida apagarlo**. `instruccion_al_pasar` remite a su sección del puente, lleva `{{DIA_SEMANA}}` y `{{HORA_CR}}` y le prohíbe contarle a la persona el día o la hora (ver el apéndice de catálogo y fotos) |
 | | Las piezas viejas nuestras que contradicen el texto nuevo (`reglas_finales`, `objeciones`, `instruccion_al_pasar`) se vacían o se alinean |
 | | **Los topes salen de su TEXTO, no de su LEEME.** Si el texto dice "una burbuja, dos solo si son dos cosas, tres solo con link", `tope_burbujas` es 2, aunque el LEEME diga 3. `largo_maximo_respuesta` no baja de lo que el texto necesita (ver paso 4: el recortador rompe frases). El resto de las llaves del LEEME (temperatura, espera) se ponen si existen en el código; las que no existen se reportan |
 
@@ -25,6 +25,7 @@ Lo que esta skill antes llamaba "cambiar lo mínimo" ahora se parte en dos:
 - Viene con instrucciones de carga ("esto va en tal campo", "la espera ya está configurada") que **no se escribieron mirando el sistema vivo**.
 - El motor no usa ese texto solo: le pega bloques alrededor (catálogo, decisiones del turno, reglas del sistema, revisión final del negocio) y lee config que el autor no ve.
 - Cross-project: cualquier sistema que arma el prompt **por bloques**, usa **caché de prompts** y deja que el negocio edite parte de la config desde una pantalla.
+- La entrega trae también **catálogo y fotos**: seguir además el apéndice "Cuando la entrega trae catálogo y fotos", al final.
 
 ## Por qué existe esta skill
 
@@ -190,3 +191,73 @@ Un cliente trabaja hasta las 5 y el prompt cortaba «hoy» a las 4. Se sacó el 
 - **Trampa:** `instruccion_al_pasar` tiene **tope de 400 caracteres** y el motor corta en silencio con `.slice`. Una prueba que arma el texto sin el recorte da verde, y en producción se corta justo lo nuevo (va al final). Probá pasando por **la misma función del motor** que arma la instrucción, no por una copia.
 - **Lo que funcionó:** `reglas_finales` (2.000 caracteres, **lo último que lee el modelo**) con una frase explícita: «Si ahora está fuera de ese horario, no diga hoy ni hoy mismo». Resultado: **6 de 6 bien** fuera de horario y **3 de 3** en horario. Son pocas corridas: se confirma con pases reales.
 - **Antes de culpar al reloj:** el «mensaje de fuera de horario» que reportó el cliente no era el aviso automático ni la hora del servidor: lo escribía el modelo siguiendo el prompt. Calculá la hora con la función real del motor y buscá el texto exacto en los mensajes guardados antes de tocar nada.
+
+---
+
+## Apéndice 2026-11-02 — Cuando la entrega trae catálogo y fotos
+
+Una tienda de uniformes entregó en un zip el prompt, las reglas de pase, 26 productos y 26 fotos, con una nota que decía que el catálogo solo se usaba para las fotos. El prompt se cargó tal cual. Lo que hizo falta estuvo alrededor del texto, y nada de esto dio error.
+
+### Las fotos se miran antes de subirlas
+
+- **El nombre del archivo puede mentir.** 8 de 11 fotos de una colección tenían el nombre cruzado: el archivo del diseño 6 mostraba el diseño 10. Cargadas por nombre, a quien pide un diseño le llega otro, y la medición no lo ve porque solo cuenta que salió una foto.
+- **Cómo revisarlas:** una hoja de contacto con el nombre del archivo debajo de cada foto (en Windows sale con `System.Drawing`, sin instalar nada) y otra ampliada de las que traen un código impreso. Si lo que muestra la foto coincide con el catálogo y el nombre no, manda lo que muestra. La lista de cruces va en el mensaje al autor, para que corrija su carpeta.
+- **Una foto compartida por dos productos se sube dos veces,** una por ítem, para que quitarla de uno no toque al otro. La ruta es la del panel, `<negocio>/tmp/<uuid>.<ext>`: el borrado de un negocio recorre dos niveles.
+- **Después de medir, verificar qué foto salió,** no que salió una. Se cruza la URL de `media->0` de cada producto con `bot_turns.output_crudo`. `tools_invocadas` vino vacío en turnos en los que el bot sí había buscado, así que no sirve para esto.
+- **Lo impreso en la foto también es dato:**
+  - **Un código impreso distinto del catálogo** (`UGSW_06` contra `USW_006`) da 0 resultados en la búsqueda. Si no se le avisa al bot, dice que ese código no existe, así que va en el texto del módulo.
+  - **Un precio impreso distinto** (sin IVA, o con otro monto) lo va a ver la persona al lado del que dice el bot. Se compara contra el prompt y se le reporta al autor.
+
+### Lo que el motor no hace aunque la nota lo pida
+
+| La nota dice | Lo que pasa |
+|---|---|
+| "La tabla de medidas va como segunda foto" | `producto_para_el_modelo` devuelve solo `media->0`. La segunda se ve en el panel y el bot nunca la manda |
+| "`largo_maximo_respuesta` de 900" | Ese valor solo baja el límite: `limiteDeLargo` toma el menor entre el negocio y `tope × 220`. Con 3 burbujas queda en 660. Se carga igual, se reporta, y el motor se toca solo si una medición llega al tope |
+| "Cuando un diseño llega a 0, deja de ofrecerse" | Es cierto con stock cargado. Stock vacío cuenta como disponible, así que sin la cantidad el bot ofrece todo |
+
+### El texto del módulo puede contradecir al prompt
+
+Con "el catálogo solo para las fotos", el texto genérico de Productos choca de cuatro formas:
+- pide buscar siempre antes de responder;
+- dice "lo que no venga en los datos no lo afirmes", y el prompt ya sabe telas y envíos;
+- dice "si salió en la búsqueda, está disponible", contra la regla de no confirmar existencias;
+- va de vos, en un bot que habla de usted.
+
+Se resuelve con `prompt_override` en `agency_modules.config`, sin tocar el texto del autor. Hay que conservar el formato `[IMG:URL]` y qué hacer con `relajaciones`. La descripción de la herramienta y `NOTA_DETALLE_PRECIO` viven en el código y no se pisan.
+
+### El pase y la hora
+
+- **La hora en `instruccion_al_pasar` puede hacer que el bot cuente su razonamiento:** "hoy es lunes así que en un rato le escriben", "como estamos en horario". Salió en 3 de 4 pases. Bajó casi del todo agregando "le dice solo cuándo, sin nombrar el día, la hora ni el horario": en unas veinte corridas siguientes quedó una vez ("como hoy es domingo"), y a veces un "ya cerramos por hoy", que se lee natural.
+- **Fuera de horario se prueba sin esperar a la noche.** `--config` de `medir-estilo` con `agent_prompts.principal`, `instruccion_al_pasar` y `reglas_finales` en los que `{{DIA_SEMANA}}`, `{{FECHA_CR}}` y `{{HORA_CR}}` ya van reemplazados por un valor fijo. No se guarda nada, y cada corrida de un caso costó de US$0,02 a US$0,12. Los casos mínimos son en horario, sábado abierto, sábado cerrado, noche y madrugada.
+- **La regla final tiene que cubrir los tres casos.** Medido:
+  - **Sin regla:** un sábado a las 4:10 p. m., con la tienda cerrada desde las 2:30, dijo "hoy mismo".
+  - **Con "si ya cerraron, no diga hoy":** el sábado quedó bien, pero en horario salió una vez "mañana a primera hora". Además, esa frase choca con la madrugada, donde "hoy desde las 8" es lo correcto.
+  - **Con los tres casos** (abierto: en un rato, no mañana; todavía no abren: hoy desde que abran; ya cerraron: mañana o el lunes): 6 de 6 bien. Son pocas corridas, así que se confirma con pases reales.
+
+### Al medir
+
+- **`espera_pase`:** un caso que tiene que pasar en el primer turno, como un reclamo, va con `"si"`. Con `"al-final"` la tabla lo cuenta como falla aunque el bot haya hecho lo correcto.
+- **El lead simulado no ve los adjuntos:** vuelve a pedir la foto que ya le mandaron. Un "aquí la tiene otra vez" es de la prueba, no del bot.
+- **Las cuentas se revisan a mano.** Ninguna regex sabe si 6 × 3.300 + 2 × 4.430 da bien. Conviene escribir los totales esperados en `fuente`, en el archivo de casos.
+- **El costo de la hora dentro del prompt no sale de la simulación.** Las corridas van seguidas y la caché pega: dieron US$0,027 por respuesta, contra los US$0,060 de tráfico real. Para el autor, ese costo se multiplica por el volumen del negocio, contando ráfagas:
+
+```sql
+with m as (
+  select conversation_id, created_at,
+         lag(created_at) over (partition by conversation_id order by created_at) as previo
+  from messages where agency_id = '<id>' and direction = 'inbound'
+)
+select date_trunc('day', created_at at time zone 'America/Costa_Rica')::date as dia,
+       count(*) as respuestas_estimadas
+from m where previo is null or created_at - previo > interval '30 seconds'
+group by 1 order by 1;
+```
+
+  Es un techo: baja con cada conversación que pasa a una persona.
+
+### Las preguntas que trae la nota
+
+Se contestan contra el código o la base, y van en el mensaje al autor. Medido en esta carga:
+- **"¿El bot ve el anuncio?"** No. El turno no lee la atribución. Ve lo que escribe la persona, y el texto prearmado del anuncio le llega como su mensaje.
+- **"Un mensaje del equipo quedó como del cliente":** antes de culpar al registro, mirar el evento crudo del proveedor. `webhook_events_raw.agency_id` puede venir nulo, así que filtrar por agencia da 0 filas y parece que no hay datos: se busca el número del negocio dentro de `raw_payload`, acotado por fecha. En este caso eran entrantes reales desde otro número.
