@@ -6,6 +6,36 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-02 — Un proveedor de IA sin crédito, el horario de un bot, el orden de los estados y el link del correo
+
+**Contexto:** el mismo día llegaron tres quejas de clientes. Los nombres y el detalle están en el backlog privado del CRM (`crm-v2/memory/backlog.md`) y en su handoff del 02-11, en `crm-v2/memory/`.
+- **El bot no ponía estados ni etiquetas:** la cuenta de OpenAI llevaba 4 días sin crédito. Fallaron 848 análisis en 288 conversaciones de 4 negocios, y nadie se enteró porque el bot contesta con Claude.
+- **Un bot decía «mañana» a las 4 pm,** en un negocio que trabaja hasta las 5. Lo mandaba su prompt, no era la hora del servidor.
+- **Una invitación venció en 53 segundos:** el antivirus de un correo de Microsoft 365 abrió el link y lo gastó antes que la persona.
+
+**Decisión:**
+- **La alerta del analista (PR #482, 0172):** el vigilante avisa si el analista falla seguido, con el motivo real. Si no hay análisis no cambia nada, para no mandar un «volvió» falso de madrugada.
+- **Poner al día lo perdido** con un script, primero 5 de prueba. Hans: «dale a las dos cosas».
+- **El horario, opción B (Hans: «dale con la B, cambiala vos»):** el «hoy» se corta a la hora real de cierre. Se tocó el texto del autor del prompt solo por esto, con una regla final, porque sin ella el modelo copia los ejemplos del prompt y promete «hoy» de noche.
+- **Ordenar los estados de ese negocio y releer sus contactos (Hans: «dale»):** el analista solo avanza hacia posiciones mayores y un estado del equipo es barrera. Un orden arrastrado a mano lo había dejado casi sin opciones.
+- **Configuración › Estados avisa y no bloquea (PR #485, Hans: «dale con las tres»):** el orden sigue siendo del cliente y se guarda igual.
+- **El link del correo se canjea en el POST de un botón (PR #480), no al abrirlo.** `token_hash` + `verifyOtp` arregla los links entre dispositivos, no esto.
+- **Reenviar invitación según la contraseña (PR #481, 0171):** la señal de quién puede entrar es no tener contraseña ni otro proveedor. `last_sign_in_at` lo llena también el antivirus.
+- **La prueba con correos reales no se hace.** Hans: «no hace falta la prueba. Todo bien, ya todo funciona». Queda anotada como decisión suya, no como probada.
+
+**Razón:** las tres fallas eran silenciosas, sin ninguna línea roja. La regla que sale de acá es que todo lo que depende de un tercero o de un orden que edita el cliente tiene que poder avisar solo.
+
+**Qué se descartó:**
+- **Mantener el corte de las 4 (opción A):** con el modelo real casi nunca se cumplía, y no coincide con el horario del negocio.
+- **Cambiar el formato de la hora en el motor:** la medición no mostró mejora.
+- **Windsor.ai para el CRM:** es legal y entra por la vía oficial de Meta, pero solo lee métricas y comentarios. No toca los mensajes directos.
+
+**Medido después (03-11):** 3 pases reales fuera de horario y ninguna promesa falsa. Antes, 8 de 19.
+
+**Pendientes inmediatos:**
+- **Ver un pase real de 4 a 5 pm y uno de un viernes en la noche,** que todavía no hubo.
+- **El autor del prompt** parte de la versión nueva y saca «hoy mismo» de sus dos ejemplos.
+
 ## 2026-10-28 (tarde) — Agenda propia: formularios, abierta a todos los negocios, citas «Todos juntos», el Meet siempre, y el modelo según la tarea
 
 **Contexto:** el mismo día del reparto y del link por persona salieron cinco cosas más. Cada una tuvo su sesión, su prueba real en Momentum y el OK de Hans:
