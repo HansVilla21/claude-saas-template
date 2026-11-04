@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**202 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**211 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -237,6 +237,12 @@ Que el sistema no muera con vos. Los dos documentos tienen lectores distintos.
 |---|---|
 | ⭐ `reporte-de-traspaso-del-proyecto` | Un repo **no** es un traspaso: 13 secciones, y la #8 (accesos — dueño, quién paga, qué vence) es la que salva el proyecto. Los pendientes se parten por dueño |
 | ⭐ `manual-de-ayuda-dentro-del-producto` | El documento hermano, para quien **usa** el sistema (ver arriba, en UI) |
+
+## 🧾 Cotizar
+
+| Skill | Qué resuelve |
+|---|---|
+| `cotizar-crm-desde-llamada` | De la transcripción de una llamada a la cotización del CRM, sin prometer de más: de dónde sale cada dato que "no tenemos", y cada promesa cruzada con el código vivo. El generador vive en el repo privado de PM |
 
 ## 💡 Estrategia, marca y oferta
 

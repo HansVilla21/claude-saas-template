@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        212 skills de proceso reusables:
+│   └── skills/        213 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2470,6 +2470,19 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       —`git worktree remove --force` entra por el enlace—:
                       primero se quita el enlace, se comprueba, y recién ahí
                       el remove.
+                      Tier 82 — La cotización que no promete de más (1, capturada 2026-11-03
+                      de dos cotizaciones reales del CRM hechas el mismo día):
+                      cotizar-crm-desde-llamada (de la transcripción a un PDF con la marca, listo
+                      para que el founder lo revise. El generador vive en el repo privado de PM;
+                      esto es lo que no está ahí. "Es lo único que tenemos" suele ser falso: el
+                      nombre sale del CRM, la razón social del pie del sitio y el número de líneas
+                      del chat con el bot. El precio sale de lo que dijo el founder, nunca de otra
+                      cotización: dos del mismo día trataban distinto el primer mes. Cada promesa
+                      se cruza con el código vivo en cuatro estados —existe, a medias, espera a un
+                      tercero, no existe—, porque una demo hace que todo parezca terminado, y a
+                      veces el founder dice "eso no está" y ya existía. Incluye mirar el permiso,
+                      nombrar en "No incluye" lo que se dejó para después, poner borde a las
+                      adaptaciones y declarar lo que contradice a los Términos).
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

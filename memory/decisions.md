@@ -6,6 +6,25 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-03 — La cotización del CRM ya tiene plantilla y método
+
+**Contexto:** el mismo día salieron dos llamadas con cotización prometida, y no había formato para vender el CRM como producto. Los nombres y los montos de cada cliente están en `clients/`, que no se versiona.
+
+**Decisión:**
+- **Un generador con un solo contenido,** que saca PDF y Word con la línea gráfica de Momentum y se detiene si queda un dato sin llenar. Vive en el repo privado de PM (`templates/contratos/generador/cotizacion/`). Hans: «dejala como plantilla en PM».
+- **El método va en una skill aparte,** `cotizar-crm-desde-llamada`. Hans: «me gusta cómo estamos creando estas cotizaciones».
+- **Cada promesa se cruza con el código vivo antes de mandarla,** y Hans recibe lo que hay que construir si el cliente cierra.
+- **El primer mes es por cliente.** En una lo cubre la implementación y en la otra la mensualidad corre desde el inicio, según lo que Hans dijo en cada llamada.
+- **El envío lo hace Hans.**
+
+**Razón:** una cotización escrita con la demo en la cabeza promete cosas que no existen. Las dos tocaban funciones a medias o sin construir, y el plazo dependía de eso.
+
+**Qué se descartó:** copiar las condiciones de la cotización anterior. Habría cambiado el precio que Hans dijo.
+
+**Pendientes inmediatos:**
+- **La plantilla y los Términos del generador están en un PR del repo privado de PM** (`docs/plantilla-cotizacion`). Solo entran esas dos carpetas: ese repo tiene otros cambios sin commitear.
+- **Si un cliente cierra,** antes de arrancar hay que hablar con Hans lo que dice su ficha, en `clients/`.
+
 ## 2026-11-02 — Un proveedor de IA sin crédito, el horario de un bot, el orden de los estados y el link del correo
 
 **Contexto:** el mismo día llegaron tres quejas de clientes. Los nombres y el detalle están en el backlog privado del CRM (`crm-v2/memory/backlog.md`) y en su handoff del 02-11, en `crm-v2/memory/`.
