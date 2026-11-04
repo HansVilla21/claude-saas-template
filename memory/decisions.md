@@ -22,7 +22,7 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 **Qué se descartó:** copiar las condiciones de la cotización anterior. Habría cambiado el precio que Hans dijo.
 
 **Pendientes inmediatos:**
-- **La plantilla y los Términos del generador siguen sin subir** en el repo de PM, que tiene otros cambios sin commitear.
+- **La plantilla y los Términos del generador están en un PR del repo privado de PM** (`docs/plantilla-cotizacion`). Solo entran esas dos carpetas: ese repo tiene otros cambios sin commitear.
 - **Si un cliente cierra,** antes de arrancar hay que hablar con Hans lo que dice su ficha, en `clients/`.
 
 ## 2026-11-02 — Un proveedor de IA sin crédito, el horario de un bot, el orden de los estados y el link del correo
