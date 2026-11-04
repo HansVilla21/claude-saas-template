@@ -1,6 +1,6 @@
 # Índice de skills de proceso (`.agent/skills/`)
 
-**211 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
+**213 skills.** Las leen los agentes vía Read tool: `.agent/skills/<nombre>/SKILL.md`.
 
 Cada una salió de un problema real que ya nos costó tiempo, y documenta **el gotcha**, no solo el procedimiento. Las marcadas ⭐ son **cross-project**: valen en cualquier proyecto, no solo en este.
 
@@ -22,7 +22,7 @@ Cómo saber que algo funciona de verdad. Si vas a decir "listo", empezá acá.
 | ⭐ `enforcement-con-hook-no-con-regla` | Una regla escrita depende de que alguien se acuerde. Cuándo algo merece hook y el gotcha que lo anula |
 | `verificar-visual-midiendo-contraste` | Medir el ratio WCAG real en el browser. El instinto daba 3.2:1; medir dio el camino a 6.42:1 |
 | `debugging-silent-errors` | `console.error` estructurado, reproducir antes de instrumentar, códigos de error de Postgres/Supabase |
-| `worktree-para-no-pisar-el-checkout` | Trabajar cuando otra persona está en el mismo repo (un commit quedó huérfano) |
+| `worktree-para-no-pisar-el-checkout` | Trabajar cuando otra persona está en el mismo repo (un commit quedó huérfano). Apéndice: **repartir el trabajo entre varios ayudantes** en copias paralelas, aflojar las pruebas compartidas antes de repartir y **borrar una copia enlazada sin vaciar el `node_modules` de la principal** |
 | ⭐ `cosechas-en-paralelo-sin-pisarse` | N sesiones a la vez sobre el mismo repo reclaman el mismo número y rompen el conteo. El número se reclama en el PR, el conteo se **deriva**, el índice se **verifica** contra el disco — y un push a una rama no es un cambio entregado |
 | `mesa-arquitectonica-multiagente` | Panel multi-agente + jueces adversariales para decisiones arquitectónicas grandes |
 | `creador-de-skills` | La meta-skill: cuándo y cómo capturar un proceso |
@@ -157,6 +157,8 @@ El grupo con más incidentes del proyecto. Casi todos comparten un modo de fallo
 
 | Skill | Qué resuelve |
 |---|---|
+| ⭐ `guia-interactiva-sobre-pantallas-reales` | Un sistema que **acompaña** paso a paso marcando el botón real (no un manual). El recorrido es un **dato**, el motor es puro, y el catálogo se **prueba** contra el código (anclas, nombres de botón, roles, hechos) con control negativo. Incluye la revisión que ninguna prueba hace y el **barrido en navegador real** (scripts) |
+| ⭐ `guia-pasos-dentro-de-ventanas` | Tocar el panel de la guía cerraba la ventana y borraba lo escrito; un paso `campo` adentro se trababa; `volverSi` retrocedía solo. El patrón: **la ventana se explica en el paso que la abre**, y cuándo sí valen `campo` y `volverSi` |
 | ⭐ `editar-dato-que-el-webhook-reescribe` | "Editar contacto" cuando una integración también escribe los datos: el webhook pisaba el nombre en cada mensaje y la edición **volvía atrás sin error**. Un dueño por campo, precedencia en el resolver único (medida antes: 13 de 1.769), teléfono de solo lectura si hay id del proveedor, modal no optimista, y un cumpleaños como `date` |
 | ⭐ `lectura-cortada-por-max-rows` | "Se guardó pero al recargar no está": PostgREST corta en 1.000 filas **sin error** y faltan las más nuevas. Diagnóstico (logs de clave duplicada + conteo por tenant + prueba con control positivo), el helper `leerTodo` paginado con orden total, y por qué `.limit()` y subir `max_rows` no lo arreglan. **2º caso** (8.022 leads, 7 pantallas): `.in()` revienta con ~500 ids (la URL) y sin mirar `error` devuelve vacío → `fetchIn` en tandas; decidir con `count`; el orden decide qué se pierde; `count head`; barrido de todas las lecturas; verificar contra SQL directo; tope explícito si el fix cambia algo hacia afuera. **3er caso** (2026-10-24): `.in()` en una ESCRITURA tumba la acción en lote entera (350 uuid pasan, 400 no) → `enTandas` en orden; un hilo se lee desde lo ÚLTIMO (desc + techo + reverse) — una importación de historial llevó un chat a 4.841 y se abría en junio |
 | ⭐ `paginar-lista-en-servidor` | La continuación del tope de 1000: con la lectura arreglada, la lista mandaba 4,2 MB por visita y su kanban pintaba 111.074 elementos (3,3 s congelada). Primero medir peso, lectura y pintado por separado y topar lo que pinta «todo»; después, vista SQL con `security_invoker` —sin eso le muestra todo a cualquiera—, UNA implementación de filtrar y ordenar reusada en página, contadores, ids, CSV y kanban, las trampas de PostgREST (NULL fuera de `neq` dentro de `or()`, `*` comodín, 416 en una página que ya no existe), la prueba vieja contra nueva en la base real y medir CON la RLS |
