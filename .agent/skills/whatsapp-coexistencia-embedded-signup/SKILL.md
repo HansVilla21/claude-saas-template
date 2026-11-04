@@ -11,8 +11,10 @@
 > familia: un mensaje viejo que entra por el camino de un mensaje nuevo dispara
 > todo lo que se pensó para uno nuevo.
 >
-> Archivos de referencia: `payloads-y-sql.md` y `prueba-real.md` (la primera
-> conexión real, pantalla por pantalla, 2026-09-12). Skills hermanas:
+> Archivos de referencia: `payloads-y-sql.md`, `prueba-real.md` (la primera
+> conexión real, pantalla por pantalla, 2026-09-12) y
+> `bind-a-medias-cierre-de-meta.md` (el BSP no puede adoptar la cuenta a fin de mes:
+> el cliente queda a medias y se resuelve sin que repita nada). Skills hermanas:
 > `meta-tech-provider-de-cero-a-app-review`, `fb-login-sdk-fedcm-y-callback`,
 > `webhook-meta-multicanal`, `probar-migracion-contra-base-viva-con-rollback`.
 
@@ -292,4 +294,5 @@ la producción quedó intacta. En la función del webhook, 14 pruebas con los
 - [ ] Prueba con bloque que aborta **y** control negativo
 - [ ] Texto de ayuda con los límites (grupos, temporales, dispositivos vinculados)
 - [ ] Probar en una cuenta nueva con el número vacío: conectar en una cuenta viva apaga su línea
+- [ ] Por un BSP: no conectar en los últimos días del mes; si el bind falla, ver `bind-a-medias-cierre-de-meta.md`
 - [ ] Historial sin `errors`/`unsupported`; nombres de relleno nunca a la vista ni en mensajes
