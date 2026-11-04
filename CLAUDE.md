@@ -2483,6 +2483,23 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       veces el founder dice "eso no está" y ya existía. Incluye mirar el permiso,
                       nombrar en "No incluye" lo que se dejó para después, poner borde a las
                       adaptaciones y declarar lo que contradice a los Términos).
+                      Tier 83 — El cliente que quedó a medias por el calendario de Meta (1
+                      extensión, capturada 2026-11-04 de un alta por la solución de YCloud a fin
+                      de mes): whatsapp-coexistencia-embedded-signup suma
+                      bind-a-medias-cierre-de-meta.md (⭐ cross-project: el cliente termina el
+                      flujo de Meta y falla solo el último paso del BSP, "cannot be moved onto a
+                      credit line while the monthly billing close is running", subcode 1752358,
+                      transitorio. Duró hasta el 2-4 del mes. Lo no obvio: los entrantes SÍ llegan
+                      aunque el bind falle, y sin canal se descartan sin ningún error (111 en una
+                      hora); se carga el canal con el bot apagado y `revisar_salud: false`, se
+                      recupera lo perdido, y el bind se reintenta a mano sobre la misma WABA, SIN
+                      un flujo nuevo. Antes del bind no hay ecos y enviar da "has not been
+                      registered". Lo que no sirvió: reconectar durante el cierre, operar la WABA
+                      con la app propia (Meta deja solo "Números de teléfono") y creerle a la
+                      respuesta genérica de soporte: pedía IDR y reconectar, y el bind salió con la
+                      cuenta en USD. Antes de pedirle a un cliente que borre su cuenta, se reintenta.
+                      Se pierde lo que el negocio contestó desde el celular esos días, y
+                      probablemente el historial viejo. Regla: no conectar por el BSP a fin de mes).
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
