@@ -261,3 +261,43 @@ group by 1 order by 1;
 Se contestan contra el código o la base, y van en el mensaje al autor. Medido en esta carga:
 - **"¿El bot ve el anuncio?"** No. El turno no lee la atribución. Ve lo que escribe la persona, y el texto prearmado del anuncio le llega como su mensaje.
 - **"Un mensaje del equipo quedó como del cliente":** antes de culpar al registro, mirar el evento crudo del proveedor. `webhook_events_raw.agency_id` puede venir nulo, así que filtrar por agencia da 0 filas y parece que no hay datos: se busca el número del negocio dentro de `raw_payload`, acotado por fecha. En este caso eran entrantes reales desde otro número.
+
+---
+
+## Apéndice 2026-11-03 — Cuando el prompt pide una ficha y el texto del motor la frena
+
+La nueva versión del prompt de una clínica pedía no listar tratamientos ni precios cuando alguien cuenta una preocupación, y dar la información de la valoración con su ficha (`descripcion_tal_cual`, skill `texto-literal-por-marcador`). El texto del autor se cargó tal cual. Lo que hubo que cambiar estaba alrededor.
+
+### Medir el choque antes de arreglarlo
+
+Leyendo los textos, el choque parecía otro. La nota del motor decía "se nombran cada uno con su precio, sin fichas", se lee al final y vale "por encima de cualquier otra indicación", así que debía ganarle al prompt y listar precios. **Medido con 3 conversaciones (US$0,34): el modelo no listó nada.** Lo que sí fallaba era la otra mitad de la frase: por el "sin fichas", contaba la valoración con sus palabras.
+
+Sin esa tanda chica, el informe habría dicho "lista precios" y el arreglo habría apuntado a lo que no estaba roto.
+
+### El texto del motor dice cuándo, no qué contestar
+
+- **La regla:** la nota de un mecanismo que usan varios negocios dice cuándo se dispara. Qué contestar cuando no aplica lo dice el prompt del negocio. La nota traía una decisión comercial de un día, y al cambiar el prompt pasó a contradecirlo.
+- **Si la decisión era del founder, se le dice.** Cambiar esa frase deshacía una opción que había elegido antes, así que el merge esperó su OK.
+- **"Como mucho una frase corta" también manda.** Dejaba la ficha sin saludo: dos reportes de la clínica. La nota ahora nombra el saludo antes de la ficha, y `medir-estilo` lo cuenta con `saludo_al_empezar`.
+
+### Una ficha que el modelo no usa por su cuenta
+
+Un servicio que el prompt manda a ofrecer por iniciativa propia, como la valoración, se resiste a salir por ficha: el prompt ya trae los datos, y el modelo los cuenta.
+
+| Lo que se probó | Ficha de la valoración |
+|---|---|
+| Solo la línea del prompt ("si el sistema te pasa la ficha, la usas") + el servicio en el catálogo | 0 de 3 |
+| Nota del motor: "cada vez que va a decir el precio o lo que incluye, aunque no lo haya nombrado" | 1 de 3 |
+| Además, `reglas_finales` con el marcador concreto: `[FICHA:<ref>]` | 4 de 4 |
+
+- **`reglas_finales` es config nuestra** y se lee al final, así que no toca el texto del autor. Se le cuenta en el mensaje, porque su línea sola no alcanza.
+- **El marcador es parte del id del servicio.** Si alguien borra y vuelve a crear el servicio, deja de valer: `depurarFichas` lo saca sin error y la ficha deja de salir. Queda anotado en el backlog.
+- **El equipo del negocio puede editar `reglas_finales`** desde Configuración. Si lo borra, se vuelve al 1 de 3.
+
+### Lo que se revisa en cada carga
+
+- **Lo agregado a mano se compara contra lo VIVO, no contra la versión anterior del autor.** Contra su versión anterior había 2 cambios; contra lo que estaba cargado, 6. Cada diferencia se revisa y se reporta si se pierde algo.
+- **Las palabras que el autor prohíbe también salen de nuestra config.** `instruccion_al_pasar` todavía decía "nunca en un ratito", y el nuevo prompt prohíbe esa palabra. Cambiarla por la frase larga daba 409 caracteres contra el tope de 400, y el motor habría cortado lo último en silencio.
+- **Una palabra que el cliente prohibió por escrito va también a `frases_prohibidas`.** Se busca sin mirar las fichas: una descripción del negocio que la usa sale igual, y se le avisa al autor.
+- **Los casos de medir se actualizan con el prompt.** Una cita que ya no está en el texto avisa sola. Lo que no avisa es un `espera_pase` que quedó viejo o un regex que no cubre lo que el motor genera: `{{SALUDO_HORA}}` da "Buen día", no "Buenos días", y de día la regla del saludo habría fallado siempre.
+- **La hora en Git Bash de Windows:** `TZ=America/Costa_Rica date` imprime UTC y lo rotula como hora local. Dio 03:43 cuando eran las 21:43. La hora de Costa Rica se saca con `Intl` en Node, que es lo que ya imprime el reporte de `medir-estilo`.
