@@ -51,7 +51,7 @@ Conclusión: se construye propio, y del motor de Cal.diy se copian las ideas, no
 
    **Los márgenes no se aplican contra el borde del horario:** con «15 min antes», igual se ofrece a las 8:00 cuando abre a las 8:00. Una cita cargada a mano no tiene márgenes; las reservas los guardan congelados.
 4. **Generar.** Sobre cada rango libre:
-   - el primer inicio es el mayor entre el comienzo del rango y `ahora + aviso mínimo`;
+   - el primer inicio es el mayor entre el comienzo del rango y `ahora + aviso mínimo`. El aviso es **el más largo entre el del servicio y el de esa persona** (`RecursoMotor.avisoMinimoMin`, opcional): un aviso propio corto no achica el del servicio;
    - ese inicio se **alinea a la grilla CONTANDO DESDE LA HORA EN PUNTO, en la zona del NEGOCIO**, con el paso de alineación = el mayor de 60, 30, 20, 15, 10 y 5 que divide al paso (con 45 → 15, con 8 → 1);
    - después avanza de a un paso (si no hay paso, lo que dura el servicio), y un inicio queda solo si **la cita entera entra** en el rango.
 
@@ -64,12 +64,12 @@ Conclusión: se construye propio, y del motor de Cal.diy se copian las ideas, no
    - También existe «sin límite».
 8. **La zona del cliente.** Se expanden las fechas del negocio con **±2 días** de colchón (la diferencia más grande entre dos zonas es de 26 h), se genera, y se agrupa por la fecha en la zona del cliente. «Hoy» es el del cliente, como en Calendly: en Tokio aparece el sábado y desaparece el martes.
 9. **La salida trae TODAS las fechas pedidas,** las vacías con su **motivo**: pasado, fuera de la ventana, feriado (con el nombre), cerrado, límite diario, aviso mínimo u ocupado. La pantalla pinta el mes sin adivinar, y la vista previa le explica al dueño por qué un día no tiene nada.
-10. **Varios recursos:** un horario sale si al menos uno está libre, y dice cuáles (`recursos: [...]`). Es la base del reparto.
+10. **Varios recursos:** un horario sale si al menos uno está libre, y dice cuáles (`recursos: [...]`). Es la base del reparto. Cada uno cuenta con su aviso, y el motivo «aviso mínimo» sale solo si no le alcanza a ninguno.
 11. **Validar al reservar con la MISMA función** (`estaLibre(entrada, inicio)` llama a `horariosLibres` de ese día). Lo de que dos personas no reserven a la vez **no es del motor**: es de la base, con un candado por recurso y día que vuelve a calcular y después inserta.
 
 ### 3. Las pruebas que lo dan por bueno
 
-`assets/pruebas-motor.test.ts` trae 38. Las que vienen de Calendly, medidas en vivo por REA OS, con L-V de 9 a 17 (Costa Rica), 45 min cada 30, 24 h de aviso y 14 días:
+`assets/pruebas-aviso-por-persona.test.ts` y `pruebas-aviso-de-la-cita.test.ts` cubren el aviso de cada persona y la cita a mano (sección 6). `assets/pruebas-motor.test.ts` trae 38. Las que vienen de Calendly, medidas en vivo por REA OS, con L-V de 9 a 17 (Costa Rica), 45 min cada 30, 24 h de aviso y 14 días:
 
 | Caso | Esperado |
 |---|---|
@@ -107,6 +107,29 @@ Están en `assets/feriados-cr.ts`. Diez caen siempre el mismo día y los otros d
 - **Se muestra el motivo de cada día vacío** y cuántas citas ya se descontaron.
 - **Mientras no exista la página para reservar, las pantallas solo las ve master.** Un dueño que carga servicios y espera citas que no llegan es peor que no tener nada. Una sola constante (`SOLO_MASTER`) la leen el gate de las páginas y el menú: si fueran dos, se separan.
 
+### 6. El aviso mínimo cuando agenda el equipo (agregado 2026-11-04)
+
+El primer diseño le borraba el aviso al equipo. El negocio lo notó así: a las 11:20, con 4 horas de aviso, la página ofrecía 4:00 y 5:00 p. m. y «Nueva cita» ofrecía 12, 13, 14 y 15. Y el dueño pidió lo que el servicio no cubre: *«tampoco quiero que se me agenden cosas literalmente a 20 minutos»*.
+
+**El aviso protege a quien atiende, no al servicio.** Por eso hay dos piezas:
+- **Un aviso propio por persona:** va en `booking_resources.min_notice_min`, 0 = sin aviso propio. No va en el horario, porque un horario también puede ser el de un servicio. Solo para personas: un espacio no tiene a quién proteger.
+- **Una regla pura para la hora escrita a mano** (`assets/aviso-de-la-cita.ts`), que usan la ventana para decirlo antes y la server action para decidir:
+
+| Caso | Qué pasa |
+|---|---|
+| Botones de horarios libres | Corren el motor: respetan el aviso de todos. La ventana de días no aplica al equipo |
+| Hora a mano para uno mismo | Advierte y guarda: el cliente al teléfono que pide una llamada ya |
+| Hora a mano para otra persona | No deja, validado en el servidor |
+| Cita con varias personas | Se mira a cada una, aunque quien agenda sea parte; si solo choca su propio aviso, advierte |
+| Cita sin servicio asignada a otra persona | Cuenta el aviso de esa persona |
+| Un espacio | Solo advierte |
+| Editar | Solo se revisa si cambia la hora o se suma a alguien: cambiar una nota nunca bloquea |
+| Hora que ya pasó | Nada: anotar lo que ya ocurrió se puede |
+
+La cita a mano **no** valida con `estaLibre`: el equipo puede agendar sobre un choque, y una hora ocupada no se bloquea. Por eso la regla es aparte. Lo que arma sus datos también es puro (`citaNuevaARevisar`, `citaEditadaARevisar`); si no, las pruebas de la regla siguen en verde aunque la action no la llame. En el CRM, otra prueba lee el código y exige que el corte esté antes de escribir.
+
+**Quedó afuera, por decisión del dueño:** «Volver a agendada» revive una cita cancelada sin mirar el aviso, porque también es el deshacer de un «Cancelar» tocado por error.
+
 ---
 
 ## Gotchas (los que ya costaron)
@@ -124,13 +147,18 @@ Están en `assets/feriados-cr.ts`. Diez caen siempre el mismo día y los otros d
 5. **El interruptor chico (16×28 px) queda debajo del piso táctil de 24 px.** En una lista de días se usa el mediano, salvo que un `<label>` le dé el área.
 6. **Guardar un servicio son varias escrituras** (su horario propio, el servicio, quién atiende). El orden que deja algo coherente si una falla: primero el horario, que no se ve; después el servicio; al final los enlaces. Si el servicio no se crea, se borra el horario huérfano.
 7. **El recurso no se borra si atiende un servicio:** se dice cuál («Atiende «X». Primero elegí a otra persona en ese servicio»). Si no, el servicio se queda sin nadie y deja de ofrecer horarios sin que nadie entienda por qué.
+8. **Antes de sacarle una regla al equipo, preguntá a quién protege.** Quitarle el aviso a «Nueva cita» se decidió a propósito el 27-10 y volvió como bug el 04-11. La pregunta que lo resolvió fue separar **agendarse a uno mismo** de **agendarle a otra persona**.
+9. **Dos mensajes pueden contradecirse, y solo se ve en la pantalla.** A las 19:00, fuera del horario, salía «Igual se puede agendar» junto a «Elegí una hora más adelante». Y el error del servidor seguía nombrando a Pietro después de cambiar a Hans: hay que limpiarlo también al cambiar de persona o de servicio, no solo de hora. Ninguna prueba los vio.
+10. **Con avisos distintos, nombrá solo al del más largo.** «1 día para Pietro y Cristel» le atribuye a Cristel un aviso que no es suyo.
+11. **Guardar un panel manda solo lo que se tocó.** Sumar el aviso al «Guardar horario» hizo que cambiar solo el aviso reescribiera la semana: con la pantalla abierta desde la mañana, revertía el cambio de otra persona, y esa semana se ofrece en la página. Se prueba mirando que `updated_at` y la huella del horario no cambien.
+12. **Simular la hora en el navegador solo prueba la pantalla.** El servidor sigue con el reloj real. Con el navegador en las 11:20 y el reloj en las 17:00, tocar «Agendar» a las 12:00 crearía una cita de verdad, porque para el servidor esa hora ya pasó. El rechazo se prueba con una hora futura real.
 
 ---
 
 ## Output esperado
 
 - **Base:** las tablas de `assets/esquema.sql`, con las llaves compuestas y escritura solo desde el servidor. Se prueba con el bloque que siempre aborta: cruces entre negocios rechazados, un rol que ve solo lo suyo, anon bloqueado.
-- **Motor:** `motor.ts`, `semana.ts`, `feriados-cr.ts` y `tz.ts`, con sus 52 pruebas en verde dentro del proyecto.
+- **Motor:** `motor.ts`, `semana.ts`, `feriados-cr.ts`, `tz.ts` y `aviso-de-la-cita.ts`, con sus 77 pruebas en verde dentro del proyecto.
 - **Pantallas:** Servicios con la vista previa y Horarios con la semana, los feriados y los días especiales, verificadas a 375 px.
 
 ## Ejemplo
@@ -159,8 +187,9 @@ Al pasar la duración a 1 h, el lunes queda 8, 9, 11… sin guardar nada. Con d�
 | `assets/semana.ts` | Tipos `Franja`, `Semana` y `Horario`; validación (`revisarFranjas`, `semanaValida`); `franjasDelDia` con la precedencia; fechas como texto; `resumenSemana` («Lun a Vie · 8:00 a 17:00») |
 | `assets/feriados-cr.ts` | Feriados de Costa Rica (fijos + Pascua), modos y próximos feriados |
 | `assets/tz.ts` | `partesEnZona`, `instanteEnZona`, `claveDiaEnZona` y `horaEnZona`, con Intl y sin librería |
-| `assets/pruebas-*.test.ts` | 52 pruebas (`node --experimental-strip-types --test assets/pruebas-*.test.ts`) |
-| `assets/esquema.sql` | La migración 0159 del CRM. Usa `is_member_of()`, `is_master()` y `set_updated_at()` del proyecto: adaptarlas a los helpers del tuyo |
+| `assets/aviso-de-la-cita.ts` | La regla de la hora escrita a mano: `revisarAvisoDeLaCita`, `personasDeLaCita`, `citaNuevaARevisar`, `citaEditadaARevisar` y `textoDelAviso` |
+| `assets/pruebas-*.test.ts` | 77 pruebas (`node --experimental-strip-types --test assets/pruebas-*.test.ts`) |
+| `assets/esquema.sql` | La migración 0159 del CRM, con la columna del aviso de la 0175 al final. Usa `is_member_of()`, `is_master()` y `set_updated_at()` del proyecto: adaptarlas a los helpers del tuyo |
 
 **Para copiarlo:** los imports son relativos con `.ts` (`'./tz.ts'`) para que las pruebas corran solas. En un proyecto Next, cambialos por el alias (`'@/lib/reservas/…'`). La fuente viva es `crm-v2/src/lib/reservas/`; si este motor cambia allá, actualizá los assets.
 

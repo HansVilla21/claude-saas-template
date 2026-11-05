@@ -69,7 +69,12 @@ export type ServicioMotor = {
 };
 
 /** Quien atiende (una persona) o donde se atiende (un espacio), con su horario. */
-export type RecursoMotor = { id: string; horario: Horario };
+export type RecursoMotor = {
+  id: string;
+  horario: Horario;
+  /** Su aviso mínimo propio. Manda el más largo entre este y el del servicio. Sin dato, 0. */
+  avisoMinimoMin?: number;
+};
 
 /**
  * Algo que ocupa a un recurso: una cita del CRM, una reserva, un evento de su
@@ -225,6 +230,11 @@ export function ultimaFechaReservable(v: Ventana, hoy: string, h: Horario): stri
 
 type Candidato = { inicio: number; fin: number; quedan: number; recursoId: string };
 
+/** El aviso que le cuenta a este recurso: el más largo entre el del servicio y el suyo. */
+function avisoDe(s: ServicioMotor, r: RecursoMotor): number {
+  return Math.max(s.avisoMinimoMin, r.avisoMinimoMin ?? 0);
+}
+
 function candidatosDelRecurso(
   e: EntradaMotor,
   r: RecursoMotor,
@@ -266,7 +276,7 @@ function candidatosDelRecurso(
   // La ventana se mide por el INICIO: el último día vale entero, aunque la cita
   // de las 23:30 termine al día siguiente.
   const finVentana = ultima === null ? Infinity : instanteEnZona(sumarDias(ultima, 1), '00:00', h.zona) ?? Infinity;
-  const minimo = e.ahora + s.avisoMinimoMin * MIN;
+  const minimo = e.ahora + avisoDe(s, r) * MIN;
 
   const ocupadosPorInicio = new Map<number, number>();
   for (const o of compartidas) ocupadosPorInicio.set(o.inicio, (ocupadosPorInicio.get(o.inicio) ?? 0) + 1);
@@ -333,16 +343,18 @@ function motivoDelDia(e: EntradaMotor, fecha: string): MotivoSinHorarios {
   // servicio: si el servicio no se da ese día, está cerrado aunque quien
   // atiende trabaje.
   const delServicio = e.horarioServicio ? rangosDelHorario(e.horarioServicio, [fecha]) : null;
-  const rangos = e.recursos.flatMap((x) => {
+  const porRecurso = e.recursos.flatMap((x) => {
     const propios = rangosDelHorario(x.horario, [fecha]);
-    return delServicio ? intersectar(propios, delServicio) : propios;
+    const rangos = delServicio ? intersectar(propios, delServicio) : propios;
+    return rangos.length > 0 ? [{ rangos, minimo: e.ahora + avisoDe(e.servicio, x) * MIN }] : [];
   });
-  if (rangos.length === 0) return { tipo: 'cerrado' };
+  if (porRecurso.length === 0) return { tipo: 'cerrado' };
   if (diasEnLimite(e, h.zona).has(fecha)) return { tipo: 'limite_diario' };
-  // Si todo lo que abre ese día termina antes del aviso mínimo, el motivo es el
-  // aviso, no que esté lleno.
-  const minimo = e.ahora + e.servicio.avisoMinimoMin * MIN;
-  if (rangos.every(([, b]) => b - e.servicio.duracionMin * MIN < minimo)) return { tipo: 'aviso_minimo' };
+  // Si todo lo que le abre ese día a cada uno termina antes de SU aviso mínimo, el
+  // motivo es el aviso, no que esté lleno. Con varios, tiene que pasarle a todos.
+  const noLlega = ({ rangos, minimo }: (typeof porRecurso)[number]) =>
+    rangos.every(([, b]) => b - e.servicio.duracionMin * MIN < minimo);
+  if (porRecurso.every(noLlega)) return { tipo: 'aviso_minimo' };
   return { tipo: 'ocupado' };
 }
 

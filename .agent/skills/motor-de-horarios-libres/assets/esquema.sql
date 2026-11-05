@@ -235,3 +235,11 @@ create trigger trg_set_updated_at before update on public.booking_resources
     for each row execute function public.set_updated_at();
 create trigger trg_set_updated_at before update on public.booking_types
     for each row execute function public.set_updated_at();
+
+-- ── 0175 — El aviso mínimo de cada persona (2026-11-04) ─────────────────────
+-- 0 = sin aviso propio: sigue mandando el del servicio. Manda el más largo.
+alter table public.booking_resources
+    add column if not exists min_notice_min int not null default 0;
+alter table public.booking_resources
+    add constraint booking_resources_min_notice_min_check
+    check (min_notice_min between 0 and 129600);
