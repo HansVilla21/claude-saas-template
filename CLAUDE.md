@@ -2506,6 +2506,18 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       cuenta en USD. Antes de pedirle a un cliente que borre su cuenta, se reintenta.
                       Se pierde lo que el negocio contestó desde el celular esos días, y
                       probablemente el historial viejo. Regla: no conectar por el BSP a fin de mes).
+                      Tier 84 — El contenido que llega después (1 extensión, capturada 2026-11-05
+                      del «Hola» de prueba que el CRM mostró como aviso de anuncio):
+                      primer-contacto-sin-texto suma el apéndice (⭐ cross-project: desde el 27-10
+                      YCloud reenvía el contenido de un 131060 segundos después, con el MISMO
+                      wamid; la tabla única por wamid lo descartaba como reintento sin un error:
+                      126 de 126 perdidos, mediana 7,7 s, 118 con el anuncio real. Convertir la
+                      fila del aviso en vez de insertar —también en la carrera del 23505—, el
+                      orden inverso no convierte nada, el preview a mano porque el trigger corre
+                      solo en el INSERT, la atribución inferida reemplazada por la real, dos
+                      turnos de un mensaje con una sola respuesta, la memoria del bot que tenía
+                      el texto del aviso como si lo hubiera dicho el lead, y la recuperación
+                      desde el crudo con el mismo extractor del webhook).
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

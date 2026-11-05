@@ -21,6 +21,8 @@
 2. Meta entrega ese primer mensaje al BSP como `unsupported`, error `131060`, **sin el texto y sin `referral`**.
    Meta lo documenta como comportamiento esperado del primer mensaje ("first-time messaging"). No es un bug
    tuyo y no hay nada que reconstruir: el contenido no existe del lado del BSP.
+   ⚠️ **Corregido el 2026-11-05:** desde el 27-10 el contenido SÍ llega, segundos después y con el mismo
+   wamid, en el 85 % de los casos. Ver el apéndice al final antes de aplicar esta skill.
 3. Si guardás ese evento como aviso del sistema (lo correcto, ver paso 2 del proceso), **no es un mensaje del
    lead y no pide turno**. Resultado: el lead más caliente que existe, uno que viene de plata de anuncios, no
    recibe nada. Y sin `referral` tampoco hay `ad_id`, así que el reporte lo cuenta como orgánico.
@@ -140,3 +142,96 @@ que escribió desde un anuncio y Meta no entregó el contenido."
 - `porcentaje-necesita-minimo-muestra` — por qué un grupo mezclado o chico no compite en un ranking por tasa.
 - `drill-down-numero-a-lista` — la clave de agrupación es la misma que viaja en la URL y filtra la lista.
 - `verificar-funcionamiento-end-to-end` — "respondió 200" no es "funciona".
+- `estado-antes-que-mensaje` — otra carrera del mismo webhook: el aviso de un evento que llega antes que la cosa.
+
+---
+
+## Apéndice 2026-11-05: el contenido llega después, con el mismo wamid
+
+> Capturado en el CRM de Momentum (PR #506 de momentum-ai-crm, webhook 1.16.0). El caso que lo destapó: Hans
+> reconectó el WhatsApp de un cliente, se mandó un «Hola» de prueba y el chat mostró el aviso de anuncio.
+
+### Qué cambió del lado del BSP
+
+Hasta octubre de 2026 el `131060` era el final de la historia. Desde el 27-10 YCloud **reenvía el mismo
+mensaje** unos segundos después, con el **mismo wamid** y el contenido real (texto, foto o audio). Si tu tabla
+de mensajes es única por wamid (lo normal, para la idempotencia), el segundo evento choca con el aviso, se toma
+por un reintento del BSP y **se descarta sin ningún error**: el evento queda procesado y el mensaje no aparece
+en ningún lado.
+
+**Medido (75 días, 6 negocios):** 126 pares y los 126 perdidos. Por semana: 0 % hasta la del 19-10, 64 % la del
+26-10, 85 % la del 02-11. Mediana 7,7 s entre los dos; 2 de 126 tardaron más de 45 s (máximo 510 s). 124 textos,
+1 foto, 1 audio. **118 de los 126 contenidos traen `referral`**, el anuncio real con su `ctwa_clid`, que el aviso
+no traía. En los negocios con bot, **el bot contestó los 51 casos sin saber qué le habían escrito**.
+
+### Cómo se arregla
+
+1. **Convertir la fila del aviso, no insertar otra.** Cuando entra contenido para un wamid cuya fila es un aviso
+   que lo espera (`sender_kind = 'system'` y la causa del 131060), esa fila pasa a ser el mensaje del lead: mismo
+   id, misma hora (`created_at` no se toca: es cuando llegó). El UPDATE repite la condición en la base, así dos
+   copias del contenido convierten una vez y nunca se pisa un mensaje real.
+2. **Convertir también en la carrera del INSERT.** El aviso y el contenido se procesan en paralelo: si el aviso
+   gana el INSERT, el contenido recibe el 23505. Ahí también hay que releer y convertir, o la carrera pierde el
+   mensaje igual.
+3. **El orden inverso no convierte nada.** Si el contenido llega primero, el aviso encuentra un mensaje del lead
+   y no lo toca: solo se convierte un aviso. Probalo con su propio caso.
+4. **Todo lo que hace el INSERT, hacerlo a mano.** Los triggers de la base corren en el INSERT: el preview de la
+   lista sigue con el texto del aviso (ponelo solo si ese mensaje sigue siendo el último). El contador de no
+   leídos y `last_inbound_at` **no** se tocan: el aviso ya los contó, con la hora real. Lo demás (archivar la
+   media, la memoria del bot, el turno) va por el mismo camino de un mensaje nuevo.
+5. **Reemplazar la atribución inferida por la real.** El aviso dejó al lead en «Anuncio sin identificar»; el
+   contenido trae el anuncio. Reemplazá solo la inferida (por eso conviene marcarla con `origen_inferido`) y
+   seguí siendo first-touch con cualquier otra.
+6. **Dos turnos para un mensaje, una respuesta.** El aviso ya abrió su turno (el saludo del paso 3 del proceso).
+   Ahora llega el contenido:
+   - el turno del contenido va como **otro evento del mismo mensaje** (si el candado es por mensaje y evento, con
+     la misma clave el segundo muere como duplicado);
+   - el turno del aviso, al terminar su espera, mira si la fila se convirtió: si ya existe el turno del
+     contenido, se retira; si no, relee el mensaje y contesta él, **sacándole al modelo el aviso de "no sabés qué
+     dijo"**;
+   - el turno del contenido no contesta si el mensaje ya tuvo respuesta (el contenido llegó después del saludo):
+     serían dos respuestas a un solo mensaje del lead. En vez de contestar, corrige la memoria;
+   - si el turno del aviso **todavía corre** cuando despierta el del contenido (entró al modelo justo antes de
+     que llegara el contenido, o abrió tarde por una lectura de audio), el del contenido lo **espera**, con un
+     techo que respete el tiempo máximo de la función. Y "ya contestó" se mira en la **fila del turno** (cerró
+     con salida), no en la conversación: el turno se cierra antes de que el envío inserte la burbuja, y en ese
+     hueco el mensaje parece sin respuesta.
+   - **El análisis también son dos.** Si el análisis del mensaje (datos, etiquetas, estado) cuelga del pedido de
+     turno, cada pedido trae el suyo: se analiza dos veces, casi siempre (el contenido llega a los ~8 s). El del
+     aviso se omite si el contenido ya tiene su turno; si el contenido llegó tarde, el del aviso ya analizó el
+     aviso y el cursor del analista quedó exactamente en la hora de esa fila, así que el del contenido tiene que
+     correrlo 1 ms para atrás o nunca lo ve.
+7. **Corregir la memoria del bot.** El turno del aviso le pasa al modelo el texto del aviso y así queda guardado,
+   como si el lead lo hubiera dicho. Reemplazá ese texto por el contenido en la fila del lead (solo el texto del
+   aviso: pudo entrar junto con otros mensajes del lote), y buscá el aviso ANTES de mirar si el contenido ya está:
+   el contenido suele ser «Hola» y en un chat con historial un «Hola» viejo te haría creer que ya está.
+8. **El rótulo depende del chat.** Un `131060` en un chat con historial (pasó al reconectar el número) no es un
+   primer contacto: aviso neutro, sin atribución y sin saludo. Lo que la skill decía en el gotcha ⭐ vale también
+   para el texto del aviso, no solo para el turno y la atribución.
+9. **Recuperar lo perdido desde el crudo del webhook**, con el MISMO código que usa el webhook (mové el extractor
+   a un módulo que puedan importar el webhook, las pruebas y el script). En seco por defecto, respaldo antes de
+   escribir, y nada que hable hacia afuera: sin turnos, sin notificaciones, sin marcar leído. La media del BSP
+   vence a los 7 días (`bsp-media-expira-archivar-propio`): la recuperación es urgente para las fotos y los
+   audios.
+
+### Gotchas de esta parte
+
+- **El descarte no deja rastro.** Ninguno de los 126 tenía error: el evento quedaba procesado. Se encontró
+  porque alguien miró el chat. Si tu webhook trata "ya existe" como éxito silencioso, contá los eventos crudos
+  por wamid de vez en cuando: dos eventos con distinto `type` y el mismo wamid son la señal.
+- **La regla vieja de la skill ("el contenido nunca llega") estaba escrita en un comentario del código**, y por
+  eso nadie volvió a mirar. Cuando un proveedor cambia, los comentarios que afirman "nunca" son los primeros
+  sospechosos.
+- **Probá el orden de los dos eventos en las dos direcciones y la carrera del 23505.** Son tres pruebas distintas
+  y cada una rompe por un lado distinto.
+- **El rescate de turnos elige el PRIMER evento del wamid**, que en una fila convertida es el aviso. Si el turno
+  del contenido no salió, el rescate reprocesa el aviso, encuentra la fila como mensaje del lead y no hace nada,
+  13 veces. El camino del aviso tiene que saber pedir el turno de una fila que ya es del lead (reciente y sin
+  turno), o el cron tiene que preferir el evento con contenido.
+- **Desplegar en orden:** primero el motor que entiende el evento nuevo, después el webhook que lo manda. Al
+  revés, el motor viejo trata el turno del contenido como un mensaje común y el candado lo frena como
+  duplicado: no hay doble respuesta, pero contesta el turno del aviso, con el aviso de "no sabés qué dijo".
+- **La recuperación recalcula la causa de los avisos viejos** con la regla nueva antes de atribuir: los viejos
+  dicen todos "primer contacto" porque el clasificador de antes no miraba el historial.
+- **El control negativo:** con el comportamiento viejo (tratar la fila existente como duplicado), la prueba del
+  caso real tiene que fallar. Se comprobó: caen 4 de 16 en el webhook y 3 de 16 en el motor.
