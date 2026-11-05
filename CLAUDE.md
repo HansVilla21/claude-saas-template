@@ -2188,6 +2188,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      agency_id y `on delete set null (columna)`. Trae el motor, las
 │                      52 pruebas (los casos que REA OS midió en Calendly) y el
 │                      esquema en `assets/`, listos para copiar).
+│                      **Apéndice 2026-11-04:** el aviso mínimo protege a quien
+│                      atiende: aviso propio por persona, manda el más largo, y una
+│                      regla pura para la hora escrita a mano —a uno mismo advierte,
+│                      a otra persona no deja, validado en el servidor—. Suma 25
+│                      pruebas y 5 gotchas, como el «Guardar» que reescribía la
+│                      semana de otra persona.
 │                      Tier 72 — Quién gana la hora (1, capturada 2026-10-27 de la
 │                      fase 2 de la agenda propia del CRM):
 │                      reservar-sin-pisarse-pagina-publica (⭐ cross-project: la
