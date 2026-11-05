@@ -190,7 +190,17 @@ no traía. En los negocios con bot, **el bot contestó los 51 casos sin saber qu
      contenido, se retira; si no, relee el mensaje y contesta él, **sacándole al modelo el aviso de "no sabés qué
      dijo"**;
    - el turno del contenido no contesta si el mensaje ya tuvo respuesta (el contenido llegó después del saludo):
-     serían dos respuestas a un solo mensaje del lead. En vez de contestar, corrige la memoria.
+     serían dos respuestas a un solo mensaje del lead. En vez de contestar, corrige la memoria;
+   - si el turno del aviso **todavía corre** cuando despierta el del contenido (entró al modelo justo antes de
+     que llegara el contenido, o abrió tarde por una lectura de audio), el del contenido lo **espera**, con un
+     techo que respete el tiempo máximo de la función. Y "ya contestó" se mira en la **fila del turno** (cerró
+     con salida), no en la conversación: el turno se cierra antes de que el envío inserte la burbuja, y en ese
+     hueco el mensaje parece sin respuesta.
+   - **El análisis también son dos.** Si el análisis del mensaje (datos, etiquetas, estado) cuelga del pedido de
+     turno, cada pedido trae el suyo: se analiza dos veces, casi siempre (el contenido llega a los ~8 s). El del
+     aviso se omite si el contenido ya tiene su turno; si el contenido llegó tarde, el del aviso ya analizó el
+     aviso y el cursor del analista quedó exactamente en la hora de esa fila, así que el del contenido tiene que
+     correrlo 1 ms para atrás o nunca lo ve.
 7. **Corregir la memoria del bot.** El turno del aviso le pasa al modelo el texto del aviso y así queda guardado,
    como si el lead lo hubiera dicho. Reemplazá ese texto por el contenido en la fila del lead (solo el texto del
    aviso: pudo entrar junto con otros mensajes del lote), y buscá el aviso ANTES de mirar si el contenido ya está:
@@ -214,5 +224,14 @@ no traía. En los negocios con bot, **el bot contestó los 51 casos sin saber qu
   sospechosos.
 - **Probá el orden de los dos eventos en las dos direcciones y la carrera del 23505.** Son tres pruebas distintas
   y cada una rompe por un lado distinto.
+- **El rescate de turnos elige el PRIMER evento del wamid**, que en una fila convertida es el aviso. Si el turno
+  del contenido no salió, el rescate reprocesa el aviso, encuentra la fila como mensaje del lead y no hace nada,
+  13 veces. El camino del aviso tiene que saber pedir el turno de una fila que ya es del lead (reciente y sin
+  turno), o el cron tiene que preferir el evento con contenido.
+- **Desplegar en orden:** primero el motor que entiende el evento nuevo, después el webhook que lo manda. Al
+  revés, el motor viejo trata el turno del contenido como un mensaje común y el candado lo frena como
+  duplicado: no hay doble respuesta, pero contesta el turno del aviso, con el aviso de "no sabés qué dijo".
+- **La recuperación recalcula la causa de los avisos viejos** con la regla nueva antes de atribuir: los viejos
+  dicen todos "primer contacto" porque el clasificador de antes no miraba el historial.
 - **El control negativo:** con el comportamiento viejo (tratar la fila existente como duplicado), la prueba del
   caso real tiene que fallar. Se comprobó: caen 4 de 16 en el webhook y 3 de 16 en el motor.
