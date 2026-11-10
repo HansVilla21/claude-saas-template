@@ -199,6 +199,26 @@ hay varios negocios, varias personas por servicio y citas que carga el equipo:
 - **Un preview de Vercel no sirve de URI de redirección:** se conecta desde
   producción o localhost y el permiso sirve igual en el preview.
 
+## Apéndice 2026-11-10: los otros calendarios de la misma cuenta
+
+El caso: quien ordena su agenda en varios calendarios de la misma cuenta de Google (uno por negocio, uno personal) tenía reuniones que no bloqueaban nada, porque solo se leía `primary`. Lo decidido en el CRM: cada persona **elige** cuáles cuentan y **solo bloquean**, no se muestran.
+
+- **`calendar.events` ya deja leer los eventos de TODOS los calendarios.** Lo que falta es saber cuáles existen. Eso pide `calendar.calendarlist.readonly`, un permiso aparte que hay que sumar también en Google Cloud › Acceso a los datos.
+  - Pedilo como **opcional**: si la persona lo destilda, conectá igual con el principal.
+  - En ese caso **vaciá la elección**: si no, siguen bloqueando calendarios que la pantalla no puede mostrar ni dejar quitar.
+- **Por defecto, marcá solo los calendarios propios** (`accessRole: owner`). Feriados, Cumpleaños o el de un compañero no van marcados, porque un evento de todo el día tapa el día entero.
+- **Uno en `freeBusyReader` no se puede elegir:** con este permiso no se leen sus eventos. Y si un elegido baja a ese rol, en la lista sale **sin marcar**. Si saliera marcado y deshabilitado, cada Guardar lo volvería a mandar, el servidor lo rechazaría y nadie podría sacarlo nunca.
+- **Si falla un calendario elegido, la persona queda ocupada todo el rango, pero NO se marca rota la conexión.**
+  - Un 403 en ESE calendario (lo borraron, dejaron de compartirlo) no es el permiso. Convertilo en un error con el nombre del calendario antes de que llegue a la lógica de «conexión rota», y mostrá cuál fue.
+  - El 401 sí se deja pasar, para renovar el acceso y reintentar.
+- **La elección se valida en el servidor contra la lista real de Google,** leída en el momento, y se guarda el nombre que da Google, nunca el que manda el navegador.
+- **Leé de a 5 calendarios por persona.** Con 20 elegidos son 21 pedidos por visita, y un 429 de uno solo deja a la persona sin horarios.
+- **Si cambia la cuenta de Google al reconectar, la elección arranca de cero.** Si falta el correo de alguno de los dos lados, también, porque no se puede saber si es la misma cuenta.
+- **⚠️ Gotcha de Next.js (cross-project):** en un archivo `'use server'`, re-exportar un tipo con `export type { X }` rompe la acción en ejecución con `ReferenceError: X is not defined`.
+  - Ni `tsc` ni `eslint` lo ven; la pantalla quedó en «Leyendo tus calendarios…» sin otro síntoma.
+  - En un `'use server'` solo se exportan funciones async; los tipos se importan desde el módulo que los define.
+  - Solo se descubre probando en el navegador.
+
 ## Verificar la app con Google
 
 Cuando la conectan clientes, ver `verificacion-de-la-app.md`. Antes de enviarla:

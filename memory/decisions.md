@@ -6,6 +6,41 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-10 — Agenda propia: los otros calendarios de Google se eligen y solo bloquean
+
+**Contexto:** la agenda solo miraba el calendario principal de la cuenta de Google conectada. Hans ordena su agenda en varios calendarios (uno por negocio, uno personal), y una reunión en otro de ellos no bloqueaba nada: la página ofrecía horas que tenía ocupadas. Sus palabras: «si no, no me funciona al 100 %».
+
+**Decisión:**
+- **A: los calendarios se eligen uno por uno** en «Mi perfil». El principal cuenta siempre. Por defecto vienen marcados los que son de la persona; Feriados, Cumpleaños y los de compañeros, no.
+- **A: solo bloquean horarios.** No se muestran en la Agenda del CRM, que sigue sin mostrar eventos de Google (tampoco los del principal).
+
+**Razón:** si entraran todos, un evento de todo el día de un calendario de suscripción taparía el día entero. Mostrar los eventos en la Agenda es una pieza mucho más grande que no hacía falta para el problema.
+
+**Qué se descartó:** que entren todos los calendarios sin elegir (B), y mostrar los eventos de Google en la Agenda como bloques grises (B).
+
+**Cómo quedó:** CRM #517 y migración 0179, en producción el 2026-11-10. Permiso nuevo `calendar.calendarlist.readonly`, opcional. Si un calendario elegido no se puede leer, esa persona queda ocupada todo el rango y la pantalla dice cuál fue.
+
+**Pendientes inmediatos:**
+- Hans: sumar `calendar.calendarlist.readonly` en Google Cloud › Acceso a los datos antes de grabar el video de la verificación, y mostrar la lista en «Mi perfil» en el video.
+- Pietro: volver a conectar su Google para elegir sus calendarios.
+
+## 2026-11-04 — Agenda propia: el aviso mínimo también vale para el equipo, y cada persona puede tener el suyo
+
+**Contexto:** Hans vio que «Nueva cita» ofrecía las 12:00 de una «Llamada de diagnóstico» con 4 horas de aviso, a las 11:20, mientras la página pública arrancaba bien a las 16:00. La cita a mano ignoraba el aviso a propósito (decisión del 2026-10-27). También pidió un aviso propio por persona: «tampoco quiero que se me agenden cosas literalmente a 20 minutos».
+
+**Decisión:**
+- **C:** para uno mismo, los botones arrancan después del aviso y una hora escrita a mano dentro de él sale en amarillo y se puede guardar. Para otra persona, dentro del aviso no se guarda, validado en el servidor.
+- **A:** gana el aviso más largo entre el del servicio y el de la persona; sin aviso propio, vale el del servicio; con varias personas, cada una con el suyo.
+- **A:** en «Todos juntos» se mira cada persona: se bloquea si cae dentro del aviso de otra, y solo es amarillo si choca con el aviso propio.
+
+**Razón:** el aviso protege a quien atiende. Uno mismo puede saltárselo a sabiendas; nadie puede saltarse el de otro.
+
+**Qué se descartó:** la opción A de la primera pregunta, que dejaba agendar a otra persona dentro de su aviso con solo una advertencia.
+
+**Cómo quedó:** CRM #496 y migración 0175 (`booking_resources.min_notice_min`), en producción el 2026-11-04; la skill madre `motor-de-horarios-libres` se actualizó (#131). «Volver a agendada» sigue sin mirar el aviso, porque sirve para deshacer un «Cancelar» tocado por error.
+
+**El mismo día:** se creó en Momentum «Reunión con cliente» («Todos juntos» con Pietro y Hans, 60 minutos, videollamada, 4 horas de aviso). Ofrece solo las horas en que los dos están libres y crea un solo evento con el otro como invitado.
+
 ## 2026-11-03 — La cotización del CRM ya tiene plantilla y método
 
 **Contexto:** el mismo día salieron dos llamadas con cotización prometida, y no había formato para vender el CRM como producto. Los nombres y los montos de cada cliente están en `clients/`, que no se versiona.
