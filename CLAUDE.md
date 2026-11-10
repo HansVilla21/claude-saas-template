@@ -857,7 +857,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      multi-negocio del CRM —leer eventos y no freeBusy para no
 │                      contar dos veces las citas propias, conexión por persona,
 │                      sin leer = ocupado todo el rango, trigger + cola + id de
-│                      evento fijo, invitar sin duplicar el .ics—) +
+│                      evento fijo, invitar sin duplicar el .ics—;
+│                      **apéndice 2026-11-10**: los otros calendarios de la
+│                      misma cuenta —`calendarlist.readonly` opcional, elegir
+│                      con los propios marcados, un elegido que falla deja
+│                      ocupado sin marcar rota la conexión, y el gotcha de
+│                      `export type` en un archivo `'use server'`—) +
 │                      key-de-ia-en-configuracion (la API key del proveedor se pega
 │                      en Configuración y vive CIFRADA en la base, no en el .env:
 │                      destraba la espera de la cuenta del cliente y deja el
