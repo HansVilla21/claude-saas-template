@@ -6,6 +6,23 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-10 (noche) — Las invitaciones de Google en spam se avisan, y una cita transferida ya no se pierde del calendario
+
+**Contexto:** a los clientes la invitación de Google Calendar les caía siempre a spam. La misma noche, Pietro le transfirió a Hans una cita (Yura) que aparecía en la Agenda y no en su Google.
+
+**Decisión:**
+- **A: se mantiene la invitación de Google y se avisa.** El correo de confirmación y la pantalla «Cita agendada» dicen que puede haber caído en spam y cómo marcarla. El WhatsApp no cambia: es una plantilla aprobada por Meta.
+- **Un evento solo cuenta si lo organiza ese calendario y está activo.** Si el id está ocupado por otra cosa, se crea con otro id.
+
+**Razón:** el spam no viene de la verificación de Google ni del dominio (Workspace con SPF, DKIM y DMARC; la invitación no lleva links): Gmail desconfía de remitentes desconocidos. Con la invitación, el cliente queda en la lista del Meet y la cita se actualiza sola.
+
+**Qué se descartó:** dejar de usar la invitación de Google y mandar solo el archivo de calendario en nuestro correo (B): entra a la bandeja, pero el cliente tendría que pedir permiso para entrar al Meet.
+
+**Cómo quedó:** CRM #519 y #521, en producción el 2026-11-10. La cita de Yura se arregló a mano con OK de Hans.
+
+**Pendientes inmediatos:**
+- Reconectar el Google con otra cuenta deja los eventos viejos en la cuenta anterior, y el cliente puede tener otro link de Meet (pasó con Pietro el 10-11).
+
 ## 2026-11-10 — Agenda propia: los otros calendarios de Google se eligen y solo bloquean
 
 **Contexto:** la agenda solo miraba el calendario principal de la cuenta de Google conectada. Hans ordena su agenda en varios calendarios (uno por negocio, uno personal), y una reunión en otro de ellos no bloqueaba nada: la página ofrecía horas que tenía ocupadas. Sus palabras: «si no, no me funciona al 100 %».
