@@ -862,7 +862,9 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      misma cuenta —`calendarlist.readonly` opcional, elegir
 │                      con los propios marcados, un elegido que falla deja
 │                      ocupado sin marcar rota la conexión, y el gotcha de
-│                      `export type` en un archivo `'use server'`—) +
+│                      `export type` en un archivo `'use server'`, y el id fijo
+│                      del evento que puede estar ocupado por la copia de una
+│                      invitación ajena: solo sirve con `organizer.self`—) +
 │                      key-de-ia-en-configuracion (la API key del proveedor se pega
 │                      en Configuración y vive CIFRADA en la base, no en el .env:
 │                      destraba la espera de la cuenta del cliente y deja el
