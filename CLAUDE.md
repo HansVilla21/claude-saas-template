@@ -286,6 +286,17 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      el RESUMEN en el prompt en vez de la lista, una herramienta por
 │                      módulo enrutada por nombre, panel paginado en el servidor y las
 │                      4 fallas que solo mostró el motor real.
+│                      **Apéndice 2026-11-14:** el inventario exportado del
+│                      sistema de la tienda (2.577 filas sin categoría ni marca):
+│                      no cargar la cantidad del día —un 0 esconde el producto—
+│                      ni pedidos con nombre de cliente; sin precio, prohibir
+│                      `precio_max`; las categorías las ponés vos y la búsqueda
+│                      las LEE, así que cada palabra tiene que valer para todos
+│                      sus productos («Pañales de adulto y bebé» traía adultos
+│                      a quien pedía bebé); el resumen muestra solo 25 y una
+│                      categoría visible pero equivocada repite el cruce, así
+│                      que para un producto se busca solo con texto; y se mide
+│                      leyendo los argumentos en `metadata.herramientas`.
 │                      Tier 19 — Método de trabajo (3, capturadas 2026-08-11 de la
 │                      sesión de etiquetas + drill-down del CRM):
 │                      verificar-base-del-pr-antes-de-mergear (⭐ cross-project:
@@ -1988,6 +1999,12 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      prompt y se resuelve con `prompt_override`; y el pase fuera de
 │                      horario se prueba con el reloj fijado por `--config`, con una regla
 │                      final que cubra abierto, antes de abrir y ya cerrado.
+│                      **Ampliada 2026-11-14 (el puente de noche):** el aviso del pase lo
+│                      escribe el campo que describe `instruccion_al_pasar`, así que el
+│                      cálculo de la próxima apertura va AHÍ y no solo al final (de 0 de 3
+│                      con el texto original a 8 de 11 un sábado de noche, 6 de 6 abierto);
+│                      más razonamiento no lo arregla (3 de 5 con medium y con high), y lo
+│                      que queda pide que el motor calcule la apertura y se la pase hecha.
 │                      Tier 63 — El que decide no se revisa solo (1, capturada 2026-10-19
 │                      de MOM-133, el analista que mueve el estado de los contactos de un
 │                      CRM leyendo la descripción que escribe cada negocio):

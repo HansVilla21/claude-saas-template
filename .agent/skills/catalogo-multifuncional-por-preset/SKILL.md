@@ -242,3 +242,122 @@ herramienta de propiedades sobre productos. Se prende después del deploy.
 **Al escribir SQL o prompts con Python en Windows,** `open(..., 'w')` escribe
 CRLF. El prompt llegó a la base con 17 caracteres de más. Usá
 `newline='\n'` y compará el md5 de la base, la migración y el seed.
+
+---
+
+## Apéndice 2026-11-14 — El inventario que sale del sistema de la tienda
+
+Una distribuidora de insumos médicos mandó su inventario exportado del
+sistema de caja: 2.577 filas con código, nombre, precio, IVA y cantidad. **No
+traía categoría ni marca.** Se cargaron 2.465 productos sin precio y sin
+existencias, porque el bot deja el pedido armado y una persona confirma precio
+y existencia. Lo que sigue vale para cualquier exportación de un sistema de
+tienda.
+
+### Lo que trae y cómo leerlo
+
+- **Marca, talla, color y medida van dentro del nombre,** y cada variante es
+  una fila. El texto del módulo le dice al bot que sume la talla, el color o
+  la marca a la búsqueda, y que nombre lo que salió.
+- **Los nombres vienen en mayúsculas.** No se reescriben (son la fuente y el
+  panel los muestra así); el texto del módulo le pide escribirlos como en un
+  chat, sin agregar detalles que el nombre no traiga.
+- **Códigos internos de 6 dígitos:** que no los diga salvo que se los pidan.
+- **La ñ puede venir rota** (`Ã‘`). Se repara antes de cargar.
+- **"Los 900 productos" del cliente no eran 900:** eran los que tenían
+  existencia ese día (928). El archivo traía 2.577. Contá antes de prometer.
+
+### Lo que NO se carga aunque venga
+
+- **La cantidad.** Es una foto del día y un 0 esconde el producto de la
+  búsqueda (ver "El estado es la única fuente de verdad"). Había 1.649 en
+  cero, entre ellos casi todas las camas hospitalarias y las sillas que se
+  venden a pedido. Se carga todo sin cantidad y la existencia la confirma una
+  persona.
+- **El precio, si el negocio decide no darlo.** Sin precio, `precio_max`
+  deja la búsqueda en cero. El texto del módulo le prohíbe usarlo aunque la
+  persona dé un presupuesto, y al medir se confirma en los argumentos de la
+  herramienta (ver abajo). Los precios y cantidades del archivo quedan en un
+  JSON local, por si después se cargan por código.
+- **Filas que no son productos,** con la lista para que la revise el
+  negocio:
+  - pedidos a la medida con **el nombre de un cliente en el título** (12):
+    es un dato personal que el bot podría nombrarle a otra persona;
+  - servicios internos (descuento, transporte, reparación, consultas, filas
+    vacías, `#NAME?`);
+  - lo que el prompt dice que no es del rubro (acá, 87 medicamentos);
+  - los dudosos ("(PACA)", "(VIEJAS)"), que se le preguntan al cliente.
+- **Un clasificador por reglas se equivoca con lo que se parece:** "cortador
+  de pastillas" caía como medicamento. Leé la lista de excluidos entera antes
+  de cargar.
+
+### Las categorías las ponés vos, y la búsqueda las lee
+
+`search_doc` le da a la categoría el peso B, casi como al título. Eso las
+vuelve parte de la búsqueda, para bien y para mal:
+
+- **Sin categoría, "cama hospitalaria" encontraba 1 de las 25 camas,** porque
+  el resto se llama "CAMA MANUAL 3 POSICIONES…".
+- **Cada palabra del nombre de una categoría tiene que valer para TODOS sus
+  productos.** Con "Pañales de adulto y bebé", "pañal de bebé" devolvía
+  pañales de adulto, sin aviso de relajación: la palabra "bebé" la ponía la
+  categoría. Con "Colchones antiescaras y hospitalarios", un colchón
+  matrimonial salía como antiescaras. Se partieron (pañales de adulto / de
+  bebé / sin decir, camas solo con camas, colchones sin adjetivos) y se
+  volvió a medir: de 30 búsquedas reales a 22 de 22 bien.
+- **Los sinónimos sí van, si son la misma cosa:** "Andaderas, andadores y
+  rollators" hace que "andador" traiga las 22 andaderas.
+- **Pero el resumen muestra 25 categorías.** Partir dejó 47, y las 22 que no
+  entran al resumen son justo las chicas que se separaron (andaderas,
+  glucómetros, tensiómetros, pañales de bebé). Medido: el modelo pasó
+  `categoria: "Equipo médico y mobiliario"` para un tensiómetro de muñeca.
+  La búsqueda corre sus niveles DENTRO de esa categoría antes de soltarla,
+  así que con una categoría visible pero equivocada el nivel "alguna palabra"
+  puede devolver productos de otra cosa: el mismo cruce de arriba, por otra
+  puerta.
+- **El arreglo es nuestro y va en el texto del módulo:** `categoria` solo
+  cuando la persona pide ver una categoría entera ("qué sillas de ruedas
+  manejan"). Para un producto, solo texto, que ya encuentra la categoría por
+  el peso B. Medido con el prompt real: antes pasaba categoría en 9 de 11
+  búsquedas; después, en 12 de 76, casi siempre una que sí calzaba ("Sillas
+  de ruedas", "Fajas y corsés"). La otra salida es quedarse en 25 categorías
+  o subir el tope del resumen en el código, que cambia el prompt de todos los
+  negocios.
+
+### Prenderlo cambia lo que ve el cliente
+
+Prender el módulo desde Master materializa los campos del extractor del
+preset (acá, "Producto buscado" y "Presupuesto máximo" en la ficha del
+contacto) y muestra la sección Catálogo en el menú del negocio. Avisale al
+cliente antes de que lo encuentre solo.
+
+### Cargar sin pisar nada
+
+- **Un script que solo agrega los códigos que faltan.** El índice único de
+  `external_code` es parcial y PostgREST no puede hacer upsert contra él.
+  Leé los códigos cargados paginando (tope de 1.000) y verificando contra
+  `count`, insertá en tandas de 200 con `.select('id')` y contá lo que volvió.
+- **Guardas antes de escribir:** el proyecto de la URL, el negocio por id y
+  slug, y el módulo por id y slug.
+- **Desde que el módulo está prendido, el negocio edita su catálogo en el
+  panel.** Una recarga con otra exportación no pisa nombres ni borra lo que ya
+  no venden: eso se decide con el cliente.
+
+### Medir con el prompt real, mirando qué buscó
+
+La respuesta del bot no dice qué buscó. `bot_turns.metadata.herramientas`
+trae cada `Product_Search_Tool` con sus argumentos (`texto`, `categoria`,
+`marca`, `precio_max`) y el detalle de la relajación ("3 de 3 productos, se
+relajó categoria, marca"). Ahí se ve si usó `precio_max`, si eligió una
+categoría que no está en el resumen y si buscó cada producto nuevo que nombró
+la persona. En esta carga, 87 búsquedas en 78 turnos simulados (US$0,02 por
+respuesta con Sonnet 5): **0 con `precio_max`**, aunque un caso pedía "que no
+pase de 100 mil", y ninguna afirmación de existencia ni precio.
+
+Lo que el bot hizo bien y conviene pedirle a cualquier texto de módulo así:
+- "Omron" no estaba: dijo que esa marca no aparece y ofreció los dos de
+  muñeca que sí, sin "no tenemos".
+- "Talla G" no existe en el nombre: ofreció las tallas que vienen (S a XL) y
+  preguntó el peso, que el nombre del producto sí trae.
+- Medicamentos, que no son del rubro: lo dijo en una línea, no pasó, y buscó
+  el termómetro que pidió después.

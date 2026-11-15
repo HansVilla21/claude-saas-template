@@ -6,6 +6,80 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-14 (noche, 22:29–23:19 CR) — El sistema calcula si el negocio está abierto, y se carga en cuatro negocios
+
+**Contexto:** con la cuenta de días escrita a mano en la instrucción del pase, Disumed acertaba el aviso en 8 de 11 con la tienda cerrada: un sábado de noche decía «mañana desde las 7», que es domingo. Subir el razonamiento no lo arreglaba (3 de 5).
+
+**Decisión:**
+- **El motor resuelve `{{ABIERTO_AHORA}}` y `{{PROXIMA_APERTURA}}`** con `bot_config.horario_atencion`: un día por llave (`"lunes": "07:00-18:00"` o `"cerrado"`), `especiales` por fecha y `feriados` (todos, obligatorios o ninguno). Si el horario está mal escrito, la variable vale «sin dato» y en la bienvenida esa línea no sale. Es el PR #526 de crm-v2 (merge `54569683`), revisado por Opus en dos pasadas.
+- **La config se carga después del deploy de producción,** para que ningún bot lea las variables sin resolver.
+- **Cambia solo nuestra parte** (`reglas_finales`, `instruccion_al_pasar`). El texto del autor no se toca.
+- **Cargado con el OK de Hans**, medido antes de cada carga:
+
+| Negocio | Hora (CR) | Antes → con el motor | Bot |
+|---|---|---|---|
+| Disumed | 22:29 | cerrada 8/11 → 13/13; abierta 15/15 | apagado |
+| Di Garda | 23:16 | 18/19 → 19/19; abierta 11/11 | prendido |
+| Genmotec | 23:18 | cerrado 5/9 → 10/12; viernes 16:30 (la queja del cliente) 1/3 → 5/6 | prendido |
+| Ricardo | 23:19 | 0/5 → 3/5; abierta 3/3 | apagado |
+
+**Razón:** la cuenta de días es aritmética y el modelo la falla. Si el sistema la entrega hecha, el bot solo elige la frase.
+
+**Qué se descartó:**
+- Seguir escribiendo cada caso en el prompt.
+- Cargarlo en EPK: sus `reglas_finales` e `instruccion_al_pasar` son de Pietro y su cuenta a mano ya da 30/30 en Haiku. La propuesta queda en `clients/epk/horario-motor-2026-11-14/` (local) para cuando Pietro la quiera.
+
+**Cómo quedó:** verificado en la base el 14-11: los cuatro tienen `horario_atencion`; Disumed y Ricardo con el bot apagado. Respaldos y notas por negocio en `clients/<negocio>/…/horario-motor-2026-11-14/README.md` (local). El backlog de crm-v2 lo anota en #527.
+
+**Pendientes inmediatos:**
+- Confirmar los feriados de Disumed, Di Garda y Ricardo (hoy los feriados no cierran Disumed ni Ricardo).
+- Un aviso en Master cuando un prompt usa las variables y el negocio no tiene horario.
+- Que la medición del puente acepte «mañana sábado» (hoy cuenta falsos negativos).
+- Para Pietro, de Disumed: 5 de 13 puentes nocturnos usan la frase del puente en horario, y un sábado a las 12:40 el bot aceptó que el cliente retire «mañana», que es domingo.
+- La skill `cargar-prompt-al-motor` dice en su apéndice del 14-11 que lo seguro es que el sistema calcule la apertura: ya lo hace, falta anotarlo.
+
+## 2026-11-14 (noche) — Disumed: la v1.4 de Pietro entra al motor, y el horario se le calcula al bot en la instrucción del pase
+
+**Contexto:** Hans pidió cargar la v1.4 de Pietro y medirla con el catálogo real. El prompt decide el aviso del pase según la hora: «en un momento le escribe» con la tienda abierta, «le escribe el lunes desde las 7» con la tienda cerrada. Medido un sábado de noche, con el texto original el bot decía «en un momento» con la tienda cerrada en 3 de 3.
+
+**Decisión:**
+- **El texto de Pietro va tal cual,** salvo la línea de la hora, que pasa al final (regla del 2026-11-10). El modelo es Sonnet 5 con el razonamiento por defecto. El aviso al pasar queda prendido aunque su nota pedía apagarlo, porque apagado el sistema borra su puente.
+- **El cálculo de la próxima apertura va en `instruccion_al_pasar`,** además de en `reglas_finales`. El aviso se escribe al llenar ese campo, así que lo que está al final no alcanza. Con la tienda cerrada pasó de 0 de 3 a 8 de 11; con la tienda abierta, 6 de 6.
+- **El texto del módulo de catálogo cambia una regla:** el bot pasa `categoria` solo cuando piden ver una categoría entera. El resumen muestra 25 de las 47 categorías, y a un tensiómetro le ponía «Equipo médico y mobiliario». Pasó de usar categoría en 9 de 11 búsquedas a 12 de 76. En las 87 búsquedas no usó nunca el filtro de precio.
+- **Bot apagado.** Prenderlo es otro paso, con el OK de Hans.
+
+**Razón:** el error que queda es aritmética de días: un sábado de noche dice «mañana desde las 7». Más texto o más razonamiento no lo arreglan. Lo arregla que el sistema calcule la próxima apertura.
+
+**Qué se descartó:**
+- `esfuerzo: medium` y `high`: 3 de 5 cada uno, más caros. Una vez el bot escribió su cuenta en el mensaje.
+- Una línea nuestra en `reglas_finales` para que salude en el primer mensaje: el saludo faltaba en 9 de 15 sin la línea y en 12 de 15 con ella. Se sacó y va a Pietro.
+
+**Cómo quedó:** principal md5 `61594b8e…`, módulo md5 `a52c520e…`, cargado el 2026-11-14 a las 21:22 CR. Gasto de las pruebas: US$1,63. Detalle y archivos en `clients/disumed/prompts/motor-v1.4-2026-11-14/README.md` (local). Las skills `catalogo-multifuncional-por-preset` y `cargar-prompt-al-motor` suman lo aprendido (#136).
+
+**Pendientes inmediatos:**
+- Hans: mandarle a Pietro el mensaje con lo medido. Pietro prueba en «Probar bot».
+- Diego: confirmar si venden medicamentos y qué son «(PACA)» y «(VIEJAS)».
+- ~~Sesión aparte (*Motor: calcular la próxima apertura para el pase*): el sistema calcula la próxima apertura y se la pasa hecha al bot.~~ Hecho esa misma noche: ver la entrada de arriba.
+
+## 2026-11-14 — Disumed: el inventario entra entero al catálogo, sin precios, y las categorías son nuestras
+
+**Contexto:** Hans y Pietro decidieron el 11-11 cargar la lista de Diego al catálogo sin precios, para que el bot deje el pedido armado y Diego confirme precio y existencia. El Excel trajo 2.577 filas, no 900: los «unos 900» eran los que tenían existencia ese día. No traía categoría ni marca.
+
+**Decisión:**
+- **Entran todos, con o sin existencia,** sin precio y sin cantidad. Un 0 esconde el producto de la búsqueda, y las camas hospitalarias y las sillas que se venden a pedido estaban en cero.
+- **Afuera, 112 filas:**
+  - 87 medicamentos, porque el prompt dice que no son del rubro;
+  - 12 pedidos con el nombre de un cliente en el título;
+  - 10 que no son productos;
+  - 3 dudosos.
+- **Las 47 categorías las pusimos nosotros,** y cada palabra del nombre de una categoría vale para todos sus productos, porque la búsqueda lee la categoría. Con «Pañales de adulto y bebé», quien pedía pañal de bebé recibía pañales de adulto.
+
+**Razón:** el catálogo es la única fuente de qué maneja Disumed (regla de Hans del 09-11). Una categoría mal nombrada hace que el bot ofrezca otra cosa, sin ningún aviso.
+
+**Qué se descartó:** cargar solo los 928 con existencia, porque dejaba afuera lo que se vende a pedido. Y cargar la cantidad, porque es una foto del día.
+
+**Cómo quedó:** 2.465 productos cargados el 2026-11-14 de 19:16 a 19:21 CR, con el módulo Productos prendido. Al prenderlo, Disumed ve la sección Catálogo y dos campos nuevos en la ficha del contacto. Los precios con IVA y las cantidades del 11-11 quedaron en un archivo local, por si después se cargan por código.
+
 ## 2026-11-10 (noche) — Las invitaciones de Google en spam se avisan, y una cita transferida ya no se pierde del calendario
 
 **Contexto:** a los clientes la invitación de Google Calendar les caía siempre a spam. La misma noche, Pietro le transfirió a Hans una cita (Yura) que aparecía en la Agenda y no en su Google.

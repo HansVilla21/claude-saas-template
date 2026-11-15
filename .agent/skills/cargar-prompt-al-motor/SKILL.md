@@ -301,3 +301,24 @@ Un servicio que el prompt manda a ofrecer por iniciativa propia, como la valorac
 - **Una palabra que el cliente prohibió por escrito va también a `frases_prohibidas`.** Se busca sin mirar las fichas: una descripción del negocio que la usa sale igual, y se le avisa al autor.
 - **Los casos de medir se actualizan con el prompt.** Una cita que ya no está en el texto avisa sola. Lo que no avisa es un `espera_pase` que quedó viejo o un regex que no cubre lo que el motor genera: `{{SALUDO_HORA}}` da "Buen día", no "Buenos días", y de día la regla del saludo habría fallado siempre.
 - **La hora en Git Bash de Windows:** `TZ=America/Costa_Rica date` imprime UTC y lo rotula como hora local. Dio 03:43 cuando eran las 21:43. La hora de Costa Rica se saca con `Intl` en Node, que es lo que ya imprime el reporte de `medir-estilo`.
+
+---
+
+## Apéndice 2026-11-14 — El puente de noche lo decide el campo del aviso
+
+Una tienda abre de lunes a viernes de 7 a 18 y el sábado de 8 a 13. El prompt del autor trae el cálculo completo de la próxima apertura en su sección del puente. Se cargó tal cual (con la hora movida al final, regla de 2026-11-10) y se midió un sábado a las 21:10 con la tienda cerrada.
+
+| Configuración | Puente correcto con la tienda cerrada |
+|---|---|
+| Texto original del autor, con la hora en su lugar | 0 de 3 ("en un momento le escribe") |
+| Hora al final + `reglas_finales` con el día y la hora | 1 de 3 |
+| `reglas_finales` con cada caso escrito (como Di Garda y EPK) | 5 de 9 |
+| Lo anterior + `esfuerzo: medium` | 2 de 4 en los casos que fallaban |
+| **El cálculo dentro de `instruccion_al_pasar`** | **8 de 11** (abierta: 6 de 6) |
+| Lo anterior + `esfuerzo: medium` / `high` | 3 de 5 / 3 de 5 |
+
+- **El aviso del pase se escribe al llenar ese campo del JSON,** guiado por su descripción, que es `instruccion_al_pasar`. Si ahí solo dice "abierta, el de horario; cerrada, el de fuera de horario", el modelo decide abierto o cerrado sin mirar el cálculo del final. Con los casos escritos ahí ("el sábado desde la 1 y el domingo, el lunes a las 7"), subió de la mitad a 8 de 11. El tope de 400 obliga a escribirlo comprimido.
+- **Más razonamiento no lo arregla:** con `medium` y `high`, 3 de 5 cada uno, y una vez el bot escribió su cuenta en el mensaje ("mañana domingo no atendemos, así que sería el lunes").
+- **El error que queda es siempre el mismo:** un sábado de noche dice "mañana desde las 7", como si mañana fuera día hábil, o "en un momento" en un pase calificado. Para que sea confiable, el motor tiene que calcular la próxima apertura y pasársela hecha; la aritmética de días no se le deja al modelo.
+- **Una línea en `reglas_finales` que repite lo que el texto ya pide no siempre mueve nada:** "en tu primer mensaje saludás según la hora" dejó el saludo ausente en 12 de 15 primeros mensajes, contra 9 de 15 sin la línea. Se sacó, y el dato va al autor: el bot saluda cuando la persona saluda, y si llega directo con la pregunta, contesta sin saludar.
+- **Medir abierto y cerrado con los textos FINALES.** La ronda de tienda abierta se había corrido con la instrucción anterior; al cambiarla, se repitió (martes 10:15 y sábado 12:40 con `--config` y la hora resuelta).
