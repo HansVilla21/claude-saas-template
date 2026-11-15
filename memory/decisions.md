@@ -6,6 +6,38 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-14 (noche, 22:29–23:19 CR) — El sistema calcula si el negocio está abierto, y se carga en cuatro negocios
+
+**Contexto:** con la cuenta de días escrita a mano en la instrucción del pase, Disumed acertaba el aviso en 8 de 11 con la tienda cerrada: un sábado de noche decía «mañana desde las 7», que es domingo. Subir el razonamiento no lo arreglaba (3 de 5).
+
+**Decisión:**
+- **El motor resuelve `{{ABIERTO_AHORA}}` y `{{PROXIMA_APERTURA}}`** con `bot_config.horario_atencion`: un día por llave (`"lunes": "07:00-18:00"` o `"cerrado"`), `especiales` por fecha y `feriados` (todos, obligatorios o ninguno). Si el horario está mal escrito, la variable vale «sin dato» y en la bienvenida esa línea no sale. Es el PR #526 de crm-v2 (merge `54569683`), revisado por Opus en dos pasadas.
+- **La config se carga después del deploy de producción,** para que ningún bot lea las variables sin resolver.
+- **Cambia solo nuestra parte** (`reglas_finales`, `instruccion_al_pasar`). El texto del autor no se toca.
+- **Cargado con el OK de Hans**, medido antes de cada carga:
+
+| Negocio | Hora (CR) | Antes → con el motor | Bot |
+|---|---|---|---|
+| Disumed | 22:29 | cerrada 8/11 → 13/13; abierta 15/15 | apagado |
+| Di Garda | 23:16 | 18/19 → 19/19; abierta 11/11 | prendido |
+| Genmotec | 23:18 | cerrado 5/9 → 10/12; viernes 16:30 (la queja del cliente) 1/3 → 5/6 | prendido |
+| Ricardo | 23:19 | 0/5 → 3/5; abierta 3/3 | apagado |
+
+**Razón:** la cuenta de días es aritmética y el modelo la falla. Si el sistema la entrega hecha, el bot solo elige la frase.
+
+**Qué se descartó:**
+- Seguir escribiendo cada caso en el prompt.
+- Cargarlo en EPK: sus `reglas_finales` e `instruccion_al_pasar` son de Pietro y su cuenta a mano ya da 30/30 en Haiku. La propuesta queda en `clients/epk/horario-motor-2026-11-14/` (local) para cuando Pietro la quiera.
+
+**Cómo quedó:** verificado en la base el 14-11: los cuatro tienen `horario_atencion`; Disumed y Ricardo con el bot apagado. Respaldos y notas por negocio en `clients/<negocio>/…/horario-motor-2026-11-14/README.md` (local). El backlog de crm-v2 lo anota en #527.
+
+**Pendientes inmediatos:**
+- Confirmar los feriados de Disumed, Di Garda y Ricardo (hoy los feriados no cierran Disumed ni Ricardo).
+- Un aviso en Master cuando un prompt usa las variables y el negocio no tiene horario.
+- Que la medición del puente acepte «mañana sábado» (hoy cuenta falsos negativos).
+- Para Pietro, de Disumed: 5 de 13 puentes nocturnos usan la frase del puente en horario, y un sábado a las 12:40 el bot aceptó que el cliente retire «mañana», que es domingo.
+- La skill `cargar-prompt-al-motor` dice en su apéndice del 14-11 que lo seguro es que el sistema calcule la apertura: ya lo hace, falta anotarlo.
+
 ## 2026-11-14 (noche) — Disumed: la v1.4 de Pietro entra al motor, y el horario se le calcula al bot en la instrucción del pase
 
 **Contexto:** Hans pidió cargar la v1.4 de Pietro y medirla con el catálogo real. El prompt decide el aviso del pase según la hora: «en un momento le escribe» con la tienda abierta, «le escribe el lunes desde las 7» con la tienda cerrada. Medido un sábado de noche, con el texto original el bot decía «en un momento» con la tienda cerrada en 3 de 3.
@@ -27,7 +59,7 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 **Pendientes inmediatos:**
 - Hans: mandarle a Pietro el mensaje con lo medido. Pietro prueba en «Probar bot».
 - Diego: confirmar si venden medicamentos y qué son «(PACA)» y «(VIEJAS)».
-- Sesión aparte (*Motor: calcular la próxima apertura para el pase*): el sistema calcula la próxima apertura y se la pasa hecha al bot. Sirve para Disumed, EPK, Di Garda, Genmotec y Ricardo.
+- ~~Sesión aparte (*Motor: calcular la próxima apertura para el pase*): el sistema calcula la próxima apertura y se la pasa hecha al bot.~~ Hecho esa misma noche: ver la entrada de arriba.
 
 ## 2026-11-14 — Disumed: el inventario entra entero al catálogo, sin precios, y las categorías son nuestras
 
