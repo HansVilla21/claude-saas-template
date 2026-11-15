@@ -219,6 +219,19 @@ El caso: quien ordena su agenda en varios calendarios de la misma cuenta de Goog
   - En un `'use server'` solo se exportan funciones async; los tipos se importan desde el módulo que los define.
   - Solo se descubre probando en el navegador.
 
+## Apéndice 2026-11-10 (noche): el id fijo del evento y las invitaciones en spam
+
+**El id fijo tiene una trampa.** Sale de la cita, así que es el mismo en todos los calendarios. Una cita se transfirió a alguien que ya tenía, con ese id, la copia cancelada de una invitación de otro organizador:
+- `insert` respondió 409;
+- el `PATCH` de respaldo sobre esa copia respondió **200 sin revivirla**;
+- la cita quedó marcada como sincronizada, sin nada en el calendario y sin un solo error.
+
+La regla: un evento existente solo sirve si `organizer.self === true` y no quedó `cancelled`. Si no, otro id (`…v2`), con **otro** `requestId` de Meet. Con varios ids ocupados, error y reintento, nunca éxito.
+
+Antes de confiar en `organizer.self`, confirmalo contra Google en `GET` y en `PATCH`: si faltara, cada actualización crearía un evento duplicado. También pasa al cambiar el dueño de una cita colectiva, porque los compañeros tienen la copia con ese id.
+
+**Las invitaciones caen en spam aunque todo esté bien.** Con SPF, DKIM y DMARC en orden y sin links, Gmail igual desconfía de una invitación de alguien a quien la persona nunca le escribió. No depende de la verificación de la app, que solo cambia la pantalla de permisos. Lo que se puede hacer es avisar en el correo propio, que sí llega, dónde buscarla. Sacar la invitación y mandar solo el `.ics` la hace llegar, pero el cliente ya no está en la lista del Meet y tiene que pedir permiso para entrar.
+
 ## Verificar la app con Google
 
 Cuando la conectan clientes, ver `verificacion-de-la-app.md`. Antes de enviarla:
