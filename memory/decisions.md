@@ -6,6 +6,26 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-15 — Agenda: el equipo se entera por WhatsApp de los cambios de sus citas, y una cita pasada a otro no vuelve sola
+
+**Contexto:** el 11-11 Yura cambió la hora de su llamada desde su link. La cita había sido de Pietro y Pietro se la había pasado a Hans; con el cambio volvió a Pietro, para el día siguiente a las 9. Hans la perdió de su calendario y nadie se enteró, porque el aviso solo sonaba en la campana y Pietro la tenía sin abrir. El mismo día, «Nueva cita» le ofrecía a Hans libres su gym y sus reuniones.
+
+**Decisión:**
+- **El WhatsApp al equipo sale del número de Momentum, con una sola plantilla UTILITY para todos los negocios** (`aviso_agenda`, aprobada el 15-11). Le llega a quien atiende la cita cuando el cliente reserva, cambia la hora o cancela, y a quien la tenía antes si cambió de manos. También cuando alguien del equipo agenda o pasa una cita sin «Avisarle al cliente». A quien hizo el cambio no le llega.
+- **La persona del link sigue a quien tiene la cita.** Una reserva hecha con el link de una persona se mueve solo con esa persona. Si el equipo se la pasa a otra, el link pasa a la nueva.
+- **«Nueva cita» muestra los horarios de la persona elegida en «Quién atiende»,** y ese campo va antes de «Cuándo». Sin nadie elegido, sigue mostrando los de todo el servicio.
+- **La cita de Yura queda con Pietro** (jueves 12-11, 9:00 CR): pasársela a Hans le habría mandado a Yura un tercer link de Meet.
+
+**Razón:** la campana del CRM no alcanza para algo con hora: quien no abre el CRM no se entera, y eso pasa justo con el closer.
+
+**Qué se descartó:**
+- **Mandarlo desde el número de cada negocio,** como el aviso del pase: hay que crear y aprobar la plantilla en cada cuenta de WhatsApp, y en las que no la tengan el aviso no sale.
+- **Pasarle la cita de Yura de vuelta a Hans.**
+
+**Pendientes inmediatos:**
+- Hans mira «Nueva cita» en el navegador la próxima vez que agende a mano. Es lo único que no se probó con sesión.
+- Sumar `calendar.calendarlist.readonly` en Google Cloud antes del video de la verificación.
+
 ## 2026-11-14 (noche, 22:29–23:19 CR) — El sistema calcula si el negocio está abierto, y se carga en cuatro negocios
 
 **Contexto:** con la cuenta de días escrita a mano en la instrucción del pase, Disumed acertaba el aviso en 8 de 11 con la tienda cerrada: un sábado de noche decía «mañana desde las 7», que es domingo. Subir el razonamiento no lo arreglaba (3 de 5).
