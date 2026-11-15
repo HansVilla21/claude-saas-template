@@ -1666,6 +1666,14 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                      manda compras propias; la cuenta publicitaria se saca de
 │                      los `ad_id` de los leads; y las reglas las puede poner el
 │                      equipo del cliente.
+│                      **Ampliada 2026-11-15 (cuenta propia, tres
+│                      portafolios):** en la configuración nueva de Meta,
+│                      «Cuentas de WhatsApp» lista una presencia («unknown»)
+│                      y no la cuenta: la real se asigna desde Messaging
+│                      accounts › Linked accounts, o el token da código 100;
+│                      el portafolio dueño sale de la API de YCloud; y no se
+│                      cambia la optimización de un conjunto de anuncios que
+│                      ya corre: con poco volumen, solo columnas.
 │                      Tier 49 — El "leído" que nadie leyó (1, capturada 2026-09-24
 │                      con un cliente en coexistencia —el mismo número en la app del celular y en
 │                      la API—): coexistencia-leido-y-sin-leer (⭐ cross-project: "los chats se

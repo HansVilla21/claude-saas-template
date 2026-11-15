@@ -33,6 +33,10 @@ La última fila es la trampa cara: la respuesta 200 no prueba que Meta procesó 
 
 **Corregida el 2026-10-11.** Lo de arriba no era un problema para diagnosticar: faltaba un paso del proceso. El conjunto que crea el código nace sin nadie asignado y sin conectar a ninguna pauta, así que asignarlo y conectarlo pasa a ser el **paso 4b, obligatorio antes de encender**.
 
+**Ampliada el 2026-11-15**, al conectar la cuenta propia del proveedor:
+- **El activo equivocado.** La configuración nueva de Meta lista en «Cuentas de WhatsApp» algo que no es la cuenta de WhatsApp Business. Se le asignó eso al usuario del sistema y el token no llegaba a la cuenta (paso 3).
+- **Lo que casi se rompe del lado de la pauta.** Para elegir el conjunto de datos en el conjunto de anuncios, había que cambiar un conjunto de anuncios que ya corría (paso 4b).
+
 ## Proceso
 
 ### 1. Medir antes de prometer
@@ -94,6 +98,12 @@ Si tu app **puede** ser socio de la cuenta de WhatsApp (el cliente la conectó p
    - **El nombre:** Meta rechaza algunos con *«Elegiste un nombre de usuario del sistema no válido»*, sin decir por qué. Pasó con «Momentum CRM» y con «Eventos Momentum»; «Momentum» a secas pasó. Probá uno corto.
    - **En la ventana «Asignar activos»** se eligen los dos en una sola pasada. Primero «Apps» › tu app con «Administrar app». Después, **sin tocar todavía el botón**, «Cuentas de WhatsApp» › la cuenta › «Acceso total». El botón azul recién se habilita con un permiso elegido.
    - **Si no podés ver el identificador ahí,** elegí por nombre: el paso 5 te dice si era otra cuenta, porque el token no la alcanza.
+   - **Configuración nueva de Meta (2026-11-15): la cuenta NO está en «Cuentas de WhatsApp».** Esa sección lista una *presencia* de WhatsApp, no la cuenta de WhatsApp Business.
+     - **Cómo se ve:** puede salir sin nombre («unknown», con un guion) y con «aún no agregó ningún número de teléfono», aunque el número funcione perfecto.
+     - **Qué pasa si asignás eso:** el token pasa `debug_token` con los dos permisos y no llega a la cuenta. Falla con código 100, subcódigo 33: *«Object with ID … does not exist, cannot be loaded due to missing permissions»*.
+     - **Dónde está la cuenta real:** en la ventana «Asignar activos», en **Messaging accounts › Linked accounts**, o en Standalone accounts si no aparece ahí. Buscala por su identificador. El mismo identificador buscado en «Cuentas de WhatsApp» da «No se encontró ningún activo comercial».
+     - **No hace falta un token nuevo:** después de asignarla, se volvió a revisar el token que ya estaba pegado y pasó.
+   - **De qué portafolio es la cuenta de WhatsApp: no se le pregunta al cliente.** Si el número está en YCloud, `GET /v2/whatsapp/businessAccounts/{WABA_ID}` devuelve `businessId` y `businessName`, el portafolio dueño. Ahí va la solicitud de la app y el usuario del sistema. En la cuenta propia del proveedor eran tres portafolios distintos: uno con la app, otro con la cuenta de WhatsApp y un tercero con la cuenta publicitaria. Como el mismo administrador estaba en los tres, la solicitud de la app se aprobó sola. La cuenta publicitaria del tercero apareció directo en «Conectar activos» del 4b, porque ya estaba compartida.
 3. **Generar token** → tu app → caducidad **Nunca** (uno que vence deja de mandar eventos en silencio) → **solo** `whatsapp_business_management` y `whatsapp_business_manage_events`.
 4. **Otro administrador del portafolio aprueba** la solicitud (*"Aprobación necesaria… otro administrador debe aprobar"*). La solicitud **vence en 7 días**. Pasale el enlace directo: `business.facebook.com/settings/requests?business_id=<ID>` → "Requieren revisión". Al aprobar **no se muestra el token**: hay que volver a "Generar token", y ahí aparece **una sola vez**.
 5. El token lo pega el humano en **una pantalla de tu sistema** (password, write-only), nunca en el chat. Va a un secreto por negocio (Vault), con funciones `SECURITY DEFINER` y `EXECUTE` solo para `service_role`. Antes de guardarlo, revisalo contra Meta: `debug_token` (válido, scopes, `expires_at`) y un `GET /{waba_id}?fields=id` (alcanza la cuenta).
@@ -130,6 +140,14 @@ Lo hace un administrador del portafolio del cliente, en la configuración del ne
    - agregar las columnas de clientes potenciales y compras.
    
    Eso ya lo maneja él. Decíselo, para que no espere que aparezca solo.
+
+   **⚠️ No cambies la optimización de un conjunto de anuncios que ya corre solo para elegir el conjunto de datos** (visto 2026-11-15).
+   - **Cuándo aparece el selector:** el del conjunto de datos solo sale si el conjunto de anuncios optimiza por una conversión (compras o clientes potenciales). Los de Click-to-WhatsApp suelen optimizar por **conversaciones**: se mira con `optimization_goal: CONVERSATIONS`.
+   - **Por qué no conviene:** pasarlo a conversiones reinicia el aprendizaje. Si no hay el volumen del paso 1 (10 compras en 30 días, o más de 100 leads en 90), el anuncio rinde peor.
+   - **Con poco volumen, solo se agregan las columnas:** Columnas › Personalizar columnas.
+     - «**Clientes potenciales**»: el total. No hace falta marcar ninguna de las tres de abajo («en el sitio web», «offline», «en Meta»); son el mismo total partido por origen.
+     - «**Compras**»: la general.
+   - **El cambio de optimización es otra decisión,** para cuando haya volumen.
 
 Preguntá **antes de construir** quién maneja los anuncios y en qué cuenta publicitaria. Es el mismo dato que hace falta para el paso 3 de esta lista.
 
@@ -257,6 +275,8 @@ Que Meta procese el evento no alcanza: el que pauta tiene que verlo y poder eleg
 | La API de estadísticas del conjunto (MCP de Meta Ads) cuenta estos eventos | ❌ da `stats: []` con el Resumen mostrando 34 |
 | Mandar "este lead es malo" | ❌ no existe (2026-09-28, documentación de Meta): se comunica no mandando nada (paso 1b) |
 | Optimizar por leads en anuncios de WhatsApp | 📄 documentado, no medido: `LeadSubmitted` + `Purchase`, más de 100 en 90 días con la API en la nube |
+| Configuración nueva de Meta: la cuenta de WhatsApp Business se asigna desde **Messaging accounts › Linked accounts**; lo que lista «Cuentas de WhatsApp» no le da acceso al token | ✅ 2026-11-15: con la presencia asignada, código 100 / subcódigo 33; con la cuenta de Linked accounts, el mismo token pasó |
+| Los eventos se suman en las columnas «Clientes potenciales» y «Compras» sin elegir el conjunto de datos en el conjunto de anuncios (que optimiza por conversaciones) | ⏳ falta el primer evento real para confirmarlo. Si queda en cero, mirar «Clientes potenciales en Meta» antes de tocar la optimización |
 
 **Actualizar la fila ⏳** cuando quien pauta confirme que eligió el conjunto en una campaña.
 
