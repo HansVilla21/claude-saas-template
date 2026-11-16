@@ -25,6 +25,9 @@ Casi nunca hay ficha, y "esto es lo único que tenemos" suele ser falso:
 | Si ya se le dijo un precio | Esa misma conversación |
 | Razón social | El pie del sitio del cliente ("X es una marca de Y S.A.") |
 | Reglas de su negocio, para el alcance | Su sitio: mínimo de compra, envíos, horario |
+| Quién decide y el cargo de quien llamó | La página de equipo o "Nosotros" de su sitio: gerencia, junta, el nombre bien escrito |
+
+**El contacto se busca solo en la cuenta de Momentum.** El mismo teléfono puede aparecer en las cuentas de otros clientes del CRM, porque esa persona también les escribió. Esas conversaciones no se leen ni se usan.
 
 Si falta la cédula, **no se inventa ni se frena el documento**: se quita esa línea y la condición de pago dice "con los datos que nos confirmen al contratar". Avisale al founder de dónde salió cada dato que no le dio el cliente.
 
@@ -33,6 +36,10 @@ Si falta la cédula, **no se inventa ni se frena el documento**: se quita esa l�
 El precio y qué cubre salen de sus palabras en la llamada, nunca de otra cotización. Dos cotizaciones del mismo día tuvieron condiciones distintas: en una la implementación cubría el primer mes y en la otra la mensualidad corría desde el inicio. La plantilla traía la primera. Copiarla habría cambiado el precio dicho.
 
 Anotá también lo que prometió de palabra, como plazos o funciones "que implementamos de una".
+
+**Un número dicho con duda no va al documento.** Si dijo "creo que el siguiente plan es 350", se escribe genérico ("el plan que corresponda") y se le pregunta.
+
+**El IVA se decide por cliente.** Por defecto, los montos van más IVA. Si el founder pidió cobrar sin IVA a un cliente, eso no pasa al siguiente.
 
 ### 3. Verificar cada promesa contra el código vivo
 
@@ -70,7 +77,7 @@ Sin esa frase, al firmar los Términos el cliente firma lo contrario de lo que l
 ### 6. Generar y mirar cada página
 
 - Se revisa imagen por imagen. El Word no se puede abrir por automatización en esta máquina: decí que quedó sin revisar.
-- **Si se pasa a una página casi vacía, se recorta el texto,** nunca la letra. En el caso real sobraban cuatro renglones: se juntaron dos filas y se acortaron frases.
+- **Si se pasa a una página casi vacía, se recorta el texto,** nunca la letra. En el caso real sobraban cuatro renglones: se juntaron dos filas y se acortaron frases. Lo que más espacio devuelve es convertir una tabla corta (por ejemplo, las etapas del plazo) en una sola frase.
 - Cada recorte se relee: el texto corto no puede prometer más que el largo.
 
 ### 7. Dejar el rastro y avisar
@@ -89,6 +96,9 @@ Sin esa frase, al firmar los Términos el cliente firma lo contrario de lo que l
 | Se partió el correo en dos renglones al final del documento | Mirar la página. Se quitó el correo, porque el WhatsApp ya estaba |
 | El bot le había dicho al cliente que "podés tener varios agentes", y la llamada hablaba de "3 o 4 números" | El chat decía 3. Se usó el dato que escribió el cliente |
 | Prometer un canal que el cliente ya usa en su herramienta actual, y que todavía espera a Meta | Decir qué pasa mientras tanto. Apagar la herramienta vieja le quitaría ese canal |
+| El cliente quería que el bot diera un dato que vive en su sistema (un saldo) y que cambia durante el día | No se promete con un Excel que queda viejo. Va en "No incluye" y la fila dice lo que sí hace: explicar las condiciones, mandar el enlace de su portal y pasar el caso a una persona |
+| Quien llamó no decide: tiene que presentarlo ante la gerencia junto con otras propuestas | Un recuadro arriba con el resumen en tres líneas, para que lo lea quien decide |
+| Meta le había bloqueado el número por mandar mensajes en masa | Los envíos masivos van en "No incluye", y antes de conectar se revisa dónde está la restricción |
 
 ## Output esperado
 
