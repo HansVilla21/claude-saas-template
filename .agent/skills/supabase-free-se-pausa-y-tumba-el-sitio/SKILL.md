@@ -30,7 +30,7 @@ curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   https://api.supabase.com/v1/projects/<ref> | jq .status
 ```
 
-- `ACTIVE_HEALTHY` → el problema es otro, seguí buscando.
+- `ACTIVE_HEALTHY` → no está pausado. **Eso no dice que la base esté sana**: antes de seguir buscando, mirá `/health` (ver el apéndice del final).
 - `INACTIVE` → **es esto**. Dejá de leer logs.
 
 **Antes de tocar nada más, correlo.** Es una llamada; descarta o confirma la
@@ -137,3 +137,86 @@ quedarse con el ping diario. Quedó anotado en el handoff con los dos comandos.
 `deploy-seguro-vercel-preview-prod` (el build fallido es donde suele aparecer) ·
 `debugging-silent-errors` (misma familia: el código de estado miente) ·
 `umbral-compartido-cron-cliente` · `verificar-funcionamiento-end-to-end`.
+
+## Apéndice 2026-10-02 — `ACTIVE_HEALTHY` con la base muerta
+
+El diagnóstico de arriba decía "`ACTIVE_HEALTHY` → el problema es otro, seguí
+buscando". Es cierto para *pausa*, pero se lee como "la base está bien", y no lo
+es: `status` es el **ciclo de vida** del proyecto (activo, pausado,
+restaurando), no su salud.
+
+En un CRM en producción, todavía en plan gratis, el disco de 2 GB se llenó, la
+base pasó a solo lectura y el bot estuvo 11,5 horas sin contestar. Durante todo
+ese tiempo `GET /v1/projects/<ref>` devolvió `ACTIVE_HEALTHY`. La salud real
+estaba en otro endpoint:
+
+```bash
+curl -s -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+  "https://api.supabase.com/v1/projects/<ref>/health?services=db,rest,auth"
+```
+
+```
+db    UNHEALTHY  Failed to connect to database
+```
+
+**El diagnóstico completo de un proyecto que "no responde" son dos llamadas:**
+
+1. `status` → ¿está pausado? (`INACTIVE` = esta skill).
+2. `/health?services=db,rest,auth` → ¿la base responde? Si `db` está
+   `UNHEALTHY`, mirá el disco con `/config/disk/util`: arriba del 95 % es la
+   skill `supabase-disco-lleno-pasa-a-solo-lectura`.
+
+Los dos modos de caída del plan gratis son opuestos: uno por **no usarse**
+(pausa por inactividad) y otro por **usarse de más** (disco lleno). El
+keep-alive de esta skill arregla el primero y no hace nada por el segundo. Para
+un proyecto con clientes reales, la salida de fondo de los dos es la misma: no
+estar en plan gratis.
+
+## Apéndice 2026-10-13 — Vercel también apaga todo si el cobro falla, y no avisa
+
+El mismo modo de falla del lado de la app. Un CRM con clientes reales estaba
+en **Pro**, pero la tarjeta registrada no tenía fondos. Cada intento de cobro
+fallaba y Vercel apagó el proyecto entero, dominio propio incluido: 1 h 20 la
+primera vez, y otra vez casi todas las noches durante tres días:
+
+```bash
+curl -sI https://<tu-dominio>/login | head -1   # HTTP/1.1 402 Payment Required
+curl -s https://<tu-dominio>/login              # "Payment required … DEPLOYMENT_DISABLED"
+```
+
+- **Cómo reconocerlo:** un **402** con `DEPLOYMENT_DISABLED` no es un error
+  del código, es la cuenta. Los previews dan "This deployment is temporarily
+  paused".
+- **Qué dice la cuenta:** `vercel api /v2/teams/<team_id>` devuelve
+  `billing.status`. `overdue` significa que un cobro falló; `active`, que está
+  al día. Los correos de `failed-payments@vercel.com` dicen cuándo es el
+  próximo intento.
+- **El primer diagnóstico fue falso, y vale anotarlo:** se leyó "Plan not
+  found" en la API de cobros como "el equipo está en Hobby". Ese mismo error
+  sale en **Pro con la factura vencida**. Leé `billing.status` y
+  `billing.planChangedAt`, no el error de otro endpoint.
+- **«Reactivar» no paga la factura.** Devuelve el servicio en el momento, la
+  factura sigue impaga y el ciclo vuelve con el próximo intento de cobro. Por
+  eso parecía que se caía "solo, casi todas las noches".
+- **El arreglo:** cambiar el método de pago y **pagar la factura pendiente**. Lo
+  hace el dueño de la cuenta, porque es un pago. Después se confirma por API
+  que `billing.status` pasó a `active`. Y Hobby tampoco es salida: no permite
+  uso comercial.
+- **Qué se rompe y qué no** depende de dónde corre cada pieza:
+  - **El webhook** vivía en Supabase y siguió guardando cada mensaje: no se
+    perdió nada.
+  - **El motor del bot** corre en Vercel: no contestó nada en todo ese tiempo.
+  - **El rescate automático** solo miraba los últimos 15 minutos. Al volver, los
+    mensajes más viejos hubo que redespacharlos a mano, por el mismo camino del
+    cron. Antes, confirmar que no tuvieran turno abierto, para no duplicar.
+    Si el lead ya había vuelto a escribir, el turno viejo queda `superseded`.
+- **Se notó de casualidad,** al abrir un preview. Es la segunda caída de
+  infraestructura en dos semanas que nadie detecta: la otra fue el disco lleno
+  de arriba.
+- **La lección para producción:**
+  - **Ningún componente con clientes reales en plan gratis,** ni la base ni la
+    app. **Y un plan pago con el cobro fallando es lo mismo que uno gratis:**
+    la tarjeta de los servicios de producción se revisa como parte de la
+    infraestructura.
+  - **Un chequeo externo** que pida `/login` cada pocos minutos y alerte con
+    402 o 5xx.

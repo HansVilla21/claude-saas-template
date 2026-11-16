@@ -35,7 +35,7 @@ Este setup tiene **muchas piezas que se rompen en silencio** si las hacés en el
 
 ### 4. App — flujos de auth (código)
 
-- **Ruta `/auth/confirm` (token_hash + verifyOtp) — la base resiliente para links de CORREO**: creá `app/auth/confirm/route.ts` que lea `token_hash`, `type`, `next` y haga `supabase.auth.verifyOtp({ type, token_hash })`; en éxito redirige a `next` con guard anti-open-redirect (`next.startsWith('/') && !next.startsWith('//')`). Es **stateless**: no depende del navegador que pidió el link. **Reemplaza al viejo `/auth/callback`** (PKCE `code` + `exchangeCodeForSession`), que exigía el `code_verifier` del MISMO navegador → rompía cross-device, admin-triggered y scanners de correo (bug del reset de Pietro, jun-2026 — ver Gotchas).
+- **Ruta `/auth/confirm` (token_hash + verifyOtp) — la base resiliente para links de CORREO**: `app/auth/confirm/route.ts` lee `token_hash`, `type` y `next`. **El GET NO canjea:** lleva a una pantalla con un botón, y el POST de ese botón hace `supabase.auth.verifyOtp({ type, token_hash })` y redirige a `next` con guard anti-open-redirect (`next.startsWith('/') && !next.startsWith('//')`). Un antivirus de correo abre los links antes que la persona: un GET que canjea queda gastado (corregido el 2026-11-02; código completo en la skill `link-gastado-por-antivirus`). Es **stateless**: no depende del navegador que pidió el link. **Reemplaza al viejo `/auth/callback`** (PKCE `code` + `exchangeCodeForSession`), que exigía el `code_verifier` del MISMO navegador → rompía cross-device y admin-triggered (bug del reset de Pietro, jun-2026 — ver Gotchas).
 - **Reset de contraseña**: link "¿Olvidaste tu contraseña?" → `resetPasswordForEmail(email, ...)`. El **template** (paso 5) arma el link a `/auth/confirm?token_hash=…&type=recovery&next=/auth/reset`. `/auth/reset` muestra el form → `updateUser({ password })`. Mensaje SIEMPRE neutro (anti-enumeración).
 - **Invite-only**: remové el signup público (action + UI) **y** desactivá "Allow new users to sign up" en Supabase (defensa doble).
 - **Invitación que fija contraseña**: el template de invitación apunta a `/auth/confirm?token_hash=…&type=invite&next=/auth/reset` (no directo al inbox). Si no, el usuario invitado entra una vez pero, como nunca fijó contraseña, no puede volver. (Reusá la misma página de reset; copy neutro tipo "Definí tu contraseña").
@@ -48,6 +48,7 @@ Este setup tiene **muchas piezas que se rompen en silencio** si las hacés en el
 
 - **Reset real**: en la app → olvidé contraseña → llega el correo desde tu dominio → link → fijás contraseña → entrás.
 - **Invitación real**: invitá un email de prueba → llega → fija contraseña → entra.
+- **Como el antivirus**: abrí el link con `curl` antes de abrirlo en el navegador. Si después el botón sigue funcionando, un antivirus no te lo gasta.
 - Si había **contraseñas temporales compartidas**, retiralas: cada usuario existente hace un reset y fija la suya.
 
 ## Output esperado
@@ -69,7 +70,8 @@ Este setup tiene **muchas piezas que se rompen en silencio** si las hacés en el
 
 ## Gotchas / antipattern
 
-- **NO** uses `{{ .ConfirmationURL }}` / PKCE `code` + `exchangeCodeForSession` (`/auth/callback`) para los links de **CORREO** (reset, invitación, magic link). Ese flujo exige el `code_verifier` guardado en el MISMO navegador que pidió el link → falla si el usuario abre el correo en **otro dispositivo**, si lo dispara un **admin** (invitaciones), o si un **scanner de correo** "toca" el link antes (consume el código de un solo uso). Para links de correo usá SIEMPRE **`token_hash` + `verifyOtp`** en `/auth/confirm` (stateless). El `code`/PKCE es para OAuth interactivo en la misma pestaña, no para correo. (Causa raíz del "link inválido" del reset de Pietro, jun-2026.)
+- **NO** uses `{{ .ConfirmationURL }}` / PKCE `code` + `exchangeCodeForSession` (`/auth/callback`) para los links de **CORREO** (reset, invitación, magic link). Ese flujo exige el `code_verifier` guardado en el MISMO navegador que pidió el link → falla si el usuario abre el correo en **otro dispositivo** o si lo dispara un **admin** (invitaciones). Para links de correo usá SIEMPRE **`token_hash` + `verifyOtp`** en `/auth/confirm` (stateless). El `code`/PKCE es para OAuth interactivo en la misma pestaña, no para correo. (Causa raíz del "link inválido" del reset de Pietro, jun-2026.)
+- **NO** canjees el token en el GET, ni con `token_hash`: el antivirus de un correo corporativo (Safe Links de Microsoft 365) abre el link antes que la persona y lo gasta. Esta skill lo daba por resuelto con `token_hash` y no lo estaba: una invitación quedó vencida en 53 s, con la cuenta confirmada y sin contraseña. Canjeá en el POST de un botón. Ver `link-gastado-por-antivirus`.
 - **NO** verifiques el root en Resend pensando que pisa tu Google Workspace: Resend usa el subdominio `send.` para SPF/return-path → coexisten. NUNCA edites/borres el `MX`/`SPF` del root.
 - **NO** olvides `NEXT_PUBLIC_SITE_URL` en Vercel prod ni el Site URL en Supabase → los links de invite/reset salen apuntando a `localhost` o a la URL vieja.
 - **NO** dejes a los usuarios invitados sin fijar contraseña: el `redirectTo` del invite debe ir a una página de set-password (`/auth/reset`), si no entran una vez y no pueden volver.
@@ -80,6 +82,7 @@ Este setup tiene **muchas piezas que se rompen en silencio** si las hacés en el
 
 ## Skills relacionadas
 
+- `link-gastado-por-antivirus` — el GET que no canjea, quién puede entrar de verdad y qué correo reenviarle.
 - `verificar-funcionamiento-end-to-end` — la verificación e2e que cierra cada paso.
 - `habilitar-rls-tabla-expuesta` — seguridad de la DB del mismo SaaS.
 - `supabase-edge-function-secret-auth` — auth por bearer-secret de edge functions (mismo stack).

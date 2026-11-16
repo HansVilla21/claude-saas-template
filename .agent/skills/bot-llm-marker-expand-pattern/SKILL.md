@@ -193,3 +193,4 @@ Resultado: lead pide "me pasás foto" → recibe imagen real en WhatsApp + capti
 - `whatsapp-image-delivery-ycloud` — cómo el HTTP node downstream envía la imagen
 - `n8n-workflow-build-script` — para versionar cambios al Code node Expand
 - `langchain-agent-prompt-design` (.claude/skills/) — para escribir el prompt del LLM con la regla del marker
+- `texto-literal-por-marcador` — el mismo patrón para un TEXTO que el negocio quiere tal cual (la descripción de un servicio): el marcador se expande después de la limpieza y el partidor, y la memoria guarda el marcador

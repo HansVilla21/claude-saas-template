@@ -162,3 +162,6 @@ anteriores quedan sin lote a propósito. Commit `455581b`, EN VIVO.
 - `soft-delete-bloqueado-por-rls` — por qué el "enviar a papelera" tiene que ir por service role.
 - `datos-reales-vs-seed-demo` — cuando el sistema empieza a recibir datos reales.
 - `demo-con-datos-falsos` — la regla general: el deshacer se escribe **antes** del cambio.
+- `historial-importaciones-deshacer` — el paso siguiente: historial de todas las importaciones y
+  deshacer cualquiera, incluido lo que «completar» rellenó en contactos que ya existían (sin
+  revertir dos veces).

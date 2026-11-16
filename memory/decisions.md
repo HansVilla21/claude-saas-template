@@ -6,6 +6,1210 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-15 — Agenda: el equipo se entera por WhatsApp de los cambios de sus citas, y una cita pasada a otro no vuelve sola
+
+**Contexto:** el 11-11 Yura cambió la hora de su llamada desde su link. La cita había sido de Pietro y Pietro se la había pasado a Hans; con el cambio volvió a Pietro, para el día siguiente a las 9. Hans la perdió de su calendario y nadie se enteró, porque el aviso solo sonaba en la campana y Pietro la tenía sin abrir. El mismo día, «Nueva cita» le ofrecía a Hans libres su gym y sus reuniones.
+
+**Decisión:**
+- **El WhatsApp al equipo sale del número de Momentum, con una sola plantilla UTILITY para todos los negocios** (`aviso_agenda`, aprobada el 15-11). Le llega a quien atiende la cita cuando el cliente reserva, cambia la hora o cancela, y a quien la tenía antes si cambió de manos. También cuando alguien del equipo agenda o pasa una cita sin «Avisarle al cliente». A quien hizo el cambio no le llega.
+- **La persona del link sigue a quien tiene la cita.** Una reserva hecha con el link de una persona se mueve solo con esa persona. Si el equipo se la pasa a otra, el link pasa a la nueva.
+- **«Nueva cita» muestra los horarios de la persona elegida en «Quién atiende»,** y ese campo va antes de «Cuándo». Sin nadie elegido, sigue mostrando los de todo el servicio.
+- **La cita de Yura queda con Pietro** (jueves 12-11, 9:00 CR): pasársela a Hans le habría mandado a Yura un tercer link de Meet.
+
+**Razón:** la campana del CRM no alcanza para algo con hora: quien no abre el CRM no se entera, y eso pasa justo con el closer.
+
+**Qué se descartó:**
+- **Mandarlo desde el número de cada negocio,** como el aviso del pase: hay que crear y aprobar la plantilla en cada cuenta de WhatsApp, y en las que no la tengan el aviso no sale.
+- **Pasarle la cita de Yura de vuelta a Hans.**
+
+**Pendientes inmediatos:**
+- Hans mira «Nueva cita» en el navegador la próxima vez que agende a mano. Es lo único que no se probó con sesión.
+- Sumar `calendar.calendarlist.readonly` en Google Cloud antes del video de la verificación.
+
+## 2026-11-14 (noche, 22:29–23:19 CR) — El sistema calcula si el negocio está abierto, y se carga en cuatro negocios
+
+**Contexto:** con la cuenta de días escrita a mano en la instrucción del pase, Disumed acertaba el aviso en 8 de 11 con la tienda cerrada: un sábado de noche decía «mañana desde las 7», que es domingo. Subir el razonamiento no lo arreglaba (3 de 5).
+
+**Decisión:**
+- **El motor resuelve `{{ABIERTO_AHORA}}` y `{{PROXIMA_APERTURA}}`** con `bot_config.horario_atencion`: un día por llave (`"lunes": "07:00-18:00"` o `"cerrado"`), `especiales` por fecha y `feriados` (todos, obligatorios o ninguno). Si el horario está mal escrito, la variable vale «sin dato» y en la bienvenida esa línea no sale. Es el PR #526 de crm-v2 (merge `54569683`), revisado por Opus en dos pasadas.
+- **La config se carga después del deploy de producción,** para que ningún bot lea las variables sin resolver.
+- **Cambia solo nuestra parte** (`reglas_finales`, `instruccion_al_pasar`). El texto del autor no se toca.
+- **Cargado con el OK de Hans**, medido antes de cada carga:
+
+| Negocio | Hora (CR) | Antes → con el motor | Bot |
+|---|---|---|---|
+| Disumed | 22:29 | cerrada 8/11 → 13/13; abierta 15/15 | apagado |
+| Di Garda | 23:16 | 18/19 → 19/19; abierta 11/11 | prendido |
+| Genmotec | 23:18 | cerrado 5/9 → 10/12; viernes 16:30 (la queja del cliente) 1/3 → 5/6 | prendido |
+| Ricardo | 23:19 | 0/5 → 3/5; abierta 3/3 | apagado |
+
+**Razón:** la cuenta de días es aritmética y el modelo la falla. Si el sistema la entrega hecha, el bot solo elige la frase.
+
+**Qué se descartó:**
+- Seguir escribiendo cada caso en el prompt.
+- Cargarlo en EPK: sus `reglas_finales` e `instruccion_al_pasar` son de Pietro y su cuenta a mano ya da 30/30 en Haiku. La propuesta queda en `clients/epk/horario-motor-2026-11-14/` (local) para cuando Pietro la quiera.
+
+**Cómo quedó:** verificado en la base el 14-11: los cuatro tienen `horario_atencion`; Disumed y Ricardo con el bot apagado. Respaldos y notas por negocio en `clients/<negocio>/…/horario-motor-2026-11-14/README.md` (local). El backlog de crm-v2 lo anota en #527.
+
+**Pendientes inmediatos:**
+- Confirmar los feriados de Disumed, Di Garda y Ricardo (hoy los feriados no cierran Disumed ni Ricardo).
+- Un aviso en Master cuando un prompt usa las variables y el negocio no tiene horario.
+- Que la medición del puente acepte «mañana sábado» (hoy cuenta falsos negativos).
+- Para Pietro, de Disumed: 5 de 13 puentes nocturnos usan la frase del puente en horario, y un sábado a las 12:40 el bot aceptó que el cliente retire «mañana», que es domingo.
+- La skill `cargar-prompt-al-motor` dice en su apéndice del 14-11 que lo seguro es que el sistema calcule la apertura: ya lo hace, falta anotarlo.
+
+## 2026-11-14 (noche) — Disumed: la v1.4 de Pietro entra al motor, y el horario se le calcula al bot en la instrucción del pase
+
+**Contexto:** Hans pidió cargar la v1.4 de Pietro y medirla con el catálogo real. El prompt decide el aviso del pase según la hora: «en un momento le escribe» con la tienda abierta, «le escribe el lunes desde las 7» con la tienda cerrada. Medido un sábado de noche, con el texto original el bot decía «en un momento» con la tienda cerrada en 3 de 3.
+
+**Decisión:**
+- **El texto de Pietro va tal cual,** salvo la línea de la hora, que pasa al final (regla del 2026-11-10). El modelo es Sonnet 5 con el razonamiento por defecto. El aviso al pasar queda prendido aunque su nota pedía apagarlo, porque apagado el sistema borra su puente.
+- **El cálculo de la próxima apertura va en `instruccion_al_pasar`,** además de en `reglas_finales`. El aviso se escribe al llenar ese campo, así que lo que está al final no alcanza. Con la tienda cerrada pasó de 0 de 3 a 8 de 11; con la tienda abierta, 6 de 6.
+- **El texto del módulo de catálogo cambia una regla:** el bot pasa `categoria` solo cuando piden ver una categoría entera. El resumen muestra 25 de las 47 categorías, y a un tensiómetro le ponía «Equipo médico y mobiliario». Pasó de usar categoría en 9 de 11 búsquedas a 12 de 76. En las 87 búsquedas no usó nunca el filtro de precio.
+- **Bot apagado.** Prenderlo es otro paso, con el OK de Hans.
+
+**Razón:** el error que queda es aritmética de días: un sábado de noche dice «mañana desde las 7». Más texto o más razonamiento no lo arreglan. Lo arregla que el sistema calcule la próxima apertura.
+
+**Qué se descartó:**
+- `esfuerzo: medium` y `high`: 3 de 5 cada uno, más caros. Una vez el bot escribió su cuenta en el mensaje.
+- Una línea nuestra en `reglas_finales` para que salude en el primer mensaje: el saludo faltaba en 9 de 15 sin la línea y en 12 de 15 con ella. Se sacó y va a Pietro.
+
+**Cómo quedó:** principal md5 `61594b8e…`, módulo md5 `a52c520e…`, cargado el 2026-11-14 a las 21:22 CR. Gasto de las pruebas: US$1,63. Detalle y archivos en `clients/disumed/prompts/motor-v1.4-2026-11-14/README.md` (local). Las skills `catalogo-multifuncional-por-preset` y `cargar-prompt-al-motor` suman lo aprendido (#136).
+
+**Pendientes inmediatos:**
+- Hans: mandarle a Pietro el mensaje con lo medido. Pietro prueba en «Probar bot».
+- Diego: confirmar si venden medicamentos y qué son «(PACA)» y «(VIEJAS)».
+- ~~Sesión aparte (*Motor: calcular la próxima apertura para el pase*): el sistema calcula la próxima apertura y se la pasa hecha al bot.~~ Hecho esa misma noche: ver la entrada de arriba.
+
+## 2026-11-14 — Disumed: el inventario entra entero al catálogo, sin precios, y las categorías son nuestras
+
+**Contexto:** Hans y Pietro decidieron el 11-11 cargar la lista de Diego al catálogo sin precios, para que el bot deje el pedido armado y Diego confirme precio y existencia. El Excel trajo 2.577 filas, no 900: los «unos 900» eran los que tenían existencia ese día. No traía categoría ni marca.
+
+**Decisión:**
+- **Entran todos, con o sin existencia,** sin precio y sin cantidad. Un 0 esconde el producto de la búsqueda, y las camas hospitalarias y las sillas que se venden a pedido estaban en cero.
+- **Afuera, 112 filas:**
+  - 87 medicamentos, porque el prompt dice que no son del rubro;
+  - 12 pedidos con el nombre de un cliente en el título;
+  - 10 que no son productos;
+  - 3 dudosos.
+- **Las 47 categorías las pusimos nosotros,** y cada palabra del nombre de una categoría vale para todos sus productos, porque la búsqueda lee la categoría. Con «Pañales de adulto y bebé», quien pedía pañal de bebé recibía pañales de adulto.
+
+**Razón:** el catálogo es la única fuente de qué maneja Disumed (regla de Hans del 09-11). Una categoría mal nombrada hace que el bot ofrezca otra cosa, sin ningún aviso.
+
+**Qué se descartó:** cargar solo los 928 con existencia, porque dejaba afuera lo que se vende a pedido. Y cargar la cantidad, porque es una foto del día.
+
+**Cómo quedó:** 2.465 productos cargados el 2026-11-14 de 19:16 a 19:21 CR, con el módulo Productos prendido. Al prenderlo, Disumed ve la sección Catálogo y dos campos nuevos en la ficha del contacto. Los precios con IVA y las cantidades del 11-11 quedaron en un archivo local, por si después se cargan por código.
+
+## 2026-11-10 (noche) — Las invitaciones de Google en spam se avisan, y una cita transferida ya no se pierde del calendario
+
+**Contexto:** a los clientes la invitación de Google Calendar les caía siempre a spam. La misma noche, Pietro le transfirió a Hans una cita (Yura) que aparecía en la Agenda y no en su Google.
+
+**Decisión:**
+- **A: se mantiene la invitación de Google y se avisa.** El correo de confirmación y la pantalla «Cita agendada» dicen que puede haber caído en spam y cómo marcarla. El WhatsApp no cambia: es una plantilla aprobada por Meta.
+- **Un evento solo cuenta si lo organiza ese calendario y está activo.** Si el id está ocupado por otra cosa, se crea con otro id.
+
+**Razón:** el spam no viene de la verificación de Google ni del dominio (Workspace con SPF, DKIM y DMARC; la invitación no lleva links): Gmail desconfía de remitentes desconocidos. Con la invitación, el cliente queda en la lista del Meet y la cita se actualiza sola.
+
+**Qué se descartó:** dejar de usar la invitación de Google y mandar solo el archivo de calendario en nuestro correo (B): entra a la bandeja, pero el cliente tendría que pedir permiso para entrar al Meet.
+
+**Cómo quedó:** CRM #519 y #521, en producción el 2026-11-10. La cita de Yura se arregló a mano con OK de Hans.
+
+**Pendientes inmediatos:**
+- Reconectar el Google con otra cuenta deja los eventos viejos en la cuenta anterior, y el cliente puede tener otro link de Meet (pasó con Pietro el 10-11).
+
+## 2026-11-10 — Agenda propia: los otros calendarios de Google se eligen y solo bloquean
+
+**Contexto:** la agenda solo miraba el calendario principal de la cuenta de Google conectada. Hans ordena su agenda en varios calendarios (uno por negocio, uno personal), y una reunión en otro de ellos no bloqueaba nada: la página ofrecía horas que tenía ocupadas. Sus palabras: «si no, no me funciona al 100 %».
+
+**Decisión:**
+- **A: los calendarios se eligen uno por uno** en «Mi perfil». El principal cuenta siempre. Por defecto vienen marcados los que son de la persona; Feriados, Cumpleaños y los de compañeros, no.
+- **A: solo bloquean horarios.** No se muestran en la Agenda del CRM, que sigue sin mostrar eventos de Google (tampoco los del principal).
+
+**Razón:** si entraran todos, un evento de todo el día de un calendario de suscripción taparía el día entero. Mostrar los eventos en la Agenda es una pieza mucho más grande que no hacía falta para el problema.
+
+**Qué se descartó:** que entren todos los calendarios sin elegir (B), y mostrar los eventos de Google en la Agenda como bloques grises (B).
+
+**Cómo quedó:** CRM #517 y migración 0179, en producción el 2026-11-10. Permiso nuevo `calendar.calendarlist.readonly`, opcional. Si un calendario elegido no se puede leer, esa persona queda ocupada todo el rango y la pantalla dice cuál fue.
+
+**Pendientes inmediatos:**
+- Hans: sumar `calendar.calendarlist.readonly` en Google Cloud › Acceso a los datos antes de grabar el video de la verificación, y mostrar la lista en «Mi perfil» en el video.
+- Pietro: volver a conectar su Google para elegir sus calendarios.
+
+## 2026-11-04 — Agenda propia: el aviso mínimo también vale para el equipo, y cada persona puede tener el suyo
+
+**Contexto:** Hans vio que «Nueva cita» ofrecía las 12:00 de una «Llamada de diagnóstico» con 4 horas de aviso, a las 11:20, mientras la página pública arrancaba bien a las 16:00. La cita a mano ignoraba el aviso a propósito (decisión del 2026-10-27). También pidió un aviso propio por persona: «tampoco quiero que se me agenden cosas literalmente a 20 minutos».
+
+**Decisión:**
+- **C:** para uno mismo, los botones arrancan después del aviso y una hora escrita a mano dentro de él sale en amarillo y se puede guardar. Para otra persona, dentro del aviso no se guarda, validado en el servidor.
+- **A:** gana el aviso más largo entre el del servicio y el de la persona; sin aviso propio, vale el del servicio; con varias personas, cada una con el suyo.
+- **A:** en «Todos juntos» se mira cada persona: se bloquea si cae dentro del aviso de otra, y solo es amarillo si choca con el aviso propio.
+
+**Razón:** el aviso protege a quien atiende. Uno mismo puede saltárselo a sabiendas; nadie puede saltarse el de otro.
+
+**Qué se descartó:** la opción A de la primera pregunta, que dejaba agendar a otra persona dentro de su aviso con solo una advertencia.
+
+**Cómo quedó:** CRM #496 y migración 0175 (`booking_resources.min_notice_min`), en producción el 2026-11-04; la skill madre `motor-de-horarios-libres` se actualizó (#131). «Volver a agendada» sigue sin mirar el aviso, porque sirve para deshacer un «Cancelar» tocado por error.
+
+**El mismo día:** se creó en Momentum «Reunión con cliente» («Todos juntos» con Pietro y Hans, 60 minutos, videollamada, 4 horas de aviso). Ofrece solo las horas en que los dos están libres y crea un solo evento con el otro como invitado.
+
+## 2026-11-03 — La cotización del CRM ya tiene plantilla y método
+
+**Contexto:** el mismo día salieron dos llamadas con cotización prometida, y no había formato para vender el CRM como producto. Los nombres y los montos de cada cliente están en `clients/`, que no se versiona.
+
+**Decisión:**
+- **Un generador con un solo contenido,** que saca PDF y Word con la línea gráfica de Momentum y se detiene si queda un dato sin llenar. Vive en el repo privado de PM (`templates/contratos/generador/cotizacion/`). Hans: «dejala como plantilla en PM».
+- **El método va en una skill aparte,** `cotizar-crm-desde-llamada`. Hans: «me gusta cómo estamos creando estas cotizaciones».
+- **Cada promesa se cruza con el código vivo antes de mandarla,** y Hans recibe lo que hay que construir si el cliente cierra.
+- **El primer mes es por cliente.** En una lo cubre la implementación y en la otra la mensualidad corre desde el inicio, según lo que Hans dijo en cada llamada.
+- **El envío lo hace Hans.**
+
+**Razón:** una cotización escrita con la demo en la cabeza promete cosas que no existen. Las dos tocaban funciones a medias o sin construir, y el plazo dependía de eso.
+
+**Qué se descartó:** copiar las condiciones de la cotización anterior. Habría cambiado el precio que Hans dijo.
+
+**Pendientes inmediatos:**
+- **La plantilla y los Términos del generador están en un PR del repo privado de PM** (`docs/plantilla-cotizacion`). Solo entran esas dos carpetas: ese repo tiene otros cambios sin commitear.
+- **Si un cliente cierra,** antes de arrancar hay que hablar con Hans lo que dice su ficha, en `clients/`.
+
+## 2026-11-02 — Un proveedor de IA sin crédito, el horario de un bot, el orden de los estados y el link del correo
+
+**Contexto:** el mismo día llegaron tres quejas de clientes. Los nombres y el detalle están en el backlog privado del CRM (`crm-v2/memory/backlog.md`) y en su handoff del 02-11, en `crm-v2/memory/`.
+- **El bot no ponía estados ni etiquetas:** la cuenta de OpenAI llevaba 4 días sin crédito. Fallaron 848 análisis en 288 conversaciones de 4 negocios, y nadie se enteró porque el bot contesta con Claude.
+- **Un bot decía «mañana» a las 4 pm,** en un negocio que trabaja hasta las 5. Lo mandaba su prompt, no era la hora del servidor.
+- **Una invitación venció en 53 segundos:** el antivirus de un correo de Microsoft 365 abrió el link y lo gastó antes que la persona.
+
+**Decisión:**
+- **La alerta del analista (PR #482, 0172):** el vigilante avisa si el analista falla seguido, con el motivo real. Si no hay análisis no cambia nada, para no mandar un «volvió» falso de madrugada.
+- **Poner al día lo perdido** con un script, primero 5 de prueba. Hans: «dale a las dos cosas».
+- **El horario, opción B (Hans: «dale con la B, cambiala vos»):** el «hoy» se corta a la hora real de cierre. Se tocó el texto del autor del prompt solo por esto, con una regla final, porque sin ella el modelo copia los ejemplos del prompt y promete «hoy» de noche.
+- **Ordenar los estados de ese negocio y releer sus contactos (Hans: «dale»):** el analista solo avanza hacia posiciones mayores y un estado del equipo es barrera. Un orden arrastrado a mano lo había dejado casi sin opciones.
+- **Configuración › Estados avisa y no bloquea (PR #485, Hans: «dale con las tres»):** el orden sigue siendo del cliente y se guarda igual.
+- **El link del correo se canjea en el POST de un botón (PR #480), no al abrirlo.** `token_hash` + `verifyOtp` arregla los links entre dispositivos, no esto.
+- **Reenviar invitación según la contraseña (PR #481, 0171):** la señal de quién puede entrar es no tener contraseña ni otro proveedor. `last_sign_in_at` lo llena también el antivirus.
+- **La prueba con correos reales no se hace.** Hans: «no hace falta la prueba. Todo bien, ya todo funciona». Queda anotada como decisión suya, no como probada.
+
+**Razón:** las tres fallas eran silenciosas, sin ninguna línea roja. La regla que sale de acá es que todo lo que depende de un tercero o de un orden que edita el cliente tiene que poder avisar solo.
+
+**Qué se descartó:**
+- **Mantener el corte de las 4 (opción A):** con el modelo real casi nunca se cumplía, y no coincide con el horario del negocio.
+- **Cambiar el formato de la hora en el motor:** la medición no mostró mejora.
+- **Windsor.ai para el CRM:** es legal y entra por la vía oficial de Meta, pero solo lee métricas y comentarios. No toca los mensajes directos.
+
+**Medido después (03-11):** 3 pases reales fuera de horario y ninguna promesa falsa. Antes, 8 de 19.
+
+**Pendientes inmediatos:**
+- **Ver un pase real de 4 a 5 pm y uno de un viernes en la noche,** que todavía no hubo.
+- **El autor del prompt** parte de la versión nueva y saca «hoy mismo» de sus dos ejemplos.
+
+## 2026-10-28 (tarde) — Agenda propia: formularios, abierta a todos los negocios, citas «Todos juntos», el Meet siempre, y el modelo según la tarea
+
+**Contexto:** el mismo día del reparto y del link por persona salieron cinco cosas más. Cada una tuvo su sesión, su prueba real en Momentum y el OK de Hans:
+- formularios por servicio (#465, 0167, skill Tier 76);
+- abrir la agenda a todos (#468, la privacidad #469 y el enlace del sitio, `momentum-ai` #3);
+- el arreglo del Meet (#472);
+- citas colectivas con invitados (#474, 0169, skill Tier 78);
+- la regla del modelo por tarea (madre #115).
+
+**Decisión:**
+- **Formularios (Hans: «como recomendás»), en el ejemplo de Laura y Momentum:**
+  - **A:** lo que la persona responde reemplaza el dato del contacto. Una respuesta vacía no borra nada.
+  - **B:** si después el bot oye algo nuevo, gana lo último que dijo la persona, y la ficha muestra de dónde salió.
+  - **C:** un campo creado desde el formulario no lo busca el bot. Una casilla lo prende después.
+  - **D:** «Empresa» no es columna fija: es un campo propio del negocio.
+  - Más tipos de campo (número, correo, teléfono, fecha, sí/no, lista, varias opciones).
+- **Abierta a todos:** Hans, con estas palabras: «ya un cliente lo está necesitando… tenemos que activarlo ya para todo el mundo».
+  - Sale de «solo master», con su Novedad.
+  - Los agentes conectan su propio Google desde «Mi perfil».
+  - `reserva_confirmada` y `recordatorio_cita` se pidieron a Meta en 7 negocios; la de Level CR falló porque su WhatsApp está desenlazado.
+- **Verificar la app de Google:** Hans: «pidamos la verificación». Ver la skill `agendamiento-google-calendar/verificacion-de-la-app.md`.
+- **Citas «Todos juntos» (Hans: «como recomendás»), en el ejemplo de la capacitación con Pietro, Hans y Ana con 2 invitados:**
+  - un tercer modo de reparto, que ofrece solo las horas en que están libres todos;
+  - un solo evento de Google, en el primer calendario conectado, con los demás del equipo, la clienta y hasta 10 invitados;
+  - quien no puede se saca, y la cita sigue con el resto (el último no se puede sacar);
+  - los recordatorios van solo a la clienta;
+  - una cita colectiva no cuenta para el «Parejo» de otros servicios;
+  - en «Nueva cita» también se suman invitados;
+  - los invitados no pueden mover ni cancelar.
+- **El Meet sale siempre en un servicio por videollamada,** también en la cita a mano, salvo que el servicio traiga un link fijo. Lo pidió Hans: «Eso debe quedarse activado de una vez al crear el evento». La cita de Jorge, que Hans arregló a mano, no se tocó.
+- **El modelo según la tarea (Hans, regla global y de proyecto):** el 27-10 se fue el 19 % del límite semanal en un día.
+  - Haiku para chequeos y lecturas.
+  - Sonnet para hacer con un plan claro.
+  - Opus con esfuerzo `high` (no `xhigh`) para decidir y para lo que llega a clientes.
+  - La calidad no se negocia.
+
+**Razón:** Hans quiere la agenda igual o mejor que Calendly y un cliente ya la necesitaba. Cada pieza se probó con su Google real antes de abrirla.
+
+**Qué se descartó:**
+- Una columna «Empresa» para todos los negocios.
+- Que el bot llene solo los campos nuevos.
+- Dos eventos de Google por cita colectiva.
+- Avisar a la clienta cuando alguien del equipo se saca de la cita.
+- Dejar la agenda solo para master hasta tener la verificación de Google.
+
+**Pendientes inmediatos:**
+- **La verificación de Google:** Hans graba el video y la envía desde el Centro de verificación.
+- **La plantilla de Level CR:** cuando reconecte su WhatsApp.
+- **La fase 5,** que el bot agende. Hans pidió esperar: «De momento, no arranquemos toda esa parte».
+
+## 2026-10-28 — Agenda propia: un link por persona, el reparto por servicio y la cita a mano que le avisa al cliente
+
+**Contexto:** Hans probó la agenda en Momentum con dos citas: una a mano, que al cliente no le avisó nada, y una por la página, que fue a Pietro por ser el primero del orden. Pidió tres cambios antes de la fase 5 (PR #463 del CRM, migración 0166; skill: apéndice de `reservar-sin-pisarse-pagina-publica`).
+
+**Decisión:**
+- **Hans, 27 y 28-10:**
+  - **Un link por persona:** «como en Calendly, un link por persona que atiende». Va en `/r/<negocio>/<servicio>/<persona>`, muestra solo sus horarios y la cita le queda a esa persona. El link del servicio sigue andando y reparte.
+  - **El modo de reparto se elige por servicio:**
+    - **«En orden de prioridad»:** el primero libre, como hasta ahora.
+    - **«Parejo»:** a quien va más atrasado.
+  - **Qué cuenta el «Parejo»:** las citas del link del servicio y del bot, de los últimos 30 días, sin las canceladas. No cuentan las del link de cada persona ni las cargadas a mano.
+  - **Momentum queda en prioridad:** «para Momentum, en realidad, la prioridad es Pietro».
+  - **Al mover, la cita sigue con quien la tiene** si está libre. Si se reservó con el link de una persona, solo puede ir con ella.
+  - **La cita a mano le avisa al cliente.** Esto reemplaza la decisión B del 27-10:
+    - hay una casilla «Avisarle al cliente», prendida cuando el contacto tiene correo o WhatsApp;
+    - al cliente le llegan la confirmación, la invitación de Google (o el `.ics`), los cambios y los recordatorios;
+    - con la casilla apagada es una cita interna y no le llega nada.
+- **Técnicas:**
+  - **El reparto se decide dentro de `reservas_elegir_recurso`,** después del candado del servicio, para que dos reservas no lean el mismo conteo.
+  - **`avisar_cliente` tiene tres valores:** true, false y null. Null es una cita a mano de antes y sigue como siempre.
+
+**Razón:** el closer comparte su propio link. Si el reparto contara esas citas, el que consigue sus propias citas recibiría menos. Y una cita a mano también es una cita para el cliente.
+
+**Qué se descartó:**
+- Calcular el reparto en el servidor, porque dos reservas simultáneas eligen a la misma persona.
+- Contar en el «parejo» todas las citas del servicio.
+- Pasar a «Parejo» el servicio de Momentum.
+- Dejar en `true` o en `false` las citas a mano viejas.
+
+**Pendientes inmediatos:**
+- La fase 5, el bot usa la agenda, con el handoff `session-handoff-2026-10-28-agenda-reparto-y-aviso.md` del CRM. El bot reserva con el link del servicio y hereda el reparto.
+
+## 2026-10-27 (noche, tarde) — Agenda propia, fase 4: recordatorios personalizables por negocio, y días especiales en rango
+
+**Contexto:** la fase 4 de la agenda propia del CRM (PR #459, migración 0165; «Hasta» en #460; handoff de la fase 5 en #461; skill Tier 73 en madre #113). Se trabajó con Hans por medio de la sesión «Agenda propia fase 4».
+
+**Decisión:**
+- **Hans, 27-10:**
+  - **Los recordatorios se personalizan por negocio, como los seguimientos:** «al igual que los seguimientos, este tema de los recordatorios debe ser personalizable». Quedó una pestaña «Recordatorios de cita» en Seguimientos, con un interruptor y hasta 3 recordatorios, cada uno con cuánto antes (1 h a 7 días), canal y plantilla.
+  - **Los de fábrica:** 1 día antes por WhatsApp y correo, y 3 h antes solo por WhatsApp.
+  - **Se mandan a todas las citas con WhatsApp,** también las cargadas a mano.
+  - **Una sola plantilla, `recordatorio_cita`,** neutra y con el nombre.
+  - **El nombre que la persona escribe al reservar REEMPLAZA al del contacto,** aunque el equipo le haya puesto otro: «sí es mejor reemplazarlo por el nombre que aparece en la cita». La recomendación era dejar el del equipo, y Hans eligió reemplazarlo. «Nueva cita» exige el nombre si el contacto no tiene uno real. El correo, en cambio, solo se guarda si el contacto no tenía.
+  - **Momentum, prendido** desde las 22:09 CR.
+  - **«Hasta» en los días especiales:** un rango de hasta 31 días de una vez, para cuando alguien viaja. La idea fue de Hans; los días sueltos, cerrados o con otras horas, ya existían.
+- **Técnicas:**
+  - **Los recordatorios NO pasan por el motor de seguimientos.** Ahí tendrían que saltarse 5 reglas: que el contacto contestó, la ventana de 24 h, el horario de 8 a 20, la pausa entre mensajes y la que cancela contra otro seguimiento programado. Van por un barrido propio cada 5 min, que relee la cita viva antes de mandar.
+  - **Nada sale antes de las 7:00 del negocio.** Lo que ya venció no sale.
+  - **Cada recordatorio lleva su propio link** a la misma cita. La base guarda solo la huella, y el link de la confirmación sigue andando.
+  - **El bot ve** en su memoria la confirmación y el recordatorio.
+
+**Razón:** cada excepción en un motor compartido es un lugar donde se rompen los seguimientos de los clientes. Hans prefiere el dato que la persona da al reservar sobre el que cargó el equipo.
+
+**Qué se descartó:**
+- Extender `followups` con excepciones.
+- Recordatorios fijos en 24 h y 3 h.
+- Texto libre por WhatsApp: fuera de la ventana de 24 h, Meta exige plantilla.
+- Guardar el link legible en la base, o reemplazar el de la confirmación.
+- Sacar el nombre de la plantilla: con el nombre obligatorio al agendar, siempre hay uno.
+
+**Pendientes inmediatos:**
+- Que Meta apruebe `recordatorio_cita` (id 1613699746690658) y `reserva_confirmada`. Mientras tanto sale solo el correo.
+- Mirar la primera tanda real, la «Llamada de cierre» con Gerencia Instituto Alfa: los WhatsApp del domingo 1/11 10:00 y del lunes 2/11 7:00, en `recordatorio_envios`.
+- Fase 5, el bot usa la agenda, con el handoff `session-handoff-2026-10-27-agenda-fase-4.md` del CRM.
+- **Antes de abrirla a otros negocios:**
+  - `recordatorio_cita` en la WABA de cada uno;
+  - verificar la app de Google, lo que además hace que se vea el logo en la pantalla de permiso;
+  - que conecte su Google quien atiende sin ser admin;
+  - `SOLO_MASTER = false` y Novedades.
+
+## 2026-10-27 (noche) — Agenda propia, fase 3: el Google Calendar de cada persona
+
+**Contexto:** la fase 3 de la agenda propia del CRM (PR #457, migración 0164). Hans creó el proyecto «Momentum AI CRM» en Google Cloud con la cuenta de la empresa, lo publicó en producción y conectó su Google (hans@momentum-lab-ai.com).
+
+**Decisión:**
+- **Hans, 27-10:**
+  - **A:** cuando Google invita al cliente, nuestro correo sigue saliendo, pero sin el archivo de calendario. Con los dos, al cliente le quedarían dos eventos.
+  - **B:** la cita que carga el equipo a mano va al Google de quien atiende y al cliente no le llega nada, como hasta ahora.
+- **Técnicas:**
+  - **Un solo permiso, `calendar.events`.** Se leen los eventos y no se usa freeBusy, para saltear las citas que el propio CRM puso en Google. Si no, mover una cita choca consigo misma y un cupo se llena con la primera reserva.
+  - **La conexión es por persona, no por negocio:** una persona que atiende en dos negocios tiene un solo Google.
+  - **Si no se puede leer el Google de alguien,** esa persona no ofrece horarios.
+  - **Las funciones de reservar con candado (0162) no cambiaron:** el servidor lee Google sin caché justo antes de llamarlas.
+  - **Desconectar no borra los eventos:** borrarlos le mandaría una cancelación al cliente invitado.
+
+**Razón:** la regla de la agenda es que ofrecer una hora ocupada es mucho peor que no ofrecer una libre. Y la invitación de Google no puede duplicar la nuestra.
+
+**Qué se descartó:**
+- freeBusy, que no dice qué evento ocupa.
+- Pasarle a la base los bloques de Google bajo el candado: serían los mismos, leídos en el mismo instante.
+- Un proyecto de Google por cliente: sin verificar, Google no muestra su nombre igual.
+- Conectar desde el preview: su dominio cambia por rama y no puede ser URI de redirección.
+
+**Pendientes inmediatos:**
+- Mergear #457, con el verde de Vercel y el OK de Hans.
+- **Antes de abrirla a otros negocios:**
+  - pedirle a Google la verificación de la app (el permiso es sensible: sin verificar sale el cartel y hay un tope de 100 personas);
+  - dejar que conecte quien atiende sin ser admin.
+- Skill: apéndice en `agendamiento-google-calendar` (`segundo-caso-agenda-multinegocio.md`).
+
+## 2026-10-27 — Agenda propia: la fase 1 en producción, la agenda manual conectada a los servicios, y cómo será la página
+
+**Contexto:** se construyó la fase 1 de la agenda propia del CRM (#450, 0159): Servicios, Horarios y el motor de horarios libres. Al revisarla, Hans pidió dos cosas más: que «Nueva cita» use los servicios, «que todo esté conectado y funcionando como uno solo», y poder elegir varias personas por servicio (#451, 0160). Después decidió cómo será la fase 2.
+
+**Decisión:**
+- **Hasta que exista la página, todo lo de la agenda propia lo ven solo las cuentas master.** Un dueño que carga servicios esperando reservas que no llegan es peor que no tener nada.
+- **La agenda manual y la de reservas son una sola:**
+  - «Nueva cita» elige el servicio, y la cita lo guarda junto con quién la atiende;
+  - los horarios libres salen del mismo motor;
+  - para el EQUIPO no aplican el aviso mínimo ni la ventana de días, que son reglas para el cliente;
+  - una hora no libre se puede agendar, con aviso, como decidió la 0078.
+- **Varias personas por servicio:** se ofrece el horario si al menos una está libre, y la cita va a la primera libre en el orden elegido. El reparto parejo queda para después.
+- **La fase 2, la página para reservar:**
+  - se prueba primero en **Momentum**;
+  - el **correo es obligatorio**, como en Calendly, porque la invitación de Google Calendar (fase 3) va a ese correo;
+  - la confirmación por WhatsApp se pide ya, con una plantilla **neutra** (sin tú, vos ni usted) para que sirva a cualquier negocio, en categoría utilidad, con el botón «Cambiar o cancelar» que lleva a `/r/cita/<token>`.
+
+**Razón:** Hans quiere una sola agenda. Si la cita manual no sabe de qué servicio es, no cuenta para los cupos ni para el límite del día, y la página ofrecería horarios que el equipo ya ocupó.
+
+**Qué se descartó:**
+- **Bloquear la agenda manual** cuando la hora no está libre.
+- **Hacer el correo opcional:** Hans lo pidió obligatorio, por Google Calendar.
+- **Arrancar la fase 2 en la misma conversación:** estaba al 74 % de su memoria. Se hizo checkpoint y se arranca en una sesión nueva.
+
+**Pendientes inmediatos:**
+- **La plantilla `reserva_confirmada` no se pudo crear.** YCloud responde «Object with ID … does not exist, cannot be loaded due to missing permissions» sobre la WABA de Momentum: leerla funciona y crear plantillas no. Lo resuelve Hans en YCloud o Meta.
+- **La fase 2 se arranca en una sesión nueva,** con el handoff del 27-10 del CRM.
+
+## 2026-10-25 — Agenda propia tipo Calendly, construida en el CRM: la agenda primero y el bot al final
+
+**Contexto:** Hans quiere una agenda «igual o mejor que Calendly», propia del CRM. Junta MOM-26 (Google Calendar), MOM-135 (espacios con cupo) y MOM-67 (recordatorios). Pidió diseñarla con REA OS, que tiene una ingeniería inversa de Calendly (`REA OS/sistemas/calendly/`, consulta `20261025-193837-440e`).
+
+**Decisión:**
+- **Se construye adentro del CRM,** montada sobre `appointments`. Hay un solo motor de horarios para la página y para el bot, y el cupo va desde el primer día (una fila por persona; el cupo es un conteo).
+- **Orden (Hans):** «primero quiero tener la funcionalidad del calendario conectado a Google Calendar, con el link… ya cuando tengamos todo eso funcionando bien, trabajamos la conexión con el chatbot». Fases: 1 servicios, horarios y motor · 2 página pública · 3 Google Calendar · 4 recordatorios · 5 el bot usa la agenda.
+- **El bot reserva solo,** con un interruptor por negocio para pedir aprobación.
+- **La página** va en el dominio del CRM, con WhatsApp obligatorio.
+- **La confirmación** sale por WhatsApp (plantilla) y por correo con invitación de calendario.
+- **Reagendar** mueve la misma cita, para que la 0123 la siga contando.
+- **En la v1 no van:** el cobro, una regla de cancelación por defecto ni el reparto entre asesores.
+
+**Razón:** lo que nos diferencia es que el bot reserve dentro de WhatsApp, sin link, pegado a la ficha del contacto. Ningún producto lo trae, y más de la mitad ya existía: citas, agenda, el botón de agendar, el motor de seguimientos y el Google Calendar del CRM de Josué.
+
+**Qué se descartó:**
+- **Instalar cal.com:** cerró su código en abril de 2026, y para instalarlo en un servidor propio hay que contratar Enterprise. Su Platform cerró a clientes nuevos en diciembre de 2025.
+- **Cal.diy** (lo que quedó abierto, con licencia MIT): es para uso personal y no maneja varios negocios. Su motor se puede copiar si conviene.
+- **Conectar el bot primero:** Hans quiere la agenda probada sola antes.
+
+**Pendientes inmediatos:**
+- La fase 1 arranca el martes 27 (había límite semanal de Claude al 94 %).
+- Hay que definir el negocio de prueba.
+- Las plantillas de recordatorio se le piden a Meta con tiempo.
+
+## 2026-10-24 — Los avisos de que algo se rompió van solo a Hans y Pietro, y el sistema se vigila desde dos lados
+
+**Contexto:** en octubre el CRM se cayó tres veces sin que nadie se enterara: el disco lleno (02-10, 11,5 h), Vercel apagado por un cobro (13-10, 1 h 20) y el tope de Anthropic (21-10, 2 h). El aviso de número caído (MOM-126) le llegaba también al dueño del negocio.
+
+**Decisión:**
+- **Los avisos internos van SOLO a los super_admin (Hans y Pietro), nunca al cliente.** Hans: «para nadie más, no hay que avisar al cliente de nada». Ya no hay campana para el negocio, la franja y el cartel de Canales solo los ve un master, y Novedades del 19-10 se reescribió (CRM #438).
+- **Dos vigilantes en dominios de falla distintos:**
+  - un Edge Function en Supabase (cron cada 5 min) mira el CRM, los turnos del bot, el respaldo y el saldo de YCloud;
+  - un cron de Vercel mira la base con una escritura de prueba (0151).
+- **Plantilla genérica `alerta_crm`** para todos los avisos internos. Mientras Meta la revisa, el aviso de número caído usa las plantillas viejas de respaldo.
+- **El estado se ve donde Hans llega al iniciar sesión,** «Todas las cuentas» (CRM #441), además del panorama de `/master`.
+
+**Razón:** lo que avisa no puede vivir dentro de lo que se cae. Skill `vigilancia-cruzada-dos-testigos` (Tier 66).
+
+**Qué se descartó:**
+- avisarle al dueño del negocio;
+- un solo vigilante, porque cae con la pieza que vigila;
+- deduplicar el aviso de base caída guardando estado (no hay dónde): se usan ventanas fijas de 30 minutos.
+
+**Pendientes inmediatos:** que Meta apruebe `alerta_crm` (la recategorizó a MARKETING).
+
+## 2026-10-24 — Si Claude falla, contesta gpt-4.1 (MOM-125)
+
+**Contexto:** el 21-10 el tope de gasto de Anthropic dejó a todos los bots en «falla técnica» 2 h.
+
+**Decisión:** respaldo de OpenAI, decidido por Hans («que sea uno de OpenAI, el más indicado»): **gpt-4.1**, el modelo de todos los bots hasta el 17-10, con estos mismos prompts y el mismo esquema (CRM #439).
+- **Qué lo dispara:** cualquier falla tras el reintento, salvo que el modelo elija no contestar.
+- **Cuánto dura:** se queda en el respaldo el resto del turno.
+- **También cubre:** los seguimientos redactados por el bot.
+
+**Razón:** un reintento no arregla un tope ni una clave revocada; otro proveedor sí. El vigilante avisa con una sola respuesta en respaldo, para que el respaldo no tape la caída.
+
+**Qué se descartó:**
+- los GPT-6, que no tienen precio cargado y piden `reasoning_effort: none` para usar herramientas;
+- volver al primario a mitad del turno.
+
+## 2026-10-24 — El historial de WhatsApp se importa, y los chats viejos de Di Garda se rescataron
+
+**Contexto:** 34.896 eventos de historial de coexistencia se descartaban desde el 23-09 (CRM #386). Al importarlos, 4 triggers trataban un mensaje viejo como uno de ahora: pasaban el chat a una persona, encolaban a Zoho y mandaban eventos a Meta.
+
+**Decisión:**
+- **Importar con la marca `app.importando_historial` en todos los triggers** (0152). La carrera de dos mensajes de la misma persona se arregló en la 0154.
+- **Rescate de lo guardado de Di Garda,** con OK de Hans: 17.509 mensajes y 549 contactos, sin avisos, sin Meta, y ningún chat pasó a una persona.
+- **Un chat viejo que vuelve a escribir lo atiende quien corresponda hoy:** el bot si está prendido, la persona asignada si no. Hans: «como está ahora, funciona».
+- **La base se limpia sola cada día:** eventos crudos de más de 30 días (90 si tienen error) y registro de los crons de más de 7 días (0153 y 0155). Hans: «solucionalo».
+
+**Razón:** la regla de Hans es que un chat viejo no actúe como un mensaje de ahora.
+
+**Qué se descartó:**
+- el script viejo de importación (#402, cerrado): creaba contactos fuera de la marca;
+- nacer «sin asignar» siempre, porque dejaba mudo al bot para ese contacto.
+
+## 2026-10-24 — La descripción de cada servicio sale tal cual: el modelo elige un marcador, no copia (Di Garda)
+
+**Contexto:** la clínica pidió que, cuando alguien pregunta por un servicio, le llegue la descripción que cargó en el catálogo, "como copy paste". El modelo la resumía, porque el prompt de Pietro dice "la descripción la cuentas con tus palabras". Y aunque la copiara, el motor la cambia: la limpieza le saca los dos puntos, el partidor la corta en burbujas de 220 y el recortador acorta lo que pasa de 660. Las 38 descripciones llegan a 959 caracteres, con viñetas, "Incluye:" y el link de WhatsApp.
+
+**Decisión:**
+- **La llave `bot_config.descripcion_tal_cual`** (CRM #434). Cada servicio de la lista inline trae su marcador `[FICHA:ref]`; el modelo lo pone y el sistema manda la descripción exacta en su propio mensaje, sin limpieza, sin partidor y sin recortador.
+- **La opción A de Hans:** si la persona pregunta en general, el bot nombra las opciones con su precio y manda la descripción de la que elija.
+- **Como mucho 2 por mensaje** y ninguna repetida en la conversación. La memoria guarda el marcador, no el texto.
+- **Prendida en Di Garda el 24-10 a las 17:23 CR,** con respaldo de su config.
+
+**Razón:** la única forma de que el texto llegue igual es que no lo escriba el modelo. Medido con el motor real (5 corridas, US$1,34): 10 de 10 descripciones idénticas al catálogo.
+
+**Qué se descartó:**
+- pedirle al modelo que la copie, porque el motor la cambia igual;
+- la opción B: ante una pregunta general, mandar de una todas las descripciones que sirven;
+- tocar la línea de Pietro, porque el texto del autor se carga tal cual.
+
+**Pendientes inmediatos:** avisarle a Pietro que saque esa línea, y probarlo en Probar bot. Productos y propiedades todavía no tienen fichas.
+
+## 2026-10-24 — Los reportes de la clínica en Probar bot: casi todo va a Pietro y dos cosas se arreglan en el motor (Di Garda)
+
+**Contexto:** la clínica dejó 9 reportes. Los 2 de septiembre ya estaban arreglados, y los 7 de Probar bot son del 20-10.
+
+**Decisión:**
+- **Casi todo es contenido del prompt o del catálogo.** Queda en revisión en Master con su nota, para Pietro y la clínica.
+- **Dos eran del motor** y salieron en CRM #433, con el OK de Hans:
+  - una línea que el negocio ya mandó idéntica en la conversación no se vuelve a mandar, en todos los bots;
+  - `bot_config.punto_final` (opción A): el sistema pone el punto antes del emoji del final. Prendido en Di Garda.
+
+**Razón:** pedirlo en el prompt no alcanzaba en ninguno de los dos casos. El saludo doble pasó aunque el prompt dice "no saludas dos veces", y el modelo casi nunca escribe el punto final porque termina las burbujas con un emoji.
+
+**Qué se descartó:** reescribir el prompt de Pietro para arreglar lo que es de su texto.
+
+**Pendientes inmediatos:** aclarar con la clínica qué es "las conversaciones se quedan abiertas en el WhatsApp".
+
+## 2026-10-23 — El prompt de Di Garda se recarga tal cual y se mide antes de decir "listo"
+
+**Contexto:** el 15-10, la v2.3 de Pietro se había cargado con tres cambios nuestros: la hora y su revisión final pasaron a `reglas_finales`. El 17-10 el founder fijó que el texto del autor va tal cual.
+
+**Decisión:**
+- El principal es el archivo de Pietro letra por letra (md5 `0cf0fb12…`), y nuestras `reglas_finales` salen. Lo demás de la config sigue igual.
+- Medido con `medir-estilo` (CRM #432): 8 respuestas, 2 limpias, pase 3/4, US$0,31.
+- Las reglas de pase que la clínica editó el 20-10 no se revirtieron.
+
+**Razón:** el prompt es de Pietro y lo va a volver a editar. Si lo cambiamos nosotros, la versión que él tiene deja de ser la que corre.
+
+**Qué se descartó:** dejar la hora fuera del prompt. Con la hora adentro cada respuesta cuesta unas 2,5 veces más, y eso se le avisa a Pietro.
+
+**Pendientes inmediatos:** pasarle a Pietro los números, el costo de la hora y el choque con las reglas de pase editadas.
+
+## 2026-10-21 — El tope de gasto de Anthropic sube a USD 150 tras dejar a todos los bots sin contestar
+
+**Contexto:** desde las 09:28 CR, cada turno de todos los bots falló con «You have reached your specified API usage limits». La cuenta tenía un límite de gasto mensual de USD 50 y ya iba en USD 50,01. Durante ~2 horas, 7 contactos (6 de Givi, Douglas de Momentum y uno de Di Garda) pasaron al equipo con «falla técnica». El límite lo comparten los bots de producción y los scripts de prueba (medir-estilo, simuladores, replay).
+
+**Decisión:**
+- **Hans subió el límite a USD 150/mes.** Está en la consola clásica: Configuración de la organización › Facturación › Límites de gasto. En la navegación nueva no aparece dentro de Configuración, y «Límites de frecuencia» son otra cosa (los límites por minuto).
+- **Quedan abiertas dos recomendaciones:**
+  - el aviso por correo en USD 100 (hoy está en USD 5, que no sirve);
+  - una llave de API aparte para las pruebas, con su propio tope, para que una tanda de pruebas no deje sin presupuesto a los clientes.
+
+**Razón:** octubre ya llevaba ~US$56 de bot en producción, más las pruebas. Con el ritmo de clientes nuevos, USD 50 alcanza para menos de un mes. Un bot que no contesta cuesta leads; el tope existe para que un error no gaste sin límite, no para frenar el uso normal.
+
+**Qué se descartó:** pasar los bots a GPT-4.1 mientras tanto. Los prompts de Pietro se midieron con Claude, y subir el límite tomaba 2 minutos.
+
+## 2026-10-19 — El botón de reconectar el WhatsApp, solo para los números que conectó nuestra app
+
+**Contexto:** al reconectar a El Canal (el primer aviso real de MOM-126), su número salía «No cumple los requisitos — este número no se puede compartir con esta app» en nuestra ventana de Meta, y «Registrado» en la de YCloud. Meta solo deja que retome un número registrado la app que lo registró. Pasaba igual con Roberto, Jacó y Givi: hoy todos los clientes se conectaron desde la consola de YCloud.
+
+**Decisión:** el botón de Canales sale solo para los números con `provider_config.origen = 'ycloud_tp'` (los que conectó nuestra app). A los demás, el cartel y la campana les dicen «escribinos y lo reconectamos nosotros», y el equipo lo hace desde la consola de YCloud (CRM #429, base 0148).
+
+**Razón:** mandar al cliente a un botón que le va a fallar es peor que no tener botón.
+
+**Qué se descartó:** migrar ya a los clientes actuales a nuestra app con la migración entre socios de Meta. Es posible, pero es un trámite por cliente y una decisión aparte.
+
+## 2026-10-19 — El CRM vigila que cada número de WhatsApp siga conectado (MOM-126)
+
+**Contexto:** el número de un negocio vive en YCloud y se puede caer sin que nadie lo toque. Pasó con Jacó (01-09, ~20 días sin WhatsApp) y con Roberto (29-09, ~15 h de mensajes perdidos), y YCloud no mandó ningún evento. Se notó las dos veces porque alguien vio que faltaban mensajes.
+
+**Decisión:**
+- **Revisión cada 15 minutos** (pg_cron → `/api/cron/canales`) contra `GET /v2/whatsapp/phoneNumbers`. El error de envío «has not been registered» revisa ese negocio en el momento.
+- **Máquina de estados que no avisa de más:** 2 fallas seguidas, un aviso por caída y otro por vuelta, el primer chequeo no avisa, 30 min de gracia tras conectar. Si YCloud no responde, no cambia nada.
+- **Avisos por un camino que no es el caído:** campana al dueño y admins, WhatsApp por plantilla desde el número de Momentum (dueño + super_admin) y una franja roja para todo el equipo.
+- **El secreto del cron se genera dentro del Vault** en la migración: no hay variable de Vercel.
+- **Level CR en pausa a mano** (`revisar_salud: false`) por decisión de Hans: llevaba 18 días caído y él habla con ellos. La pausa se borra sola al reconectar.
+
+**Razón:** dos caídas silenciosas con clientes sin respuesta. Un aviso falso al cliente cuesta más que la caída, por eso cada regla está para callarse cuando no hay certeza.
+
+**Qué se descartó:**
+- Esperar un webhook del proveedor: no existe para este caso.
+- Avisar en el primer chequeo: al prender la revisión habría mandado un WhatsApp automático a Level CR por una caída de hace 18 días.
+- La señal de "N horas sin mensajes" y los canales directos con Meta: quedan para después.
+
+Skill: `.agent/skills/vigilar-proveedor-que-no-avisa` (Tier 64).
+
+## 2026-10-19 — Un revisor aparte frena los cambios de estado que se adelantan (MOM-133)
+
+**Contexto:** el analista (gpt-4.1) mueve el estado de cada contacto según la descripción que escribe el negocio. Del 12 al 17-10, 10 de 10 pases automáticos a «Llamada agendada» fueron antes de tiempo: la descripción pedía "confirmó día y hora y ya se le envió el link", y el modelo movía con un "sí". El analista además solo veía los mensajes del lead, así que "ya se le envió el link" no se podía cumplir con evidencia.
+
+**Decisión:**
+- **El analista ve los mensajes de los dos lados** para decidir el estado. Los datos y la calificación siguen saliendo solo del lead.
+- **Un revisor aparte** (segunda llamada, temperatura 0, `{revision, falta}`) busca qué parte de la descripción falta. Solo corre cuando el analista quiere mover y la etapa tiene descripción (~175 por semana, menos de US$1). Si falla o responde roto, no se mueve.
+- **Las citas del analista se verifican por código**: cada una tiene que estar dentro de un solo mensaje de la conversación.
+- **Banco de replay** con casos reales (`crm-v2/scripts/replay-analista-etapas.ts`) antes de tocar el analista otra vez.
+
+**Razón:** medido con el modelo real, código viejo 27 de 54; con el revisor 26 de 26 y los 10 prematuros frenados en 20 de 20 corridas. Un estado adelantado le dice al equipo que algo pasó cuando no pasó; uno atrasado se corrige en el próximo mensaje.
+
+**Qué se descartó:**
+- Más instrucciones al mismo modelo ("cuando dudes, no muevas", partir la descripción en condiciones y citar cada una): reescribía las condiciones para que le cerraran y se olvidaba de la del link. 41 y después 47 de 54, con regresiones en cada retoque.
+- La evidencia antes de la decisión en el schema: la dejaba vacía y elegía igual.
+
+Skill: `.agent/skills/revisor-adversarial-para-decisiones-de-ia` (Tier 63).
+
+## 2026-10-15 — Di Garda: el prompt v2.3 entra al motor, el catálogo inline llega entero y los ¿ ¡ son por negocio
+
+**Contexto:** Pietro entregó la v2.3 con un "nada más hay que implementarlo". El motor no podía con tres cosas:
+- el catálogo inline se cortaba en 30 ítems y 300 caracteres por descripción (Di Garda tiene 38, y 36 pasan de 300);
+- el código borraba los ¿ ¡ en todos los bots;
+- la pantalla de Configuración tenía un tope de 2.000 para las reglas de pase, y las de Pietro miden 2.885.
+
+**Decisión:**
+- **CRM #416:** el catálogo inline entero (100 ítems, 4.000 caracteres), la unidad del precio como en el panel, y `bot_config.signos_de_apertura` (opción A de Hans: Di Garda conserva los ¿ ¡).
+- **CRM #417:** el tope de las reglas de pase en Configuración sube a 4.000.
+- **El bot queda apagado** hasta el OK de Hans.
+
+**Razón:** el prompt da por hecho que el catálogo está completo y que el bot escribe como el equipo.
+
+**Qué se descartó:** recortar el prompt. Con Sonnet 5 el largo no es un problema.
+
+**Pendientes inmediatos:** la consulta de la Ley 8968 antes de prenderlo.
+
+## 2026-10-15 — El prompt del bot se edita afuera y la base lo protege (MOM-78)
+
+**Contexto:** cada cambio al prompt de un cliente pasaba de Pietro a Hans por WhatsApp, y Hans lo aplicaba con scripts. Pietro pidió poder bajar el archivo, editarlo con su IA y volver a subirlo. Los clientes no tienen que poder tocarlo.
+
+**Decisión:**
+- **«Descargar» y «Subir nuevo»** en Master → cliente → Bot, para el principal y las objeciones. Solo master; soporte de solo lectura baja pero no sube.
+- **El archivo lleva una cabecera de una línea** con el negocio, la pieza y el md5 de la versión desde la que se bajó. El archivo de otro negocio no se sube, y si alguien subió otra cosa en el medio, no se pisa.
+- **Guarda una función de la base** (`guardar_prompt_del_bot`, 0145): bloquea la fila, compara, archiva lo anterior en `bot_prompt_versions` y escribe sin tocar las demás llaves. El historial, con «Volver a esta», es además el primer respaldo de los prompts vivos.
+- **Un candado en la base** (0142): un dueño o admin con su sesión no puede cambiar el prompt.
+- **El skill para editar** (`editar-prompt-momentum`) se baja del mismo panel.
+
+**Razón:** es la solución barata que pidió el usuario, y cada riesgo real (cliente equivocado, pisar otra edición, perder la versión buena, que un cliente lo toque) queda cubierto por la base y no por la buena voluntad.
+
+**Qué se descartó:**
+- Un editor de prompts dentro del producto: más caro, y Pietro ya edita con Claude.
+- Comparar contra lo que muestra la pantalla: puede llevar horas abierta.
+- Que los clientes editen su prompt. Hans: "si los otros clientes se ponen a tocar, se caga el chatbot".
+
+**Pendientes inmediatos:** el primer uso real de Pietro. La 0144 de la otra sesión (#408) espera el OK.
+
+## 2026-10-15 — El filtro por fecha de la bandeja cuenta dos fechas (MOM-131)
+
+**Contexto:** el ticket pedía definir antes de construir "¿fecha de qué?": último mensaje, primer contacto o última respuesta del equipo. Pedía además combinarlo con estado y etiqueta, que la bandeja no tenía.
+
+**Decisión:**
+- **Dos fechas en el mismo control:** «Último mensaje», por defecto, porque es el orden de la lista y la hora de cada tarjeta. Y «Cuándo entró», con la misma fecha que Contactos (`leads.created_at`) para que las dos pantallas cuenten igual.
+- **Estado y Etiquetas se sumaron a la bandeja.**
+- **Fecha, estado y etiqueta recortan el universo,** así que los chips cuentan sobre lo que queda.
+- **Los filtros viven arriba de la lista y en el link,** para que sobrevivan a abrir un chat en el celular y a recargar.
+
+**Razón:** las dos primeras fechas responden preguntas distintas ("¿qué se movió hoy?" y "¿qué entró esta semana?"), y las dos ya están en la base.
+
+**Qué se descartó:** «Última respuesta del equipo». No se guarda en ningún lado: los mensajes del bot y las plantillas también cuentan como enviados, y habría que empezar a registrarla.
+
+**Pendientes inmediatos:** ninguno. Se sabe que «Archivadas» trae solo las últimas 50.
+
+## 2026-10-15 — El detalle del precio es texto aparte; el precio sigue siendo número
+
+**Contexto:** Hans pidió poder escribir "+ 13% IVA" o "puede variar según cotización" junto al precio, sin pasar el precio a texto.
+
+**Decisión:**
+- **Una columna base,** `catalog_items.price_note` (opcional, hasta 120 caracteres).
+- **El bot la recibe por los tres caminos del catálogo,** y la regla de mencionarla vive en el motor, no en el texto del módulo.
+- **El acortador no deja perder un porcentaje ni un IVA.**
+
+**Razón:**
+- El precio numérico ordena y filtra por presupuesto.
+- La búsqueda de productos arma su salida con llaves explícitas, así que una llave en `attributes` no le llegaría.
+- Cada negocio puede reemplazar el texto de su módulo, así que una regla escrita ahí se perdería.
+
+**Qué se descartó:** pasar el precio a texto y guardar el detalle dentro de `attributes`.
+
+**Pendientes inmediatos:** ninguno.
+
+## 2026-10-15 — Catálogo de productos: la búsqueda en la base, el resumen en el prompt
+
+**Contexto:** el founder pidió un catálogo "específicamente para productos". Los dos modos que había tienen techo: la lista en el prompt corta en 30 y la búsqueda en memoria en 200. No se sabe cuántos productos tiene cada tienda.
+
+**Decisión:**
+- **La búsqueda vive en Postgres** (texto completo en español, sin tildes y con errores de tipeo), detrás de una herramienta propia del rubro.
+- **En el prompt va solo el resumen** de lo que vende el negocio.
+- **Tallas y colores van como texto,** no como variantes reales.
+- **El estado es la única fuente de verdad:** un stock en 0 agota al guardar.
+
+**Razón:** el prompt no crece con el catálogo y funciona igual con 20 que con 5.000. Con 5.000 productos medidos: ~100 ms.
+
+**Qué se descartó:**
+- Subir el tope de la lista o un modo automático por tamaño. El founder: "no podemos poner así un límite".
+- Embeddings: el modelo ya ve las categorías, y suman un servicio externo por guardado. Se pueden agregar después detrás de la misma herramienta.
+- Variantes reales con stock por talla.
+- Un índice GIN: medido, ganaba 1–20 ms.
+
+**Pendientes inmediatos:** la fase 2, importar productos desde Excel/CSV.
+
+## 2026-10-15 — Ningún componente con clientes reales en plan gratis
+
+**Contexto:** el 13-10, Vercel apagó la app entera 1 h 20 (402 `DEPLOYMENT_DISABLED`), y se repitió las noches siguientes. Primero se creyó que era Hobby; el 15-10 se vio que el equipo ya era Pro y que el cobro fallaba porque la tarjeta no tenía fondos. El bot calló y nadie se enteró. Dos semanas antes, el disco lleno del plan gratis de la base había hecho lo mismo durante 11,5 h.
+
+**Decisión:**
+- **App y base en planes pagos:** Vercel Pro y Supabase Pro.
+- **Y al día:** un cobro fallido apaga igual que un plan gratis. «Reactivar» no paga la factura; hay que cambiar la tarjeta y pagarla.
+- **Las caídas de infraestructura se detectan con un chequeo externo,** no de casualidad.
+
+**Razón:** los dos planes gratis se caen solos y sin avisar. Además, Hobby no permite uso comercial.
+
+**Pendientes inmediatos:**
+- Un aviso automático si `/login` deja de responder 200.
+- Que el rescate del bot cubra caídas más largas que su ventana de 15 minutos.
+
+## 2026-10-13 — Eventos a Meta en el segundo negocio: la conexión es nuestra, las reglas son del cliente
+
+**Contexto:** un segundo negocio, una clínica, pidió lo mismo que el primero. Se conectó de cero en dos días, guiando al founder pantalla por pantalla.
+
+**Decisiones:**
+
+1. **La conexión la hace el proveedor y las reglas y el encendido los hace el equipo del cliente**, desde su configuración. Founder: *«que lo haga el equipo»*. El negocio es quien sabe qué estado significa «agendó» y cuánto vale un paciente.
+2. **No se averigua quién maneja los anuncios ni quién administra el portafolio.** Founder: *«tampoco lo necesitamos saber. Simplemente ocupamos de hacer el trabajo»*.
+   - La cuenta publicitaria salió de los `ad_id` de los leads, por descarte.
+   - La aprobación del token la pide Meta sola al otro administrador.
+
+**Pendientes inmediatos:**
+- Revisar los primeros avisos cuando el equipo del cliente lo encienda.
+- Solo 1 de 39 citas agendadas vino de un anuncio: si no mueven a esos contactos, a Meta le llega poco.
+
+## 2026-10-11 — Eventos a Meta: conectar el conjunto de datos a la pauta es parte de la puesta en marcha
+
+**Contexto:** el primer negocio con Eventos a Meta llevaba dos semanas encendido, con 26 leads y 2 compras procesados en el Resumen. El que le maneja los anuncios decía que *"no llegaba nada"* y pidió poner el píxel en el CRM. El conjunto de datos que crea el código tenía **0 personas asignadas y 0 activos conectados**. Él no lo veía, porque tener acceso total al portafolio no le daba acceso al conjunto, y no lo podía elegir en sus campañas.
+
+**Decisiones:**
+
+1. **Antes de encender un negocio, el conjunto se asigna a quien pauta y se conecta a su cuenta publicitaria.** Es el paso 4b de la skill `eventos-a-meta-desde-crm-whatsapp`. Founder: *"parte de lo que nos faltó en la implementación es conectar ese conjunto de datos a una pauta real. Si no, no estaba sirviendo de nada"*.
+2. **Nada de píxel en el CRM.** El píxel mide visitas a una web. En el CRM mediría a los vendedores y ensuciaría los datos.
+3. **Sumar el teléfono hasheado a los eventos queda como decisión pendiente** con cada negocio:
+   - **Para qué:** subiría la «calidad de coincidencia» que otra herramienta le muestra al de los anuncios.
+   - **El costo:** cambia la promesa de la pantalla («nada de nombres, teléfonos ni mensajes») y son datos de los clientes del negocio.
+   - **Cuándo decidir:** después de ver la nota real.
+
+**Pendientes inmediatos:**
+- Que el de los anuncios confirme que eligió el conjunto en sus campañas.
+- El segundo negocio que lo pidió es una clínica: hay que avisarle de la categoría «salud y bienestar».
+
+## 2026-10-07 — La salida a un CRM externo (Zoho) va en una sola dirección y no toca lo que el cliente ya tiene; la próxima cita, a la vista en el chat
+
+**Contexto:** del 01 al 07-10 se cerraron en el CRM:
+- el reparto de leads (MOM-124, `momentum-ai-crm` #385);
+- la próxima cita en la conversación (MOM-130, #391);
+- el encabezado del chat según su ancho (#392);
+- la integración con el Zoho CRM del primer cliente que lo usa (MOM-128, #393 a #397).
+
+La última fue prometida en la venta, así que no se cobra.
+
+**Decisiones:**
+
+1. **Zoho en una sola dirección: del CRM al de ellos.**
+   - De ida y vuelta habría dos fuentes de verdad que se desincronizan sin que nadie lo note.
+   - La entrada de un sistema externo es otro ticket (MOM-82).
+2. **Módulo Leads, apenas escriben y después al día.**
+   - Viajan el nombre, el móvil, la fuente, el estado y las etiquetas, estos dos en campos propios de texto, y el enlace al chat.
+   - Un Cliente que ya existe en su Zoho no se toca.
+   - Un Lead borrado allá se vuelve a crear.
+3. **El dueño del Lead es el que atiende la conversación acá**, emparejado por correo con un usuario de Zoho.
+   - El **dueño de respaldo se usa solo al CREAR.**
+   - Al actualizar un Lead que acá nadie atiende, no se manda dueño: un Lead que su equipo ya había asignado no se mueve.
+4. **En el CRM del cliente no se agrega nada:** se elige entre las opciones que ya tienen.
+   - Su Fuente de Lead no tenía «WhatsApp», pero sí una variante propia.
+   - Founder: *«no quiero tocar nada de lo que ellos ya tienen, porque sí puede afectar el trabajo que ellos ya están haciendo»*. Solo se crearon los 3 campos propios.
+5. **Los contactos que existían antes de conectar entran SIN disparar las reglas de Zoho** (`trigger: []`).
+   - Su Zoho tiene, al crear un Lead, un SMS, un aviso al dueño y una fecha de captación.
+   - Los contactos nuevos las siguen disparando, como cualquier Lead que les llega.
+   - Descartado mandarlos con sus reglas: 85 contactos viejos iban a recibir un SMS.
+6. **Sin nombre confirmado, el Lead se llama «perfil de WhatsApp · número».** Pedido del founder para reconocer al contacto; solo al crear.
+7. **La próxima cita se muestra en el chat** (pastilla en el encabezado y bloque en Info), leída una sola vez para la conversación. MOM-74 se había cerrado mostrándola solo en la ficha.
+8. **El encabezado del chat decide su forma por el ancho del CHAT, no de la pantalla.** Con el panel del contacto abierto, el nombre del contacto quedaba en 0 px.
+
+**Resultado medido:**
+- Envío de los existentes: 78 creados y 10 actualizados (7 ya estaban en su Zoho), 0 fallos, 88 de 88.
+- Las reglas no corrieron: la «Fecha de Captación» quedó vacía.
+
+**Skill:** `salida-a-crm-externo` (Tier 59).
+
+**Pendientes:**
+- Que el cliente confirme que ve bien sus Leads.
+- Decidir si el reparto sigue encendido en la cuenta de Momentum.
+- La migración 0141, para que desconectar con un lote en vuelo no marque la conexión como cortada.
+
+## 2026-09-26 (madrugada) — Las descargas grandes se arman en el navegador; estados que conviven por categoría; el acceso del equipo con registro y por tiempo
+
+**Contexto:** cierre de la noche en el CRM. Hubo dos pedidos chicos y dos tickets grandes que esperaban una decisión del founder:
+- descargar la puesta en marcha de un cliente para que el socio comercial arme los prompts (`momentum-ai-crm` #362);
+- una X en los avisos flotantes y un switch más discreto (#363);
+- MOM-101 y MOM-109.
+
+**Decisiones:**
+
+1. **Un .zip con archivos del storage se arma en el navegador, no en el server.**
+   - Vercel corta toda **respuesta** de una función en 4.5 MB, igual que el cuerpo de un request. La puesta en marcha más grande ya pesa 53 MB.
+   - El server solo firma las URLs (10 min, al tocar el botón), y el navegador baja cada archivo directo del storage y arma el zip con fflate.
+   - Las fotos, los PDF y los audios se guardan sin recomprimir; el texto sí se comprime.
+   - Un archivo que no baja no frena el zip: se lista al final del documento.
+   - fflate marca los nombres con tilde como UTF-8. Se verificó extrayendo con el descompresor propio de Windows.
+2. **Los avisos flotantes van en un solo componente para los dos scopes**, con la X adentro, a la derecha y de 32 px. La de la librería medía 20 px, colgando de la esquina izquierda: por debajo del piso táctil de 24 px.
+3. **MOM-101: un estado activo POR CATEGORÍA, al mismo tiempo.** Poner "no show" ya no borra que había agendado.
+   - Las categorías las arma cada negocio.
+   - Los estados de hoy quedan en "Sin categoría", así que migrar no mueve a nadie.
+   - Se descartó la lectura de un "umbral" configurable.
+4. **MOM-109: el cliente controla el acceso del equipo Momentum a su cuenta.**
+   - Cada vez que se da o se quita queda registrado, con quién lo hizo.
+   - Se puede quitar todo de un toque o dar el acceso por un tiempo.
+   - Quitarlo corta entrar a la cuenta y leer conversaciones y contactos.
+   - Desde el panel propio se sigue configurando el bot y viendo números agregados, porque sin eso no hay soporte.
+   - **Ese recorte tiene que decirse con todas las letras en la pantalla del cliente:** si descubre después que seguíamos viendo sus números, la función hace más daño que no tenerla.
+
+**Qué se descartó:**
+- Armar el zip en el server: se cae justo con el cliente que más material mandó.
+- Sets de estados fijos (lead, post-agenda, post-cliente) configurados por nosotros.
+- Categorías de estado solo visuales. Serían rápidas, pero no resuelven que un estado pise al anterior.
+
+**Pendientes inmediatos:**
+- MOM-101 y MOM-109 se construyen en sesiones nuevas.
+- **MOM-101:** primero se diseña cómo se ve un contacto con 2 o 3 estados.
+  - Rompe un supuesto de MOM-106: un contacto va a caer en varios disparadores a Meta a la vez, y eso deja de ser un caso raro.
+  - Hay que distinguirlo en pantalla de los grupos de etiquetas, que son solo visuales.
+- **MOM-109:** primero se hace el inventario de cada vía de entrada: la función de master en las policies, la impersonación y las lecturas con admin client.
+- **Skill candidata:** extender `subir-archivos-grandes-sin-pasar-por-el-servidor` con el lado de la descarga.
+
+## 2026-09-26 — Historial de cambios por trigger, grupos de etiquetas solo visuales y un export de entrenamiento que tapa los datos de contacto
+
+**Contexto:** tres pedidos de un cliente del CRM, traídos de una llamada del socio comercial. Se hicieron seguidos y quedaron en producción la misma noche (`momentum-ai-crm` #358 y #359, migraciones 0124 y 0125):
+- ver cómo llegó un contacto a su estado (MOM-112);
+- ordenar las etiquetas en grupos (MOM-111);
+- que los chats con proveedores o familiares no entrenen al bot (MOM-110).
+
+**Decisiones:**
+
+1. **El historial se escribe con triggers en la base, no desde cada pantalla.**
+   - El estado lo cambian seis caminos (ficha, chat, lote, bot, automatizaciones, borrar un estado) y las etiquetas, cuatro. Un trigger `SECURITY DEFINER` sobre la columna y otro sobre la tabla de asignaciones los cubren todos, también los que se agreguen mañana.
+   - **Quién fue:** manda la sesión (el navegador no puede firmar como bot). Sin sesión, vale la procedencia que trae el mismo UPDATE; si no trae, queda "sistema".
+   - **Nunca rompe la escritura:** si anotar falla, el cambio se guarda igual y queda un WARNING.
+   - **Los nombres se guardan como eran en el momento del cambio,** para que se siga leyendo aunque después se renombren.
+   - **Lo que el trigger no puede saber lo firma quien sí sabe:** el lote corre sin sesión y firma él mismo las etiquetas que quita.
+2. **Los grupos de etiquetas son solo visuales.**
+   - Cambiar qué hace una etiqueta sería alcance nuevo.
+   - FK compuesta `(group_id, agency_id)` con `on delete set null (group_id)` (Postgres 15+): borrar un grupo deja sus etiquetas sin grupo y nunca apunta a otro negocio.
+   - **Los selectores traen los grupos en una consulta aparte:** si falla, se ven sin agrupar, nunca vacíos. Un negocio sin grupos no ve nada distinto.
+3. **"No usar para entrenar" es un interruptor por etiqueta, configurable por negocio,** con el mismo patrón que "la puede usar el chatbot". Lo respeta el export con que se entrena un bot, que además:
+   - deja afuera los mensajes borrados;
+   - **tapa correos y teléfonos escritos dentro de los mensajes** (48 en la primera exportación), reconociendo el formato local del teléfono y no "cualquier número largo", porque los precios son justo lo que el análisis necesita.
+4. **Primero las migraciones y después el código, con dos OK del founder:**
+   - las migraciones aditivas se aplican antes, para verificar en pantalla con su sesión;
+   - el código sube después;
+   - lo probado en su cuenta se revierte y se dice que se revirtió.
+
+**Qué se descartó:**
+- Llenar `audit_log`, que ya existía y nadie usaba: una tabla específica con nombres guardados se lee sin interpretar un jsonb.
+- Reconstruir el historial viejo: no hay de dónde. La novedad avisa que se registra desde ahora.
+- Grupos que condicionan comportamiento.
+- Un campo único "la etiqueta de exclusión" por negocio: el interruptor por etiqueta es más flexible.
+
+**Pendientes inmediatos:**
+- Ver con tráfico real las primeras filas del historial firmadas por el bot y por "sistema".
+- El filtro de etiquetas del Resumen todavía no agrupa.
+- Skill candidata: `historial-de-cambios-por-trigger`.
+
+## 2026-09-25 (noche) — Novedades contada como "¿Querés…?", y un mensaje borrado en WhatsApp sale también de la memoria del bot
+
+**Contexto:** con Novedades ya en producción, el founder pidió cambiarle el enfoque: *"que todo sea para qué me sirve y después lo uso… ¿querés que el bot te organice tus contactos? y si le doy sí me explica… no como 'este tool hace esto'"*. Esa misma noche llegó un pedido de un cliente, vía una llamada del socio comercial: si alguien del negocio le manda a una clienta un mensaje por error y lo borra en WhatsApp Web, el chatbot no debe seguir usándolo como contexto. Las dos piezas quedaron en producción (`momentum-ai-crm` #353 y #355, `ycloud-webhook` 1.12.0).
+
+**Decisiones:**
+
+1. **Cada novedad que se puede usar es una pregunta con sus pasos.**
+   - `uso = { pregunta, pasos }` en el ítem. En pantalla se lee como la pregunta y un botón "Sí, mostrame cómo", que despliega los pasos y lleva a la pantalla.
+   - Los pasos nombran los botones tal como se ven, sacados del código; nunca de memoria.
+   - La prueba del registro lo exige en todo lo nuevo y destacado, así que no depende de acordarse.
+   - El aviso del menú pregunta por UNA cosa que ese rol puede usar: a un agente no se le ofrece algo de Configuración.
+   - La entrada del día se republicó con otro id para que el aviso volviera a salir a todos. Fue una excepción deliberada a "los ids no se tocan".
+2. **Borrar o editar un mensaje se hace solo desde WhatsApp (app o Web); el CRM lo refleja, no lo origina.**
+   - Ni la API de Meta ni la del BSP permiten borrar o editar un mensaje ya enviado. Un botón en el CRM lo escondería en el CRM pero el cliente lo seguiría viendo: se descartó.
+   - Con coexistencia, un mensaje enviado desde el CRM también aparece en el WhatsApp del negocio y se puede borrar ahí.
+3. **Un cambio en `messages` no le llega al bot: su memoria es otra tabla.** Cuando algo se borra o edita, hay que corregir las dos.
+   - El CRM ya marcaba "Mensaje eliminado", pero la memoria del chatbot (`n8n_chat_histories`) seguía igual y el bot lo usaba.
+   - Como la memoria no guarda ids, el mensaje se ubica por su texto dentro de la sesión y el rol, y solo como mensaje entero: un "si" no le come el principio a "sistema".
+4. **El mismo mensaje puede llegar con dos wamid distintos.**
+   - Desde el 11-09, Meta a veces identifica a la persona por su id de usuario y no por el teléfono. Decodificado, el wamid cambia en esa parte, pero la clave del mensaje es la misma.
+   - 18 borrados del negocio se habían perdido así. La comparación se hace por esa clave, siempre dentro de la conversación.
+   - Skill candidata: `wamid-dos-formatos-y-memoria-del-bot`.
+5. **Corrección de datos conservadora:**
+   - los 18 borrados perdidos se marcaron con la hora real del borrado;
+   - 46 mensajes salieron de la memoria;
+   - 6 se dejaron a propósito, porque el mismo texto aparecía más de una vez y no se podía saber cuál era.
+
+**Qué se descartó:**
+- Un botón "borrar" en el CRM: no llega al cliente.
+- Guardar el id del mensaje en cada fila de memoria: son cuatro lugares que escriben la memoria y habría que cambiarlos todos. Con el texto alcanza para el caso real, que es un mensaje borrado a los pocos minutos.
+- Corregir las filas con texto repetido "adivinando" cuál era.
+
+**Pendientes inmediatos:**
+- Verificar con el primer borrado real, ticket MOM-114.
+- El canal directo de Meta (`meta-webhook`, casi sin uso) todavía no corrige la memoria.
+- Hay un compromiso vencido con un cliente por listas de difusión (MOM-62), que quedó en baja prioridad: avisarle.
+
+## 2026-09-25 — Una ronda de 11 tickets subida de una vez, y "Novedades" como regla del proyecto
+
+**Contexto:** el founder mandó 11 tickets de Jira (del 24-09) y pidió dejarlos listos para aprobarlos a la vuelta. Quedaron 10 PRs (`momentum-ai-crm` #338–#347), cada uno revisado. A la vuelta pidió dos cosas más, para subir todo junto: una sección de **Novedades** (*"siempre agregamos cosas nuevas y nunca avisamos nada"*) y ordenar la ficha del contacto (citas y tareas en pestañas propias, el chatbot en menos espacio). Todo quedó en producción el mismo día (PR #348), seguido de la regla permanente (PR #350).
+
+**Decisiones:**
+
+1. **Subir la ronda por una rama de salida, no PR por PR.**
+   - Los 10 PRs más las dos piezas nuevas se juntaron en `release/ronda-2026-09-25`, se probaron como un solo producto y entraron a `main` en un merge.
+   - Merge commit y no squash, para que cada PR quede MERGED solo.
+   - Las migraciones compatibles con el código que corría (0116–0123, y la Edge Function `bot-actions` 0.10.0) se aplicaron ANTES. Así se pudo verificar en pantalla contra la base real.
+   - La que corrige datos que el código viejo seguía escribiendo mal (0115, seguimientos firmados como bot) fue DESPUÉS del deploy: 514 filas.
+   - Skill: `rama-de-salida-varios-prs`.
+2. **Decisiones de producto de la ronda,** todas del founder salvo la 2.3:
+   1. Corregir hacia atrás los seguimientos viejos.
+   2. El interruptor "lo puede usar el chatbot" va en la fila de cada etiqueta y estado, y lo cambia cualquier owner/admin.
+   3. Una etapa reservada al equipo es **barrera**: el bot tampoco salta a las de después. Fue decisión técnica; el founder no la objetó y después apagó él mismo las etapas de equipo de su negocio.
+   4. `{{producto}}` no entra como variable (no existe el dato).
+   5. La plantilla con imagen queda cargada en el mensaje, no se manda sola.
+   6. Cada uno corrige su propia nota durante 15 minutos.
+   7. Los recordatorios de cita van más adelante.
+   8. Todo control de formulario va con el diseño del sistema, enforced por lint.
+3. **Novedades: contenido como código y "visto" por usuario, por id.**
+   - Las entradas viven tipadas en el repo, así el anuncio viaja en el mismo PR que el cambio.
+   - Cada usuario guarda el id de la más nueva que vio, en el servidor. Una entrada nueva reenciende el aviso para todos.
+   - El aviso es una tarjeta clara, sin flecha. El globo oscuro con flecha de la primera versión no pasó la mirada del founder: *"seamos más serios"*.
+   - **Imágenes que son réplicas de la interfaz con datos de ejemplo, nunca capturas:** una captura mostraría contactos reales a todos los clientes.
+   - Skill: `novedades-dentro-del-producto`.
+4. **Regla permanente: todo cambio que el usuario nota se anuncia en Novedades en el MISMO PR,** y no depende de acordarse. Pedido literal del founder: *"no tengo que estar todo recordando"*.
+   - Regla en `AGENTS.md` §9 y en la fila del CRM de este `CLAUDE.md`.
+   - Skill del proyecto `novedades-en-cada-cambio`.
+   - Candado `.githooks/pre-push`: frena el push de una rama que cambia pantallas sin tocar el registro. El escape es declarado (`Sin-Novedad: <motivo>`), nunca silencioso.
+5. **Una pestaña para cada cosa en la ficha.** La primera versión juntó citas y tareas en "Agenda"; el founder pidió que Tareas fuera aparte. Quedaron Agenda (citas, con reagendadas contadas por trigger desde el 25-09) y Tareas, cada una con su número.
+
+**Qué se descartó:**
+- Mergear 10 PRs uno por uno: 10 deploys y ninguna prueba del conjunto.
+- Capturas reales para Novedades: filtran datos de clientes.
+- Guardar el "visto" en el navegador: es por dispositivo y reaparecería.
+- Una tabla de novedades con panel de carga: invita a anunciar "después".
+- Candado en pre-commit: un commit intermedio no tiene por qué traer su anuncio.
+- Una sola pestaña para citas y tareas.
+
+**Pendientes inmediatos:**
+- Mirar con uso real la plantilla con imagen en el chat y el aviso de quién cambió las etiquetas.
+- Pasar los PRs a los tickets de Jira (necesita el OK del founder).
+- Los detalles latentes que anotó la revisión: zona horaria mezclada en la ficha, el modal que aparece tarde y tokens de color que no existen. Están en el backlog del CRM.
+
+## 2026-09-24 — Instagram y Messenger en producción, y la conexión que agarró de más
+
+**Contexto:** se construyó el frente social completo del CRM: conectar la página del negocio, recibir y responder por Instagram y Messenger, y el nombre de quien escribe. Cuatro entregas a producción el mismo día (PRs #322 a #325 de `momentum-ai-crm`, migración `0114`, `meta-webhook` 1.4.0), probadas con mensajes reales por los dos canales.
+
+**Decisiones:**
+
+1. **El negocio elige QUÉ cuenta conectar; no se conectan todas.** La primera versión conectaba todas las páginas que Meta devolviera: con la cuenta del founder —que administra las de varios clientes— quedaron 16 canales de cuatro clientes dentro de la agencia de pruebas, suscritos al webhook. Se revirtió el mismo día (0 mensajes habían entrado) y el flujo pasó a dos pasos: listar sin credenciales, conectar solo la elegida, y verificarla contra Meta. Skill nueva: `elegir-la-cuenta-no-conectar-todas`.
+2. **El token de página va al almacén cifrado, con llave por agencia Y página** (`0114`), nunca a la columna de configuración que leen owner y master.
+3. **Se usa el modo por defecto del login de Meta (token), no el de `code`.** En esa variante el canje exige repetir una dirección de retorno que arma el propio SDK. El registro insertado de WhatsApp sigue con `code`: son variantes distintas de la misma app.
+4. **La revisión de Meta se hace en dos tandas: mensajes primero, comentarios después.** Meta exige un video por permiso mostrando el flujo funcionando, así que no se puede "dejar aprobado" lo que todavía no existe. La tanda 2 (comentarios y comment-to-DM, lo que hace ManyChat con los CTA de historias) se construye y recién ahí se manda.
+5. **Lo que el proveedor niega se documenta, no se rodea.** El nombre de quien escribe por Messenger exige `pages_messaging` con acceso avanzado: hasta la aprobación, el contacto entra con el relleno y lo toma cuando vuelva a escribir. En Instagram ya funciona.
+
+**Qué se descartó:** conectar todas las cuentas y que el cliente borre las que no quiera (el daño ya ocurrió); pedir permisos de más "para dejar el terreno listo" (un permiso sin video traba la solicitud entera).
+
+**Pendientes inmediatos:** la revisión de la tanda 1; que el bot atienda lo que entra por Meta; la respuesta de YCloud sobre la solución de socio (`949599191550451`, Pendiente).
+
+## 2026-09-12 (noche) — Se reabre el socio tecnológico de YCloud; Instagram y Messenger van primero
+
+**Contexto:** con WhatsApp directo verificado, el founder retomó el programa *Tech Partner* de YCloud, que había quedado pendiente mientras no estaba lo de Meta. Victor, del equipo Business de YCloud, contestó por correo la duda que bloqueaba ese carril. Sesión de planificación, sin cambios en producción.
+
+> **Corrige** la Decisión 1 del 2026-09-12 más abajo, que anotaba el socio tecnológico de YCloud como descartado. Para el founder estaba pendiente, no descartado.
+
+**Decisiones:**
+
+1. **El carril de YCloud se reabre, pero no se crea nada hasta tener respuestas.** Victor confirmó que elegir "Only my partner" para enviar mensajes no impide usar la misma app de Meta para Instagram y Messenger. Se le mandaron 6 preguntas sobre lo que tiene que seguir funcionando: el tipo de proveedor registrado (Independent vs "Working with a Solution Partner"), los clientes actuales, los clientes nuevos desde el CRM, el saldo compartido, las plantillas y cómo salir sin perder el número.
+2. **La Partner Solution no se crea ni se guarda como borrador antes de esas respuestas.** El formulario de Meta avisa que sus permisos no se pueden cambiar después.
+3. **Instagram y Messenger son el siguiente bloque de construcción.** Hacen falta en cualquier escenario con YCloud. Se prueban con la página de Facebook y el Instagram de Momentum AI.
+4. **Coexistencia y chats viejos no son preguntas para YCloud.** Los clientes actuales ya están en coexistencia por YCloud, y según el founder los chats viejos no son prioridad.
+
+**Razón:** el único argumento que quedaba a favor de YCloud es comercial (el cliente no pone tarjeta en Meta y hay margen en WhatsApp). El riesgo operativo también sigue en pie y está escrito en su guía: si el saldo del partner no alcanza, los clientes pierden el canal.
+
+**Pendientes inmediatos:** respuesta de Victor; confirmar que el Instagram de Momentum AI es profesional y está vinculado a su página; arrancar la conexión de Instagram y Messenger en Canales.
+
+## 2026-09-12 (tarde) — El relleno fuera de las pantallas, y las funciones que cualquiera podía ejecutar
+
+**Contexto:** después de arreglar "Lead sin nombre" en las pantallas (PR #211), el founder preguntó por el pendiente del webhook de YCloud. Siguiendo el relleno aparecieron cuatro lectores más fuera del front y, al reemplazar dos funciones SQL, un problema de permisos en toda la base. Entregas en `momentum-ai-crm`: PR #215 (`ycloud-webhook` 1.5.1, migración `0094`) y PR #216 (`notify-agent-whatsapp` 1.0.1, migración `0095`), las dos con OK del founder y en producción. Skills: Tier 39 en este repo.
+
+**Decisiones:**
+
+1. **El nombre de WhatsApp completa `full_name` solo si es el relleno o está vacío.** Nunca pisa un nombre que puso el negocio. Es el mismo criterio que `meta-webhook`. Los 16 leads que ya estaban así se corrigieron con un backfill medido (0 nombres reales tocados).
+2. **Cada lector conserva su orden y su texto genérico; lo único nuevo es saltar el relleno.** En SQL, con un helper (`nombre_real_lead` + `telefono_legible`) en vez de repetir la lista en cada `coalesce`. Se descartó unificar el orden de todos: habría cambiado lo que ven hoy los que tienen nombre.
+3. **En el aviso de WhatsApp al agente va "Sin nombre" y no el teléfono**, porque el teléfono ya va en su propia línea.
+4. **Las notificaciones y tareas ya creadas no se reescriben** (185 notificaciones con el relleno). Son historia, y reescribir notificaciones re-emite su broadcast a las pantallas.
+5. **Toda función SECURITY DEFINER se cierra con `revoke … from public, anon, authenticated`**, no solo anon/authenticated: el EXECUTE viene de PUBLIC. Se aplicó a `notif_lead_label` (devolvía nombre o teléfono de cualquier lead a un anónimo) y `tasks_scan_generadores`.
+
+**Qué se descartó:** llamar a funciones que escriben para "probar" que estaban abiertas (la prueba sería el daño); ampliar el cierre de permisos en el mismo PR sin buscar los llamadores de cada función (la app con sesión podría romperse).
+
+**Cierre del mismo día (PR #218, migración `0096`, con OK del founder):** la auditoría encontró 18 funciones SECURITY DEFINER más sin chequeo de quién llama. Se cerraron con la misma regla. Los llamadores se midieron en `pg_stat_statements` por rol, no solo con grep. Las 4 que el panel master llamaba con sesión pasaron al cliente de servicio después de `requireMaster()`, y **la app se desplegó antes que la migración**. Resultado: funciones SECURITY DEFINER ejecutables por anon 33 → 15 (quedan las de trigger y los helpers de RLS, que las policies necesitan), `curl` anónimo → 401, y el cron y los seguimientos siguieron corriendo después.
+
+**Pendientes inmediatos:** ver el primer mensaje entrante, la primera apertura del panel master, y el primer aviso, notificación y tarea reales con el código nuevo.
+
+## 2026-09-12 — Conexión directa con Meta: de proveedor de tecnología a un WhatsApp real por coexistencia
+
+**Contexto:** cierre del camino que arrancó el 2026-09-09 para que cada negocio conecte SU WhatsApp desde el CRM, sin YCloud en el medio. El 2026-09-11 se destrabó el registro insertado (FedCM, callback async, proveedor sin registrar) y se envió la revisión de la app; el 2026-09-12 Meta la aprobó, la app se publicó y se conectó el primer número real por coexistencia. Entregas del día en `momentum-ai-crm`: PRs #211, #212 y #213, migración `0093`, `meta-webhook` 1.3.1 y 1.3.2. Skills: Tier 37 (tres) y Tier 38 (dos) en este repo.
+
+> **Corrige un registro viejo:** más abajo (sesión de Casa CRM) figura *"NO necesitamos Tech Provider status de Meta"*. Para Momentum AI CRM es al revés: sin ser proveedor de tecnología registrado **y** con la revisión aprobada, Meta no deja conectar ningún número por Embedded Signup, ni el propio.
+
+### Decisión 1 — Proveedor de tecnología directo, no un BSP
+
+**Decisión:** Momentum es **Independent Tech Provider** de Meta; cada cliente paga sus mensajes a Meta con su tarjeta.
+
+**Razón:** WhatsApp, Instagram y Messenger salen por la misma app; no hay un saldo del partner que, si se vacía, apaga a todos los clientes; y la revisión de la app era inevitable igual (el carril de socio tecnológico de YCloud pide los mismos videos).
+
+**Qué se descartó:** quedarse en YCloud como proveedor, y su programa de socio tecnológico.
+
+### Decisión 2 — Coexistencia sí o sí, con los chats viejos
+
+**Decisión:** la conexión es **coexistencia** (el número sigue en WhatsApp Business del celular y en WhatsApp Web) y se importan los chats de los últimos 6 meses.
+
+**Razón:** palabras del founder: *"mis clientes siempre deben también poder acceder al WhatsApp desde el celular o desde WhatsApp web"*, y después *"trae los chats viejos también"*.
+
+**Cómo, para que el pasado no se haga pasar por presente:** la importación corre en una función que aparta los avisos, los "no leídos" y el realtime, y **no llena la ventana de 24 h** (a quien escribió antes de conectar solo se le puede escribir con plantilla). Nunca se registra con PIN un número que está en la app.
+
+### Decisión 3 — La prueba real va en una cuenta aparte; "Momentum AI CRM" sigue en YCloud
+
+**Decisión:** el número de prueba se conectó en una cuenta nueva, **Pruebas Meta**, creada con el número vacío. "Momentum AI CRM" y los clientes siguen en YCloud por ahora.
+
+**Razón:** un negocio tiene una sola línea activa, y conectar por Meta en una cuenta viva **apaga su línea de YCloud**. Palabras del founder: *"necesitamos que todavía esté funcionando con Ycloud, porque siguen llegando mensajes"*. La demo tampoco servía: mezcla chats reales con datos inventados.
+
+### Decisión 4 — Un nombre de relleno nunca se muestra ni se usa para hablarle a nadie
+
+**Decisión:** "Lead sin nombre" y los demás rellenos pasan por un helper único: en pantalla se ve el **teléfono**, y en plantillas o prompts de IA no se usa. Cuando la persona vuelve a escribir, su nombre de WhatsApp reemplaza el relleno, nunca un nombre cargado a mano.
+
+**Razón:** Meta no manda nombres en los chats viejos, así que la importación iba a llenar el CRM de "Lead sin nombre". Al revisarlo aparecieron dos daños que venían de antes: plantillas saludando **"Hola Lead,"** y la IA de seguimientos recibiendo el relleno como nombre del cliente.
+
+**Qué se descartó:** borrar el relleno de la base (el bot y el SQL comparan contra ese texto).
+
+### Decisión 5 — Un aviso de estado que llega antes que su mensaje se guarda, no se pide reintento
+
+**Decisión:** si Meta avisa "entregado" o "leído" de un mensaje que todavía no está guardado, el aviso va a una tabla de pendientes y un trigger lo aplica cuando aparece el mensaje (migración `0093`). La función que comparte con YCloud no se tocó.
+
+**Razón:** medido dos veces el mismo día (36 ms y 22 ms de diferencia): con coexistencia la carrera es lo normal. Pedirle a Meta que reintente dejaría reintentando durante días los avisos de mensajes que nunca van a existir en el CRM.
+
+### Decisión 6 — La importación de chats viejos salta los mensajes sin contenido
+
+**Decisión:** en el historial se ignoran `errors` y `unsupported`. En vivo se siguen mostrando.
+
+**Razón:** el mensaje oficial de Meta que pide tocar "Conectar" durante el QR llega así y creaba un contacto basura del Reino Unido. De un chat viejo, esos tipos solo dejan una burbuja vacía.
+
+**Pendientes inmediatos:**
+- Antes de pasar un cliente de YCloud a Meta: resolver los mensajes que el historial duplicaría (guardados con el id de YCloud; medido 25 en Givi/Jacó) y el handler de las conversaciones importadas cuando el bot escuche a Meta.
+- `ycloud-webhook`: completar el nombre de un contacto existente igual que `meta-webhook` (la app ya lo muestra bien).
+- Renombrar el portafolio "Hans Villalobos": es lo que ven los clientes al conectar ("Tu cuenta está conectada a Hans Villalobos").
+
+## 2026-09-11 — Los estados de un mensaje: el check azul, y lo que WhatsApp no deja hacer
+
+**Contexto:** el founder preguntó si se podía editar o borrar un mensaje como en WhatsApp, y después si se podía saber cuándo lo leyeron. Las dos respuestas salieron de la documentación viva de Meta y de YCloud (revisada el 2026-09-11) y de medir la base de producción. Terminó en tres entregas a producción del CRM (PRs #205, #206 y #207 de `momentum-ai-crm`, migración `0092` y la función `ycloud-webhook` v28) y una skill nueva en este repo (el cuarto footgun de `git-footguns-de-sesion`, PR #37).
+
+### Decisión 1 — Editar y borrar desde el CRM: no se construye, se espera a Meta
+
+**Decisión:** no se construye nada; queda anotado en el backlog del CRM con qué vigilar.
+
+**Razón:** la API no lo permite. Ni Meta ni YCloud tienen forma de editar o borrar un mensaje ya enviado — revisado en la referencia y en los dos changelogs, al día. Lo que sí llega, y el CRM ya mostraba: las ediciones y borrados del lead (58 casos en 5 agencias) y los que el negocio hace desde su propio celular (9, en Givi).
+
+**Qué se descartó:** un "borrar" que solo esconda el mensaje en el CRM. El agente creería que lo borró y el cliente lo seguiría viendo en su teléfono: el sistema mentiría sobre lo único que importa.
+
+### Decisión 2 — El check azul se muestra; el visto hacia el cliente no se manda
+
+**Decisión:** la burbuja de un saliente muestra reloj, una rayita gris, dos grises o dos azules, con la hora de entrega y de lectura al tocarla. Marcar como leído hacia el lead —que la API sí permite, igual que el "escribiendo…"— **no se hace**.
+
+**Razón:** el dato de lectura llegaba y se guardaba desde hacía meses; lo único que faltaba era mostrarlo. Lo del visto hacia el cliente es decisión de producto del founder: *"no hace falta que los leads vean el visto"*.
+
+**Consecuencia a saber:** que no haya azul NO quiere decir "no lo leyó". El cliente puede tener apagada la confirmación de lectura, y los mensajes escritos desde el celular casi nunca traen el aviso (523 de 596 se quedan en "enviado"). La pantalla lo explica al tocar los checks, para que nadie persiga a un cliente por nada.
+
+### Decisión 3 — El estado de un mensaje solo AVANZA, y una fecha es un hecho
+
+**Decisión:** los dos webhooks escriben el estado con la misma función SQL (`aplicar_estado_meta`), que lo calcula sobre la fila bloqueada y nunca retrocede; y se aplica el estado más avanzado que el propio aviso demuestra con sus fechas.
+
+**Razón:** YCloud no garantiza el orden de sus avisos. Guardar el último que llegaba dejó **641 mensajes con el estado atrasado** (263 leídos figurando como entregados o enviados, 378 entregados figurando como enviados). Medido además: 3 de cada ~3 horas de avisos traen status "sent" con la hora de ENTREGA adentro.
+
+**Y:** la pantalla deriva lo que dibuja del estado **y** de las fechas, así que un estado atrasado no se ve mal. Si WhatsApp dijo a qué hora se leyó, se leyó.
+
+### Decisión 4 — Un tope que recorta un prompt se sube; no decide él qué regla del negocio se cae
+
+**Decisión:** el tope de la persona del asistente de IA pasó de 24.000 a 60.000 caracteres, con la regla escrita de volver a subirlo —después de medir el costo— si otro prompt real lo pasa.
+
+**Razón:** el prompt de Level (49.926 caracteres) perdía ~26.000 del MEDIO, y ahí vivían el gate duro de calificación y "lo que no podés decir": la sugerencia podía empujar a un lead sin calificar. El tope era nuestro, no del modelo — la ventana es de 1M y el prompt entero cuesta menos de un centavo por sugerencia.
+
+**Cómo apareció:** por un chequeo que venía fallando y mostraba un número tranquilizador, 23.963 caracteres, que era el largo DESPUÉS de recortar.
+
+### Decisión 5 — Un chequeo tiene que separar "no lo mandaron" de "lo perdimos"
+
+**Decisión:** el verificador de anuncios dejó de exigir siempre el texto del anuncio: ahora falla solo si el crudo del webhook SÍ lo trae y nosotros no lo mostramos. Y la ficha del contacto dice "Meta no mandó el texto de este anuncio" en vez de esconder el bloque.
+
+**Razón:** el caso real era 1 lead de 937, y el crudo tampoco traía el texto — Meta no lo manda cuando el anuncio no tiene texto propio. Un chequeo que falla por algo ajeno se vuelve ruido, y un hueco mudo en la ficha hace dudar de si el dato falta o si no cargó.
+
+**Pendientes inmediatos:**
+- Confirmar la v28 de `ycloud-webhook` con un aviso real: los salientes con `read_at` y `status <> 'read'` tienen que dar 0.
+- Vigilar los changelogs de Meta y de YCloud por si habilitan editar y borrar.
+- Siguen arriba las dos esperas de terceros: publicar la app de Google Cloud y las plantillas de Meta para las agencias que no tienen.
+
+## 2026-09-10 — El sistema de productividad del CRM, entero y en producción: Tareas, Agenda y "Mi día"
+
+**Contexto:** el founder pidió convertir Agenda y Tareas en un gestor profesional y sumar una pantalla "Mi día" con *"todo lo mío"*, incluidos los leads que le escribieron y no les contestó. Se planificó en 4 fases (spec en `crm-v2/docs/superpowers/specs/2026-09-08-productividad-fase1-generadores-design.md`). Entre el 8 y el 10 de septiembre se construyeron y pasaron a producción las cuatro; las Fases 2 a 4 son los PRs #186 a #196 de `momentum-ai-crm`. El detalle de cada entrega, con cómo se verificó, está en `crm-v2/memory/backlog.md`.
+
+### Decisión 1 — Construir todo, sin gate de medición
+
+**Decisión:** se construyó la funcionalidad completa sin esperar datos de uso.
+
+**Razón:** decisión explícita del founder, textual: *"no quiero hacer pruebas ni nada. Quiero que hagamos la funcionalidad al 100%. Me da igual ahorita si lo utilicen o no."*
+
+**Qué se descartó:** el plan de la Fase 1 exigía prender los 4 generadores en Givi y medir 7 días —qué proporción de tareas se trabajaba y cuál caducaba— antes de construir la pantalla de Tareas. **No reabrir.**
+
+**Consecuencia a saber:** al 2026-09-10 hay 0 generadores prendidos, 1 tarea en toda la base y 0 planificadas. Las pantallas nuevas se ven vacías hasta que el equipo las use o se prenda un generador.
+
+### Decisión 2 — "Tuyo" es UNA regla en todo el sistema: lo asignado a vos MÁS lo que no tiene dueño
+
+**Decisión:** `esDelDiaDe` (en `crm-v2/src/lib/tareas/dia.ts`) decide de quién es algo en la tira "Tu día", en la Agenda por persona, en los huecos y en "Mi día". Todo lo que no tiene dueño lo dice en pantalla ("Sin dueño").
+
+**Razón:** en 7 de 10 agencias no hay nada asignado; una vista personal que dejara afuera lo sin dueño estaría vacía justo ahí, y una cita que nadie ve es el peor error de una agenda.
+
+**Qué se descartó:** "solo lo mío" (dejaba vacías 7 de 10 agencias) y un umbral por tamaño de agencia (magia que cambia la pantalla sin que nadie lo pida).
+
+**Bug que destapó:** la tira "Tu día" de Tareas mostraba y SUMABA lo de todo el equipo. Se arregló volviendo obligatorio el parámetro `persona`: quien llama tiene que decidir de quién es el día.
+
+### Decisión 3 — "Te escribieron y no contestaste" = la definición del generador G2, NO el "Sin atender" del Resumen
+
+**Decisión:** "espera respuesta" es `archived_at is null and handler <> 'bot' and last_inbound_at is not null and (last_outbound_at is null or last_outbound_at < last_inbound_at)` —la condición del generador G2 (migración 0084)—, escrita en TS en `crm-v2/src/lib/hoy/esperando.ts` con el comentario que cruza las dos.
+
+**Razón:** una sola definición para "Mi día" y para las tareas automáticas; si divergen, se contradicen. **Verificado contra la base viva:** TS y SQL dan el mismo número en las 10 agencias, sobre las 1.228 conversaciones (84 · 16 · 10 · 4 · 1 · 1 · 0 · 0 · 0 · 0).
+
+**Qué se descartó:** reutilizar el "Sin atender" del Resumen, que cuenta `handler = 'unassigned'`. Es otro conjunto —una conversación que alguien tomó y no contestó está en uno y no en el otro—, así que tienen nombres distintos y no se enlazan entre sí.
+
+**Y:** las de hace más de una semana se CUENTAN y no se listan. Givi tenía 84 esperando: 14 de la última semana y 39 de hace más de un mes.
+
+### Decisión 4 — Los huecos del día se calculan en una jornada A LA VISTA y editable, no con el horario de la agencia
+
+**Decisión:** "Huecos entre las 08:00 y las 18:00 · Cambiar", en horas enteras, guardado en el navegador y dicho en pantalla.
+
+**Razón:** 7 de 10 agencias no tienen horario cargado, y las 2 que sí lo usan para la ventana nocturna del bot. Es la misma razón por la que se descartó un número de "capacidad" del día: un supuesto escondido se ve autoritario y engaña; uno que se ve y se cambia, no.
+
+**Y:** poner una tarea sin dueño en el hueco de alguien la hace de esa persona, pero **nunca le quita la tarea a otro**: el dueño solo se escribe con `assigned_user_id IS NULL` en el WHERE (verificado contra la base: con dueño, el primer update toca 0 filas y el dueño no cambia).
+
+### Decisión 5 — La Agenda pide datos al servidor por el RANGO de la vista, y la ventana es la `key` del cliente
+
+**Decisión:** la Agenda trae ±45 días. Si hay que pedir otra ventana se decide mirando el rango ENTERO de la vista (día, semana o mes), y la ventana es la `key` del componente cliente.
+
+**Razón:** octubre visto desde el 10 de septiembre empieza adentro de la ventana y termina afuera; sus últimos días se verían vacíos sin serlo. Y sin la `key`, al salir de la ventana el servidor traía las citas nuevas pero la pantalla seguía mostrando las viejas (`useState` no vuelve a leer sus props): un bug que venía desde la Agenda original, reproducido con una copia de la página SIN el arreglo en el mismo build antes de corregirlo.
+
+**Pendientes inmediatos:**
+- Las dos esperas de terceros siguen arriba de todo y no dependen de código: publicar la app de Google Cloud (la sincronización con Google Calendar depende de eso) y las plantillas de Meta para las 6 agencias que no tienen (`crm-v2/memory/plan-ejecucion-2026-09-07.md`).
+- Decidir si se prende algún generador y en qué agencia.
+- Un número de pendientes al lado de "Mi día" en el menú: medir antes, porque sería una consulta más en el layout de TODAS las páginas.
+
+## 2026-09-09 — El bot llegaba antes que el lead, y el 86 % del tráfico ni siquiera pasa por él
+
+**Contexto:** el founder reportó que el bot de Givi estaba encendido, en ventana 08:00–18:00, y no atendía.
+
+### Decisión 1 — Esperar 6 s antes de buscar el lead, en vez de reintentar
+
+YCloud entrega el MISMO evento a dos endpoints en paralelo: la Edge Function `ycloud-webhook` (crea lead + conversación + mensaje) y el workflow del bot (lo busca). El bot llegaba a `Buscar Lead (Supabase)` **antes** de que el lead existiera, la query devolvía `{}` y el flujo moría en `Abort - Lead No Encontrado`. Sin error, sin log, sin respuesta al lead — ni siquiera el aviso de fuera de horario.
+
+Medición de dos ejecuciones reales:
+
+| | Buscó | El lead existió | Resultado |
+|---|---|---|---|
+| Muda | 22:23:28.**272** | 22:23:28.**301** | perdió por **29 ms** |
+| OK | 19:37:26.**897** | 19:37:26.**851** | ganó por 46 ms |
+
+Delta webhook → lead creado: **3,70 s y 3,69 s**, muy consistente.
+
+**Decisión:** un nodo Wait de 6 s entre `Resolve Agency` y `Buscar Lead (Supabase)`.
+
+**Qué se descartó:** un nodo de reintento en la rama "no encontrado". **26 nodos aguas abajo leen `$('Buscar Lead (Supabase)')` por NOMBRE** — con un nodo de reintento aparte, todos ésos leerían la búsqueda vacía (la primera), rompiendo el trace, el handoff y las HTTP del extractor justo en el camino que se quería rescatar. Esperar antes del mismo nodo no cambia ninguna referencia.
+
+**Costo:** 6 s de latencia para todos los tenants. Despreciable frente al debounce de 45 s que el bot ya aplica después.
+
+### Decisión 2 — `handler` es terminal, y eso NO se cambia
+
+Al medir por qué no respondía dentro de la ventana, el reparto de 10 días fue: **282 mensajes en conversaciones `handler = human`** (el bot no las toca por diseño; 146 quedaron sin respuesta, de personas) contra **47 en `handler = bot`** (4 fallaron, la carrera de arriba).
+
+O sea: **el bot ve 47 de 329 mensajes, el 14 %**. Cuando una persona contesta desde el inbox, la conversación pasa a `human` y el bot no vuelve a entrar nunca, aunque el equipo la abandone.
+
+**Decisión del founder, textual:** *"No, no, no, eso no lo quiero. Eso de hecho es una funcionalidad que ni siquiera hemos implementado."* No se construye retoma automática.
+
+### Decisión 3 — Ventana nocturna en modo silencioso
+
+Se pasó a **18:00 → 05:00, todos los días**, y el modo de `office_hours` a **`office_hours_silencioso`**: con ventana nocturna y el modo anterior, quien escribiera a las 10 a.m. recibiría *"estamos fuera de horario"* mientras el equipo está trabajando.
+
+Probado con el código real del nodo inyectándole el reloj: 11 casos, bordes incluidos (contesta 18:00 en punto y 04:59, se calla 17:59 y 05:00 en punto).
+
+**Estado final:** `bot_enabled = false` a pedido del founder. La ventana y el modo quedan guardados para cuando lo prenda.
+
+**Pendientes inmediatos:**
+- Al prender en producción, verificar que la espera de 6 s eliminó los abortos por lead no encontrado
+- El video para la objeción "mandame info" sigue sin URL
+- Decisión abierta del estudio: el equipo nunca manda link (0 de 64) ni da precio en números (0 de 64); el bot hace las dos por pedido del cliente
+
+## 2026-08-28 — La lentitud no estaba en la base: los flujos de seguimientos y la sesión que salía a preguntar
+
+**Contexto:** el founder reportó el CRM "extremadamente lento, incluso cambiar entre secciones". En la misma jornada se rehízo Seguimientos tres veces a partir de su feedback mirando la pantalla.
+
+### Decisión 1 — Antes de optimizar una consulta, contar los VIAJES
+
+La sospecha razonable era la base. **La base tardaba 5,17 ms** con 100 % de cache hit y 937 conversaciones. De cada segundo de espera usaba **5 milésimos**.
+
+El costo real era la cantidad de idas y vueltas: **~215 ms cada una** (Vercel en `iad1`, Supabase en `us-west-2`) y **~11-14 en fila** por navegación — `getUser()` dos veces y tres consultas del layout **repetidas** en el gate de cada página, dentro del mismo request.
+
+**Razón:** una consulta lenta se ve en `EXPLAIN`. Un viaje de más no se ve en ningún lado: cada pieza está bien, y la suma no. La pregunta que lo destapa es *"¿cuántos `await` a la base hay EN FILA antes de que se dibuje algo?"*.
+
+**Cross-project:** aplica a cualquier app serverless contra una base gestionada.
+
+### Decisión 2 — El cómputo va DONDE están los datos, y eso hay que amarrarlo por escrito
+
+`vercel.json` con `"regions": ["pdx1"]` porque **`pdx1` ES `us-west-2`**, la misma región de la base — no una cercana. Medido: el costo por viaje bajó de **~215 ms a ~43 ms**, cinco veces.
+
+**Lo que hay que dejar escrito y casi nadie escribe:** si algún día se mueve el proyecto de la base, hay que mover la región del cómputo. Un desacuerdo entre las dos **no rompe nada y no da ningún error** — solo hace todo más lento, para siempre. Quedó en `AGENTS.md §7.5` con el grep de una línea que lo verifica.
+
+**Contrapartida honesta:** una ruta SIN base se puso más lenta (125 → 222 ms), porque el salto usuario→función se alargó. El punto de equilibrio está por debajo de **una** consulta por request.
+
+### Decisión 3 — Verificar la sesión sin salir a la red, con el trade-off dicho en voz alta
+
+`getClaims()` en vez de `getUser()`: verifica la firma del JWT **localmente** cuando el proyecto usa llaves asimétricas. Sigue refrescando la sesión y cachea el JWKS por proceso; si las llaves fueran simétricas, el SDK **cae solo** a `getUser()` — más lento, nunca inseguro.
+
+**El trade-off, escrito y no escondido:** `getUser()` pregunta al servidor si el usuario sigue vigente y detecta al instante una sesión cerrada en otro lado; `getClaims()` confía en la firma hasta que el token vence. **La autorización no cambia** — cada consulta sigue pasando por RLS con el mismo JWT.
+
+### Decisión 4 — Dos interruptores en serie son dos formas de quedar mudo
+
+Se aplicó **tres veces** el mismo día: se le sacó el switch a cada paso del flujo, y después se borraron **dos llaves de configuración con defaults OPUESTOS** que ninguna pantalla escribía —una hacía que el generador no creara nada, la otra habría cancelado todo al instante—.
+
+**Razón:** cada interruptor extra es una forma independiente de que el sistema no haga nada **y no lo diga**. El síntoma no es un error: es silencio.
+
+**Qué se descartó:** construir el interruptor que faltaba. La UI apuntaba a un control que nunca existió; la respuesta correcta no era construirlo, era borrar el concepto.
+
+### Decisión 5 — Un estado que afirma algo tiene que poder respaldarlo
+
+`conversations.handler` nacía en `'bot'` por el DEFAULT del schema, sin preguntar si el bot del negocio existía. Con el bot apagado, tres leads reales quedaron **6,5 h sin respuesta** mostrando el chip "Bot" — que es lo que un agente lee como *"esto ya está atendido"*.
+
+**Razón:** el invariante va en la BASE, no en el código, cuando el valor lo escriben varios consumidores. Uno que dependa de que cada uno se acuerde no es un invariante.
+
+**Hallazgo de paso:** el valor "sin asignar" **no lo escribía nadie** — 0 filas en toda la base —, así que la tarjeta del dashboard que lo contaba mostró **0 para todos, siempre**, desde que existe.
+
+### Pendientes que dispara
+
+- **Sin verificar:** el camino de master impersonando tras el cambio de sesión.
+- La ficha de contacto hace **15 viajes en fila** — la peor pantalla; el resto anda en 5-6.
+- El token de Apify **sigue** dentro del workflow vivo. (El `BOT_TEST_SECRET` ya no: ese pendiente era falso.)
+
 ## 2026-08-28 — El onboarding del cliente entra al producto (y lo que enseñó probarlo)
 
 **Contexto:** cuando un cliente paga, se le mandaba al grupo de WhatsApp un `.docx` con 32 preguntas y 8 assets. Las carpetas `clients/*/onboarding/` de los tres clientes estaban **vacías**: nadie lo llenaba. El material que terminó cambiando el bot de Roberto llegó meses después y suelto. En la misma sesión se construyó, se probó y se puso en producción el reemplazo.

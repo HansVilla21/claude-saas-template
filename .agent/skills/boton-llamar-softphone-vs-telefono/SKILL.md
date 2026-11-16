@@ -107,6 +107,46 @@ Anotado en el traspaso: si aparece Skype, pasar a `sip:`. Y que la integración 
 
 ---
 
+## Segundo caso: elegir el canal (Zoiper, WhatsApp o Zoom) — CRM de Josué, 2026-10-25
+
+El cliente pidió que «Llamar» deje elegir desde dónde, «para ir llamando uno tras otro sin
+salirme». Lo que enseñó:
+
+- **Revisá en la grabación quién pidió cada canal.** El ticket decía «WhatsApp, Zoiper o Zoom»,
+  pero Zoom lo había dicho el consultor: el cliente pidió WhatsApp y Zoiper. Casi se le pregunta
+  si tenía Zoom Phone por un canal que nunca pidió.
+- **WhatsApp no tiene enlace para EMPEZAR una llamada a una persona.** Los enlaces de llamada son
+  solo para números de empresa y no andan en la computadora. `wa.me/<número>` abre el chat y la
+  llamada se toca ahí: el botón dice «Abrir chat», no «Llamar».
+- **`wa.me` necesita el número con código de país.** `wa.me/88887777` (8 dígitos de Costa Rica,
+  sin el 506) y WhatsApp dice que el número no es válido. Le pasaba al 60 % de la base y nadie lo
+  había notado, porque el botón «abría algo». Regla:
+  - 8 dígitos → anteponer el país del negocio;
+  - con `+` o `00` → ya trae el país;
+  - 11 o más dígitos → se toma como que lo trae;
+  - **7, 9 y 10 no se adivinan.** Un 10 sin `+` es un número de EE. UU. sin el 1, y
+    `wa.me/3055551234` cae en Grecia. Mejor no ofrecer el botón que llamar al país equivocado.
+- **Zoom marca solo con Zoom Phone:** `zoomphonecall://+<E.164>`, documentado por Zoom junto a
+  `callto:` y `tel:`. Con Zoom Meetings no llama a teléfonos.
+- **Casillas viejas con varios números** («2222-3333 / 8888-7777», cientos de contactos importados
+  antes de separar teléfonos): partilas con el mismo normalizador del importador ANTES de armar el
+  `href`, o se marca un número de 16 dígitos que no existe. El regex de extensión tiene que
+  aceptar paréntesis: «(EXT 101)» se pegaba al número.
+- **El canal elegido se recuerda en esa computadora**, en `localStorage`, leído con
+  `useSyncExternalStore` y con el canal por defecto en el servidor: sin desajuste de hidratación.
+  Los números de la ficha marcan directo por ese canal, que es lo que permite llamar uno tras
+  otro. En modo privado `localStorage` tira: guardalo también en memoria de la pestaña.
+- **El iPad se presenta como «Macintosh».** Para decidir entre `tel:` y `callto:`, sumá
+  `navigator.maxTouchPoints > 1`.
+- **La computadora del cliente era Windows, no Mac** (llamada del 18/08, después del ejemplo de
+  arriba). Ahí `callto:` no tenía dueño y Windows ofrecía buscar una app en la Microsoft Store.
+  Zoiper tiene que quedar elegido para el protocolo CALLTO: en Windows, Configuración →
+  Aplicaciones → Aplicaciones predeterminadas → por protocolo; o en Zoiper, Settings → Advanced.
+  Es configuración del cliente: pedila explícita, y el ticket no se cierra hasta que «Llamar»
+  abra el softphone en SU máquina.
+
+---
+
 ## Skills relacionadas
 
 - `reporte-de-traspaso-del-proyecto` — dónde se anotan la alternativa y el alcance.

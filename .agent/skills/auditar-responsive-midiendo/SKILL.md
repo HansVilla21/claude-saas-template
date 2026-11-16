@@ -244,6 +244,30 @@ Arreglos + **20 y pico de pantallas medidas a 320/375/768/1280** con `scrollWidt
 - banner de 40px inyectado → `main` se achica **exactamente 40px**, scroll del documento en **0**.
 - responder/reaccionar: 4 botones, `opacity: 1`, 32px — antes no existían en celular.
 
+## Apéndice (2026-10-03): el que mide mal es el breakpoint, no el elemento
+
+**Segundo caso del mismo modo de fallo, en escritorio.** El encabezado del chat decidía su versión compacta por el ancho de la **pantalla** (`isCompact`). Con el panel del contacto abierto, a 1280 px el chat mide 338 px, y a 1440 mide 498. Como la pantalla era «grande», el encabezado se armaba completo:
+- 418 px de controles le dejaban **0 px al nombre del contacto**, que no se veía;
+- el botón «Llamar» quedaba en **16 px**.
+
+A 375 y a 1920 todo se veía bien. Por eso lo vio una verificación de otra cosa y no el reporte.
+
+**La regla:** cuando un componente vive en una columna que cambia de ancho por otra cosa (un panel lateral, un split, una ventana), decide su forma por el ancho **de su contenedor**, no por el de la ventana:
+- Una container query alcanza si el cambio es solo de CSS.
+- Si cambia el árbol (qué botones existen, qué va a un menú ⋯), medí el contenedor con `ResizeObserver` dentro de un `useLayoutEffect`, para que no parpadee, y derivá un nivel.
+
+En el caso real fueron tres niveles:
+
+| Nivel | Ancho del encabezado | Qué hace |
+|---|---|---|
+| **Angosto** | < 560 px | El encabezado del celular: acciones al menú ⋯ y la cita en su propia franja |
+| **Medio** | 560–859 px | Botones completos y la cita en su franja. En línea aplastaba el teléfono a 16 px |
+| **Ancho** | ≥ 860 px | Todo en una línea |
+
+Solo el encabezado usa el nivel; el resto del chat sigue con el breakpoint de pantalla.
+
+**Cómo se verifica:** medí con el panel abierto **y** cerrado, a 1280, 1440, 1600 y 1920, además de 375 y 768. El ancho de la ventana no es la variable que importa. El ancho del nombre en px es el número que delata el bug: tiene que dar más que 0 en todos los casos, además de `scrollW === vw` y ningún blanco bajo 24 px. Es la misma familia que el selector de emojis (`selector-de-emojis-tipo-whatsapp`): el «compacto» se decidía por la ventana y no por la columna.
+
 ## Relacionadas
 
 - `verificar-funcionamiento-end-to-end` — "se ve bien" ≠ "funciona"; esta skill es su versión para UI.

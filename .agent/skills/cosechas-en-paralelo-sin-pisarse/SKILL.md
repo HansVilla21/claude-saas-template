@@ -50,7 +50,7 @@ Si otro PR abierto ya lo reclama, **tomá el siguiente y ponéle la fecha de la 
 
 ### 2. El conteo se deriva, nunca se calcula de memoria
 
-`ls | wc -l` contra el disco, después de cada merge. Nunca "lo que había más lo mío".
+`ls -d .agent/skills/*/ | wc -l` contra el disco, después de cada merge. Nunca "lo que había más lo mío".
 
 ```bash
 # la verdad, siempre
@@ -78,7 +78,7 @@ Este chequeo también atrapa un defecto que nada más detecta: **un nombre parti
 El orden importa menos de lo que parece; lo que importa es **quién repasa al final**.
 
 1. Mergear en el orden que sea (o el cronológico, si querés que los tiers queden lindos).
-2. **Cada PR posterior:** traer `main` a la rama (`git merge origin/main`), resolver el índice **conservando los dos bloques**, y recalcular el conteo con `ls | wc -l`.
+2. **Cada PR posterior:** traer `main` a la rama (`git merge origin/main`), resolver el índice **conservando los dos bloques**, y recalcular el conteo con `ls -d .agent/skills/*/ | wc -l`.
 3. **El último en mergear corre la verificación completa** y arregla lo que quedó suelto.
 4. Si el índice tiene familias/categorías además del listado cronológico, la nueva entrada va **en las dos**.
 
@@ -93,7 +93,7 @@ El orden importa menos de lo que parece; lo que importa es **quién repasa al fi
 ## Output esperado
 
 - Cada PR con un número que nadie más reclama.
-- El conteo declarado igual a `ls | wc -l`.
+- El conteo declarado igual a `ls -d .agent/skills/*/ | wc -l` (con la barra final: `ls .agent/skills | wc -l` cuenta el `README.md` y da uno de MÁS — pasó el 2026-09-07).
 - Verificación de cobertura en cero huecos, corrida **después** del último merge.
 - Confirmación de que tus archivos están **en `main`**, no solo en tu rama.
 - En el PR, dicho explícito: qué PRs quedan abiertos tocando el mismo índice y qué hay que repasar cuando entren.

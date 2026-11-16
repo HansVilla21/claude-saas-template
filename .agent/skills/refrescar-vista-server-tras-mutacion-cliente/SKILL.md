@@ -18,7 +18,7 @@ Caso real (Mi perfil, 2026-07-08): guardar el nombre actualizaba el input (estad
 
 - ¿El dato desactualizado lo renderiza un **Server Component** (layout, page, algo que hace `await supabase...` en el server)? → necesitás revalidar el server (paso 2).
 - ¿Es **estado cliente** del mismo componente? → actualizalo con `setState` (no necesitás refresh).
-- ¿Es un cambio hecho por **OTRO usuario/pestaña**? → eso NO lo arregla refresh; necesitás **realtime** (broadcast/subscription).
+- ¿Es un cambio hecho por **OTRO usuario/pestaña**? → un refresh tras TU write no se entera; necesitás **realtime** (broadcast/subscription) o, si unos segundos de atraso no importan, un refresco automático acotado (`pantalla-se-actualiza-sola`).
 
 ### 2. Si es server-rendered: `router.refresh()` tras el write
 
@@ -34,6 +34,8 @@ router.refresh(); // re-corre los Server Components → re-leen la fuente → la
 ### 3. Si es cross-usuario: realtime, no refresh
 
 Si el cambio lo hace otra persona (o el mismo user en otra pestaña), `router.refresh()` en tu sesión no se entera. Ahí va un broadcast/subscription (ej. un trigger `realtime.send()` en UPDATE + un hook que escucha). Ver `desktop-notifications-from-realtime`.
+
+Matiz: `router.refresh()` SÍ lee lo último de la base cuando corre; lo que no hace es enterarse solo de que otro cambió algo. Si alcanza con que la pantalla esté al día en segundos o en un minuto (una agenda donde reservan por un link, una lista que tocan una asistente o un webhook), un refresco al volver a la pestaña y cada minuto mientras hay actividad cuesta mucho menos que realtime. Ver `pantalla-se-actualiza-sola`.
 
 ### 4. Verificar
 
@@ -54,12 +56,13 @@ Hacé la acción y confirmá que la vista server se actualiza **sin F5**. (No te
 
 - **NO** confundir este bug con "UI optimista que se traga el error" (otro problema: el write falló y revertiste en silencio; ahí verificá que el write persistió — ver `verificar-funcionamiento-end-to-end`). Acá el write SÍ persistió, solo faltó revalidar la vista server.
 - **NO** uses `router.refresh()` para datos que solo viven en estado cliente — es innecesario y re-corre todo el server.
-- **NO** uses `router.refresh()` para reflejar cambios de OTRO usuario — no los ve; eso es realtime.
+- **NO** esperes que un `router.refresh()` tras tu write refleje cambios de OTRO usuario: no se entera de que pasaron. Eso es realtime, o un refresco automático acotado (`pantalla-se-actualiza-sola`).
 - **NO** lo pongas en un efecto que corre en loop; disparalo puntualmente tras la mutación.
 - **SIEMPRE** verificá en vivo que la vista server se actualiza sin F5.
 
 ## Skills relacionadas
 
 - `desktop-notifications-from-realtime` — el otro lado: sincronizar cambios cross-usuario/pestaña por realtime en vez de refresh.
+- `pantalla-se-actualiza-sola` — la alternativa barata a realtime: refresco al volver a la pestaña y cada minuto con freno por inactividad.
 - `verificar-funcionamiento-end-to-end` — descartar que sea un write que no persistió antes de asumir que es staleness.
 - `toaster-montado-por-scope` — otra causa de "hice algo y no pasó nada visible" del mismo sistema.

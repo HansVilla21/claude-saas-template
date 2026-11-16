@@ -127,6 +127,29 @@ Si ese conteo no cuadra con lo que hizo el sistema, ahí está el hueco. Ver `we
 
 **Output:** "No es un reintento: son dos `messageId` distintos. La segunda llegó a n8n y nunca a la Edge Function — no está en `webhook_events_raw` ni hay invocación en los logs a esa hora. Es fan-out del proveedor a dos endpoints independientes sin nadie que reconcilie. Agregué `Rescatar Inbound Faltante`: INSERT idempotente colgado en paralelo de `Get Conversation State`, con `on conflict do nothing` sobre `(agency_id, channel, external_id)`. Verificado: el mensaje sintético que la Edge nunca vio quedó en la base (`direction=inbound`, `sender_kind=lead`, `status=delivered`) y hay 0 `external_id` duplicados en los últimos 2 días, o sea que las ejecuciones normales pasan por el rescate y no duplican. **No cubre** el caso del primer mensaje de un lead nuevo: ahí el lead no existe y el flujo aborta antes."
 
+## APÉNDICE 2026-09-09 — el hueco que esta skill anotó, medido
+
+Arriba dice: *"No cubre el caso del primer mensaje de un lead nuevo: ahí el lead no existe y el flujo aborta antes."* **Eso ocurrió**, en el bot de Givi, y costó hasta el 31 % de los leads nuevos de un día.
+
+**Es un modo de fallo distinto al del cuerpo de la skill.** Allá se PIERDE una entrega. Acá **llegan las dos** — y aun así el sistema falla, porque compiten por el mismo estado: la Edge Function CREA el lead y el workflow lo BUSCA. Dos suscriptores al mismo evento no solo son dos formas de perderse el evento; también son una carrera.
+
+**Lo que hace invisible el fallo:** la ejecución termina en `success`. La query no da error, devuelve vacío. Un `If` lo manda a una rama de abort que es legítima (existe para mensajes de números desconocidos). Nada en ningún log dice que un lead real se quedó sin respuesta.
+
+**Medición que lo desenmascara** — comparar el instante en que se consultó contra el instante en que el dato existió, no "¿había o no había?":
+
+| | Consultó | El dato existió | |
+|---|---|---|---|
+| Muda | 22:23:28.**272** | 22:23:28.**301** | perdió por **29 ms** |
+| OK | 19:37:26.**897** | 19:37:26.**851** | ganó por 46 ms |
+
+Delta webhook → dato creado: **3,70 s y 3,69 s**. Muy consistente ⇒ una espera fija alcanza; no hacía falta backoff.
+
+**El fix que parece obvio y rompe todo:** poner un nodo de reintento en la rama "no encontrado". En ese workflow **26 nodos aguas abajo leían `$('Buscar Lead (Supabase)')` por NOMBRE**. Con un nodo de reintento aparte, todos ésos leen la búsqueda VACÍA (la primera) — se rompen el trace, el handoff y las HTTP del extractor justo en el camino que se quería rescatar, y encima en silencio.
+
+**El fix correcto:** esperar ANTES del mismo nodo. No cambia ninguna referencia, no agrega ramas, y la latencia extra la paga todo el mundo pero es despreciable si el flujo ya tiene un debounce (allá eran 6 s contra 45 s de batching).
+
+**La pregunta que decide:** *¿alguien aguas abajo referencia este nodo por nombre?* Si sí, el reintento va en el mismo nodo o antes — nunca en uno nuevo.
+
 ## Skills relacionadas
 
 `webhook-contar-event-types-antes-de-arreglar` (contar antes de tocar el webhook) · `ycloud-webhook-to-supabase` (la ingesta que persiste) · `probar-camino-produccion-sin-efectos-externos` (cómo verificar el rescate sin mandar nada) · `verificar-funcionamiento-end-to-end` (contar filas, no leer status) · `bsp-media-expira-archivar-propio` (el otro dato que se pierde en silencio).

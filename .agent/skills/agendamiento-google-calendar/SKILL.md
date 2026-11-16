@@ -174,3 +174,76 @@ caiga en su Google con el link de Meet."
   estaba desde la primera migración del proyecto y **nunca se había visto porque la
   tabla de citas siempre estuvo vacía**. La primera reserva real fue la primera vez
   que esa función corrió.
+
+## Apéndice 2026-10-27: segundo caso, agenda propia con varios negocios
+
+Detalle en `segundo-caso-agenda-multinegocio.md`. En corto, lo que cambia cuando
+hay varios negocios, varias personas por servicio y citas que carga el equipo:
+
+- **Leer eventos, no freeBusy:** freeBusy no dice qué evento ocupa, y apenas el
+  sistema escribe sus citas en Google las contaría dos veces (mover una cita choca
+  consigo misma; un cupo se llena con la primera reserva). Se saltean los eventos
+  con la marca del sistema para ESTE negocio; los de otro negocio sí cuentan. Con
+  `calendar.events` alcanza.
+- **La conexión es por persona**, no por negocio.
+- **Si no se pudo leer, esa persona queda ocupada todo el rango.** Un 401 se
+  reintenta renovando; recién `invalid_grant` es "rota".
+- **El último chequeo antes de guardar no toca la función con candado:** basta con
+  leer Google sin caché justo antes y pasarle solo a los que siguen libres.
+- **Trigger + cola + id de evento fijo** (sale de la cita: crear es idempotente) y
+  PATCH en vez de PUT para no perder el Meet. En la reserva, Google va ANTES que el
+  correo.
+- **Se invita** solo a la reserva del cliente hecha después de conectar y sin un
+  `.ics` ya enviado; el correo propio sale sin `.ics`. Desconectar NO borra los
+  eventos (mandaría una cancelación al invitado).
+- **Un preview de Vercel no sirve de URI de redirección:** se conecta desde
+  producción o localhost y el permiso sirve igual en el preview.
+
+## Apéndice 2026-11-10: los otros calendarios de la misma cuenta
+
+El caso: quien ordena su agenda en varios calendarios de la misma cuenta de Google (uno por negocio, uno personal) tenía reuniones que no bloqueaban nada, porque solo se leía `primary`. Lo decidido en el CRM: cada persona **elige** cuáles cuentan y **solo bloquean**, no se muestran.
+
+- **`calendar.events` ya deja leer los eventos de TODOS los calendarios.** Lo que falta es saber cuáles existen. Eso pide `calendar.calendarlist.readonly`, un permiso aparte que hay que sumar también en Google Cloud › Acceso a los datos.
+  - Pedilo como **opcional**: si la persona lo destilda, conectá igual con el principal.
+  - En ese caso **vaciá la elección**: si no, siguen bloqueando calendarios que la pantalla no puede mostrar ni dejar quitar.
+- **Por defecto, marcá solo los calendarios propios** (`accessRole: owner`). Feriados, Cumpleaños o el de un compañero no van marcados, porque un evento de todo el día tapa el día entero.
+- **Uno en `freeBusyReader` no se puede elegir:** con este permiso no se leen sus eventos. Y si un elegido baja a ese rol, en la lista sale **sin marcar**. Si saliera marcado y deshabilitado, cada Guardar lo volvería a mandar, el servidor lo rechazaría y nadie podría sacarlo nunca.
+- **Si falla un calendario elegido, la persona queda ocupada todo el rango, pero NO se marca rota la conexión.**
+  - Un 403 en ESE calendario (lo borraron, dejaron de compartirlo) no es el permiso. Convertilo en un error con el nombre del calendario antes de que llegue a la lógica de «conexión rota», y mostrá cuál fue.
+  - El 401 sí se deja pasar, para renovar el acceso y reintentar.
+- **La elección se valida en el servidor contra la lista real de Google,** leída en el momento, y se guarda el nombre que da Google, nunca el que manda el navegador.
+- **Leé de a 5 calendarios por persona.** Con 20 elegidos son 21 pedidos por visita, y un 429 de uno solo deja a la persona sin horarios.
+- **Si cambia la cuenta de Google al reconectar, la elección arranca de cero.** Si falta el correo de alguno de los dos lados, también, porque no se puede saber si es la misma cuenta.
+- **⚠️ Gotcha de Next.js (cross-project):** en un archivo `'use server'`, re-exportar un tipo con `export type { X }` rompe la acción en ejecución con `ReferenceError: X is not defined`.
+  - Ni `tsc` ni `eslint` lo ven; la pantalla quedó en «Leyendo tus calendarios…» sin otro síntoma.
+  - En un `'use server'` solo se exportan funciones async; los tipos se importan desde el módulo que los define.
+  - Solo se descubre probando en el navegador.
+
+## Apéndice 2026-11-10 (noche): el id fijo del evento y las invitaciones en spam
+
+**El id fijo tiene una trampa.** Sale de la cita, así que es el mismo en todos los calendarios. Una cita se transfirió a alguien que ya tenía, con ese id, la copia cancelada de una invitación de otro organizador:
+- `insert` respondió 409;
+- el `PATCH` de respaldo sobre esa copia respondió **200 sin revivirla**;
+- la cita quedó marcada como sincronizada, sin nada en el calendario y sin un solo error.
+
+La regla: un evento existente solo sirve si `organizer.self === true` y no quedó `cancelled`. Si no, otro id (`…v2`), con **otro** `requestId` de Meet. Con varios ids ocupados, error y reintento, nunca éxito.
+
+Antes de confiar en `organizer.self`, confirmalo contra Google en `GET` y en `PATCH`: si faltara, cada actualización crearía un evento duplicado. También pasa al cambiar el dueño de una cita colectiva, porque los compañeros tienen la copia con ese id.
+
+**Las invitaciones caen en spam aunque todo esté bien.** Con SPF, DKIM y DMARC en orden y sin links, Gmail igual desconfía de una invitación de alguien a quien la persona nunca le escribió. No depende de la verificación de la app, que solo cambia la pantalla de permisos. Lo que se puede hacer es avisar en el correo propio, que sí llega, dónde buscarla. Sacar la invitación y mandar solo el `.ics` la hace llegar, pero el cliente ya no está en la lista del Meet y tiene que pedir permiso para entrar.
+
+## Verificar la app con Google
+
+Cuando la conectan clientes, ver `verificacion-de-la-app.md`. Antes de enviarla:
+- la política nombra a Google y trae la frase de Uso Limitado;
+- la página principal enlaza a esa misma política;
+- el dominio está verificado en Search Console (mirá primero quién sirve el DNS);
+- en «Acceso a los datos» quedan solo los permisos que se usan.
+
+Además: la justificación tiene un tope de 1.000 caracteres y en el video se tiene que ver el `client_id`.
+
+## Relacionadas
+
+- `motor-de-horarios-libres` (2026-10-27): el cálculo de qué horarios ofrecer, como función pura con sus pruebas (márgenes, cupos, límite diario, feriados, zona del cliente). Esta skill pone lo que tiene ocupado Google; ese motor lo resta.
+- `reservar-sin-pisarse-pagina-publica` (2026-10-27): la página pública, el link para mover o cancelar y la reserva con candado. Al sumar Google, lo ocupado del calendario tiene que entrar también a la revisión bajo candado, o dos reservas pueden caer sobre un evento de Google creado entre la lista y el insert.
+- `salida-a-crm-externo`: la cola (una fila por registro, marca con `clock_timestamp`, `skip locked`, cerrar comparando la marca) que se reusó para llevar las citas a Google.
