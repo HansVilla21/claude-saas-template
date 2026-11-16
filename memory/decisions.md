@@ -6,6 +6,30 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-15 (noche) — La plataforma avanza en sesiones paralelas con una sola Cola de merges
+
+**Contexto:** Hans pidió avanzar a la vez con todo lo pendiente de la plataforma: lo que le había pedido Pietro, formularios y Shopify. Los clientes quedan para los días de semana. Eran muchas sesiones escribiendo sobre el mismo repo en producción.
+
+**Decisión:**
+- Una sola sesión, la **Cola de merges**, mergea en el CRM y en el template. Las demás cierran con «listo para la cola: PR #N».
+- Cada sesión tiene su zona de archivos y su bloque de números de migración.
+- Toda escritura en producción lleva el OK de Hans, citado con sus palabras: migración, merge, deploy o prender algo.
+- Ese día entraron más de 25 PRs, de a uno y con el deploy verificado, sin que el sistema se cayera.
+
+**Decisiones de producto del día:**
+- **El WhatsApp al equipo** cuando el bot pasa una conversación viene apagado por defecto, y cada persona lo prende en Mi perfil. Antes era demasiado spam. Además, cada persona elige de qué negocios, de qué tipos y por qué canal le llegan los avisos.
+- **Los formularios se configuran por formulario y por negocio:** cuándo lo manda el bot, si espera o sigue conversando, y los recordatorios. El recordatorio nunca escribe si alguien del equipo atiende la conversación. En Momentum va «al sí, en el mismo mensaje del pase».
+- **«Descartado» automático** cuando el lead dice claramente que no, con el freno de seguimientos **siempre**: si alguien pidió que no le escriban, se respeta.
+- **Envíos masivos** construidos y habilitados solo en Momentum. Los créditos y Onvo, después y con Hans presente.
+- **Formularios pasa a ser una sección propia del menú,** con métricas, respuestas enlazadas al contacto y el bot aparte. El boceto está aprobado y se construye el 16-11.
+
+**Qué se descartó:** que el bot agende solo, los créditos, la desconexión de los números y los botones de WhatsApp. Quedan para después, por decisión de Hans.
+
+**Pendientes inmediatos:**
+- la prueba de la firma de términos (#476) en el celular;
+- que Pietro agregue la excepción de los formularios en el prompt de Givi y apruebe sus preguntas;
+- revisar los primeros descartes, el analista lector de Di Garda y la caché del bot.
+
 ## 2026-11-15 — Agenda: el equipo se entera por WhatsApp de los cambios de sus citas, y una cita pasada a otro no vuelve sola
 
 **Contexto:** el 11-11 Yura cambió la hora de su llamada desde su link. La cita había sido de Pietro y Pietro se la había pasado a Hans; con el cambio volvió a Pietro, para el día siguiente a las 9. Hans la perdió de su calendario y nadie se enteró, porque el aviso solo sonaba en la campana y Pietro la tenía sin abrir. El mismo día, «Nueva cita» le ofrecía a Hans libres su gym y sus reuniones.
