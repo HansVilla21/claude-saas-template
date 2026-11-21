@@ -6,6 +6,34 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-21 (madrugada) — Momo sale con Haiku, en Momentum y Givi, como botón flotante
+
+**Contexto:** el diseño de Momo se aprobó el 20-11. Esa misma noche corrió el banco de preguntas, entró en producción (#616) y Hans lo vio en pantalla.
+
+**Decisión:**
+- **Modelo Haiku 5.5**, porque el banco mostró que contesta igual de bien que Sonnet:
+  - las 12 trampas bien;
+  - «no sé» en 5 de 5;
+  - el artículo correcto en 22 de 23.
+  Cuesta unos US$0,001 por pregunta, contra US$0,02 con Sonnet. Era la regla acordada en el diseño.
+- **Prendido en Momentum y en Givi.** Hans: «prendé Momo en Givi y Momentum». Va sin Novedad ni Ayuda hasta que se prenda para todos; a Givi se le cuenta directo.
+- **Las consultas de un negocio con conversaciones privadas no se ven en Master (0282).** Es la misma regla que la 0176 aplicó a los resúmenes y a los seguimientos.
+- **Momo flotante (#619):**
+  - Hans: «saquemos lo del asistente de esta sección… ya está demasiado cortado» y «que no se abra como toda una columna a la derecha».
+  - Eligió la maqueta B, un círculo con cara y la etiqueta «Momo», que se abre en una ventana compacta, y le sumó la invitación de la A.
+  - En Conversaciones y en Probar bot pasa al encabezado, para no tapar el botón de enviar.
+  - La invitación sale como mucho 3 veces por persona, en días distintos. Se corta si la persona ya usó Momo, si lo abrió o si la cerró 2 veces. Se recuerda en el servidor (0283).
+
+**Qué se descartó:**
+- Sonnet para Momo, que costaba unas 17 veces más sin contestar mejor.
+- La columna lateral de toda la altura.
+- El logo de Momentum como botón: la gente no entendía qué era.
+- La pestaña en el borde (opción C).
+
+**Pendientes inmediatos:**
+- Revisar las primeras preguntas reales de Givi y Momentum.
+- Después, decidir si se prende para todos con la Novedad y la Ayuda.
+
 ## 2026-11-20 (noche) — La Ayuda se mantiene sola, Momo arranca y el catálogo de EPK espera las reglas del cliente
 
 **Contexto:** el 20-11 entraron la sección de Ayuda (275 artículos), su rediseño, los arreglos que la Ayuda destapó y los botones y listas de WhatsApp (#489). También se conectó el Shopify de EPK y se diseñó el asistente interno Momo. El trabajo siguió el esquema del 15-11: un coordinador, sesiones en paralelo y una sola Cola de merges. El detalle está en el handoff `crm-v2/memory/session-handoff-2026-11-20-ayuda-momo-y-epk.md`.
