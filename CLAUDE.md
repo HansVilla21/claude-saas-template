@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        213 skills de proceso reusables:
+│   └── skills/        214 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2550,6 +2550,26 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       turnos de un mensaje con una sola respuesta, la memoria del bot que tenía
                       el texto del aviso como si lo hubiera dicho el lead, y la recuperación
                       desde el crudo con el mismo extractor del webhook).
+                      Tier 85 — La ayuda que se encuentra (1, capturada 2026-11-20 del
+                      rediseño de la Ayuda del CRM, PR #614): ayuda-que-se-encuentra (⭐
+                      cross-project: el manual ya estaba adentro del producto, 275
+                      artículos, y la gente igual no encontraba nada. «Se va a perder…
+                      buscar algo se vuelve complicado». Primero, maquetas que FUNCIONAN
+                      con los datos reales, en celular y computadora y en una sola página;
+                      el founder no elige una, combina piezas. Después, cuatro piezas puras
+                      en `assets/`: un buscador que perdona (sin relleno salvo que sea todo,
+                      «no» no es relleno, sinónimos de la gente, raíz tosca, distancia de
+                      edición con tope, n-1 palabras desde 3, «lo más parecido» avisado, la
+                      mejor respuesta abierta con sus pasos); temas que espejan el menú, con
+                      el tema DERIVADO de la pantalla; subsecciones curadas con una prueba
+                      que obliga a ubicar cada artículo en una sola; y el «Mirá también»
+                      como grafo, con los backlinks calculados (como el cerebro de Nexus OS)
+                      y dibujado en abanico, no como madeja. Cada respuesta tiene su
+                      dirección; «Volver» trae lo escrito gracias a un `?volver=` con lista
+                      blanca de llaves. Gotchas: en un shell scrollea `<main>` y no la
+                      ventana; container queries porque la barra lateral miente al
+                      breakpoint; input con estado local y no de `useSearchParams`;
+                      `setState` solo desde el ResizeObserver).
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action

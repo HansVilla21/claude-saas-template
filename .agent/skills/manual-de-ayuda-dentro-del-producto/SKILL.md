@@ -165,3 +165,4 @@ Documentar obliga a mirar, y mirar encuentra.
   sistema (no para el que lo usa).
 - `onboarding-cliente-crm` — el momento en que este manual se entrega.
 - `fuente-unica-derivar-de-hijos` — por qué la matriz de permisos derivada no se rompe sola.
+- `ayuda-que-se-encuentra` — cuando el manual ya está y la gente igual no encuentra nada: un buscador que perdona los errores, temas que espejan el menú, subsecciones con prueba y el «Mirá también» como grafo.
