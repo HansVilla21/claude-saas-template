@@ -6,6 +6,43 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-20 (noche) — La Ayuda se mantiene sola, Momo arranca y el catálogo de EPK espera las reglas del cliente
+
+**Contexto:** el 20-11 entraron la sección de Ayuda (275 artículos), su rediseño, los arreglos que la Ayuda destapó y los botones y listas de WhatsApp (#489). También se conectó el Shopify de EPK y se diseñó el asistente interno Momo. El trabajo siguió el esquema del 15-11: un coordinador, sesiones en paralelo y una sola Cola de merges. El detalle está en el handoff `crm-v2/memory/session-handoff-2026-11-20-ayuda-momo-y-epk.md`.
+
+**Decisiones:**
+- **La Ayuda se actualiza en el mismo PR que cambia una pantalla, con candado** (Hans: «Los dos ya»; #608). El `pre-push` frena la rama que toca pantallas sin tocar el manual. El escape es `Sin-Ayuda: <motivo>`. Razón de Hans: «una ayuda desactualizada es peor que no tener ayuda». Además es lo que lee Momo.
+- **Rediseño de la Ayuda, versión D (#614).** Hans dijo que la primera versión era fea y que la gente se perdía.
+  - Arriba, «¿Cómo hago para ___?».
+  - Un mapa del CRM que se enciende mientras se escribe, y subsecciones.
+  - Una página por artículo.
+  - Las maquetas se eligieron funcionando con datos reales.
+- **Permisos:**
+  - el viewer no exporta;
+  - la agenda queda como estaba, salvo que borrar una cita futura le avisa al cliente;
+  - «sin días marcados» en el horario hábil cuenta como todos los días, también para el tiempo de respuesta.
+- **Momo (MOM-116), versión 1:**
+  - Solo responde, sin ejecutar acciones.
+  - Abre los artículos del manual y lee los datos del negocio con herramientas, con los permisos de quien pregunta.
+  - Cuando no sabe, lo dice y abre «Reportar».
+  - Límites: US$10 por mes por negocio, aviso al 80 % y 40 preguntas por día por persona.
+  - Arranca en Momentum, después Givi.
+  - Sin Novedad ni Ayuda hasta que se prenda para todos.
+  - El modelo, Sonnet 5 o Haiku 5.5, lo decide un banco de 42 preguntas.
+- **Botones y listas de WhatsApp (#489):** se pusieron al día y se subieron aunque hoy nadie los usa, porque cada semana parados chocaban con más cambios. Quedaron probados de punta a punta por YCloud.
+- **EPK: el catálogo de Shopify queda conectado pero APAGADO en el bot** hasta que EPK defina qué puede decir el bot: precios, tallas, tiendas, tarjetas de regalo y agotados. Se prendió con el OK de Hans y a los 40 minutos él pidió apagarlo: «no hemos definido bien cómo es que se va a usar». Lo de las tiendas se consulta al cliente.
+- **Recordatorio diario del WhatsApp caído (#611).** Pruebas Meta queda fuera de la revisión.
+- **Cómo se trabaja:** cuando una sesión necesita una respuesta de Hans, se la pregunta el coordinador en su chat. Hans no tiene que ir sesión por sesión.
+
+**Qué se descartó:**
+- Para Momo, mandar el manual entero en cada pregunta (unos US$150 por mes en caché) y elegir los artículos solo por palabras.
+- Prender el catálogo de EPK con las reglas del prompt actual, que prohíbe dar precios y confirmar tallas.
+
+**Pendientes inmediatos:**
+- Hans le manda a EPK las preguntas del catálogo. Con las respuestas, Pietro ajusta su prompt.
+- Terminar el banco de Momo, la revisión de Opus y el PR, y prenderlo en Momentum.
+- Confirmar con el primer caso real un mensaje por `meta-webhook` v15 y el aviso «cita cancelada».
+
 ## 2026-11-15 (noche) — La plataforma avanza en sesiones paralelas con una sola Cola de merges
 
 **Contexto:** Hans pidió avanzar a la vez con todo lo pendiente de la plataforma: lo que le había pedido Pietro, formularios y Shopify. Los clientes quedan para los días de semana. Eran muchas sesiones escribiendo sobre el mismo repo en producción.
