@@ -6,6 +6,27 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-24 (noche) — Givi: en vivo sigue la v3; la v4.1 se mide en el borrador antes de publicar
+
+**Contexto:** Pietro vio que el bot de Givi hablaba como la v3: decía «reu», pasaba la conversación con el sí y mandaba el formulario a veces sí y a veces no. En «Probar bot», en cambio, se portaba como la v4.
+
+**Decisión:**
+- **La explicación:** en vivo sigue la v3, porque la v4 nunca se publicó. «Probar bot» usa el borrador (MOM-187), que tenía la v4.
+- **D18 (Hans le mandó el texto a Pietro):** Pietro cambia ya en vivo la condición del formulario por la simple, «sí a la llamada o pide horarios». Va sin la frase de «Mandámelo», porque el reenvío todavía no funciona. Así el formulario sale con cada sí mientras siga la v3.
+- **La v4.1 de Pietro** se cargó tal cual en el borrador y se midió (US$1,01). No se publica hasta tres cosas:
+  - que esté el arreglo del reenvío del formulario, que es un error de nuestro motor;
+  - que se cierre el hueco de quien llena el formulario y no escribe «Listo»;
+  - el OK de Hans.
+- **El método de trabajo** (coordinador, registro único y decisiones numeradas) se le pasó a Pietro como prompt para su propio proyecto de Claude Code.
+
+**Qué se descartó:**
+- Publicar la v4.1 ya. Con eso, cada «Mandámelo» recibiría «te lo mando de nuevo» sin link, y quien llena el formulario sin escribir «Listo» quedaría sin nadie que lo atienda.
+
+**Pendientes inmediatos:**
+- El PR del reenvío del formulario.
+- Las 2 opciones para el hueco del «Listo».
+- Para Pietro: Centro Pet (la v4.1 cierra a quien dice «etapa informativa»), los «$83» de la pregunta 5, y «Cliente», que manda una compra de US$360 a Meta.
+
 ## 2026-11-24 — Día por bloques: el mensaje automático ya no calla al bot, las fotos las pone el código y el bot agenda (apagado)
 
 **Contexto:** Hans armó el día en dos bloques: A, las urgencias, y B, los tickets de citas. Pidió un método para no perder el hilo: un registro único y las decisiones de a una, numeradas.
