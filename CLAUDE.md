@@ -83,7 +83,7 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
 │                        vercel-domain-migration, onvo-setup,
 │                        onvo-checkout-flow, onvo-troubleshooting
 ├── .agent/
-│   └── skills/        214 skills de proceso reusables:
+│   └── skills/        215 skills de proceso reusables:
 │                      Originales (5): creador-de-skills (meta-skill),
 │                      evaluar-icp, definir-avatar, descubrir-dolor, construir-oferta.
 │                      Tier 1 — Bot/N8N/WhatsApp core (5, capturadas 2026-05-21):
@@ -2570,6 +2570,20 @@ Este NO es un proyecto en sí — es la **base reusable** desde la que se inicia
                       ventana; container queries porque la barra lateral miente al
                       breakpoint; input con estado local y no de `useSearchParams`;
                       `setState` solo desde el ResizeObserver).
+                      Tier 86 — El founder que no se pierde (1, capturada 2026-11-24 del
+                      día de 6 puntos urgentes del CRM): coordinar-sesiones-registro-unico
+                      (⭐ cross-project: varias sesiones hijas en paralelo y un founder que
+                      pierde el hilo cuando le llega una decisión antes de contestar la otra.
+                      Un registro único `progreso-AAAA-MM-DD.md` excluido de git, con cada
+                      punto y su estado; decisiones numeradas (D1, D2…) de a una, la más
+                      vieja primero, repitiendo «D3: decidiste tal cosa» y guardando la cita;
+                      lo menor lo decide el coordinador y lo anota; el reporte va en un
+                      cuadrito con íconos + «Te toca» (una sola cosa) + «Hecho»; las hijas no
+                      le escriben al founder. Gotchas: el mensaje a una hija que trabaja queda
+                      en cola —si vuelve a pedir un OK ya dado, se reenvía con la cita—; mirar
+                      el diff antes de pasar a la Cola, no el reporte; probar pantallas con el
+                      usuario de prueba local en vez de pedir login. Hans: «así me encanta
+                      trabajar»).
                       Sin tier (estaban en disco y NO figuraban en el índice — detectadas
 │                      2026-08-24 con el grep carpeta-por-carpeta que manda
 │                      cosechas-en-paralelo-sin-pisarse): borrar-entidad-con-fk-no-action
