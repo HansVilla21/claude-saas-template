@@ -6,6 +6,38 @@ Cada decisión tiene fecha + qué + por qué + alternativas descartadas.
 >
 > **Para decisiones de PROMPTING heredadas del proyecto Momentum AI Chatbot Arquitect** (Jacó, Dr. Carlos, El Canal, Level, etc.) → ver `memory/prompting-decisions.md`. Son universos distintos: éste es el CRM SaaS, el otro es el método para construir prompts de chatbot de calidad.
 
+## 2026-11-24 — Día por bloques: el mensaje automático ya no calla al bot, las fotos las pone el código y el bot agenda (apagado)
+
+**Contexto:** Hans armó el día en dos bloques: A, las urgencias, y B, los tickets de citas. Pidió un método para no perder el hilo: un registro único y las decisiones de a una, numeradas.
+
+**Decisión:**
+- **Las fotos del catálogo las pone el código (#629),** como opción por negocio (`adjuntar_fotos`), prendida solo en Disumed. Antes dependían de que el modelo escribiera el marcador: 9 de 23 veces.
+- **El mensaje automático del celular ya no le quita la conversación al bot (#633), para TODOS los negocios** (D8, Hans: «Para todos»). Callaba al bot en cientos de chats nuevos: Comfortex 274 en 7 días, Di Garda 124. No se recupera el ~3 % que WhatsApp entrega en desorden (D15: «No, así está bien»).
+- **Botones de plantilla que ponen etiquetas, borrar plantillas desde el CRM y aviso de «Leer más»** (#630).
+  - Se borra por YCloud y la fila queda `DELETED`. Las plantillas del sistema no se borran.
+  - El umbral de «Leer más» es conservador (D5).
+- **Plantillas de Meta a mano desde el chat,** con la ventana abierta o vencida (#631).
+- **EPK:** «agotado no vuelve», como opción por negocio, y el arreglo del stock de Shopify (#632). El catálogo sigue apagado en el bot hasta el prompt de Pietro.
+- **El bot agenda en el chat (#634, MOM-135/184): construido y APAGADO** (D16, Hans: «se puede desarrollar pero no se puede activar»). Decidido para cuando se active (D11):
+  - un interruptor por servicio;
+  - el modo «pide aprobación» aparta la hora como «Por aprobar»;
+  - el bot no pide el correo;
+  - en esta versión no mueve ni cancela.
+- **La confirmación de cita** se probó en vivo y quedó prendida en Momentum.
+- **El método de trabajo:** registro único y decisiones numeradas por defecto en los días con sesiones hijas. Skill del template, Tier 86. Hans: «así me encanta trabajar».
+
+**Qué se descartó:**
+- Que el modelo siga siendo el único que manda las fotos.
+- Aplicar la regla del mensaje automático solo en Disumed.
+- Construir el refuerzo para los chats viejos de EPK: medido 0 de 18, no hacía falta.
+- El Excel de stock por tienda de EPK: queda como idea.
+- La escalera de 6 plantillas para medir «Leer más».
+
+**Pendientes inmediatos:**
+- Las respuestas de YCloud sobre Ricardo.
+- El prompt de Pietro para EPK (6 cambios) y para Momentum (el formulario antes de agendar).
+- Prender el bot de Disumed para los clientes y activar que el bot agende: los dos son decisión de Hans.
+
 ## 2026-11-21 (madrugada) — Momo sale con Haiku, en Momentum y Givi, como botón flotante
 
 **Contexto:** el diseño de Momo se aprobó el 20-11. Esa misma noche corrió el banco de preguntas, entró en producción (#616) y Hans lo vio en pantalla.
